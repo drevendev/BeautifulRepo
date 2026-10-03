@@ -1,0 +1,23 @@
+name: Bug, broken guidance or accessibility barrier
+description: Report a reproducible problem in the handbook or tools.
+title: "[Problem] "
+body:
+  - type: textarea
+    id: location
+    attributes:
+      label: Where is the problem?
+      description: Link the affected page or name the command and revision.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual result
+      description: Explain the obstacle and steps to reproduce. Avoid secrets and personal data.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and workaround, when relevant
+      description: Optional operating system, browser, Python or assistive-technology version. Do not include identifying information.
