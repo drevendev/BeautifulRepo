@@ -24,9 +24,17 @@ class ReadmeVisualExampleTests(unittest.TestCase):
         self.assertIsNotNone(match)
         self.assertGreater(len(match.group(1).split()), 8)
 
-    def test_text_equivalent_preserves_visual_facts(self):
+    def test_nearby_text_equivalent_preserves_visual_facts(self):
+        text_without_picture = re.sub(
+            r"<picture>.*?</picture>",
+            "",
+            self.text,
+            count=1,
+            flags=re.DOTALL,
+        )
+        self.assertNotEqual(text_without_picture, self.text)
         for fact in ("18 changed", "2 added", "1 removed", "changes.csv"):
-            self.assertIn(fact, self.text)
+            self.assertIn(fact, text_without_picture)
 
     def test_assets_are_local_and_present(self):
         for name in ("./hero-dark.svg", "./hero-light.svg"):

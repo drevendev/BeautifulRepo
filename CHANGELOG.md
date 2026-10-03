@@ -8,6 +8,10 @@ uv, Immich and Awesome Python READMEs without copying their media or branding. F
 offline structural tests cover theme switching, alt text, local assets, SVG descriptions
 and non-color labels.
 
+Later-run review found that the text-equivalence test could pass using facts that existed
+only inside the image markup. The test now removes the `<picture>` block before checking
+the four report facts, so it actually verifies a nearby real-text equivalent.
+
 This is a stacked production candidate based on BR-FOUNDATION-001, not acceptance or a
 released edition. Rendered GitHub light/dark appearance and assistive-technology behavior
 remain manual review items.
