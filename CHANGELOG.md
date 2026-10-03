@@ -1,5 +1,17 @@
 # Changelog
 
+## Visual README patterns candidate — 2026-10-03
+
+BR-VISUAL-002 adds a source-backed visual README guide and an original theme-aware
+PocketDiff before/after example. The guide records concrete observations from current
+uv, Immich and Awesome Python READMEs without copying their media or branding. Five
+offline structural tests cover theme switching, alt text, local assets, SVG descriptions
+and non-color labels.
+
+This is a stacked production candidate based on BR-FOUNDATION-001, not acceptance or a
+released edition. Rendered GitHub light/dark appearance and assistive-technology behavior
+remain manual review items.
+
 ## Initial foundation candidate — 2026-10-03
 
 Added the reader-first front page, repository checklist, README guide and scaffold,
