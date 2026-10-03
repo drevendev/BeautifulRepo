@@ -41,6 +41,8 @@ Each explains what to borrow, how to apply it and what not to copy.
 | [Repository checklist](checklists/repository.md) | Prioritize essential information, polish and maintenance |
 | [README design guide](guides/readme.md) | Build a useful front page without turning it into a manual |
 | [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
+| [Release notes guide](guides/release-notes.md) | Turn shipped changes into concise, evidence-backed upgrade guidance |
+| [Release-note template](templates/RELEASE_NOTES.template.md) | Draft a release without inventing impact or verification claims |
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab and Gum |
 | [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
 | [Programs and community events](guides/programs.md) | Separate current program rules from evergreen preparation |
@@ -54,10 +56,10 @@ matches the data. It runs offline and never fetches or executes linked repositor
 
 From a checkout, with **Python 3.11 or newer**:
 
-```bash
+~~~bash
 python tools/catalog.py
 python -m unittest discover -s tests -v
-```
+~~~
 
 A successful catalog check prints `OK: 11 resources; generated catalog is current`
 for this first edition and exits with code zero. The count changes as the catalog grows.
