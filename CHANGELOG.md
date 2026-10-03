@@ -1,5 +1,13 @@
 # Changelog
 
+## Community safety follow-up — 2026-10-04
+
+**BR-COMMUNITY-003** now distinguishes GitHub's custom private-vulnerability report form from
+the feature that enables private reporting. A repository may customize the enabled form with
+`.github/VULNERABILITY_REPORT.yml` or `.yaml`; that file does not enable the feature, and
+GitHub falls back to its default form when a custom form is invalid. Primary GitHub guidance
+was rechecked on 2026-10-04.
+
 ## Community safety candidate — 2026-10-03
 
 **BR-COMMUNITY-003** adds a practical guide that separates ordinary bugs, security
