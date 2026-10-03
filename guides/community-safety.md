@@ -3,7 +3,7 @@
 A repository should separate ordinary bugs, security reports, and conduct complaints. They
 have different privacy needs and should not share a generic public reporting path.
 
-Reviewed 2026-10-03 against GitHub Docs and Open Source Guides.
+Reviewed 2026-10-04 against GitHub Docs and Open Source Guides.
 
 ## Three reporting lanes
 
@@ -20,6 +20,11 @@ how to report a vulnerability. That file does not enable a private channel by it
 
 Private Vulnerability Reporting is a separate repository setting. Only tell reporters to use
 GitHub's private reporting form after verifying that the feature is enabled for the repository.
+
+A repository with Private Vulnerability Reporting enabled may customize that form with
+`.github/VULNERABILITY_REPORT.yml` or `.github/VULNERABILITY_REPORT.yaml`. The form file
+customizes the questions; it does **not** enable Private Vulnerability Reporting. If GitHub
+cannot parse or validate the custom form, reporters receive the default form instead.
 
 A useful security policy states supported versions, the verified reporting route, the details
 needed to reproduce the problem, realistic response expectations, and how disclosure will be
