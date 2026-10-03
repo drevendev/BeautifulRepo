@@ -28,7 +28,8 @@ class CommunitySafetyTests(unittest.TestCase):
         path = ROOT / "templates/CODE_OF_CONDUCT.adoption-checklist.md"
         self.assertTrue(path.is_file())
         text = path.read_text(encoding="utf-8")
-        self.assertIn("intentionally not a code of conduct itself", text)
+        normalized = " ".join(text.split())
+        self.assertIn("intentionally not a code of conduct itself", normalized)
         self.assertIn("A private reporting route exists now", text)
         self.assertFalse((ROOT / "CODE_OF_CONDUCT.md").exists())
 
