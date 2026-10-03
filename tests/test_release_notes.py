@@ -8,13 +8,14 @@ ROOT = Path(__file__).parents[1]
 class ReleaseNotesTests(unittest.TestCase):
     def test_guide_distinguishes_tag_release_and_changelog(self):
         text = (ROOT / "guides/release-notes.md").read_text(encoding="utf-8")
+        normalized = " ".join(text.split())
         for phrase in (
             "A **Git tag** marks a point in repository history.",
             "A **GitHub Release** is publication metadata",
             "A **CHANGELOG** is durable project history",
             "Generated notes are an inventory, not the final explanation",
         ):
-            self.assertIn(phrase, text)
+            self.assertIn(phrase, normalized)
 
     def test_generated_notes_are_not_presented_as_acceptance(self):
         text = (ROOT / "guides/release-notes.md").read_text(encoding="utf-8")
