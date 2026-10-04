@@ -270,10 +270,10 @@ def _leading_indent_columns(line: str):
     return columns, index
 
 
-def _list_item_content_indent(line: str):
-    """Return the content column for a simple top-level GFM list marker, or None."""
+def _list_item_details(line: str, base_indent: int = 0):
+    """Return (content column, body index) for a list marker in one container."""
     indent, index = _leading_indent_columns(line)
-    if indent > 3:
+    if indent < base_indent or indent - base_indent > 3:
         return None
 
     match = LIST_MARKER_RE.match(line[index:])
@@ -293,7 +293,15 @@ def _list_item_content_indent(line: str):
 
     if not 1 <= padding_columns <= 4:
         return None
-    return column
+
+    body_index = index + match.start("body")
+    return column, body_index
+
+
+def _list_item_content_indent(line: str, base_indent: int = 0):
+    """Return the absolute content column for a list marker, or None."""
+    details = _list_item_details(line, base_indent)
+    return details[0] if details is not None else None
 
 
 def _starts_nonparagraph_block(line: str) -> bool:
