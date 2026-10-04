@@ -99,6 +99,42 @@ class DocsLinksTests(unittest.TestCase):
                 result.stderr,
             )
 
+    def test_indented_code_blocks_are_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "    [Spaces](missing-spaces.md)\n"
+                "\t[Tab](missing-tab.md)\n"
+                "\n"
+                "    [Later chunk](missing-chunk.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 0 relative Markdown destination(s)", result.stdout)
+
+    def test_indentation_respects_paragraph_and_list_precedence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "Paragraph\n"
+                "    [Paragraph continuation](missing-paragraph.md)\n"
+                "- item\n"
+                "\n"
+                "    [List continuation](missing-list.md)\n"
+                "- code item\n"
+                "\n"
+                "      [Nested code](missing-nested-code.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn(
+                "missing relative destination: 'missing-paragraph.md'", result.stderr
+            )
+            self.assertIn("missing relative destination: 'missing-list.md'", result.stderr)
+            self.assertNotIn("missing-nested-code.md", result.stderr)
+
     def test_longer_fence_is_not_closed_by_shorter_nested_fence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

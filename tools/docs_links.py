@@ -12,6 +12,15 @@ from urllib.parse import unquote, urlsplit
 
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
+LIST_MARKER_RE = re.compile(
+    r"^(?P<marker>(?:[*+-]|[0-9]{1,9}[.)]))(?P<padding>[ \t]+)(?P<body>.*)$"
+)
+ATX_HEADING_RE = re.compile(r"^#{1,6}(?:[ \t]+|$)")
+SETEXT_UNDERLINE_RE = re.compile(r"^(?:=+|-+)[ \t]*$")
+THEMATIC_BREAK_RE = re.compile(
+    r"^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})$"
+)
+BLOCK_QUOTE_RE = re.compile(r"^>[ \t]?")
 MARKDOWN_WHITESPACE = " \t\r\n"
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
 CHARACTER_REFERENCE_RE = re.compile(
@@ -245,6 +254,128 @@ def _mask_inline_code_blocks(text: str) -> str:
     return "".join(masked)
 
 
+def _leading_indent_columns(line: str):
+    """Return (visual_columns, character_index) for leading spaces and tabs."""
+    columns = 0
+    index = 0
+    while index < len(line):
+        char = line[index]
+        if char == " ":
+            columns += 1
+        elif char == "\t":
+            columns += 4 - (columns % 4)
+        else:
+            break
+        index += 1
+    return columns, index
+
+
+def _list_item_content_indent(line: str):
+    """Return the content column for a simple top-level GFM list marker, or None."""
+    indent, index = _leading_indent_columns(line)
+    if indent > 3:
+        return None
+
+    match = LIST_MARKER_RE.match(line[index:])
+    if match is None:
+        return None
+
+    column = indent + len(match.group("marker"))
+    padding_columns = 0
+    for char in match.group("padding"):
+        if char == " ":
+            column += 1
+            padding_columns += 1
+        else:
+            width = 4 - (column % 4)
+            column += width
+            padding_columns += width
+
+    if not 1 <= padding_columns <= 4:
+        return None
+    return column
+
+
+def _starts_nonparagraph_block(line: str) -> bool:
+    """Recognize common top-level blocks that an indented code block may follow directly."""
+    indent, index = _leading_indent_columns(line)
+    if indent > 3:
+        return False
+    body = line[index:]
+    return bool(
+        ATX_HEADING_RE.match(body)
+        or SETEXT_UNDERLINE_RE.match(body)
+        or THEMATIC_BREAK_RE.match(body)
+        or BLOCK_QUOTE_RE.match(body)
+    )
+
+
+def _mask_indented_code_blocks(text: str) -> str:
+    """Mask GFM indented code while preserving paragraph and simple list precedence."""
+    masked = []
+    paragraph_open = False
+    list_content_indent = None
+    in_indented_code = False
+    code_threshold = 4
+
+    for raw_line in text.splitlines(keepends=True):
+        if raw_line.endswith("\r\n"):
+            line, ending = raw_line[:-2], "\r\n"
+        elif raw_line.endswith(("\n", "\r")):
+            line, ending = raw_line[:-1], raw_line[-1]
+        else:
+            line, ending = raw_line, ""
+
+        if not line.strip(" \t"):
+            masked.append(line + ending)
+            paragraph_open = False
+            continue
+
+        indent, _ = _leading_indent_columns(line)
+        if in_indented_code:
+            if indent >= code_threshold:
+                masked.append(" " * len(line) + ending)
+                continue
+            in_indented_code = False
+
+        if list_content_indent is not None and indent < list_content_indent:
+            list_content_indent = None
+
+        if list_content_indent is None and _starts_nonparagraph_block(line):
+            paragraph_open = False
+            masked.append(line + ending)
+            continue
+
+        marker_indent = _list_item_content_indent(line)
+        if marker_indent is not None:
+            list_content_indent = marker_indent
+            paragraph_open = True
+            masked.append(line + ending)
+            continue
+
+        if list_content_indent is not None:
+            relative_indent = indent - list_content_indent
+            if relative_indent >= 4 and not paragraph_open:
+                in_indented_code = True
+                code_threshold = list_content_indent + 4
+                masked.append(" " * len(line) + ending)
+                continue
+            paragraph_open = True
+            masked.append(line + ending)
+            continue
+
+        if indent >= 4 and not paragraph_open:
+            in_indented_code = True
+            code_threshold = 4
+            masked.append(" " * len(line) + ending)
+            continue
+
+        paragraph_open = not _starts_nonparagraph_block(line)
+        masked.append(line + ending)
+
+    return "".join(masked)
+
+
 def _mask_markdown_code(text: str) -> str:
     """Mask fenced code and GFM code spans while preserving offsets and line endings."""
     masked = []
@@ -281,7 +412,8 @@ def _mask_markdown_code(text: str) -> str:
 
         masked.append(line + ending)
 
-    return _mask_inline_code_blocks("".join(masked))
+    block_masked = _mask_indented_code_blocks("".join(masked))
+    return _mask_inline_code_blocks(block_masked)
 
 
 def iter_markdown_destinations(path: Path):

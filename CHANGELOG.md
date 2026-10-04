@@ -18,6 +18,9 @@ endings still validate their repository-owned destination while blank-line cross
 Review repair: inline-code masking now follows equal-length GFM backtick strings across line
 endings while leaving escaped or unmatched delimiters literal, preventing links inside code spans
 from being checked without hiding real links behind non-code backticks.
+Review repair: indented-code masking now treats standalone four-column code (including tabs)
+as literal while preserving paragraph continuation and common list-item precedence, preventing code
+examples from creating false broken-link failures without hiding real links in indented prose.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 
