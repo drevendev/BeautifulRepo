@@ -9,10 +9,10 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 LINK_RE = re.compile(
-    r"!?[[^]]*](s*(?P<dest><[^>\n]+>|[^)\s]+)(?:\s+[\"'][^)\n]*[\"'])?\s*)"
+    r"!?\[[^\]]*\]\(\s*(?P<dest><[^>\n]+>|[^)\s]+)(?:\s+[\"'][^)\n]*[\"'])?\s*\)"
 )
-INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
-FENCE_RE = re.compile(r"^\s*(```|~~~)")
+INLINE_CODE_RE = re.compile(r"\x60[^\x60\n]*\x60")
+FENCE_RE = re.compile(r"^\s*(\x60\x60\x60|~~~)")
 
 
 def iter_markdown_destinations(path: Path):
