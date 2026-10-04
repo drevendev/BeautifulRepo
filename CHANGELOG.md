@@ -11,6 +11,8 @@ Review repair: inline destinations now preserve balanced and backslash-escaped p
 including nested pairs, instead of truncating at the first closing parenthesis.
 Review repair: inline link-text scanning now accepts balanced and backslash-escaped brackets,
 so valid nested labels and image alt text are not silently skipped.
+Review repair: valid GFM character references in destinations are decoded before URL
+classification and path resolution, while invalid named references remain literal text.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 
