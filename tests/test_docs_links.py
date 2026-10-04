@@ -68,6 +68,21 @@ class DocsLinksTests(unittest.TestCase):
             result = self.run_checker(root)
             self.assertEqual(0, result.returncode, result.stderr)
 
+    def test_longer_fence_is_not_closed_by_shorter_nested_fence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "````md\n"
+                "[Hidden](missing.md)\n"
+                "```\n"
+                "[Still hidden](also-missing.md)\n"
+                "````\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 0 relative Markdown destination(s)", result.stdout)
+
     def test_escape_from_repository_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)
