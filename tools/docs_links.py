@@ -376,6 +376,71 @@ def _mask_indented_code_blocks(text: str) -> str:
     return "".join(masked)
 
 
+def _block_quote_content_start(line: str):
+    """Return the content index after one explicit GFM block-quote marker."""
+    indent, index = _leading_indent_columns(line)
+    if indent > 3 or index >= len(line) or line[index] != ">":
+        return None
+
+    index += 1
+    if index < len(line) and line[index] in " \t":
+        index += 1
+    return index
+
+
+def _mask_block_quote_code_blocks(text: str) -> str:
+    """Mask code inside explicit block-quote containers without shifting offsets."""
+    lines = text.splitlines(keepends=True)
+    masked = []
+    index = 0
+
+    while index < len(lines):
+        raw_line = lines[index]
+        if raw_line.endswith("\r\n"):
+            line, ending = raw_line[:-2], "\r\n"
+        elif raw_line.endswith(("\n", "\r")):
+            line, ending = raw_line[:-1], raw_line[-1]
+        else:
+            line, ending = raw_line, ""
+
+        content_start = _block_quote_content_start(line)
+        if content_start is None:
+            masked.append(raw_line)
+            index += 1
+            continue
+
+        prefixes = []
+        content_lengths = []
+        inner_parts = []
+        while index < len(lines):
+            raw_line = lines[index]
+            if raw_line.endswith("\r\n"):
+                line, ending = raw_line[:-2], "\r\n"
+            elif raw_line.endswith(("\n", "\r")):
+                line, ending = raw_line[:-1], raw_line[-1]
+            else:
+                line, ending = raw_line, ""
+
+            content_start = _block_quote_content_start(line)
+            if content_start is None:
+                break
+
+            prefix = line[:content_start]
+            content = line[content_start:] + ending
+            prefixes.append(prefix)
+            content_lengths.append(len(content))
+            inner_parts.append(content)
+            index += 1
+
+        inner_masked = _mask_markdown_code("".join(inner_parts))
+        offset = 0
+        for prefix, content_length in zip(prefixes, content_lengths):
+            masked.append(prefix + inner_masked[offset:offset + content_length])
+            offset += content_length
+
+    return "".join(masked)
+
+
 def _mask_markdown_code(text: str) -> str:
     """Mask fenced code and GFM code spans while preserving offsets and line endings."""
     masked = []
@@ -413,7 +478,8 @@ def _mask_markdown_code(text: str) -> str:
         masked.append(line + ending)
 
     block_masked = _mask_indented_code_blocks("".join(masked))
-    return _mask_inline_code_blocks(block_masked)
+    quote_masked = _mask_block_quote_code_blocks(block_masked)
+    return _mask_inline_code_blocks(quote_masked)
 
 
 def iter_markdown_destinations(path: Path):
