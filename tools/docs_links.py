@@ -12,26 +12,32 @@ LINK_RE = re.compile(
     r"!?\[[^\]]*\]\(\s*(?P<dest><[^>\n]+>|[^)\s]+)(?:\s+[\"'][^)\n]*[\"'])?\s*\)"
 )
 INLINE_CODE_RE = re.compile(r"\x60[^\x60\n]*\x60")
-FENCE_RE = re.compile(r"^\s*(\x60\x60\x60|~~~)")
+FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
+CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
 
 
 def iter_markdown_destinations(path: Path):
     """Yield (line_number, destination) for inline Markdown links outside code."""
-    in_fence = False
-    fence = None
+    fence_char = None
+    fence_length = 0
     for lineno, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        fence_match = FENCE_RE.match(raw_line)
-        if fence_match:
-            marker = fence_match.group(1)
-            if not in_fence:
-                in_fence = True
-                fence = marker
-            elif marker == fence:
-                in_fence = False
-                fence = None
+        if fence_char is not None:
+            closing = CLOSING_FENCE_RE.match(raw_line)
+            if closing:
+                marker = closing.group("fence")
+                if marker[0] == fence_char and len(marker) >= fence_length:
+                    fence_char = None
+                    fence_length = 0
             continue
-        if in_fence:
-            continue
+
+        opening = FENCE_RE.match(raw_line)
+        if opening:
+            marker = opening.group("fence")
+            info = opening.group("info")
+            if marker[0] != "`" or "`" not in info:
+                fence_char = marker[0]
+                fence_length = len(marker)
+                continue
 
         line = INLINE_CODE_RE.sub("", raw_line)
         for match in LINK_RE.finditer(line):
