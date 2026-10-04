@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-INLINE_CODE_RE = re.compile(r"\x60[^\x60\n]*\x60")
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
 MARKDOWN_WHITESPACE = " \t\r\n"
@@ -173,8 +172,81 @@ def _parse_destination(line: str, position: int):
     return None
 
 
+def _is_backslash_escaped(text: str, position: int) -> bool:
+    """Return whether the character at position is escaped by an odd backslash run."""
+    backslashes = 0
+    cursor = position - 1
+    while cursor >= 0 and text[cursor] == "\\":
+        backslashes += 1
+        cursor -= 1
+    return backslashes % 2 == 1
+
+
+def _mask_inline_code_spans(text: str) -> str:
+    """Mask GFM code spans while preserving offsets and line endings."""
+    masked = list(text)
+    position = 0
+
+    while position < len(text):
+        if text[position] != "`":
+            position += 1
+            continue
+
+        run_start = position
+        while position < len(text) and text[position] == "`":
+            position += 1
+        run_length = position - run_start
+
+        if _is_backslash_escaped(text, run_start):
+            continue
+
+        cursor = position
+        closing_end = None
+        while cursor < len(text):
+            next_start = text.find("`", cursor)
+            if next_start == -1:
+                break
+
+            next_end = next_start
+            while next_end < len(text) and text[next_end] == "`":
+                next_end += 1
+
+            if next_end - next_start == run_length:
+                closing_end = next_end
+                break
+            cursor = next_end
+
+        if closing_end is None:
+            continue
+
+        for index in range(run_start, closing_end):
+            if masked[index] not in "\r\n":
+                masked[index] = " "
+        position = closing_end
+
+    return "".join(masked)
+
+
+def _mask_inline_code_blocks(text: str) -> str:
+    """Mask code spans within each non-blank inline block."""
+    masked = []
+    block_start = 0
+    separators = list(BLANK_LINE_RE.finditer(text))
+
+    for separator in separators + [None]:
+        block_end = separator.start() if separator is not None else len(text)
+        masked.append(_mask_inline_code_spans(text[block_start:block_end]))
+
+        if separator is None:
+            break
+        masked.append(text[separator.start():separator.end()])
+        block_start = separator.end()
+
+    return "".join(masked)
+
+
 def _mask_markdown_code(text: str) -> str:
-    """Mask fenced and supported inline code while preserving offsets and line endings."""
+    """Mask fenced code and GFM code spans while preserving offsets and line endings."""
     masked = []
     fence_char = None
     fence_length = 0
@@ -207,10 +279,9 @@ def _mask_markdown_code(text: str) -> str:
                 masked.append(" " * len(line) + ending)
                 continue
 
-        line = INLINE_CODE_RE.sub(lambda match: " " * len(match.group(0)), line)
         masked.append(line + ending)
 
-    return "".join(masked)
+    return _mask_inline_code_blocks("".join(masked))
 
 
 def iter_markdown_destinations(path: Path):

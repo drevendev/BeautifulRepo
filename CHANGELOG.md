@@ -15,6 +15,9 @@ Review repair: valid semicolon-terminated GFM character references in destinatio
 before URL classification and path resolution; invalid named references remain literal text.
 Review repair: inline links are scanned across non-blank lines, so GFM titles that span line
 endings still validate their repository-owned destination while blank-line crossings stay invalid.
+Review repair: inline-code masking now follows equal-length GFM backtick strings across line
+endings while leaving escaped or unmatched delimiters literal, preventing links inside code spans
+from being checked without hiding real links behind non-code backticks.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 

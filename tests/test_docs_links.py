@@ -68,6 +68,37 @@ class DocsLinksTests(unittest.TestCase):
             result = self.run_checker(root)
             self.assertEqual(0, result.returncode, result.stderr)
 
+    def test_multibacktick_and_multiline_code_spans_are_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "Use ``[Double](missing-double.md)`` when documenting syntax.\n"
+                "Use ``code\n[Multiline](missing-multiline.md)\n`` here.\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 0 relative Markdown destination(s)", result.stdout)
+
+    def test_escaped_or_unmatched_backticks_do_not_hide_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "``[Mismatch](missing-mismatch.md)```\n"
+                r"\`not code [Escaped opener](missing-escaped.md)`" + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn(
+                "missing relative destination: 'missing-mismatch.md'",
+                result.stderr,
+            )
+            self.assertIn(
+                "missing relative destination: 'missing-escaped.md'",
+                result.stderr,
+            )
+
     def test_longer_fence_is_not_closed_by_shorter_nested_fence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
