@@ -13,8 +13,9 @@ attached to a tag and can include notes and release assets. A **CHANGELOG** is d
 history that may span many releases. They can support each other, but none is a substitute for
 the others.
 
-GitHub notes that a tag date and a release publication date can differ. Do not infer one from
-the other when documenting when software became available.
+GitHub notes that a tag date and a release publication date can differ. When recording an
+existing release, use the observed publication date (or say the release is not yet published);
+do not substitute the tag date or infer availability from it.
 
 ## Start with reader impact
 

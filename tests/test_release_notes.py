@@ -34,11 +34,20 @@ class ReleaseNotesTests(unittest.TestCase):
             "{{UPGRADE_ACTION_OR_EXPLICIT_NO_ACTION_REQUIRED}}",
             "{{TAG}}",
             "{{COMMIT_SHA}}",
+            "{{RELEASE_PUBLICATION_DATE_OR_NOT_YET_PUBLISHED}}",
             "{{VERIFICATION_FACTS}}",
             "{{COMPARE_URL}}",
         ):
             self.assertIn(token, text)
         self.assertIn("Draft template", text)
+
+    def test_template_keeps_tag_and_publication_date_separate(self):
+        guide = (ROOT / "guides/release-notes.md").read_text(encoding="utf-8")
+        template = (ROOT / "templates/RELEASE_NOTES.template.md").read_text(encoding="utf-8")
+        normalized = " ".join(guide.split())
+        self.assertIn("tag date and a release publication date can differ", normalized)
+        self.assertIn("Tag / target commit:", template)
+        self.assertIn("Release publication date:", template)
 
     def test_template_does_not_claim_observed_results(self):
         text = (ROOT / "templates/RELEASE_NOTES.template.md").read_text(encoding="utf-8")

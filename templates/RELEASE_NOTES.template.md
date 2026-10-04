@@ -33,6 +33,7 @@
 ## Verification
 
 - Tag / target commit: {{TAG}} / {{COMMIT_SHA}}
+- Release publication date: {{RELEASE_PUBLICATION_DATE_OR_NOT_YET_PUBLISHED}}
 - Compared from: {{PREVIOUS_TAG_OR_BASE}}
 - Checks actually observed: {{VERIFICATION_FACTS}}
 - Release assets verified: {{YES_NO_AND_METHOD}}
