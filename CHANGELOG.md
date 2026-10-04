@@ -5,6 +5,8 @@
 **BR-LINKS-005** adds a dependency-free offline checker for repository-owned inline Markdown
 link and image destinations, wires it into CI and contributor instructions, and adds behavioral
 tests for valid paths, missing targets, repository-root escapes, external links and code examples.
+Review repair: fenced-code parsing now keeps the opening marker length and ignores shorter inner
+fences until an equal-or-longer closing fence of the same marker type appears.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 
