@@ -9,10 +9,45 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-LINK_START_RE = re.compile(r"!?\[[^\]\n]*\]\(\s*")
 INLINE_CODE_RE = re.compile(r"\x60[^\x60\n]*\x60")
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
+
+
+def _iter_inline_link_starts(line: str):
+    """Yield destination start indices for inline links with balanced link text."""
+    position = 0
+    while position < len(line):
+        char = line[position]
+        if char == "\\" and position + 1 < len(line):
+            if line[position + 1] in string.punctuation:
+                position += 2
+                continue
+        if char != "[":
+            position += 1
+            continue
+
+        depth = 1
+        cursor = position + 1
+        while cursor < len(line):
+            char = line[cursor]
+            if char == "\\" and cursor + 1 < len(line):
+                if line[cursor + 1] in string.punctuation:
+                    cursor += 2
+                    continue
+            if char == "[":
+                depth += 1
+            elif char == "]":
+                depth -= 1
+                if depth == 0:
+                    if cursor + 1 < len(line) and line[cursor + 1] == "(":
+                        destination = cursor + 2
+                        while destination < len(line) and line[destination] in " \t":
+                            destination += 1
+                        yield destination
+                    break
+            cursor += 1
+        position += 1
 
 
 def _consume_title_and_close(line: str, position: int):
@@ -137,8 +172,8 @@ def iter_markdown_destinations(path: Path):
                 continue
 
         line = INLINE_CODE_RE.sub("", raw_line)
-        for match in LINK_START_RE.finditer(line):
-            parsed = _parse_destination(line, match.end())
+        for position in _iter_inline_link_starts(line):
+            parsed = _parse_destination(line, position)
             if parsed is not None:
                 destination, _ = parsed
                 yield lineno, destination

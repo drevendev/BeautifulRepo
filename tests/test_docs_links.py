@@ -99,6 +99,24 @@ class DocsLinksTests(unittest.TestCase):
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertIn("checked 3 relative Markdown destination(s)", result.stdout)
 
+    def test_balanced_and_escaped_brackets_in_link_text(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "docs").mkdir()
+            (root / "assets").mkdir()
+            for name in ("nested.md", "escaped.md"):
+                (root / "docs" / name).write_text("# Target\n", encoding="utf-8")
+            (root / "assets/logo.svg").write_text("<svg></svg>\n", encoding="utf-8")
+            (root / "README.md").write_text(
+                "[Nested [label]](docs/nested.md)\n"
+                r"[Escaped \[label\]](docs/escaped.md)" + "\n"
+                "![Alt [nested]](assets/logo.svg)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 3 relative Markdown destination(s)", result.stdout)
+
     def test_escape_from_repository_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)

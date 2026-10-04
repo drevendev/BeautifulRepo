@@ -9,6 +9,8 @@ Review repair: fenced-code parsing now keeps the opening marker length and ignor
 fences until an equal-or-longer closing fence of the same marker type appears.
 Review repair: inline destinations now preserve balanced and backslash-escaped parentheses,
 including nested pairs, instead of truncating at the first closing parenthesis.
+Review repair: inline link-text scanning now accepts balanced and backslash-escaped brackets,
+so valid nested labels and image alt text are not silently skipped.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 
