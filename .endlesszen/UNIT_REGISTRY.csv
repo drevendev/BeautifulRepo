@@ -1,2 +1,3 @@
 UNIT_ID,AREA,FILE,ANCHOR,STATEMENT,TYPE,PRIORITY,STATUS,DEPENDS_ON,ACCEPTANCE
 BR-FOUNDATION-001,foundation,README.md,BeautifulRepo,Deliver the first practical handbook and offline catalog tool,delivery,P0,REVIEW,,Bootstrap issue 1 acceptance and later-run review with actual check evidence
+BR-LINKS-005,maintenance,tools/docs_links.py,Relative Markdown destinations,Automate offline checks for repository-owned Markdown link and image destinations,tool,P1,PRODUCTION,BR-FOUNDATION-001,Tool detects missing or escaping relative destinations and CI plus behavioral tests cover its bounded parser

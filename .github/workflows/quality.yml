@@ -19,3 +19,5 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Check catalog metadata and generated view
         run: python3 tools/catalog.py
+      - name: Check repository-owned Markdown destinations
+        run: python3 tools/docs_links.py
