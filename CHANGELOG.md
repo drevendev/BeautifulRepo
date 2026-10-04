@@ -13,6 +13,8 @@ Review repair: inline link-text scanning now accepts balanced and backslash-esca
 so valid nested labels and image alt text are not silently skipped.
 Review repair: valid semicolon-terminated GFM character references in destinations are decoded
 before URL classification and path resolution; invalid named references remain literal text.
+Review repair: inline links are scanned across non-blank lines, so GFM titles that span line
+endings still validate their repository-owned destination while blank-line crossings stay invalid.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 

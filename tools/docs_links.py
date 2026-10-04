@@ -13,6 +13,8 @@ from urllib.parse import unquote, urlsplit
 INLINE_CODE_RE = re.compile(r"\x60[^\x60\n]*\x60")
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
+MARKDOWN_WHITESPACE = " \t\r\n"
+BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
 CHARACTER_REFERENCE_RE = re.compile(
     r"&(?:#(?P<dec>[0-9]{1,7})|#[xX](?P<hex>[0-9A-Fa-f]{1,6})|(?P<named>[A-Za-z][A-Za-z0-9]*));"
 )
@@ -63,7 +65,7 @@ def _iter_inline_link_starts(line: str):
                 if depth == 0:
                     if cursor + 1 < len(line) and line[cursor + 1] == "(":
                         destination = cursor + 2
-                        while destination < len(line) and line[destination] in " \t":
+                        while destination < len(line) and line[destination] in MARKDOWN_WHITESPACE:
                             destination += 1
                         yield destination
                     break
@@ -73,7 +75,7 @@ def _iter_inline_link_starts(line: str):
 
 def _consume_title_and_close(line: str, position: int):
     """Return the index after an inline link's closing ')' or None."""
-    while position < len(line) and line[position] in " \t":
+    while position < len(line) and line[position] in MARKDOWN_WHITESPACE:
         position += 1
 
     if position < len(line) and line[position] == ")":
@@ -97,7 +99,7 @@ def _consume_title_and_close(line: str, position: int):
             continue
         if char == closer:
             position += 1
-            while position < len(line) and line[position] in " \t":
+            while position < len(line) and line[position] in MARKDOWN_WHITESPACE:
                 position += 1
             if position < len(line) and line[position] == ")":
                 return position + 1
@@ -122,6 +124,8 @@ def _parse_destination(line: str, position: int):
                     chars.append(next_char)
                     position += 2
                     continue
+            if char in "\r\n":
+                return None
             if char == ">":
                 end = _consume_title_and_close(line, position + 1)
                 if end is None:
@@ -169,35 +173,68 @@ def _parse_destination(line: str, position: int):
     return None
 
 
-def iter_markdown_destinations(path: Path):
-    """Yield (line_number, destination) for inline Markdown links outside code."""
+def _mask_markdown_code(text: str) -> str:
+    """Mask fenced and supported inline code while preserving offsets and line endings."""
+    masked = []
     fence_char = None
     fence_length = 0
-    for lineno, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+
+    for raw_line in text.splitlines(keepends=True):
+        if raw_line.endswith("\r\n"):
+            line, ending = raw_line[:-2], "\r\n"
+        elif raw_line.endswith(("\n", "\r")):
+            line, ending = raw_line[:-1], raw_line[-1]
+        else:
+            line, ending = raw_line, ""
+
         if fence_char is not None:
-            closing = CLOSING_FENCE_RE.match(raw_line)
+            closing = CLOSING_FENCE_RE.match(line)
             if closing:
                 marker = closing.group("fence")
                 if marker[0] == fence_char and len(marker) >= fence_length:
                     fence_char = None
                     fence_length = 0
+            masked.append(" " * len(line) + ending)
             continue
 
-        opening = FENCE_RE.match(raw_line)
+        opening = FENCE_RE.match(line)
         if opening:
             marker = opening.group("fence")
             info = opening.group("info")
             if marker[0] != "`" or "`" not in info:
                 fence_char = marker[0]
                 fence_length = len(marker)
+                masked.append(" " * len(line) + ending)
                 continue
 
-        line = INLINE_CODE_RE.sub("", raw_line)
-        for position in _iter_inline_link_starts(line):
-            parsed = _parse_destination(line, position)
+        line = INLINE_CODE_RE.sub(lambda match: " " * len(match.group(0)), line)
+        masked.append(line + ending)
+
+    return "".join(masked)
+
+
+def iter_markdown_destinations(path: Path):
+    """Yield (line_number, destination) for inline Markdown links outside code."""
+    text = path.read_text(encoding="utf-8")
+    masked = _mask_markdown_code(text)
+
+    block_start = 0
+    separators = list(BLANK_LINE_RE.finditer(masked))
+    for separator in separators + [None]:
+        block_end = separator.start() if separator is not None else len(masked)
+        block = masked[block_start:block_end]
+
+        for position in _iter_inline_link_starts(block):
+            parsed = _parse_destination(block, position)
             if parsed is not None:
                 destination, _ = parsed
+                absolute_position = block_start + position
+                lineno = masked.count("\n", 0, absolute_position) + 1
                 yield lineno, destination
+
+        if separator is None:
+            break
+        block_start = separator.end()
 
 
 def resolve_local_destination(root: Path, source: Path, destination: str):
