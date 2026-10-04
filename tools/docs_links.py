@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-from html.entities import html5
 import re
 import string
 import sys
@@ -182,11 +181,7 @@ def iter_markdown_destinations(path: Path):
 
 def resolve_local_destination(root: Path, source: Path, destination: str):
     """Return (resolved_path, error) or (None, None) when destination is out of scope."""
-    if not destination:
-        return None, None
-
-    destination = _decode_character_references(destination)
-    if destination.startswith("#"):
+    if not destination or destination.startswith("#"):
         return None, None
 
     parsed = urlsplit(destination)
