@@ -169,6 +169,57 @@ class DocsLinksTests(unittest.TestCase):
             self.assertIn("absent-quote-paragraph.md", result.stderr)
             self.assertIn("absent-quote-visible.md", result.stderr)
 
+    def test_list_container_fences_do_not_hide_following_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "1.  item\n"
+                "\n"
+                "    ```md\n"
+                "    [Ordered](absent-ordered-list-code.md)\n"
+                "    ```\n"
+                "\n"
+                "- ```md\n"
+                "  [First block](absent-first-list-code.md)\n"
+                "  ```\n"
+                "\n"
+                "[Visible](absent-after-list.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-ordered-list-code.md", result.stderr)
+            self.assertNotIn("absent-first-list-code.md", result.stderr)
+            self.assertIn("absent-after-list.md", result.stderr)
+
+    def test_nested_empty_and_quoted_list_code_is_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "-\n"
+                "  ```md\n"
+                "  [Empty marker](absent-empty-marker-code.md)\n"
+                "  ```\n"
+                "- outer\n"
+                "  - inner\n"
+                "\n"
+                "    ```md\n"
+                "    [Nested](absent-nested-list-code.md)\n"
+                "    ```\n"
+                "- > ```md\n"
+                "  > [List quote](absent-list-quote-code.md)\n"
+                "  > ```\n"
+                "> - quoted item\n"
+                ">\n"
+                ">   ```md\n"
+                ">   [Quote list](absent-quote-list-code.md)\n"
+                ">   ```\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 0 relative Markdown destination(s)", result.stdout)
+
     def test_longer_fence_is_not_closed_by_shorter_nested_fence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -15,6 +15,9 @@ CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
 LIST_MARKER_RE = re.compile(
     r"^(?P<marker>(?:[*+-]|[0-9]{1,9}[.)]))(?P<padding>[ \t]+)(?P<body>.*)$"
 )
+EMPTY_LIST_MARKER_RE = re.compile(
+    r"^(?P<marker>(?:[*+-]|[0-9]{1,9}[.)]))[ \t]*$"
+)
 ATX_HEADING_RE = re.compile(r"^#{1,6}(?:[ \t]+|$)")
 SETEXT_UNDERLINE_RE = re.compile(r"^(?:=+|-+)[ \t]*$")
 THEMATIC_BREAK_RE = re.compile(
@@ -276,32 +279,115 @@ def _list_item_details(line: str, base_indent: int = 0):
     if indent < base_indent or indent - base_indent > 3:
         return None
 
-    match = LIST_MARKER_RE.match(line[index:])
-    if match is None:
-        return None
+    remainder = line[index:]
+    match = LIST_MARKER_RE.match(remainder)
+    if match is not None:
+        column = indent + len(match.group("marker"))
+        padding_columns = 0
+        for char in match.group("padding"):
+            if char == " ":
+                column += 1
+                padding_columns += 1
+            else:
+                width = 4 - (column % 4)
+                column += width
+                padding_columns += width
 
-    column = indent + len(match.group("marker"))
-    padding_columns = 0
-    for char in match.group("padding"):
-        if char == " ":
-            column += 1
-            padding_columns += 1
-        else:
-            width = 4 - (column % 4)
-            column += width
-            padding_columns += width
+        if not 1 <= padding_columns <= 4:
+            return None
 
-    if not 1 <= padding_columns <= 4:
-        return None
+        return column, index + match.start("body")
 
-    body_index = index + match.start("body")
-    return column, body_index
+    empty = EMPTY_LIST_MARKER_RE.match(remainder)
+    if empty is not None:
+        return indent + len(empty.group("marker")) + 1, len(line)
+
+    return None
 
 
 def _list_item_content_indent(line: str, base_indent: int = 0):
     """Return the absolute content column for a list marker, or None."""
     details = _list_item_details(line, base_indent)
     return details[0] if details is not None else None
+
+
+def _consume_indent_columns(line: str, columns: int):
+    """Return (prefix index, residual columns) after removing visual indentation."""
+    visual = 0
+    index = 0
+    while index < len(line) and visual < columns:
+        char = line[index]
+        if char == " ":
+            visual += 1
+        elif char == "\t":
+            visual += 4 - (visual % 4)
+        else:
+            break
+        index += 1
+    if visual < columns:
+        return None
+    return index, visual - columns
+
+
+def _mask_list_item_code_blocks(text: str) -> str:
+    """Mask code inside explicit list-item containers before root-level fence parsing."""
+    lines = text.splitlines(keepends=True)
+    masked = []
+    index = 0
+    while index < len(lines):
+        raw_line = lines[index]
+        if raw_line.endswith("\r\n"):
+            line, ending = raw_line[:-2], "\r\n"
+        elif raw_line.endswith(("\n", "\r")):
+            line, ending = raw_line[:-1], raw_line[-1]
+        else:
+            line, ending = raw_line, ""
+        details = _list_item_details(line)
+        if details is None:
+            masked.append(raw_line)
+            index += 1
+            continue
+        content_indent, body_index = details
+        prefixes = [line[:body_index]]
+        residuals = [0]
+        inner_parts = [line[body_index:] + ending]
+        inner_lengths = [len(inner_parts[-1])]
+        index += 1
+        while index < len(lines):
+            raw_line = lines[index]
+            if raw_line.endswith("\r\n"):
+                line, ending = raw_line[:-2], "\r\n"
+            elif raw_line.endswith(("\n", "\r")):
+                line, ending = raw_line[:-1], raw_line[-1]
+            else:
+                line, ending = raw_line, ""
+            if not line.strip(" \t"):
+                prefixes.append(line)
+                residuals.append(0)
+                inner_parts.append(ending)
+                inner_lengths.append(len(ending))
+                index += 1
+                continue
+            indent, _ = _leading_indent_columns(line)
+            if indent < content_indent:
+                break
+            consumed = _consume_indent_columns(line, content_indent)
+            if consumed is None:
+                break
+            prefix_index, residual = consumed
+            inner = " " * residual + line[prefix_index:] + ending
+            prefixes.append(line[:prefix_index])
+            residuals.append(residual)
+            inner_parts.append(inner)
+            inner_lengths.append(len(inner))
+            index += 1
+        inner_masked = _mask_markdown_code("".join(inner_parts))
+        offset = 0
+        for prefix, residual, inner_length in zip(prefixes, residuals, inner_lengths):
+            piece = inner_masked[offset:offset + inner_length]
+            offset += inner_length
+            masked.append(prefix + piece[residual:])
+    return "".join(masked)
 
 
 def _starts_nonparagraph_block(line: str) -> bool:
@@ -450,7 +536,8 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
 
 def _mask_markdown_code(text: str) -> str:
-    """Mask fenced code and GFM code spans while preserving offsets and line endings."""
+    """Mask fenced, indented and inline GFM code while preserving source offsets."""
+    text = _mask_list_item_code_blocks(text)
     masked = []
     fence_char = None
     fence_length = 0
