@@ -7,6 +7,8 @@ link and image destinations, wires it into CI and contributor instructions, and 
 tests for valid paths, missing targets, repository-root escapes, external links and code examples.
 Review repair: fenced-code parsing now keeps the opening marker length and ignores shorter inner
 fences until an equal-or-longer closing fence of the same marker type appears.
+Review repair: inline destinations now preserve balanced and backslash-escaped parentheses,
+including nested pairs, instead of truncating at the first closing parenthesis.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 

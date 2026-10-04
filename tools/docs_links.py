@@ -4,16 +4,113 @@ from __future__ import annotations
 
 import argparse
 import re
+import string
 import sys
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-LINK_RE = re.compile(
-    r"!?\[[^\]]*\]\(\s*(?P<dest><[^>\n]+>|[^)\s]+)(?:\s+[\"'][^)\n]*[\"'])?\s*\)"
-)
+LINK_START_RE = re.compile(r"!?\[[^\]\n]*\]\(\s*")
 INLINE_CODE_RE = re.compile(r"\x60[^\x60\n]*\x60")
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
+
+
+def _consume_title_and_close(line: str, position: int):
+    """Return the index after an inline link's closing ')' or None."""
+    while position < len(line) and line[position] in " \t":
+        position += 1
+
+    if position < len(line) and line[position] == ")":
+        return position + 1
+    if position >= len(line):
+        return None
+
+    opener = line[position]
+    if opener in "\"'":
+        closer = opener
+    elif opener == "(":
+        closer = ")"
+    else:
+        return None
+
+    position += 1
+    while position < len(line):
+        char = line[position]
+        if char == "\\" and position + 1 < len(line):
+            position += 2
+            continue
+        if char == closer:
+            position += 1
+            while position < len(line) and line[position] in " \t":
+                position += 1
+            if position < len(line) and line[position] == ")":
+                return position + 1
+            return None
+        position += 1
+    return None
+
+
+def _parse_destination(line: str, position: int):
+    """Return (destination, end_index) for one inline link destination."""
+    if position >= len(line):
+        return None
+
+    if line[position] == "<":
+        position += 1
+        chars = []
+        while position < len(line):
+            char = line[position]
+            if char == "\\" and position + 1 < len(line):
+                next_char = line[position + 1]
+                if next_char in string.punctuation:
+                    chars.append(next_char)
+                    position += 2
+                    continue
+            if char == ">":
+                end = _consume_title_and_close(line, position + 1)
+                if end is None:
+                    return None
+                return "".join(chars), end
+            if char == "<":
+                return None
+            chars.append(char)
+            position += 1
+        return None
+
+    chars = []
+    depth = 0
+    while position < len(line):
+        char = line[position]
+        if char == "\\" and position + 1 < len(line):
+            next_char = line[position + 1]
+            if next_char in string.punctuation:
+                chars.append(next_char)
+                position += 2
+                continue
+        if char == "(":
+            depth += 1
+            chars.append(char)
+            position += 1
+            continue
+        if char == ")":
+            if depth:
+                depth -= 1
+                chars.append(char)
+                position += 1
+                continue
+            if not chars:
+                return "", position + 1
+            return "".join(chars), position + 1
+        if char == " " or ord(char) < 0x20:
+            if depth or not chars:
+                return None
+            end = _consume_title_and_close(line, position)
+            if end is None:
+                return None
+            return "".join(chars), end
+        chars.append(char)
+        position += 1
+    return None
 
 
 def iter_markdown_destinations(path: Path):
@@ -40,11 +137,11 @@ def iter_markdown_destinations(path: Path):
                 continue
 
         line = INLINE_CODE_RE.sub("", raw_line)
-        for match in LINK_RE.finditer(line):
-            dest = match.group("dest")
-            if dest.startswith("<") and dest.endswith(">"):
-                dest = dest[1:-1]
-            yield lineno, dest
+        for match in LINK_START_RE.finditer(line):
+            parsed = _parse_destination(line, match.end())
+            if parsed is not None:
+                destination, _ = parsed
+                yield lineno, destination
 
 
 def resolve_local_destination(root: Path, source: Path, destination: str):

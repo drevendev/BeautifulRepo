@@ -83,6 +83,22 @@ class DocsLinksTests(unittest.TestCase):
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertIn("checked 0 relative Markdown destination(s)", result.stdout)
 
+    def test_balanced_and_escaped_parentheses_in_destinations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "docs").mkdir()
+            for name in ("a(b).md", "nested(a(b)).md", "escaped(foo).md"):
+                (root / "docs" / name).write_text("# Target\n", encoding="utf-8")
+            (root / "README.md").write_text(
+                "[Balanced](docs/a(b).md)\n"
+                "[Nested](docs/nested(a(b)).md \"title\")\n"
+                r"[Escaped](docs/escaped\(foo\).md)" + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 3 relative Markdown destination(s)", result.stdout)
+
     def test_escape_from_repository_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)
