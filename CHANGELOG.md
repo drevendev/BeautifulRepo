@@ -21,6 +21,7 @@ from being checked without hiding real links behind non-code backticks.
 Review repair: indented-code masking now treats standalone four-column code (including tabs)
 as literal while preserving paragraph continuation and common list-item precedence, preventing code
 examples from creating false broken-link failures without hiding real links in indented prose.
+Review repair: code masking now descends through explicit GFM block-quote containers, including nested quotes, so fenced and indented code examples inside quotes do not create false link failures while quoted prose links remain checked.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML, reference-style-link or section-anchor validation.
 

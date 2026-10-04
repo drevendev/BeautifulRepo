@@ -135,6 +135,40 @@ class DocsLinksTests(unittest.TestCase):
             self.assertIn("missing relative destination: 'missing-list.md'", result.stderr)
             self.assertNotIn("missing-nested-code.md", result.stderr)
 
+    def test_block_quote_code_blocks_are_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "> ~~~md\n"
+                "> [Fenced](absent-quoted-fence.md)\n"
+                "> ~~~\n"
+                ">\n"
+                ">     [Indented](absent-quoted-indented.md)\n"
+                "> > ~~~\n"
+                "> > [Nested fence](absent-nested-fence.md)\n"
+                "> > ~~~\n"
+                "> >\n"
+                "> >     [Nested indented](absent-nested-indented.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 0 relative Markdown destination(s)", result.stdout)
+
+    def test_block_quote_paragraph_links_are_still_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "> Paragraph\n"
+                ">     [Indented continuation](absent-quote-paragraph.md)\n"
+                "> [Visible](absent-quote-visible.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("absent-quote-paragraph.md", result.stderr)
+            self.assertIn("absent-quote-visible.md", result.stderr)
+
     def test_longer_fence_is_not_closed_by_shorter_nested_fence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
