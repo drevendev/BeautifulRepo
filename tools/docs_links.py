@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from html.entities import html5
 import re
 import string
 import sys
@@ -12,6 +13,26 @@ from urllib.parse import unquote, urlsplit
 INLINE_CODE_RE = re.compile(r"\x60[^\x60\n]*\x60")
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
+CHARACTER_REFERENCE_RE = re.compile(
+    r"&(?:#(?P<dec>[0-9]{1,7})|#[xX](?P<hex>[0-9A-Fa-f]{1,6})|(?P<named>[A-Za-z][A-Za-z0-9]*));"
+)
+
+
+def _decode_character_references(value: str) -> str:
+    """Decode only GFM-valid, semicolon-terminated character references."""
+    def replace(match):
+        named = match.group("named")
+        if named is not None:
+            return html5.get(named + ";", match.group(0))
+
+        digits = match.group("hex") or match.group("dec")
+        base = 16 if match.group("hex") is not None else 10
+        code_point = int(digits, base)
+        if code_point == 0 or code_point > 0x10FFFF or 0xD800 <= code_point <= 0xDFFF:
+            return "\uFFFD"
+        return chr(code_point)
+
+    return CHARACTER_REFERENCE_RE.sub(replace, value)
 
 
 def _iter_inline_link_starts(line: str):
@@ -181,7 +202,11 @@ def iter_markdown_destinations(path: Path):
 
 def resolve_local_destination(root: Path, source: Path, destination: str):
     """Return (resolved_path, error) or (None, None) when destination is out of scope."""
-    if not destination or destination.startswith("#"):
+    if not destination:
+        return None, None
+
+    destination = _decode_character_references(destination)
+    if destination.startswith("#"):
         return None, None
 
     parsed = urlsplit(destination)

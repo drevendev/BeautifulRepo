@@ -117,6 +117,23 @@ class DocsLinksTests(unittest.TestCase):
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertIn("checked 3 relative Markdown destination(s)", result.stdout)
 
+    def test_character_references_are_decoded_before_url_classification(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "docs").mkdir()
+            (root / "docs/a&b.md").write_text("# Target\n", encoding="utf-8")
+            (root / "docs/literal&bogus;.md").write_text("# Literal\n", encoding="utf-8")
+            (root / "README.md").write_text(
+                "[Entity](docs/a&amp;b.md)\n"
+                "[External](https&#58;//example.com/missing.md)\n"
+                "[Fragment](&#35;section)\n"
+                "[Invalid named](docs/literal&bogus;.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn("checked 2 relative Markdown destination(s)", result.stdout)
+
     def test_escape_from_repository_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)
