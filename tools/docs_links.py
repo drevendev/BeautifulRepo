@@ -24,6 +24,9 @@ THEMATIC_BREAK_RE = re.compile(
     r"^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})$"
 )
 BLOCK_QUOTE_RE = re.compile(r"^>[ \t]?")
+TYPE1_HTML_BLOCK_OPEN_RE = re.compile(
+    r"^ {0,3}<(?P<tag>script|pre|style|textarea)(?=[ \t>]|$)", re.IGNORECASE
+)
 MARKDOWN_WHITESPACE = " \t\r\n"
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
 CHARACTER_REFERENCE_RE = re.compile(
@@ -575,9 +578,39 @@ def _mask_block_quote_code_blocks(text: str) -> str:
     return "".join(masked)
 
 
+
+def _mask_type1_html_blocks(text: str) -> str:
+    """Mask GFM type-1 raw HTML blocks while preserving source offsets."""
+    masked = []
+    open_tag = None
+
+    for raw_line in text.splitlines(keepends=True):
+        if raw_line.endswith("\r\n"):
+            line, ending = raw_line[:-2], "\r\n"
+        elif raw_line.endswith(("\n", "\r")):
+            line, ending = raw_line[:-1], raw_line[-1]
+        else:
+            line, ending = raw_line, ""
+
+        if open_tag is None:
+            opening = TYPE1_HTML_BLOCK_OPEN_RE.match(line)
+            if opening is None:
+                masked.append(line + ending)
+                continue
+            open_tag = opening.group("tag").lower()
+
+        closing = re.search(rf"</{re.escape(open_tag)}>", line, re.IGNORECASE)
+        masked.append(" " * len(line) + ending)
+        if closing is not None:
+            open_tag = None
+
+    return "".join(masked)
+
+
 def _mask_markdown_code(text: str) -> str:
-    """Mask fenced, indented and inline GFM code while preserving source offsets."""
+    """Mask fenced, indented, raw-HTML and inline GFM literal regions."""
     text = _mask_list_item_code_blocks(text)
+    text = _mask_type1_html_blocks(text)
     masked = []
     fence_char = None
     fence_length = 0

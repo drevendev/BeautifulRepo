@@ -304,6 +304,50 @@ class DocsLinksTests(unittest.TestCase):
                 result.stderr,
             )
 
+    def test_noninterrupting_ordered_marker_does_not_hide_fenced_syntax(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "Paragraph\n"
+                "2. ```md\n"
+                "   [Visible](absent-noninterrupting.md)\n"
+                "   ```\n"
+                "\n"
+                "Paragraph\n"
+                "1. ```md\n"
+                "   [List code](absent-interrupting-list-code.md)\n"
+                "   ```\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("absent-noninterrupting.md", result.stderr)
+            self.assertNotIn("absent-interrupting-list-code.md", result.stderr)
+
+    def test_type1_raw_html_blocks_are_ignored_without_hiding_following_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "<pre>\n"
+                "[Pre](absent-pre.md)\n"
+                "</pre>\n"
+                "> <pre>\n"
+                "> [Quoted](absent-quoted-pre.md)\n"
+                "> </pre>\n"
+                "- <pre>\n"
+                "  [Listed](absent-listed-pre.md)\n"
+                "  </pre>\n"
+                "\n"
+                "[Visible](absent-after-html.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-pre.md", result.stderr)
+            self.assertNotIn("absent-quoted-pre.md", result.stderr)
+            self.assertNotIn("absent-listed-pre.md", result.stderr)
+            self.assertIn("absent-after-html.md", result.stderr)
+
     def test_escape_from_repository_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)

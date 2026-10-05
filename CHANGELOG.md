@@ -23,9 +23,10 @@ as literal while preserving paragraph continuation and common list-item preceden
 examples from creating false broken-link failures without hiding real links in indented prose.
 Review repair: code masking now descends through explicit GFM block-quote containers, including nested quotes, so fenced and indented code examples inside quotes do not create false link failures while quoted prose links remain checked.
 Review repair: code masking now descends through explicit list-item containers before root fence parsing, including marker-only items, nested lists and list/quote combinations, so legal child fences stay literal without hiding following prose links.
-Review repair: list-container masking now respects paragraph interruption rules: only non-empty bullets and ordered items starting at 1 may interrupt open paragraphs, preventing faux list markers from hiding prose links as nested code.
+Review repair: list-container masking now respects paragraph interruption rules: only non-empty bullets and ordered items starting at 1 may interrupt open paragraphs, preventing faux list markers from hiding prose links as nested code. Dedicated regression coverage now locks the ordered-start boundary.
+Review repair: GFM type-1 raw HTML blocks (`script`, `pre`, `style`, `textarea`) are masked as literal regions, including inside explicit list and quote containers, so Markdown-looking examples inside them do not create false broken-link reports.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
-claim external URL, raw-HTML, reference-style-link or section-anchor validation.
+claim external URL, raw-HTML attribute, reference-style-link or section-anchor validation.
 
 ## Initial foundation candidate — 2026-10-03
 
