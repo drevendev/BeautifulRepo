@@ -348,6 +348,24 @@ class DocsLinksTests(unittest.TestCase):
             self.assertNotIn("absent-listed-pre.md", result.stderr)
             self.assertIn("absent-after-html.md", result.stderr)
 
+    def test_textarea_is_not_extended_as_a_type1_html_block(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            opening = "<" + "textarea>"
+            closing = "</" + "textarea>"
+            (root / "README.md").write_text(
+                opening
+                + "\n\n"
+                + "[Visible after blank](absent-after-textarea-blank.md)\n"
+                + closing
+                + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("absent-after-textarea-blank.md", result.stderr)
+
+
     def test_escape_from_repository_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)

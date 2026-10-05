@@ -25,7 +25,7 @@ THEMATIC_BREAK_RE = re.compile(
 )
 BLOCK_QUOTE_RE = re.compile(r"^>[ \t]?")
 TYPE1_HTML_BLOCK_OPEN_RE = re.compile(
-    r"^ {0,3}<(?P<tag>script|pre|style|textarea)(?=[ \t>]|$)", re.IGNORECASE
+    r"^ {0,3}<(?P<tag>script|pre|style)(?=[ \t>]|$)", re.IGNORECASE
 )
 MARKDOWN_WHITESPACE = " \t\r\n"
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
