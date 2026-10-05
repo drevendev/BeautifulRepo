@@ -12,6 +12,11 @@ Later-run review found that the text-equivalence test could pass using facts tha
 only inside the image markup. The test now removes the `<picture>` block before checking
 the four report facts, so it actually verifies a nearby real-text equivalent.
 
+A later exact-head review found a narrower SVG regression gap: the tests did not prove that
+`aria-labelledby` still referenced the intended `title`/`desc` nodes, and the description
+assertion covered only one of the four reader-facing facts. The structural test now locks both
+ID linkage and all four facts without claiming runtime assistive-technology certification.
+
 On 2026-10-05 the cited README examples were rechecked. The guide now distinguishes
 Immich's useful product-first placement from its missing main-image alt text and uses
 immutable README permalinks for the inspected repository examples.

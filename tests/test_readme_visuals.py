@@ -48,12 +48,19 @@ class ReadmeVisualExampleTests(unittest.TestCase):
             root = ET.parse(path).getroot()
             self.assertEqual(root.attrib.get("viewBox"), "0 0 960 360")
             self.assertEqual(root.attrib.get("role"), "img")
+            self.assertEqual(root.attrib.get("aria-labelledby"), "title desc")
+
             title = root.find("svg:title", ns)
             desc = root.find("svg:desc", ns)
             self.assertIsNotNone(title)
             self.assertIsNotNone(desc)
+            self.assertEqual(title.attrib.get("id"), "title")
+            self.assertEqual(desc.attrib.get("id"), "desc")
             self.assertTrue((title.text or "").strip())
-            self.assertIn("18 changed rows", (desc.text or ""))
+
+            description = (desc.text or "").strip()
+            for fact in ("18 changed rows", "2 added rows", "1 removed row", "changes.csv"):
+                self.assertIn(fact, description)
 
     def test_status_not_conveyed_by_color_only(self):
         for path in ASSETS:
