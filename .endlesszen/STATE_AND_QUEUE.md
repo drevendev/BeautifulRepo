@@ -3,51 +3,55 @@
 CONTROL_PROFILE: beautifulrepo-bootstrap-v1
 PROJECT_STATUS: ACTIVE
 SETUP_STATUS: PARTIAL
-CURRENT_PHASE: foundation
-CURRENT_UNIT: BR-FOUNDATION-001
-CURRENT_UNIT_STATUS: production candidate; later-run review required
-STATE_REVISION: 1
-LAST_RESULT: initial handbook and offline tool candidate produced; integration unverified
+CURRENT_PHASE: documentation patterns
+CURRENT_UNIT: BR-VISUAL-002
+CURRENT_UNIT_STATUS: production candidate; draft PR and exact-head provider CI required before later-run acceptance
+STATE_REVISION: 2
+LAST_RESULT: visual README guide repaired and source examples rechecked on 2026-10-05; exact candidate remains unintegrated
 AUTOMATION_BINDING: resolve the single beautifulrepo-owner hourly task from its operator receipt
-SCHEDULED_EXECUTION_EVIDENCE: not yet observed
+SCHEDULED_EXECUTION_EVIDENCE: observed through scheduled owner runs; scheduler configuration alone is not liveness proof
 
 ## Canonical recovery
 
-During initial bootstrap, read this proposed control pair from branch
-`beautifulrepo/bootstrap-20261003` and its PR linked to issue #1. After that PR is merged,
-master becomes the authoritative project surface; the old branch is historical only.
-Issue/PR native state decides whether the transition happened. Do not invent a second
-project, scheduler, queue or Drive hierarchy when resuming.
+The foundation controls remain proposed on branch `beautifulrepo/bootstrap-20261003`
+and PR #2 while that PR is unmerged. GitHub-native issue, PR, check and merge facts decide
+whether a transition happened. After PR #2 merges, `master` becomes the authoritative
+project surface and the bootstrap branch becomes recovery history.
+
+Current visual work is isolated on `beautifulrepo/readme-visuals-20261003`. Its semantic
+identity is BR-VISUAL-002 in `.endlesszen/UNIT_REGISTRY.csv`; do not allocate a duplicate
+visual unit, branch or PR when resuming.
 
 Bootstrap operation: `beautifulrepo:bootstrap:2026-10-03:v1`.
 Baseline: `4d6d11f41fbd4f409fbea9041dd82198f1a0bf24`.
+Foundation candidate: `ed2386b0536cbf68176acfc6ed057238b978ce19`.
 Owner commission: 2026-10-03. See issue #1 for bounded acceptance scope.
 
 ## Next executable work
 
-1. Review foundation in a new run: inspect exact PR diff, execute tests, check rendered
-   navigation where possible, reconcile actual CI and resolve defects. Do not call the
-   producer's checks acceptance. Integrate only through the verified contract's permitted path.
-2. Establish missing strict deployment ownership/controller evidence without expanding
-   authority or manufacturing compliance; gate only dependent writes. Do not repeat an
-   unchanged qualification report as the whole ordinary output.
-3. Deepen visual README patterns and create a tested before/after example.
-4. Finish source coverage for the remaining Open Source Guides and turn findings into
-   practical templates, including conduct and verified sensitive-reporting paths.
-5. Evaluate doc-quality tools and Devostasis/HungryCrab against isolated examples.
-
-Items 3–5 are scope candidates, not pre-allocated permanent unit IDs or completed research.
-Allocate a new unit only after complete registry/history collision checks and safe ownership.
+1. Publish BR-VISUAL-002 from the existing visual branch as a draft stacked PR on
+   `beautifulrepo/bootstrap-20261003`; obtain provider CI for the exact head before acceptance.
+2. Preserve the existing BR-LINKS-005 PR #3 and its exact provider evidence; if same-account
+   COMMENT evidence cannot be written through the available connector, do not invent it or
+   silently advance the draft state.
+3. Integrate only after the actual repository gates and the verified ownership/execution
+   contract allow the affected canonical transition.
+4. Continue independent eligible research and implementation when a dependent write is blocked:
+   remaining Open Source Guides coverage, conduct/security reporting templates, and bounded
+   documentation-quality recipes remain useful follow-on scope.
 
 ## Confirmed and unverified
 
-Confirmed source reads: repo preflight; framework principles and controls; bounded setup,
-work-cycle, navigation and repository-mode slices; Open Source Guides index and selected
-chapters; GitHub community profile; current Hacktoberfest and GSoC pages; Devostasis README,
-partial HungryCrab and Gum README slices. Full framework and source-corpus coverage is NOT
-claimed. Local check details belong to the bootstrap PR receipt, not a guessed PASS here.
+Confirmed for BR-VISUAL-002: source-backed guide, original PocketDiff light/dark fixtures,
+structural tests, immutable inspected README permalinks, and a 2026-10-05 source recheck.
+Local exact-byte replay for the current candidate previously produced 19 passing tests and
+a current 11-entry catalog; provider CI for the current visual head is not yet available.
 
-Unverified: remote CI result, formal acceptance, merged publication, scheduler delivery,
-external mode-controller replay, end-to-end fencing, agent-home binding, visual rendering,
-assistive-technology testing and complete GitHub community profile. Keep private reflection
-and confidential state out of this public surface.
+Confirmed for PR #3 / BR-LINKS-005: exact head
+`36c3a865ede26c9521cc2e4725acfc497cdcdbdb` and GitHub Actions run 37273052372 with
+successful unit-test, catalog and documentation-link steps. Same-account review evidence has
+not been persisted through the current connector.
+
+Unverified: merged publication, independent-actor approval, strict external selection controller,
+end-to-end ownership/fencing, independent liveness observer, assistive-technology behavior,
+and complete source-corpus coverage. Do not convert these unknowns into PASS claims.
