@@ -311,6 +311,22 @@ def _list_item_content_indent(line: str, base_indent: int = 0):
     return details[0] if details is not None else None
 
 
+def _list_item_interrupts_paragraph(line: str) -> bool:
+    """Return whether this list marker may interrupt an open GFM paragraph."""
+    indent, index = _leading_indent_columns(line)
+    if indent > 3:
+        return False
+
+    match = LIST_MARKER_RE.match(line[index:])
+    if match is None or not match.group("body").strip():
+        return False
+
+    marker = match.group("marker")
+    if marker[0].isdigit():
+        return int(marker[:-1]) == 1
+    return True
+
+
 def _consume_indent_columns(line: str, columns: int):
     """Return (prefix index, residual columns) after removing visual indentation."""
     visual = 0
@@ -334,6 +350,7 @@ def _mask_list_item_code_blocks(text: str) -> str:
     lines = text.splitlines(keepends=True)
     masked = []
     index = 0
+    paragraph_open = False
     while index < len(lines):
         raw_line = lines[index]
         if raw_line.endswith("\r\n"):
@@ -342,11 +359,33 @@ def _mask_list_item_code_blocks(text: str) -> str:
             line, ending = raw_line[:-1], raw_line[-1]
         else:
             line, ending = raw_line, ""
+
+        if not line.strip(" \t"):
+            masked.append(raw_line)
+            paragraph_open = False
+            index += 1
+            continue
+
         details = _list_item_details(line)
         if details is None:
+            indent, _ = _leading_indent_columns(line)
+            opening = FENCE_RE.match(line)
+            valid_fence = opening is not None and (
+                opening.group("fence")[0] != "`" or "`" not in opening.group("info")
+            )
+            if valid_fence or _starts_nonparagraph_block(line):
+                paragraph_open = False
+            elif indent < 4 or paragraph_open:
+                paragraph_open = True
             masked.append(raw_line)
             index += 1
             continue
+
+        if paragraph_open and not _list_item_interrupts_paragraph(line):
+            masked.append(raw_line)
+            index += 1
+            continue
+
         content_indent, body_index = details
         prefixes = [line[:body_index]]
         residuals = [0]
@@ -387,6 +426,7 @@ def _mask_list_item_code_blocks(text: str) -> str:
             piece = inner_masked[offset:offset + inner_length]
             offset += inner_length
             masked.append(prefix + piece[residual:])
+        paragraph_open = False
     return "".join(masked)
 
 
