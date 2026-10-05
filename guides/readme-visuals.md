@@ -76,14 +76,19 @@ theme-aware benchmark image with descriptive alt text and a caption, followed by
 and installation. The useful pattern is **promise → visual evidence → interpretation → action**.
 Do not copy its benchmark, numbers or brand assets.
 
-### Immich — show the product early
+### Immich — show the product early, not its exact image markup
 
 The `immich-app/immich` README at blob
 `ba774d44cdd7b9e9baed4cc4166d4c317e3ebae8` puts its brand and a large product
 screenshot before detailed feature tables, while warnings and documentation links remain
 real text. For visual applications, a representative product state can answer “what is this?”
-faster than another paragraph. Badge rows and activity graphics are not automatically useful
-for smaller repositories.
+faster than another paragraph.
+
+Borrow the **placement and product-first evidence**, not the exact image markup: the inspected
+logo and main screenshot use `title` attributes without `alt` attributes. BeautifulRepo's
+recommended pattern keeps meaningful fallback `img alt` text because GitHub's responsive-image
+example and current accessibility guidance both treat alternative text as reader-facing
+content. Badge rows and activity graphics are not automatically useful for smaller repositories.
 
 ### Awesome Python — navigation can be the visual system
 
@@ -119,14 +124,14 @@ Before merging a README visual:
 
 ## Sources
 
-Sources and repository examples reviewed 2026-10-03.
+Sources and repository examples rechecked 2026-10-05.
 
 - [GitHub writing quickstart](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/quickstart-for-writing-on-github)
 - [GitHub basic writing and formatting syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
 - [Open Source Guides: Accessibility Best Practices](https://opensource.guide/accessibility-best-practices-for-your-project/)
-- [uv](https://github.com/astral-sh/uv)
-- [Immich](https://github.com/immich-app/immich)
-- [Awesome Python](https://github.com/vinta/awesome-python)
+- [uv README at inspected blob](https://github.com/astral-sh/uv/blob/66caaf9ccc62add8c63de8e71184c9b7677377ad/README.md)
+- [Immich README at inspected blob](https://github.com/immich-app/immich/blob/ba774d44cdd7b9e9baed4cc4166d4c317e3ebae8/README.md)
+- [Awesome Python README at inspected blob](https://github.com/vinta/awesome-python/blob/c8d5186e427f4068718ebdc26b5a86eafbe386ee/README.md)
 
 Source inspection records markup and information architecture, not runtime behavior,
 visual-quality certification or permission to reuse third-party media.
