@@ -1,3 +1,4 @@
 UNIT_ID,AREA,FILE,ANCHOR,STATEMENT,TYPE,PRIORITY,STATUS,DEPENDS_ON,ACCEPTANCE
-BR-FOUNDATION-001,foundation,README.md,BeautifulRepo,Deliver the first practical handbook and offline catalog tool,delivery,P0,REVIEW,,Bootstrap issue 1 acceptance and later-run review with actual check evidence
+BR-FOUNDATION-001,foundation,README.md,BeautifulRepo,Deliver the first practical handbook and offline catalog tool,delivery,P0,READY,,Bootstrap issue 1 acceptance and later-run review with actual check evidence
+BR-VISUAL-002,documentation,guides/readme-visuals.md,Visual README patterns that earn their space,Add source-backed visual README patterns and a tested theme-aware before/after example,delivery,P1,READY,BR-FOUNDATION-001,Guide plus original light/dark example assets plus structural tests and later-run review with actual CI
 BR-LINKS-005,maintenance,tools/docs_links.py,Relative Markdown destinations,Automate offline checks for repository-owned Markdown link and image destinations,tool,P1,PRODUCTION,BR-FOUNDATION-001,Tool detects missing or escaping relative destinations and CI plus behavioral tests cover its bounded parser

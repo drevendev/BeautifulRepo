@@ -718,18 +718,21 @@ def check_repo(root: Path):
         if ".git" in path.parts:
             continue
         markdown_files += 1
-        for lineno, destination in iter_markdown_destinations(path):
-            resolved, error = resolve_local_destination(root, path, destination)
-            if resolved is None and error is None:
-                continue
-            checked += 1
-            relative_source = path.relative_to(root).as_posix()
-            if error:
-                errors.append(f"{relative_source}:{lineno}: {error}: {destination!r}")
-            elif not resolved.exists():
-                errors.append(
-                    f"{relative_source}:{lineno}: missing relative destination: {destination!r}"
-                )
+        relative_source = path.relative_to(root).as_posix()
+        try:
+            for lineno, destination in iter_markdown_destinations(path):
+                resolved, error = resolve_local_destination(root, path, destination)
+                if resolved is None and error is None:
+                    continue
+                checked += 1
+                if error:
+                    errors.append(f"{relative_source}:{lineno}: {error}: {destination!r}")
+                elif not resolved.exists():
+                    errors.append(
+                        f"{relative_source}:{lineno}: missing relative destination: {destination!r}"
+                    )
+        except UnicodeDecodeError as exc:
+            errors.append(f"{relative_source}: invalid UTF-8 Markdown: {exc}")
 
     return errors, checked, markdown_files
 

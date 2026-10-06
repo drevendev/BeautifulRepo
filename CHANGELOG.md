@@ -25,8 +25,34 @@ Review repair: code masking now descends through explicit GFM block-quote contai
 Review repair: code masking now descends through explicit list-item containers before root fence parsing, including marker-only items, nested lists and list/quote combinations, so legal child fences stay literal without hiding following prose links.
 Review repair: list-container masking now respects paragraph interruption rules: only non-empty bullets and ordered items starting at 1 may interrupt open paragraphs, preventing faux list markers from hiding prose links as nested code. Dedicated regression coverage now locks the ordered-start boundary.
 Review repair: GFM type-1 raw HTML blocks (`script`, `pre`, `style`) are masked as literal regions, including inside explicit list and quote containers, so Markdown-looking examples inside them do not create false broken-link reports. A regression keeps other HTML tags from being overextended with type-1 end-tag semantics.
+Review repair: percent-decoded NUL destinations now produce a deterministic invalid-path diagnostic rather than crashing path resolution. Invalid UTF-8 Markdown files likewise produce a clean checker error instead of a traceback; dedicated regressions cover both failure modes.
 The implementation follows GitHub's current relative-link guidance but deliberately does not
 claim external URL, raw-HTML attribute, reference-style-link or section-anchor validation.
+
+## Visual README patterns candidate — 2026-10-03
+
+BR-VISUAL-002 adds a source-backed visual README guide and an original theme-aware
+PocketDiff before/after example. The guide records concrete observations from current
+uv, Immich and Awesome Python READMEs without copying their media or branding. Five
+offline structural tests cover theme switching, alt text, local assets, SVG descriptions
+and non-color labels.
+
+Later-run review found that the text-equivalence test could pass using facts that existed
+only inside the image markup. The test now removes the `<picture>` block before checking
+the four report facts, so it actually verifies a nearby real-text equivalent.
+
+A later exact-head review found a narrower SVG regression gap: the tests did not prove that
+`aria-labelledby` still referenced the intended `title`/`desc` nodes, and the description
+assertion covered only one of the four reader-facing facts. The structural test now locks both
+ID linkage and all four facts without claiming runtime assistive-technology certification.
+
+On 2026-10-05 the cited README examples were rechecked. The guide now distinguishes
+Immich's useful product-first placement from its missing main-image alt text and uses
+immutable README permalinks for the inspected repository examples.
+
+This is a stacked production candidate based on BR-FOUNDATION-001, not acceptance or a
+released edition. Rendered GitHub light/dark appearance and assistive-technology behavior
+remain manual review items.
 
 ## Initial foundation candidate — 2026-10-03
 

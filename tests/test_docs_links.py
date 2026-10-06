@@ -380,5 +380,25 @@ class DocsLinksTests(unittest.TestCase):
             self.assertIn("escapes repository root", result.stderr)
 
 
+    def test_invalid_percent_decoded_path_reports_without_traceback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("[bad](%00)\n", encoding="utf-8")
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("invalid relative destination", result.stderr)
+            self.assertIn("%00", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_invalid_utf8_markdown_reports_without_traceback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_bytes(b"# Test\n\xff\n")
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("invalid UTF-8 Markdown", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
