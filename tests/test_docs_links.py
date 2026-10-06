@@ -366,6 +366,22 @@ class DocsLinksTests(unittest.TestCase):
             self.assertIn("absent-after-textarea-blank.md", result.stderr)
 
 
+    def test_type1_html_marker_inside_fence_does_not_hide_following_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "```md\n"
+                "<pre>\n"
+                "[Inside fence](absent-inside-fence.md)\n"
+                "```\n"
+                "[Visible](absent-after-fence.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-inside-fence.md", result.stderr)
+            self.assertIn("absent-after-fence.md", result.stderr)
+
     def test_escape_from_repository_root_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)
