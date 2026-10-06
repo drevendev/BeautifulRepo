@@ -1,0 +1,25 @@
+name: Improvement or resource
+description: Propose an actionable improvement with evidence.
+title: "[Improvement] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Reader problem
+      description: What is difficult to understand, use or maintain?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change and evidence
+      description: Include the primary source, useful pattern and relevant limitations. Do not share private data.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How to verify it
+      description: What observable result would show the improvement works?
+    validations:
+      required: true

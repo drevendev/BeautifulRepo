@@ -1,0 +1,21 @@
+name: Catalog quality
+on:
+  pull_request:
+  push:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 ref inspected 2026-10-03
+        with:
+          persist-credentials: false
+      - name: Show available interpreter
+        run: python3 --version
+      - name: Test catalog behavior
+        run: python3 -m unittest discover -s tests -v
+      - name: Check catalog metadata and generated view
+        run: python3 tools/catalog.py

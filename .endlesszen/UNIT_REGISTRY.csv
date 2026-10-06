@@ -1,0 +1,2 @@
+UNIT_ID,AREA,FILE,ANCHOR,STATEMENT,TYPE,PRIORITY,STATUS,DEPENDS_ON,ACCEPTANCE
+BR-FOUNDATION-001,foundation,README.md,BeautifulRepo,Deliver the first practical handbook and offline catalog tool,delivery,P0,REVIEW,,Bootstrap issue 1 acceptance and later-run review with actual check evidence

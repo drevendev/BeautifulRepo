@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "resources": [
+    {
+      "id": "open-source-guides",
+      "title": "Open Source Guides",
+      "category": "guide",
+      "url": "https://opensource.guide/",
+      "why": "A primary reading map for the non-code parts of open source.",
+      "apply": "Choose a relevant chapter and turn its advice into a checklist, template or decision.",
+      "caveat": "The whole guide corpus has not been read; the initial chapter coverage is listed separately.",
+      "coverage": "Index inspected; linked chapter coverage is bounded.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "starting-project",
+      "title": "Starting an Open Source Project",
+      "category": "guide",
+      "url": "https://opensource.guide/starting-a-project/",
+      "why": "Connect project purpose with README, contribution and launch expectations.",
+      "apply": "Use the first-use questions to review the front page and contribution path.",
+      "caveat": "Project-specific legal decisions still need appropriate review.",
+      "coverage": "Launch, README, contribution and branding sections inspected.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "maintainer-practices",
+      "title": "Best Practices for Maintainers",
+      "category": "guide",
+      "url": "https://opensource.guide/best-practices/",
+      "why": "Makes scope and contribution expectations explicit.",
+      "apply": "Document review expectations and reasons for declining out-of-scope work.",
+      "caveat": "A written process is not proof that the project follows it.",
+      "coverage": "Documentation, expectations and response sections inspected.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "welcoming-community",
+      "title": "Building Welcoming Communities",
+      "category": "guide",
+      "url": "https://opensource.guide/building-community/",
+      "why": "Frames onboarding as a progression from user to contributor.",
+      "apply": "Make one contribution path small, understandable and verifiable.",
+      "caveat": "Do not promise review capacity or response times that have not been established.",
+      "coverage": "Onboarding and public-process sections inspected.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "accessible-docs",
+      "title": "Accessibility Best Practices",
+      "category": "guide",
+      "url": "https://opensource.guide/accessibility-best-practices-for-your-project/",
+      "why": "Identifies barriers in docs, media and contribution workflows.",
+      "apply": "Review headings, link text, image alternatives and non-color status information.",
+      "caveat": "Automated or source-only checks cannot certify accessibility.",
+      "coverage": "Documentation, interface and testing guidance inspected; no assistive-technology test performed.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "github-community-profile",
+      "title": "GitHub community profile",
+      "category": "checklist",
+      "url": "https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/about-community-profiles-for-public-repositories",
+      "why": "Explains GitHub recognition of community files and templates.",
+      "apply": "Use supported file locations and inspect the actual resulting community profile.",
+      "caveat": "File detection does not establish content quality, security or legal compliance.",
+      "coverage": "Community-profile documentation inspected; BeautifulRepo profile not verified.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "hacktoberfest-2026",
+      "title": "Hacktoberfest 2026",
+      "category": "program",
+      "url": "https://hacktoberfest.com/",
+      "why": "Provides current event rules rather than inherited contribution folklore.",
+      "apply": "Check event fit; use current activities rather than obsolete PR-reward instructions.",
+      "caveat": "2026 PRs and MRs do not count toward rewards; listing does not imply enrollment.",
+      "coverage": "2026 homepage and on-page FAQs inspected.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "gsoc-2026",
+      "title": "Google Summer of Code timeline",
+      "category": "program",
+      "url": "https://developers.google.com/open-source/gsoc/timeline",
+      "why": "Provides year-specific application and project milestones.",
+      "apply": "Read the detailed year section before advising an application or mentoring plan.",
+      "caveat": "2026 application deadlines are past; 2027 dates and project eligibility are not asserted.",
+      "coverage": "Detailed 2026 timeline inspected; generic summary is not used for dates.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "devostasis",
+      "title": "Devostasis",
+      "category": "tool",
+      "url": "https://github.com/drevendev/devostasis",
+      "why": "Demonstrates inspectable repository-state reports with explicit uncertainty.",
+      "apply": "Borrow truthful evidence presentation; evaluate runtime integration separately.",
+      "caveat": "README inspection is not installation or a test of runtime claims.",
+      "coverage": "README blob d20eb2ba4b9ada56d5c7d9d67a1cc8048668eb96 inspected in full.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "hungry-crab",
+      "title": "Hungry Crab",
+      "category": "tool",
+      "url": "https://github.com/drevendev/HungryCrab",
+      "why": "Connects repository research to concrete transfer decisions.",
+      "apply": "Record why a pattern is useful, how to apply it and why reuse may be limited.",
+      "caveat": "No automated ingestion, license determination or issue-serving behavior tested.",
+      "coverage": "README introduction, walkthrough, configuration and miners inspected; remaining sections unread.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    },
+    {
+      "id": "gum",
+      "title": "Gum",
+      "category": "example",
+      "url": "https://github.com/charmbracelet/gum",
+      "why": "Connects a visible demo to an example script and a short tutorial.",
+      "apply": "Use result-to-source navigation and collapse secondary installation paths.",
+      "caveat": "Source inspection is not a visual audit or permission to copy media.",
+      "coverage": "README lines 1–130; blob ed90af80689fc2e24bf08179f96613e390766838.",
+      "reviewed_on": "2026-10-03",
+      "evidence": "source-reviewed"
+    }
+  ]
+}
