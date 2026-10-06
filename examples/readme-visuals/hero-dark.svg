@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title desc">
+  <title id="title">PocketDiff example report in dark theme</title>
+  <desc id="desc">A fictional CSV comparison report showing 18 changed rows, 2 added rows, 1 removed row, and output changes.csv.</desc>
+  <rect width="960" height="360" rx="28" fill="#0d1117"/>
+  <rect x="24" y="24" width="912" height="312" rx="20" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+  <text x="56" y="82" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="28" font-weight="700" fill="#f0f6fc">PocketDiff report</text>
+  <text x="56" y="124" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#8b949e">january.csv → february.csv</text>
+  <rect x="56" y="162" width="238" height="88" rx="14" fill="#2b2411" stroke="#d29922"/>
+  <text x="76" y="198" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" fill="#e3b341">CHANGED</text>
+  <text x="76" y="232" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="700" fill="#f0f6fc">18 rows</text>
+  <rect x="312" y="162" width="238" height="88" rx="14" fill="#13261a" stroke="#3fb950"/>
+  <text x="332" y="198" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" fill="#56d364">ADDED</text>
+  <text x="332" y="232" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="700" fill="#f0f6fc">2 rows</text>
+  <rect x="568" y="162" width="238" height="88" rx="14" fill="#321b1f" stroke="#f85149"/>
+  <text x="588" y="198" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" fill="#ff7b72">REMOVED</text>
+  <text x="588" y="232" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="700" fill="#f0f6fc">1 row</text>
+  <text x="56" y="296" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#8b949e">Wrote changes.csv</text>
+</svg>

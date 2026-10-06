@@ -40,6 +40,7 @@ Each explains what to borrow, how to apply it and what not to copy.
 | --- | --- |
 | [Repository checklist](checklists/repository.md) | Prioritize essential information, polish and maintenance |
 | [README design guide](guides/readme.md) | Build a useful front page without turning it into a manual |
+| [Visual README patterns](guides/readme-visuals.md) | Make screenshots, diagrams and theme-aware media carry evidence |
 | [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab and Gum |
 | [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
@@ -84,9 +85,7 @@ external-tool trials and accessibility testing. Suggestions and small improvemen
 start with [CONTRIBUTING](CONTRIBUTING.md). Please report accessibility barriers through
 [an issue](https://github.com/drevendev/BeautifulRepo/issues/new/choose).
 
-Public documentation is maintained in English. The project uses
-[EndlessZen](https://github.com/drevendev/EndlessZen) for durable, bounded project work;
-operational details stay out of the reading path in [`.endlesszen/`](.endlesszen/INDEX.md).
+Public documentation is maintained in English.
 
 ## License
 
