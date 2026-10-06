@@ -27,6 +27,9 @@ BLOCK_QUOTE_RE = re.compile(r"^>[ \t]?")
 TYPE1_HTML_BLOCK_OPEN_RE = re.compile(
     r"^ {0,3}<(?P<tag>script|pre|style)(?=[ \t>]|$)", re.IGNORECASE
 )
+TYPE1_HTML_BLOCK_CLOSE_RE = re.compile(
+    r"</(?:script|pre|style)>", re.IGNORECASE
+)
 MARKDOWN_WHITESPACE = " \t\r\n"
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
 CHARACTER_REFERENCE_RE = re.compile(
@@ -579,41 +582,12 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
 
 
-def _mask_type1_html_blocks(text: str) -> str:
-    """Mask GFM type-1 raw HTML blocks while preserving source offsets."""
-    masked = []
-    open_tag = None
-
-    for raw_line in text.splitlines(keepends=True):
-        if raw_line.endswith("\r\n"):
-            line, ending = raw_line[:-2], "\r\n"
-        elif raw_line.endswith(("\n", "\r")):
-            line, ending = raw_line[:-1], raw_line[-1]
-        else:
-            line, ending = raw_line, ""
-
-        if open_tag is None:
-            opening = TYPE1_HTML_BLOCK_OPEN_RE.match(line)
-            if opening is None:
-                masked.append(line + ending)
-                continue
-            open_tag = opening.group("tag").lower()
-
-        closing = re.search(rf"</{re.escape(open_tag)}>", line, re.IGNORECASE)
-        masked.append(" " * len(line) + ending)
-        if closing is not None:
-            open_tag = None
-
-    return "".join(masked)
-
-
-def _mask_markdown_code(text: str) -> str:
-    """Mask fenced, indented, raw-HTML and inline GFM literal regions."""
-    text = _mask_list_item_code_blocks(text)
-    text = _mask_type1_html_blocks(text)
+def _mask_fenced_and_type1_html_blocks(text: str) -> str:
+    """Mask fenced code and GFM type-1 raw HTML in source order."""
     masked = []
     fence_char = None
     fence_length = 0
+    in_type1_html = False
 
     for raw_line in text.splitlines(keepends=True):
         if raw_line.endswith("\r\n"):
@@ -633,6 +607,12 @@ def _mask_markdown_code(text: str) -> str:
             masked.append(" " * len(line) + ending)
             continue
 
+        if in_type1_html:
+            masked.append(" " * len(line) + ending)
+            if TYPE1_HTML_BLOCK_CLOSE_RE.search(line):
+                in_type1_html = False
+            continue
+
         opening = FENCE_RE.match(line)
         if opening:
             marker = opening.group("fence")
@@ -643,10 +623,23 @@ def _mask_markdown_code(text: str) -> str:
                 masked.append(" " * len(line) + ending)
                 continue
 
+        if TYPE1_HTML_BLOCK_OPEN_RE.match(line):
+            masked.append(" " * len(line) + ending)
+            if not TYPE1_HTML_BLOCK_CLOSE_RE.search(line):
+                in_type1_html = True
+            continue
+
         masked.append(line + ending)
 
-    block_masked = _mask_indented_code_blocks("".join(masked))
-    quote_masked = _mask_block_quote_code_blocks(block_masked)
+    return "".join(masked)
+
+
+def _mask_markdown_code(text: str) -> str:
+    """Mask fenced, indented, raw-HTML and inline GFM literal regions."""
+    text = _mask_list_item_code_blocks(text)
+    block_masked = _mask_fenced_and_type1_html_blocks(text)
+    indented_masked = _mask_indented_code_blocks(block_masked)
+    quote_masked = _mask_block_quote_code_blocks(indented_masked)
     return _mask_inline_code_blocks(quote_masked)
 
 
