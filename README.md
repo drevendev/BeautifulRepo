@@ -84,9 +84,7 @@ external-tool trials and accessibility testing. Suggestions and small improvemen
 start with [CONTRIBUTING](CONTRIBUTING.md). Please report accessibility barriers through
 [an issue](https://github.com/drevendev/BeautifulRepo/issues/new/choose).
 
-Public documentation is maintained in English. The project uses
-[EndlessZen](https://github.com/drevendev/EndlessZen) for durable, bounded project work;
-operational details stay out of the reading path in [`.endlesszen/`](.endlesszen/INDEX.md).
+Public documentation is maintained in English.
 
 ## License
 
