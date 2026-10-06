@@ -690,6 +690,8 @@ def resolve_local_destination(root: Path, source: Path, destination: str):
     raw_path = unquote(parsed.path)
     if not raw_path:
         return None, None
+    if "\x00" in raw_path:
+        return None, "invalid relative destination"
 
     root = root.resolve()
     if raw_path.startswith("/"):
