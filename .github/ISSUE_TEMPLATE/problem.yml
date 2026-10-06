@@ -13,7 +13,7 @@ body:
     id: behavior
     attributes:
       label: Expected and actual result
-      description: Explain the obstacle and steps to reproduce. Avoid secrets and personal data.
+      description: Explain the obstacle and steps to reproduce. Do not post secrets, security-vulnerability details, exploit steps, or personal data in this public issue.
     validations:
       required: true
   - type: textarea

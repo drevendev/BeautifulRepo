@@ -5,9 +5,9 @@ PROJECT_STATUS: ACTIVE
 SETUP_STATUS: PARTIAL
 CURRENT_PHASE: bounded development atop foundation
 CURRENT_UNIT: BR-COMMUNITY-006
-CURRENT_UNIT_STATUS: production candidate; publication and provider checks pending
-STATE_REVISION: 2
-LAST_RESULT: community guidance and reusable policy scaffold produced on an isolated branch
+CURRENT_UNIT_STATUS: production candidate; draft PR and provider checks pending
+STATE_REVISION: 3
+LAST_RESULT: community guidance refined, public issue warnings hardened, and reader navigation added
 AUTOMATION_BINDING: resolve the single beautifulrepo-owner hourly task from its operator receipt
 SCHEDULED_EXECUTION_EVIDENCE: observed; recurrence alone does not prove serialization or fencing
 
@@ -37,9 +37,10 @@ Owner commission: 2026-10-03. See issue #1 for bounded acceptance scope.
 
 ## Confirmed and unverified
 
-Confirmed for BR-COMMUNITY-006: the guide and scaffold exist on the isolated branch and
-the relevant primary guidance was rechecked on 2026-10-06. Reader navigation, semantic
-changelog publication, provider CI and later-run acceptance are not yet established.
+Confirmed for BR-COMMUNITY-006: the guide and scaffold exist on the isolated branch; the
+relevant primary guidance was rechecked on 2026-10-06; reader navigation, semantic
+changelog publication, and explicit public-issue warnings are present on the candidate.
+Provider CI and later-run acceptance are not yet established.
 
 Unverified for this candidate: provider CI, later-run acceptance, merged publication,
 complete rendered-client accessibility and the strict external-controller/end-to-end

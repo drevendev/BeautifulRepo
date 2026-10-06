@@ -10,9 +10,18 @@ replace legal, incident-response or platform-specific advice.
 ## Security reporting: publish the route you can really operate
 
 GitHub recognizes a repository security policy and recommends that it explain supported
-versions and how to report vulnerabilities. For public repositories, GitHub also supports
-private vulnerability discussion through repository security advisories; availability and
-configuration must be verified for the actual repository before you promise that route.
+versions and how to report vulnerabilities. Keep three GitHub mechanisms distinct:
+
+- `SECURITY.md` publishes reporting instructions. It does **not** enable a private inbox.
+- **Private vulnerability reporting** is a separate repository setting. When an owner or
+  administrator enables it for a public repository, anyone can use GitHub's private
+  `Report a vulnerability` flow; an existing security policy is shown above that form.
+- **Repository security advisories** are the maintainer-side private workspace for
+  discussing, fixing and eventually disclosing a vulnerability. Authorized maintainers can
+  create a draft advisory even when private vulnerability reporting is not enabled.
+
+Do not advertise "security advisories" by themselves as a reporter-facing private route.
+Verify the actual entry point a reporter can use before publishing it in a policy.
 
 A useful security policy answers:
 
@@ -95,7 +104,9 @@ Reviewed **2026-10-06**:
 
 - [GitHub: About community profiles for public repositories](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/about-community-profiles-for-public-repositories) — file recognition and community-profile behavior.
 - [GitHub: Adding a security policy to your repository](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/add-security-policy) — supported versions and vulnerability-reporting instructions.
-- [GitHub: Coordinated disclosure of security vulnerabilities](https://docs.github.com/en/code-security/concepts/vulnerability-reporting-and-management/coordinated-disclosure) — private advisory workflow and disclosure context.
+- [GitHub: Privately reporting a security vulnerability](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately) — private vulnerability reporting is separate from `SECURITY.md` and only works when enabled.
+- [GitHub: Creating a repository security advisory](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/fix-reported-vulnerabilities/create-repository-advisory) — maintainer-created draft advisories and their permissions.
+- [GitHub: Coordinated disclosure of security vulnerabilities](https://docs.github.com/en/code-security/concepts/vulnerability-reporting-and-management/coordinated-disclosure) — disclosure context and the risk of public fallback when no reporting route is documented.
 - [GitHub: Adding a code of conduct to your project](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-code-of-conduct-to-your-project) — adoption, enforcement readiness and attribution.
 - [Open Source Guides: Building Welcoming Communities](https://opensource.guide/building-community/) — public communication with explicit security/conduct exceptions.
 
