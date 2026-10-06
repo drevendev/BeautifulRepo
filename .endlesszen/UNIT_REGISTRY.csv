@@ -1,2 +1,3 @@
 UNIT_ID,AREA,FILE,ANCHOR,STATEMENT,TYPE,PRIORITY,STATUS,DEPENDS_ON,ACCEPTANCE
 BR-FOUNDATION-001,foundation,README.md,BeautifulRepo,Deliver the first practical handbook and offline catalog tool,delivery,P0,REVIEW,,Bootstrap issue 1 acceptance and later-run review with actual check evidence
+BR-COMMUNITY-006,community,guides/community-safety.md,Community safety files that actually work,Add source-backed community safety guidance and a non-live policy scaffold,delivery,P1,PRODUCTION,BR-FOUNDATION-001,Guide plus reusable scaffold plus current primary-source review plus later-run review with provider CI
