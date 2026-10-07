@@ -4,7 +4,7 @@
 
 Added a source-backed guide for deciding when community policy files are operationally
 ready, plus a reusable drafting scaffold with explicit placeholders instead of invented
-project-specific promises. The source review was refreshed on 2026-10-06 against current
+project-specific promises. The source review was refreshed on 2026-10-07 against current
 GitHub documentation and the relevant Open Source Guides material. The guide explicitly
 separates `SECURITY.md`, GitHub Private Vulnerability Reporting and repository security
 advisories; public issue forms warn against vulnerability/exploit details, and the handbook
