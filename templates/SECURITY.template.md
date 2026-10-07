@@ -19,6 +19,8 @@ Before publishing, test the route from the reporter's side and confirm that the 
 maintainer can receive a message. Do not substitute a public issue URL for a private route.
 If you name GitHub Private Vulnerability Reporting, first verify that the repository setting
 is enabled; a `SECURITY.md` file or the ability to create advisories does not enable it.
+Also name who owns intake and verify that their GitHub security-alert notification settings
+or explicit advisory-queue checks make new private reports visible in practice.
 
 ## Useful first-report details
 

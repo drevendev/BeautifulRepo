@@ -23,6 +23,14 @@ versions and how to report vulnerabilities. Keep three GitHub mechanisms distinc
 Do not advertise "security advisories" by themselves as a reporter-facing private route.
 Verify the actual entry point a reporter can use before publishing it in a policy.
 
+For GitHub Private Vulnerability Reporting, verify the **intake side** as well as the
+reporter-facing form. GitHub documents notification behavior separately: repository
+administrators and security managers are notified only when their repository/security-alert
+notification settings allow it, and email delivery additionally depends on account
+notification preferences. A route is not operational merely because the button exists.
+Name who owns triage and make sure that person either receives the expected alerts or has an
+explicit routine for checking the repository's security-advisory queue.
+
 A useful security policy answers:
 
 - Which versions or branches receive security fixes?
@@ -77,6 +85,7 @@ Before marking either policy as complete, verify all of these:
 
 - [ ] The reporting destination exists and the intended maintainer can access it.
 - [ ] A reporter can discover the route without already knowing a maintainer personally.
+- [ ] The maintainer responsible for intake receives the expected alerts or explicitly checks the private-report queue.
 - [ ] Public issue templates warn against posting secrets or sensitive exploit details.
 - [ ] The policy does not promise response times, confidentiality or staffing that are unproven.
 - [ ] The maintainer knows who makes enforcement or disclosure decisions.
@@ -100,14 +109,16 @@ security scaffold remains a template, not BeautifulRepo's own security policy.
 
 ## Sources and limits
 
-Reviewed **2026-10-06**:
+Reviewed **2026-10-07**:
 
 - [GitHub: About community profiles for public repositories](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/about-community-profiles-for-public-repositories) — file recognition and community-profile behavior.
 - [GitHub: Adding a security policy to your repository](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/add-security-policy) — supported versions and vulnerability-reporting instructions.
 - [GitHub: Privately reporting a security vulnerability](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately) — private vulnerability reporting is separate from `SECURITY.md` and only works when enabled.
+- [GitHub: Configuring private vulnerability reporting](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository) — intake ownership and maintainer notification behavior.
 - [GitHub: Creating a repository security advisory](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/fix-reported-vulnerabilities/create-repository-advisory) — maintainer-created draft advisories and their permissions.
 - [GitHub: Coordinated disclosure of security vulnerabilities](https://docs.github.com/en/code-security/concepts/vulnerability-reporting-and-management/coordinated-disclosure) — disclosure context and the risk of public fallback when no reporting route is documented.
 - [GitHub: Adding a code of conduct to your project](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-code-of-conduct-to-your-project) — adoption, enforcement readiness and attribution.
+- [Open Source Guides: Security Best Practices for your Project](https://opensource.guide/security-best-practices-for-your-project/) — current security-policy, private-reporting, triage and lightweight incident-response guidance.
 - [Open Source Guides: Building Welcoming Communities](https://opensource.guide/building-community/) — public communication with explicit security/conduct exceptions.
 
 This is bounded source review, not complete coverage of GitHub security features, incident
