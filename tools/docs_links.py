@@ -676,7 +676,12 @@ def resolve_local_destination(root: Path, source: Path, destination: str):
     if destination.startswith("#"):
         return None, None
 
-    parsed = urlsplit(destination)
+    try:
+        parsed = urlsplit(destination)
+    except ValueError:
+        # Malformed remote URL authorities are out of scope for local-link checks.
+        # In particular, unmatched IPv6 brackets must not abort the scan.
+        return None, None
     if parsed.scheme or parsed.netloc:
         return None, None
 
