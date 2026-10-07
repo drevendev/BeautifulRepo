@@ -97,11 +97,13 @@ the checklist as discovery, then inspect whether the process works.
 
 ## BeautifulRepo's current decision
 
-As reviewed on **2026-10-06**, BeautifulRepo does not publish a root `SECURITY.md` or
-`CODE_OF_CONDUCT.md`. That is intentional: a dedicated confidential reporting route and
-conduct-enforcement path have not been verified. `CONTRIBUTING.md` therefore tells readers
-not to post private material and points sensitive abuse to GitHub's platform reporting
-facilities without pretending that this repository operates a confidential inbox.
+As reviewed on **2026-10-07**, BeautifulRepo does not publish a repository-level
+`SECURITY.md` or `CODE_OF_CONDUCT.md` in GitHub's recognized `.github`, repository-root or
+`docs` locations. No public `drevendev/.github` defaults are visible either. That is
+intentional: a dedicated confidential reporting route and conduct-enforcement path have not
+been verified. `CONTRIBUTING.md` therefore tells readers not to post private material and
+points sensitive abuse to GitHub's platform reporting facilities without pretending that
+this repository operates a confidential inbox.
 
 The next step is operational, not cosmetic: verify a private reporting mechanism and an
 enforcement owner, then adapt and publish the relevant policy. Until then, the reusable
@@ -112,6 +114,7 @@ security scaffold remains a template, not BeautifulRepo's own security policy.
 Reviewed **2026-10-07**:
 
 - [GitHub: About community profiles for public repositories](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/about-community-profiles-for-public-repositories) — file recognition and community-profile behavior.
+- [GitHub: Creating a default community health file](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file) — recognized `.github` / root / `docs` precedence and account-level defaults.
 - [GitHub: Adding a security policy to your repository](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/add-security-policy) — supported versions and vulnerability-reporting instructions.
 - [GitHub: Privately reporting a security vulnerability](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately) — private vulnerability reporting is separate from `SECURITY.md` and only works when enabled.
 - [GitHub: Configuring private vulnerability reporting](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository) — intake ownership and maintainer notification behavior.
