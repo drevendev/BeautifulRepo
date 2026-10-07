@@ -718,7 +718,18 @@ def check_repo(root: Path):
         markdown_files += 1
         relative_source = path.relative_to(root).as_posix()
         try:
-            for lineno, destination in iter_markdown_destinations(path):
+            source_target = path.resolve(strict=True)
+        except (OSError, RuntimeError):
+            errors.append(f"{relative_source}: cannot resolve Markdown source")
+            continue
+        try:
+            source_target.relative_to(root)
+        except ValueError:
+            errors.append(f"{relative_source}: Markdown source escapes repository root")
+            continue
+
+        try:
+            for lineno, destination in iter_markdown_destinations(source_target):
                 resolved, error = resolve_local_destination(root, path, destination)
                 if resolved is None and error is None:
                     continue
@@ -731,6 +742,8 @@ def check_repo(root: Path):
                     )
         except UnicodeDecodeError as exc:
             errors.append(f"{relative_source}: invalid UTF-8 Markdown: {exc}")
+        except OSError:
+            errors.append(f"{relative_source}: cannot read Markdown source")
 
     return errors, checked, markdown_files
 
