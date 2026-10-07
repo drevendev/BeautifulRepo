@@ -3,6 +3,11 @@ from pathlib import Path
 import re
 import unittest
 
+# Reserved example.com addresses are test data, not a public reporting contact.
+PRIVATE_REPORTING_ROUTE_RE = re.compile(
+    r"(?i)mailto:|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"
+)
+
 ROOT = Path(__file__).parents[1]
 PUBLIC_WARNING = (
     "Do not post secrets, security-vulnerability details, exploit steps, "
@@ -51,7 +56,7 @@ class CommunitySafetyTests(unittest.TestCase):
         self.assertIn("REPLACE_WITH_A_VERIFIED_PRIVATE_REPORTING_ROUTE", text)
         self.assertIn("STATE_ONLY_BEHAVIOR_THE_PROJECT_CAN_RELIABLY_PROVIDE", text)
         self.assertIsNone(
-            re.search(r"(?i)mailto:|[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}", text),
+            PRIVATE_REPORTING_ROUTE_RE.search(text),
             "template must not invent an email reporting route",
         )
         self.assertIn(
@@ -59,6 +64,11 @@ class CommunitySafetyTests(unittest.TestCase):
             text,
         )
         self.assertTrue((path.parent / "../guides/community-safety.md").resolve().is_file())
+
+    def test_reporting_route_matcher_detects_real_email_addresses(self):
+        self.assertIsNotNone(PRIVATE_REPORTING_ROUTE_RE.search("security@example.com"))
+        self.assertIsNotNone(PRIVATE_REPORTING_ROUTE_RE.search("mailto:security@example.com"))
+        self.assertIsNone(PRIVATE_REPORTING_ROUTE_RE.search("Use GitHub private vulnerability reporting"))
 
 
 if __name__ == "__main__":
