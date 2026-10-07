@@ -28,6 +28,21 @@ class CommunitySafetyTests(unittest.TestCase):
                 text = (ROOT / relative).read_text(encoding="utf-8")
                 self.assertIn(PUBLIC_WARNING, text)
 
+    def test_contributing_keeps_public_safety_boundary(self):
+        text = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "Do not post secrets, private logs or personal contact information in issues.",
+            text,
+        )
+        self.assertIn(
+            "A dedicated conduct policy and confirmed confidential reporting route remain on the roadmap",
+            text,
+        )
+        self.assertIn(
+            "use GitHub's platform reporting facilities rather than disclosing private details in an issue.",
+            text,
+        )
+
     def test_security_policy_template_stays_an_explicit_scaffold(self):
         path = ROOT / "templates/SECURITY.template.md"
         text = path.read_text(encoding="utf-8")
