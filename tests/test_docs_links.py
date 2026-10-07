@@ -400,9 +400,9 @@ class DocsLinksTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "README.md").write_text(
-                "[Remote](https://[broken)\\n"
-                "[Scheme-relative](//[broken)\\n"
-                "[Local](absent-local.md)\\n",
+                "[Remote](https://[broken)\n"
+                "[Scheme-relative](//[broken)\n"
+                "[Local](absent-local.md)\n",
                 encoding="utf-8",
             )
             result = self.run_checker(root)
