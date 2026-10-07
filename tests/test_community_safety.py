@@ -1,0 +1,49 @@
+"""Structural regressions for BR-COMMUNITY-006 community-safety surfaces."""
+from pathlib import Path
+import re
+import unittest
+
+ROOT = Path(__file__).parents[1]
+PUBLIC_WARNING = (
+    "Do not post secrets, security-vulnerability details, exploit steps, "
+    "or personal data in this public issue."
+)
+
+
+class CommunitySafetyTests(unittest.TestCase):
+    def test_readme_links_the_community_safety_guide(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "[Community safety readiness](guides/community-safety.md)",
+            readme,
+        )
+        self.assertTrue((ROOT / "guides/community-safety.md").is_file())
+
+    def test_public_issue_forms_warn_against_sensitive_reports(self):
+        for relative in (
+            ".github/ISSUE_TEMPLATE/problem.yml",
+            ".github/ISSUE_TEMPLATE/improvement.yml",
+        ):
+            with self.subTest(relative=relative):
+                text = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(PUBLIC_WARNING, text)
+
+    def test_security_policy_template_stays_an_explicit_scaffold(self):
+        path = ROOT / "templates/SECURITY.template.md"
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("Drafting template — not a live reporting policy.", text)
+        self.assertIn("REPLACE_WITH_A_VERIFIED_PRIVATE_REPORTING_ROUTE", text)
+        self.assertIn("STATE_ONLY_BEHAVIOR_THE_PROJECT_CAN_RELIABLY_PROVIDE", text)
+        self.assertIsNone(
+            re.search(r"(?i)mailto:|[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}", text),
+            "template must not invent an email reporting route",
+        )
+        self.assertIn(
+            "[BeautifulRepo's community safety guide](../guides/community-safety.md)",
+            text,
+        )
+        self.assertTrue((path.parent / "../guides/community-safety.md").resolve().is_file())
+
+
+if __name__ == "__main__":
+    unittest.main()
