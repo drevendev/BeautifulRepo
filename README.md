@@ -21,6 +21,9 @@ Fix the first broken step in a new visitor's journey before adding decoration.
 **Starting from scratch?** Adapt the [README scaffold](templates/README.template.md),
 then provide one working example and an honest status statement.
 
+**Building a command-line tool?** Use the [CLI starter kit](guides/cli-repositories.md)
+and its [runnable first-success example](examples/cli-starter/README.md).
+
 **Looking for inspiration?** Explore the [first pattern studies](case-studies/first-patterns.md).
 Each explains what to borrow, how to apply it and what not to copy.
 
@@ -40,6 +43,7 @@ Each explains what to borrow, how to apply it and what not to copy.
 | --- | --- |
 | [Repository checklist](checklists/repository.md) | Prioritize essential information, polish and maintenance |
 | [README design guide](guides/readme.md) | Build a useful front page without turning it into a manual |
+| [CLI repository starter](guides/cli-repositories.md) | Document a working command, expected output, installation boundaries and error behavior |
 | [Visual README patterns](guides/readme-visuals.md) | Make screenshots, diagrams and theme-aware media carry evidence |
 | [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab and Gum |

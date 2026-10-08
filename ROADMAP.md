@@ -3,11 +3,10 @@
 The first edition establishes the reading path and an auditable source catalog.
 Milestones describe outcomes, not promises about dates or assumed volunteer labor.
 
-## Foundation candidate
+## Foundation delivered
 
 README, 24-point checklist, README guide and scaffold, three bounded pattern studies,
-current-program notes, contribution forms, catalog validator and tests. Initial production
-is subject to a later-run review; see [bootstrap issue](https://github.com/drevendev/BeautifulRepo/issues/1).
+current-program notes, contribution forms, catalog validator and tests. Initial work is published; see the [completed bootstrap issue](https://github.com/drevendev/BeautifulRepo/issues/1).
 
 ## Next: make the handbook demonstrably useful
 
@@ -15,7 +14,8 @@ is subject to a later-run review; see [bootstrap issue](https://github.com/dreve
 - Finish the Open Source Guides coverage map, including security, governance, legal
   considerations, sustainability, metrics and finding users; turn each useful finding
   into a concrete guide, template or decision rather than a bookmark.
-- Add project-type starter kits: library, CLI, application, research/data and curated list.
+- Extend the [first CLI starter kit](guides/cli-repositories.md) with additional
+  project-type guides: library, application, research/data and curated list.
 - Evaluate visual patterns: demo capture, diagrams, light/dark assets, badges and release
   notes. Show before/after examples and preserve attribution.
 - Trial documentation and maintenance tools in isolated examples: link checking,
