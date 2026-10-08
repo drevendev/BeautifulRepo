@@ -1,5 +1,16 @@
 # Changelog
 
+## Presentation polish — 2026-10-08
+
+**BR-PRESENTATION-008** redesigns the public README first screen so BeautifulRepo demonstrates
+the repository-quality patterns it teaches: clear identity and outcome, real CI/license/runtime
+badges, compact reader routes, an explicit visitor journey, stronger section hierarchy and a
+self-check proof block. The change deliberately avoids decorative assets or vanity metrics that
+would push useful content below the fold.
+
+A structural regression test keeps the identity, proof, navigation, visitor journey and
+self-check commands from silently disappearing in later edits.
+
 ## BR-COMMUNITY-006 community-readiness candidate — 2026-10-06
 
 Added a source-backed guide for deciding when community policy files are operationally
