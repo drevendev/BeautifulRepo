@@ -32,6 +32,17 @@ class CommunitySafetyTests(unittest.TestCase):
             with self.subTest(relative=relative):
                 text = (ROOT / relative).read_text(encoding="utf-8")
                 self.assertIn(PUBLIC_WARNING, text)
+                # Warn before any user input; a warning in the second field is too late.
+                first_block = text.split("\nbody:\n", 1)[1]
+                self.assertTrue(
+                    first_block.startswith(
+                        "  - type: markdown\n"
+                        "    attributes:\n"
+                        "      value: >-\n"
+                        f"        {PUBLIC_WARNING}\n"
+                    ),
+                    f"{relative}: safety notice must precede the first input",
+                )
 
     def test_contributing_keeps_public_safety_boundary(self):
         text = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")

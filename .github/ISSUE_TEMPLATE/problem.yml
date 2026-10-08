@@ -2,6 +2,10 @@ name: Bug, broken guidance or accessibility barrier
 description: Report a reproducible problem in the handbook or tools.
 title: "[Problem] "
 body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do not post secrets, security-vulnerability details, exploit steps, or personal data in this public issue.
   - type: textarea
     id: location
     attributes:
