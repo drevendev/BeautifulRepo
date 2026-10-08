@@ -430,6 +430,80 @@ class DocsLinksTests(unittest.TestCase):
             self.assertNotIn("Traceback", result.stderr)
 
 
+    def test_inline_html_comments_only_hide_valid_comment_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "Intro <!-- [Hidden](absent-inline.md) --> "
+                "[Visible](absent-visible.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-inline.md", result.stderr)
+            self.assertIn("absent-visible.md", result.stderr)
+
+    def test_inline_multiline_comment_is_not_a_broken_link(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "Intro <!--\n[Hidden](absent-multiline.md)\n"
+                "--> [Visible](absent-after-comment.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-multiline.md", result.stderr)
+            self.assertIn("absent-after-comment.md", result.stderr)
+
+    def test_inline_comments_do_not_cross_blank_or_heading_boundary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "Intro <!--\n[Visible](absent-before-blank.md)\n\n"
+                "--> [After](absent-after-blank.md)\n\n"
+                "Intro <!--\n# Heading\n"
+                "[After heading](absent-after-heading.md)\n-->\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            for name in (
+                "absent-before-blank.md", "absent-after-blank.md",
+                "absent-after-heading.md",
+            ):
+                self.assertIn(name, result.stderr)
+
+    def test_inline_comments_do_not_cross_list_or_quote_boundary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "Intro <!--\n- [Listed](absent-list-boundary.md)\n-->\n\n"
+                "Intro <!--\n> [Quoted](absent-quote-boundary.md)\n-->\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("absent-list-boundary.md", result.stderr)
+            self.assertIn("absent-quote-boundary.md", result.stderr)
+
+    def test_escaped_and_invalid_comment_openers_do_not_hide_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                r"Escaped \<!-- [Visible](absent-escaped.md) -->" + "\n"
+                "Malformed <!--> [Visible](absent-malformed.md) -->\n"
+                "Code `<!--` [Visible](absent-code-span.md) `-->`\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            for name in (
+                "absent-escaped.md", "absent-malformed.md",
+                "absent-code-span.md",
+            ):
+                self.assertIn(name, result.stderr)
+
     def test_html_comments_do_not_create_false_broken_links(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

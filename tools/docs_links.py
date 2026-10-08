@@ -34,6 +34,9 @@ TYPE2_HTML_COMMENT_OPEN_RE = re.compile(r"^ {0,3}<!--")
 TYPE2_HTML_COMMENT_CLOSE_RE = re.compile(r"-->")
 MARKDOWN_WHITESPACE = " \t\r\n"
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
+INLINE_HTML_COMMENT_RE = re.compile(
+    r"<!--(?!>|->)(?:(?!--).)*?-->", re.DOTALL
+)
 CHARACTER_REFERENCE_RE = re.compile(
     r"&(?:#(?P<dec>[0-9]{1,7})|#[xX](?P<hex>[0-9A-Fa-f]{1,6})|(?P<named>[A-Za-z][A-Za-z0-9]*));"
 )
@@ -244,6 +247,62 @@ def _mask_inline_code_spans(text: str) -> str:
                 masked[index] = " "
         position = closing_end
 
+    return "".join(masked)
+
+
+def _mask_inline_html_comments(text: str) -> str:
+    """Mask valid inline HTML comments only inside their Markdown block.
+
+    Prefer reporting a questionable link over suppressing a real one: never mask
+    across paragraph, heading, list, or block-quote boundaries.
+    """
+    masked = list(text)
+    segment_start = 0
+    offset = 0
+    previous_quote_depth = 0
+
+    def mask_segment(start: int, end: int) -> None:
+        for match in INLINE_HTML_COMMENT_RE.finditer(text, start, end):
+            if _is_backslash_escaped(text, match.start()):
+                continue
+            for index in range(match.start(), match.end()):
+                if masked[index] not in "\r\n":
+                    masked[index] = " "
+
+    for raw_line in text.splitlines(keepends=True):
+        line = raw_line.rstrip("\r\n")
+        quote_depth = 0
+        body = line
+        while True:
+            start = _block_quote_content_start(body)
+            if start is None:
+                break
+            quote_depth += 1
+            body = body[start:]
+
+        blank = not body.strip(" \t")
+        indent, index = _leading_indent_columns(body)
+        stripped = body[index:]
+        single_line_block = indent <= 3 and bool(
+            ATX_HEADING_RE.match(stripped)
+            or SETEXT_UNDERLINE_RE.match(stripped)
+            or THEMATIC_BREAK_RE.match(stripped)
+        )
+        starts_new_block = (
+            single_line_block or _list_item_interrupts_paragraph(body)
+        )
+
+        if blank or quote_depth != previous_quote_depth or starts_new_block:
+            mask_segment(segment_start, offset)
+            segment_start = offset + (len(raw_line) if blank else 0)
+
+        offset += len(raw_line)
+        if single_line_block:
+            mask_segment(segment_start, offset)
+            segment_start = offset
+        previous_quote_depth = 0 if blank else quote_depth
+
+    mask_segment(segment_start, len(text))
     return "".join(masked)
 
 
@@ -655,7 +714,7 @@ def _mask_markdown_code(text: str) -> str:
     block_masked = _mask_fenced_and_type1_html_blocks(text)
     indented_masked = _mask_indented_code_blocks(block_masked)
     quote_masked = _mask_block_quote_code_blocks(indented_masked)
-    return _mask_inline_code_blocks(quote_masked)
+    return _mask_inline_html_comments(_mask_inline_code_blocks(quote_masked))
 
 
 def iter_markdown_destinations(path: Path):
