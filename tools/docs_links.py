@@ -30,6 +30,8 @@ TYPE1_HTML_BLOCK_OPEN_RE = re.compile(
 TYPE1_HTML_BLOCK_CLOSE_RE = re.compile(
     r"</(?:script|pre|style)>", re.IGNORECASE
 )
+TYPE2_HTML_COMMENT_OPEN_RE = re.compile(r"^ {0,3}<!--")
+TYPE2_HTML_COMMENT_CLOSE_RE = re.compile(r"-->")
 MARKDOWN_WHITESPACE = " \t\r\n"
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
 CHARACTER_REFERENCE_RE = re.compile(
@@ -583,11 +585,12 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
 
 def _mask_fenced_and_type1_html_blocks(text: str) -> str:
-    """Mask fenced code and GFM type-1 raw HTML in source order."""
+    """Mask fenced code and GFM type-1/type-2 raw HTML in source order."""
     masked = []
     fence_char = None
     fence_length = 0
     in_type1_html = False
+    in_type2_comment = False
 
     for raw_line in text.splitlines(keepends=True):
         if raw_line.endswith("\r\n"):
@@ -613,6 +616,12 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
                 in_type1_html = False
             continue
 
+        if in_type2_comment:
+            masked.append(" " * len(line) + ending)
+            if TYPE2_HTML_COMMENT_CLOSE_RE.search(line):
+                in_type2_comment = False
+            continue
+
         opening = FENCE_RE.match(line)
         if opening:
             marker = opening.group("fence")
@@ -627,6 +636,12 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
             masked.append(" " * len(line) + ending)
             if not TYPE1_HTML_BLOCK_CLOSE_RE.search(line):
                 in_type1_html = True
+            continue
+
+        if TYPE2_HTML_COMMENT_OPEN_RE.match(line):
+            masked.append(" " * len(line) + ending)
+            if not TYPE2_HTML_COMMENT_CLOSE_RE.search(line):
+                in_type2_comment = True
             continue
 
         masked.append(line + ending)

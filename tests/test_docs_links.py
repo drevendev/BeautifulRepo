@@ -430,5 +430,57 @@ class DocsLinksTests(unittest.TestCase):
             self.assertNotIn("Traceback", result.stderr)
 
 
+    def test_html_comments_do_not_create_false_broken_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "<!-- [Single line](absent-single.md) -->\n"
+                "<!--\n"
+                "[Multiline](absent-multiline.md)\n"
+                "\n"
+                "Still a comment: [Hidden](absent-blank.md)\n"
+                "-->\n"
+                "[Visible](absent-visible.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-single.md", result.stderr)
+            self.assertNotIn("absent-multiline.md", result.stderr)
+            self.assertNotIn("absent-blank.md", result.stderr)
+            self.assertIn("absent-visible.md", result.stderr)
+
+    def test_html_comments_inside_quotes_and_lists_are_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "> <!-- [Quoted](absent-quote.md) -->\n"
+                "- <!-- [Listed](absent-list.md) -->\n"
+                "[Visible](absent-visible.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-quote.md", result.stderr)
+            self.assertNotIn("absent-list.md", result.stderr)
+            self.assertIn("absent-visible.md", result.stderr)
+
+    def test_comment_markers_inside_fence_cannot_hide_following_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "```md\n"
+                "<!--\n"
+                "[In code](absent-code.md)\n"
+                "```\n"
+                "[Visible](absent-after-code.md)\n",
+                encoding="utf-8",
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode)
+            self.assertNotIn("absent-code.md", result.stderr)
+            self.assertIn("absent-after-code.md", result.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
