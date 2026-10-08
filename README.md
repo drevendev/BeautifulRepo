@@ -45,6 +45,7 @@ Each explains what to borrow, how to apply it and what not to copy.
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab and Gum |
 | [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
 | [Programs and community events](guides/programs.md) | Separate current program rules from evergreen preparation |
+| [Community safety readiness](guides/community-safety.md) | Publish security and conduct promises only when their reporting and enforcement paths really work |
 | [Roadmap](ROADMAP.md) | See what exists and what comes next |
 
 ## A tool that maintains this collection

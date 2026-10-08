@@ -2,6 +2,10 @@ name: Improvement or resource
 description: Propose an actionable improvement with evidence.
 title: "[Improvement] "
 body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do not post secrets, security-vulnerability details, exploit steps, or personal data in this public issue.
   - type: textarea
     id: problem
     attributes:
@@ -13,7 +17,7 @@ body:
     id: proposal
     attributes:
       label: Proposed change and evidence
-      description: Include the primary source, useful pattern and relevant limitations. Do not share private data.
+      description: Include the primary source, useful pattern and relevant limitations. Do not post secrets, security-vulnerability details, exploit steps, or personal data in this public issue.
     validations:
       required: true
   - type: textarea
