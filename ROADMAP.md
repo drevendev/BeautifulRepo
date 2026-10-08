@@ -16,8 +16,10 @@ is subject to a later-run review; see [bootstrap issue](https://github.com/dreve
   considerations, sustainability, metrics and finding users; turn each useful finding
   into a concrete guide, template or decision rather than a bookmark.
 - Add project-type starter kits: library, CLI, application, research/data and curated list.
-- Evaluate visual patterns: demo capture, diagrams, light/dark assets, badges and release
-  notes. Show before/after examples and preserve attribution.
+- Evaluate visual patterns: demo capture, diagrams, light/dark assets and badges.
+  Show before/after examples and preserve attribution.
+- Extend the [release-note writing kit](guides/release-notes.md) with a verified
+  non-fictional migration story after the project has real released versions.
 - Trial documentation and maintenance tools in isolated examples: link checking,
   Markdown linting, static docs, diagram validation, Devostasis and Hungry Crab.
 - Establish a practical conduct policy and verified confidential/security reporting
