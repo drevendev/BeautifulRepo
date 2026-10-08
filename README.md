@@ -57,6 +57,7 @@ From a checkout, with **Python 3.11 or newer**:
 
 ```bash
 python tools/catalog.py
+python tools/docs_links.py
 python -m unittest discover -s tests -v
 ```
 
@@ -64,6 +65,10 @@ A successful catalog check prints `OK: 11 resources; generated catalog is curren
 for this first edition and exits with code zero. The count changes as the catalog grows.
 Failures name the entry and field that need attention. Time-sensitive records can emit
 freshness warnings even when their structure is valid.
+
+`python tools/docs_links.py` separately checks that repository-owned relative Markdown links
+and image paths resolve to existing files or directories without network access. External URLs
+and section fragments are intentionally out of scope; see [tool documentation](tools/README.md).
 
 This is **not** a live-link checker, security scanner, accessibility certification or
 repository beauty score. See [tool documentation](tools/README.md).
