@@ -35,7 +35,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         total = count_records(args.csv_file)
-    except (OSError, UnicodeError, csv.Error, ValueError) as exc:
+    except OSError as exc:
+        # OSError may contain the full local input path.
+        reason = exc.strerror or "file access failed"
+        print(f"rowcount: cannot read CSV: {reason}", file=sys.stderr)
+        return 1
+    except (UnicodeError, csv.Error, ValueError) as exc:
         print(f"rowcount: {exc}", file=sys.stderr)
         return 1
     print(f"Data rows: {total}")
