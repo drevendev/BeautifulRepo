@@ -56,6 +56,12 @@ class ReleaseNotesTests(unittest.TestCase):
         self.assertNotIn("all tests passed", lower)
         self.assertNotIn("100% compatible", lower)
 
+    def test_reader_navigation_contains_release_note_routes(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("(guides/release-notes.md)", readme)
+        self.assertIn("(templates/RELEASE_NOTES.template.md)", readme)
+
+
 
 if __name__ == "__main__":
     unittest.main()
