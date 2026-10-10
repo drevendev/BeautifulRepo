@@ -1,5 +1,13 @@
 # Changelog
 
+## CLI documentation starter — 2026-10-09
+
+**BR-CLI-007** adds a source-backed guide for CLI repository READMEs and a runnable,
+dependency-free CSV row-counting example with black-box tests. The documentation
+distinguishes a source invocation from an installable/released package and links
+to current official GitHub and Python Packaging guidance. The guide and example
+are educational material, not a published CLI package or cross-platform certification.
+
 ## Presentation polish — 2026-10-08
 
 **BR-PRESENTATION-008** redesigns the public README first screen so BeautifulRepo demonstrates
