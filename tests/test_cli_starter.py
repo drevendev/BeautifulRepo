@@ -44,6 +44,15 @@ class CLIStarterTests(unittest.TestCase):
         self.assertIn("rowcount:", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
 
+    def test_missing_file_error_does_not_expose_absolute_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "private-location" / "missing.csv"
+            result = self.run_cli(str(path))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("cannot read CSV", result.stderr)
+        self.assertNotIn(str(path), result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
     def test_invalid_utf8_is_a_data_error(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "invalid.csv"
