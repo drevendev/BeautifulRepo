@@ -8,14 +8,20 @@ Milestones describe outcomes, not promises about dates or assumed volunteer labo
 README, 24-point checklist, README guide and scaffold, three bounded pattern studies,
 current-program notes, contribution forms, catalog validator and tests. Initial work is published; see the [completed bootstrap issue](https://github.com/drevendev/BeautifulRepo/issues/1).
 
+## Project-type examples
+
+- [CLI starter](guides/cli-repositories.md) with an executable [example](examples/cli-starter/README.md).
+- [Library starter](guides/library-repositories.md) with a runnable [checkout-only example](examples/library-starter/README.md)
+  and [README template](templates/LIBRARY_README.template.md); no package is published.
+
 ## Next: make the handbook demonstrably useful
 
 - Review and repair the foundation; reconcile actual CI and merge evidence.
 - Finish the Open Source Guides coverage map, including security, governance, legal
   considerations, sustainability, metrics and finding users; turn each useful finding
   into a concrete guide, template or decision rather than a bookmark.
-- Extend the [first CLI starter kit](guides/cli-repositories.md) with additional
-  project-type guides: library, application, research/data and curated list.
+- Extend the CLI and library starter kits with project-type guides for applications,
+  research/data projects and curated lists.
 - Evaluate visual patterns: demo capture, diagrams, light/dark assets, badges and release
   notes. Show before/after examples and preserve attribution.
 - Trial documentation and maintenance tools in isolated examples: link checking,
