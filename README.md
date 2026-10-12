@@ -54,11 +54,12 @@ That sequence is the core BeautifulRepo test. Decoration is optional; a clear pa
 
 ## What you get
 
-| | |
-| --- | --- |
-| **📋 Checklists** — prioritize clarity, onboarding, trust, accessibility and maintenance. | **🧱 Patterns** — source-backed examples of what strong repositories do and why it works. |
-| **🧰 Templates** — reusable README and security-policy scaffolds with explicit placeholders. | **🔎 Tools** — small dependency-free checks that keep repository documentation honest. |
-| **🖼️ Visual guidance** — theme-aware media, useful alt text and evidence-first screenshots. | **🧭 Community guidance** — contribution and reporting surfaces that do not invent unsupported promises. |
+- **📋 Checklists** — prioritize clarity, onboarding, trust, accessibility and maintenance.
+- **🧱 Patterns** — source-backed examples of what strong repositories do and why it works.
+- **🧰 Templates** — reusable README and security-policy scaffolds with explicit placeholders.
+- **🔎 Tools** — small dependency-free checks that keep repository documentation honest.
+- **🖼️ Visual guidance** — theme-aware media, useful alt text and evidence-first screenshots.
+- **🧭 Community guidance** — contribution and reporting surfaces that do not invent unsupported promises.
 
 ## See the difference
 
