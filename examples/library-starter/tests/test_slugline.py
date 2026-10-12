@@ -15,7 +15,7 @@ class SluglineTests(unittest.TestCase):
         self.assertEqual(slugline("  One---Two__3  "), "one-two-3")
 
     def test_invalid_input(self):
-        for invalid in ("", "!!!", "cafÃ©"):
+        for invalid in ("", "!!!", "café"):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 slugline(invalid)
         with self.assertRaises(TypeError):
