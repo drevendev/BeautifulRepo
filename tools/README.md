@@ -1,4 +1,4 @@
-# Offline catalog tool
+# Offline repository tools
 
 `catalog.py` uses Python 3.11+ and the standard library. From the repository root:
 
@@ -52,3 +52,27 @@ Reference-style Markdown links and raw HTML links are not parsed in this first b
 GitHub recommends relative links for repository-owned files because they follow the branch a
 reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
 <https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#relative-links>.
+
+## Repository entry-point audit
+
+`repo_audit.py` inspects a local repository's selected README, license and contribution
+documents without network requests, project execution or modifications. Findings carry
+relative paths, source lines where applicable, explanations and suggested next steps.
+
+```bash
+python tools/repo_audit.py .
+python tools/repo_audit.py ../your-repository --format json
+python tools/repo_audit.py ../your-repository --fail-on warning
+python examples/repository-audit/demo.py
+```
+
+The default failure threshold is errors only; warnings and informational findings remain
+visible. Missing dedicated contribution guidance and empty image alternatives are not
+unconditional failures. Exit 0 means the configured threshold was not reached, not that
+all quality or accessibility questions were answered.
+
+Read the [complete contract and limitations](../guides/repository-audit.md) and the
+[tested before/after walkthrough](../examples/repository-audit/README.md). This bounded
+source inspection is not a complete GitHub community-profile check, license classifier,
+screen-reader audit or beauty score. Its tests join the existing default unittest suite;
+no new required repository-protection rule is introduced.
