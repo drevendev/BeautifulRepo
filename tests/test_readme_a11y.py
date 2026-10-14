@@ -27,6 +27,22 @@ class FeatureOverviewAccessibilityTests(unittest.TestCase):
                 self.assertTrue(item.startswith(f"- **{label}** — "), item)
                 self.assertGreater(len(item), len(label) + 8)
 
+    def test_mermaid_has_full_ordered_text_alternative(self):
+        text = README.read_text(encoding="utf-8")
+        journey = text.split("## The visitor journey\n", 1)[1].split(
+            "\n## What you get", 1
+        )[0]
+        self.assertIn("**Text alternative:**", journey)
+        equivalent = " ".join(
+            journey.split("**Text alternative:**", 1)[1].split()
+        )
+        self.assertIn(
+            "Promise (what is this?) → Evidence (what do I get?) → "
+            "First success (can I try it?) → Trust (can I rely on it?) → "
+            "Contribute (how can I help?)",
+            equivalent,
+        )
+
     def test_feature_overview_is_not_a_presentation_table(self):
         self.assertFalse(any(line.lstrip().startswith("|")
                              for line in self.section.splitlines()))
