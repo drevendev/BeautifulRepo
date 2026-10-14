@@ -50,6 +50,10 @@ flowchart LR
     D --> E["5 · Contribute<br/>How can I help?"]
 ```
 
+**Text alternative:** Promise (what is this?) → Evidence (what do I get?) →
+First success (can I try it?) → Trust (can I rely on it?) →
+Contribute (how can I help?). Follow the stages in that order.
+
 That sequence is the core BeautifulRepo test. Decoration is optional; a clear path is not.
 
 ## What you get
