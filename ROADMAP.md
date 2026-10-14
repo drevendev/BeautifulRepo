@@ -1,43 +1,55 @@
 # Roadmap
 
-The first edition establishes the reading path and an auditable source catalog.
-Milestones describe outcomes, not promises about dates or assumed volunteer labor.
+BeautifulRepo is a working handbook, not a promise of future releases.
+Milestones describe useful outcomes rather than dates or assumed volunteer labor.
 
-## Foundation delivered
+## Available in this repository
 
-README, 24-point checklist, README guide and scaffold, three bounded pattern studies,
-current-program notes, contribution forms, catalog validator and tests. Initial work is published; see the [completed bootstrap issue](https://github.com/drevendev/BeautifulRepo/issues/1).
+- Reader-first [README](README.md), [repository checklist](checklists/repository.md),
+  [README guide](guides/readme.md) and [README scaffold](templates/README.template.md).
+- [Visual README patterns](guides/readme-visuals.md), including a before/after example
+  with theme-aware assets and text equivalents.
+- [Offline catalog validation](tools/README.md) and repository-owned Markdown
+  destination checks, both exercised by CI.
+- [Community safety readiness](guides/community-safety.md) guidance and an explicitly
+  non-live security-policy scaffold, without fictitious confidential reporting routes.
+- [Tested CLI repository starter](guides/cli-repositories.md), including an executable
+  [sample command](examples/cli-starter/README.md) and black-box tests.
+- [Library repository starter](guides/library-repositories.md) with a runnable
+  [checkout-only example](examples/library-starter/README.md) and
+  [README template](templates/LIBRARY_README.template.md); no package is published.
+- [Release-note writing guide](guides/release-notes.md) and
+  [editable draft template](templates/RELEASE_NOTES.template.md), distinguishing
+  tags, GitHub Releases and maintained changelogs without implying a release.
+- [Annotated pattern studies](case-studies/first-patterns.md) and a
+  [curated source catalog](catalog/README.md).
 
-## Project-type examples
+These linked resources are repository source files, not evidence that
+BeautifulRepo has published a packaged software release.
 
-- [CLI starter](guides/cli-repositories.md) with an executable [example](examples/cli-starter/README.md).
-- [Library starter](guides/library-repositories.md) with a runnable [checkout-only example](examples/library-starter/README.md)
-  and [README template](templates/LIBRARY_README.template.md); no package is published.
+## Next: practical reference examples
 
-## Next: make the handbook demonstrably useful
+- Turn useful Open Source Guides material on governance, legal considerations,
+  sustainability, metrics and finding users into bounded practical examples
+  rather than an unannotated link collection.
+- Expand project-type starter kits for applications, research/data projects
+  and curated collections; build on the tested CLI and library examples.
+- Evaluate lightweight maintenance tools and recipes where they improve the reader
+  experience, with real examples and explicit limitations.
+- Extend release-note advice with a verified, non-fictional migration story after
+  a real release exists. Never manufacture releases or acceptance evidence.
+- Publish a concrete conduct policy and security reporting channel only when
+  maintainers can operationally support them.
 
-- Review and repair the foundation; reconcile actual CI and merge evidence.
-- Finish the Open Source Guides coverage map, including security, governance, legal
-  considerations, sustainability, metrics and finding users; turn each useful finding
-  into a concrete guide, template or decision rather than a bookmark.
-- Extend the CLI and library starter kits with project-type guides for applications,
-  research/data projects and curated lists.
-- Evaluate visual patterns: demo capture, diagrams, light/dark assets, badges and release
-  notes. Show before/after examples and preserve attribution.
-- Trial documentation and maintenance tools in isolated examples: link checking,
-  Markdown linting, static docs, diagram validation, Devostasis and Hungry Crab.
-- Establish a practical conduct policy and verified confidential/security reporting
-  routes before claiming a complete community profile.
+## Later: evidence-backed tools
 
-## Later: usable reference library
+Explore a local repository audit that explains findings without a vanity score,
+cross-ecosystem case studies, optional searchable documentation when justified,
+and contribution preparation kits. Spending, domains, releases, applications and
+external promotion require separate owner authority.
 
-Add tested recipes, a local repository audit with evidence rather than a vanity score,
-external case studies across ecosystems, a searchable documentation site when justified,
-and contribution/mentorship preparation kits. Funding, domains, event applications and
-external promotion require separate owner approval.
+## Maintenance
 
-## Maintenance loop
-
-Keep verified examples working, distinguish stale sources from current advice, review
-incoming contributions, retire redundant material and improve this repository using its
-own recommendations. Progress is accepted useful work, not file, issue, link or star count.
+Keep verified examples working, recheck time-sensitive sources, review
+contributions, retire redundant material and improve BeautifulRepo by applying
+its own guidance. Progress means integrated useful work—not file, link or star counts.

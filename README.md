@@ -34,6 +34,7 @@
 | starting a repository from scratch | [README scaffold](templates/README.template.md) | Get a useful structure without filler |
 | polishing the first screen | [Visual README patterns](guides/readme-visuals.md) | Use screenshots, diagrams, badges and theme-aware media as evidence |
 | preparing community surfaces | [Community safety readiness](guides/community-safety.md) | Publish only promises your project can actually operate |
+| writing upgrade announcements | [Release-note writing guide](guides/release-notes.md) and [editable template](templates/RELEASE_NOTES.template.md) | Explain impact, upgrade steps and verified evidence without inventing a release |
 | looking for proven references | [Annotated pattern studies](case-studies/first-patterns.md) | Borrow patterns without copying branding or protected expression |
 | documenting a CLI | [CLI starter guide](guides/cli-repositories.md) and [working example](examples/cli-starter/README.md) | Show a command, expected output and honest install boundaries |
 | documenting a library | [Library repository guide](guides/library-repositories.md) and [checkout-only example](examples/library-starter/README.md) | Demonstrate the public API without claiming an unpublished package |
@@ -51,15 +52,20 @@ flowchart LR
     D --> E["5 · Contribute<br/>How can I help?"]
 ```
 
+**Text alternative:** Promise (what is this?) → Evidence (what do I get?) →
+First success (can I try it?) → Trust (can I rely on it?) →
+Contribute (how can I help?). Follow the stages in that order.
+
 That sequence is the core BeautifulRepo test. Decoration is optional; a clear path is not.
 
 ## What you get
 
-| | |
-| --- | --- |
-| **📋 Checklists** — prioritize clarity, onboarding, trust, accessibility and maintenance. | **🧱 Patterns** — source-backed examples of what strong repositories do and why it works. |
-| **🧰 Templates** — reusable README and security-policy scaffolds with explicit placeholders. | **🔎 Tools** — small dependency-free checks that keep repository documentation honest. |
-| **🖼️ Visual guidance** — theme-aware media, useful alt text and evidence-first screenshots. | **🧭 Community guidance** — contribution and reporting surfaces that do not invent unsupported promises. |
+- **📋 Checklists** — prioritize clarity, onboarding, trust, accessibility and maintenance.
+- **🧱 Patterns** — source-backed examples of what strong repositories do and why it works.
+- **🧰 Templates** — reusable README and security-policy scaffolds with explicit placeholders.
+- **🔎 Tools** — small dependency-free checks that keep repository documentation honest.
+- **🖼️ Visual guidance** — theme-aware media, useful alt text and evidence-first screenshots.
+- **🧭 Community guidance** — contribution and reporting surfaces that do not invent unsupported promises.
 
 ## See the difference
 
@@ -96,6 +102,7 @@ They do **not** claim to be a live-link crawler, security scanner, runtime acces
 | [Visual README patterns](guides/readme-visuals.md) | Make screenshots, diagrams and theme-aware media carry evidence |
 | [CLI repository starter](guides/cli-repositories.md) | Document commands, predictable outputs, error cases and installation claims with a tested example |
 | [Library repository starter](guides/library-repositories.md) | Show a working import and explicit checkout-only distribution boundaries using the [library README template](templates/LIBRARY_README.template.md) |
+| [Release-note writing guide](guides/release-notes.md) | Explain user impact, upgrade steps and verification; adapt the [release-note template](templates/RELEASE_NOTES.template.md) |
 | [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab, Gum and other inspected repositories |
 | [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
