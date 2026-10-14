@@ -34,6 +34,7 @@
 | starting a repository from scratch | [README scaffold](templates/README.template.md) | Get a useful structure without filler |
 | polishing the first screen | [Visual README patterns](guides/readme-visuals.md) | Use screenshots, diagrams, badges and theme-aware media as evidence |
 | preparing community surfaces | [Community safety readiness](guides/community-safety.md) | Publish only promises your project can actually operate |
+| writing upgrade announcements | [Release-note writing guide](guides/release-notes.md) and [editable template](templates/RELEASE_NOTES.template.md) | Explain impact, upgrade steps and verified evidence without inventing a release |
 | looking for proven references | [Annotated pattern studies](case-studies/first-patterns.md) | Borrow patterns without copying branding or protected expression |
 | documenting a CLI | [CLI starter guide](guides/cli-repositories.md) and [working example](examples/cli-starter/README.md) | Show a command, expected output and honest install boundaries |
 | automating quality checks | [Repository tools](tools/README.md) | Validate the catalog and repository-owned Markdown paths offline |
@@ -94,6 +95,7 @@ They do **not** claim to be a live-link crawler, security scanner, runtime acces
 | [README design guide](guides/readme.md) | Build a useful front page without turning it into a manual |
 | [Visual README patterns](guides/readme-visuals.md) | Make screenshots, diagrams and theme-aware media carry evidence |
 | [CLI repository starter](guides/cli-repositories.md) | Document commands, predictable outputs, error cases and installation claims with a tested example |
+| [Release-note writing guide](guides/release-notes.md) | Explain user impact, upgrade steps and verification; adapt the [release-note template](templates/RELEASE_NOTES.template.md) |
 | [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab, Gum and other inspected repositories |
 | [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
