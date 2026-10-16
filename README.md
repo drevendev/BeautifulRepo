@@ -38,7 +38,8 @@
 | looking for proven references | [Annotated pattern studies](case-studies/first-patterns.md) | Borrow patterns without copying branding or protected expression |
 | documenting a CLI | [CLI starter guide](guides/cli-repositories.md) and [working example](examples/cli-starter/README.md) | Show a command, expected output and honest install boundaries |
 | documenting a library | [Library repository guide](guides/library-repositories.md) and [checkout-only example](examples/library-starter/README.md) | Demonstrate the public API without claiming an unpublished package |
-| automating quality checks | [Repository tools](tools/README.md) | Validate the catalog and repository-owned Markdown paths offline |
+| documenting research or data | [Research/data guide](guides/research-data-repositories.md) and [synthetic example](examples/research-data-starter/README.md) | Reproduce one result with explicit input provenance and reuse limits |
+| automating quality checks | [Repository tools](tools/README.md) | Check metadata, local links and reader-facing entry points offline |
 
 ## The visitor journey
 
@@ -102,6 +103,8 @@ They do **not** claim to be a live-link crawler, security scanner, runtime acces
 | [Visual README patterns](guides/readme-visuals.md) | Make screenshots, diagrams and theme-aware media carry evidence |
 | [CLI repository starter](guides/cli-repositories.md) | Document commands, predictable outputs, error cases and installation claims with a tested example |
 | [Library repository starter](guides/library-repositories.md) | Show a working import and explicit checkout-only distribution boundaries using the [library README template](templates/LIBRARY_README.template.md) |
+| [Research/data repository starter](guides/research-data-repositories.md) | Reproduce a synthetic CSV analysis and adapt the [research/data README template](templates/RESEARCH_DATA_README.template.md) without inventing data access or citation claims |
+| [Offline repository audit](guides/repository-audit.md) | Find specific entry-point problems with explanations, not a beauty score |
 | [Release-note writing guide](guides/release-notes.md) | Explain user impact, upgrade steps and verification; adapt the [release-note template](templates/RELEASE_NOTES.template.md) |
 | [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab, Gum and other inspected repositories |
