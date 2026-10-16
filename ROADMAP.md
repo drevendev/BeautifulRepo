@@ -18,6 +18,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Library repository starter](guides/library-repositories.md) with a runnable
   [checkout-only example](examples/library-starter/README.md) and
   [README template](templates/LIBRARY_README.template.md); no package is published.
+- [Application repository starter](guides/application-repositories.md), with the
+  [read-only Pocket Board demo](examples/application-starter/README.md), local HTTP
+  integration tests and honest development-server boundaries.
 - [Release-note writing guide](guides/release-notes.md) and
   [editable draft template](templates/RELEASE_NOTES.template.md), distinguishing
   tags, GitHub Releases and maintained changelogs without implying a release.
@@ -32,8 +35,8 @@ BeautifulRepo has published a packaged software release.
 - Turn useful Open Source Guides material on governance, legal considerations,
   sustainability, metrics and finding users into bounded practical examples
   rather than an unannotated link collection.
-- Expand project-type starter kits for applications, research/data projects
-  and curated collections; build on the tested CLI and library examples.
+- Expand project-type starter kits for research/data projects and curated
+  collections; build on the tested CLI, library and local application examples.
 - Evaluate lightweight maintenance tools and recipes where they improve the reader
   experience, with real examples and explicit limitations.
 - Extend release-note advice with a verified, non-fictional migration story after
