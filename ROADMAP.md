@@ -15,6 +15,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   non-live security-policy scaffold, without fictitious confidential reporting routes.
 - [Tested CLI repository starter](guides/cli-repositories.md), including an executable
   [sample command](examples/cli-starter/README.md) and black-box tests.
+- [Library repository starter](guides/library-repositories.md) with a runnable
+  [checkout-only example](examples/library-starter/README.md) and
+  [README template](templates/LIBRARY_README.template.md); no package is published.
 - [Release-note writing guide](guides/release-notes.md) and
   [editable draft template](templates/RELEASE_NOTES.template.md), distinguishing
   tags, GitHub Releases and maintained changelogs without implying a release.
@@ -29,8 +32,8 @@ BeautifulRepo has published a packaged software release.
 - Turn useful Open Source Guides material on governance, legal considerations,
   sustainability, metrics and finding users into bounded practical examples
   rather than an unannotated link collection.
-- Expand project-type starter kits for libraries, applications, research/data
-  projects and curated collections; build on the tested CLI example.
+- Expand project-type starter kits for applications, research/data projects
+  and curated collections; build on the tested CLI and library examples.
 - Evaluate lightweight maintenance tools and recipes where they improve the reader
   experience, with real examples and explicit limitations.
 - Extend release-note advice with a verified, non-fictional migration story after
