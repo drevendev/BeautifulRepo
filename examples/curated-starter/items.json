@@ -1,0 +1,36 @@
+{
+  "title": "Repository stewardship references",
+  "scope": "Three official resources with concrete uses, limitations and dated checks; deliberately not an exhaustive best-of list.",
+  "entries": [
+    {
+      "id": "github-community-profile",
+      "title": "GitHub community profiles",
+      "url": "https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/about-community-profiles-for-public-repositories",
+      "category": "community",
+      "why": "Shows how repository health files become visible to contributors.",
+      "use_when": "You need to make licensing, contribution rules and conduct guidance discoverable.",
+      "limitation": "Checklist completeness does not prove moderation capacity or repository quality.",
+      "verified_on": "2026-10-17"
+    },
+    {
+      "id": "opensource-maintenance",
+      "title": "Open Source Guides: maintainer practices",
+      "url": "https://opensource.guide/best-practices/",
+      "category": "maintenance",
+      "why": "Offers practical reasons to automate regressions and document contribution workflows.",
+      "use_when": "You are reducing repeated review work and explaining how contributors run tests.",
+      "limitation": "Examples are guidance, not a replacement for project-specific risk assessment.",
+      "verified_on": "2026-10-17"
+    },
+    {
+      "id": "awesome-manifesto",
+      "title": "Awesome list manifesto",
+      "url": "https://github.com/sindresorhus/awesome/blob/main/awesome.md",
+      "category": "curation",
+      "why": "Argues for selective inclusion, informative descriptions and transparent contribution criteria.",
+      "use_when": "You are deciding whether a resource belongs in a small expert-curated collection.",
+      "limitation": "Its badge and submission rules belong to that project; following them does not confer endorsement.",
+      "verified_on": "2026-10-17"
+    }
+  ]
+}

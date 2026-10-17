@@ -23,6 +23,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   tags, GitHub Releases and maintained changelogs without implying a release.
 - [Annotated pattern studies](case-studies/first-patterns.md) and a
   [curated source catalog](catalog/README.md).
+- [Curated collection starter](guides/curated-collections.md) with a
+  [tested, source-backed example](examples/curated-starter/README.md),
+  deterministic offline checks and honest source-review dates.
 
 These linked resources are repository source files, not evidence that
 BeautifulRepo has published a packaged software release.
