@@ -119,6 +119,23 @@ class ApplicationStarterTests(unittest.TestCase):
             with patch.object(board, "STYLE", missing):
                 self.assertEqual(invoke(path="/health")[0], "503 Service Unavailable")
 
+    def test_readiness_rejects_unicode_surrogate_fixture(self):
+        # JSON can contain escaped lone surrogates even though UTF-8 HTML cannot.
+        # A 200 readiness response when the main page returns 500 is misleading.
+        with tempfile.TemporaryDirectory() as directory:
+            sample = Path(directory) / "invalid-tasks.json"
+            sample.write_text(
+                '[{"id":"bad","title":"\\ud800","status":"open","effort":1}]',
+                encoding="utf-8",
+            )
+            with patch.object(board, "FIXTURE", sample):
+                home_status, _, home_body = invoke()
+                health_status, _, health_body = invoke(path="/health")
+        self.assertEqual(home_status, "500 Internal Server Error")
+        self.assertEqual(home_body, "Sample unavailable\n")
+        self.assertEqual(health_status, "503 Service Unavailable")
+        self.assertEqual(health_body, "Sample unavailable\n")
+
     def test_labels_semantics_and_no_script(self):
         html = invoke()[2]
         parser = DocumentParser()

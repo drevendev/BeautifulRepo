@@ -30,7 +30,11 @@ def validate_tasks(raw: object) -> list[dict[str, object]]:
             raise ValueError("Invalid or duplicate task id")
         if not isinstance(title, str) or not 1 <= len(title) <= 80 or title != title.strip():
             raise ValueError("Invalid task title")
-        if any(ord(c) < 32 or ord(c) == 127 for c in title):
+        if any(ord(c) < 32 or ord(c) == 127 or 0xD800 <= ord(c) <= 0xDFFF
+               for c in title):
+            # JSON permits escaped lone surrogates, but UTF-8 HTML does not.
+            # Reject the record during validation so /health never reports a
+            # ready application when its main page cannot be encoded.
             raise ValueError("Invalid task title")
         if not isinstance(state, str) or state not in VALID_STATES:
             raise ValueError("Invalid task state")
