@@ -1,4 +1,5 @@
 """CI integration for the checkout-only library starter and its documented API."""
+import re
 import subprocess
 import sys
 import unittest
@@ -6,6 +7,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples" / "library-starter"
+
+
+def assert_nested_suite_passed(
+    test_case: unittest.TestCase, completed: subprocess.CompletedProcess[str],
+) -> None:
+    """Require successful, nonempty discovery without freezing the suite size."""
+    test_case.assertEqual(completed.returncode, 0, completed.stderr)
+    summary = re.search(r"^Ran ([0-9]+) tests? in ", completed.stderr, re.MULTILINE)
+    test_case.assertIsNotNone(summary, "Missing unittest execution summary")
+    if summary is not None:
+        test_case.assertGreater(int(summary.group(1)), 0, "No nested tests were discovered")
+    test_case.assertIn("OK", completed.stderr)
 
 
 class LibraryStarterIntegrationTests(unittest.TestCase):
@@ -49,9 +62,7 @@ class LibraryStarterIntegrationTests(unittest.TestCase):
             check=False,
             timeout=20,
         )
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("Ran 3 tests", completed.stderr)
-        self.assertIn("OK", completed.stderr)
+        assert_nested_suite_passed(self, completed)
 
     def test_library_routes_and_roadmap_are_discoverable(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
