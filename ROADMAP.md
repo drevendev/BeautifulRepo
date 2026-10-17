@@ -21,6 +21,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Library repository starter](guides/library-repositories.md) with a runnable
   [checkout-only example](examples/library-starter/README.md) and
   [README template](templates/LIBRARY_README.template.md); no package is published.
+- [Application repository starter](guides/application-repositories.md), with the
+  [read-only Pocket Board demo](examples/application-starter/README.md), local HTTP
+  integration tests and honest development-server boundaries.
 - [Research/data repository starter](guides/research-data-repositories.md), including
   a [synthetic CSV analysis](examples/research-data-starter/README.md), fixture integrity
   checks and a [README template](templates/RESEARCH_DATA_README.template.md).
@@ -29,6 +32,11 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   tags, GitHub Releases and maintained changelogs without implying a release.
 - [Annotated pattern studies](case-studies/first-patterns.md) and a
   [curated source catalog](catalog/README.md).
+- [Curated collection starter](guides/curated-collections.md), with
+  [three annotated references](examples/curated-starter/README.md), deterministic
+  Markdown/JSON output and explicit input boundaries.
+- [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md),
+  [maintenance workflow](guides/maintenance-workflow.md) and application/collection README templates.
 
 These linked resources are repository source files, not evidence that
 BeautifulRepo has published a packaged software release.
@@ -38,8 +46,8 @@ BeautifulRepo has published a packaged software release.
 - Turn useful Open Source Guides material on governance, legal considerations,
   sustainability, metrics and finding users into bounded practical examples
   rather than an unannotated link collection.
-- Expand project-type starter kits for applications and curated collections;
-  build on the tested CLI, library and synthetic research/data examples.
+- Extend the five working starter types with concrete adaptation stories and
+  observed reader problems rather than another empty scaffold.
 - Evaluate lightweight maintenance tools and recipes where they improve the reader
   experience, with real examples and explicit limitations.
 - Extend release-note advice with a verified, non-fictional migration story after

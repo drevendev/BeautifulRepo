@@ -1,100 +1,80 @@
 # Changelog
 
-## CLI documentation starter — 2026-10-09
+This log describes handbook and source changes, not packaged releases or version tags.
+Dates identify work on the repository; the linked pull requests retain integration history.
 
-**BR-CLI-007** adds a source-backed guide for CLI repository READMEs and a runnable,
-dependency-free CSV row-counting example with black-box tests. The documentation
-distinguishes a source invocation from an installable/released package and links
-to current official GitHub and Python Packaging guidance. The guide and example
-are educational material, not a published CLI package or cross-platform certification.
+## Unreleased — working repository workshop
 
-## Presentation polish — 2026-10-08
+### Added
 
-**BR-PRESENTATION-008** redesigns the public README first screen so BeautifulRepo demonstrates
-the repository-quality patterns it teaches: clear identity and outcome, real CI/license/runtime
-badges, compact reader routes, an explicit visitor journey, stronger section hierarchy and a
-self-check proof block. The change deliberately avoids decorative assets or vanity metrics that
-would push useful content below the fold.
+- [Pocket Board application starter](examples/application-starter/README.md): a read-only,
+  standard-library web example with a native status filter, light/dark styles, fictional
+  data, controlled error responses and loopback HTTP regression tests.
+- [Curated collection starter](examples/curated-starter/README.md): three annotated primary
+  sources, deterministic Markdown/JSON reports, input validation and optional stale-review
+  detection. It checks metadata, not live destination availability.
+- [Application README template](templates/APPLICATION_README.template.md) and
+  [collection README template](templates/CURATED_README.template.md).
+- [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md)
+  and [reproducible maintenance workflow](guides/maintenance-workflow.md).
 
-A structural regression test keeps the identity, proof, navigation, visitor journey and
-self-check commands from silently disappearing in later edits.
+### Corrected
 
-## BR-COMMUNITY-006 community-readiness candidate — 2026-10-06
+- Collection parsing rejects repeated JSON keys, including nested and escaped spellings,
+  before a decoder can silently overwrite metadata. Invalid UTF-8, excessive nesting and
+  input beyond the documented 1 MiB limit produce a controlled error.
+- Collection URL validation rejects unpaired Unicode surrogates, malformed percent escapes,
+  invalid DNS labels and unsupported authority syntax instead of producing a traceback or
+  accepting malformed output. This is deliberately a bounded syntax check, not a safety verdict.
+- Application readiness detects missing or invalid data and unavailable styles. Invalid
+  Unicode task titles are rejected; local filesystem paths are not returned in errors.
+- Application testing instructions now disclose the temporary loopback listener. README
+  and roadmap routes preserve all five starter types rather than replacing earlier additions.
 
-Added a source-backed guide for deciding when community policy files are operationally
-ready, plus a reusable drafting scaffold with explicit placeholders instead of invented
-project-specific promises. The source review was refreshed on 2026-10-07 against current
-GitHub documentation and the relevant Open Source Guides material. The guide explicitly
-separates `SECURITY.md`, GitHub Private Vulnerability Reporting and repository security
-advisories; public issue forms warn against vulnerability/exploit details, and the handbook
-links readers directly to this guidance.
+## Research/data and test discovery — 2026-10-17
 
-BeautifulRepo does not claim that the scaffold is a live repository policy or that all
-community-profile processes are complete. This is production evidence; provider CI and
-later-run acceptance remain separate gates.
+[Research/data starter (#13)](https://github.com/drevendev/BeautifulRepo/pull/13) adds a fully
+fabricated CSV, deterministic analysis, fixture digest, README template, provenance/citation
+advice and mandatory navigation tests. The example makes no scientific or data-rights claim.
 
-## Documentation-link checker candidate — 2026-10-04
+[Library test discovery (#14)](https://github.com/drevendev/BeautifulRepo/pull/14) replaces a
+fixed nested test count with successful nonempty discovery. Real temporary suites cover
+legitimate growth, zero tests, test failures, import errors and missing execution summaries.
 
-**BR-LINKS-005** adds a dependency-free offline checker for repository-owned inline Markdown
-link and image destinations, wires it into CI and contributor instructions, and adds behavioral
-tests for valid paths, missing targets, repository-root escapes, external links and code examples.
-Review repair: fenced-code parsing now keeps the opening marker length and ignores shorter inner
-fences until an equal-or-longer closing fence of the same marker type appears.
-Review repair: inline destinations now preserve balanced and backslash-escaped parentheses,
-including nested pairs, instead of truncating at the first closing parenthesis.
-Review repair: inline link-text scanning now accepts balanced and backslash-escaped brackets,
-so valid nested labels and image alt text are not silently skipped.
-Review repair: valid semicolon-terminated GFM character references in destinations are decoded
-before URL classification and path resolution; invalid named references remain literal text.
-Review repair: inline links are scanned across non-blank lines, so GFM titles that span line
-endings still validate their repository-owned destination while blank-line crossings stay invalid.
-Review repair: inline-code masking now follows equal-length GFM backtick strings across line
-endings while leaving escaped or unmatched delimiters literal, preventing links inside code spans
-from being checked without hiding real links behind non-code backticks.
-Review repair: indented-code masking now treats standalone four-column code (including tabs)
-as literal while preserving paragraph continuation and common list-item precedence, preventing code
-examples from creating false broken-link failures without hiding real links in indented prose.
-Review repair: code masking now descends through explicit GFM block-quote containers, including nested quotes, so fenced and indented code examples inside quotes do not create false link failures while quoted prose links remain checked.
-Review repair: code masking now descends through explicit list-item containers before root fence parsing, including marker-only items, nested lists and list/quote combinations, so legal child fences stay literal without hiding following prose links.
-Review repair: list-container masking now respects paragraph interruption rules: only non-empty bullets and ordered items starting at 1 may interrupt open paragraphs, preventing faux list markers from hiding prose links as nested code. Dedicated regression coverage now locks the ordered-start boundary.
-Review repair: GFM type-1 raw HTML blocks (`script`, `pre`, `style`) are masked as literal regions, including inside explicit list and quote containers, so Markdown-looking examples inside them do not create false broken-link reports. A regression keeps other HTML tags from being overextended with type-1 end-tag semantics.
-Review repair: percent-decoded NUL destinations now produce a deterministic invalid-path diagnostic rather than crashing path resolution. Invalid UTF-8 Markdown files likewise produce a clean checker error instead of a traceback; dedicated regressions cover both failure modes.
-The implementation follows GitHub's current relative-link guidance but deliberately does not
-claim external URL, raw-HTML attribute, reference-style-link or section-anchor validation.
+## Library starter and local audit — 2026-10-16
 
-## Visual README patterns candidate — 2026-10-03
+[Library starter (#10)](https://github.com/drevendev/BeautifulRepo/pull/10) provides a tested
+checkout-only API example, guide and README template without advertising an unpublished package.
 
-BR-VISUAL-002 adds a source-backed visual README guide and an original theme-aware
-PocketDiff before/after example. The guide records concrete observations from current
-uv, Immich and Awesome Python READMEs without copying their media or branding. Five
-offline structural tests cover theme switching, alt text, local assets, SVG descriptions
-and non-color labels.
+[Repository audit (#12)](https://github.com/drevendev/BeautifulRepo/pull/12) adds bounded,
+read-only checks for reader entry points, actionable findings, text/JSON reports and a
+before/after example. Empty image alternatives and absent dedicated contribution guidance
+are informational, not universal failures; no beauty score or certification is produced.
 
-Later-run review found that the text-equivalence test could pass using facts that existed
-only inside the image markup. The test now removes the `<picture>` block before checking
-the four report facts, so it actually verifies a nearby real-text equivalent.
+## Release guidance and accessible front page — 2026-10-14
 
-A later exact-head review found a narrower SVG regression gap: the tests did not prove that
-`aria-labelledby` still referenced the intended `title`/`desc` nodes, and the description
-assertion covered only one of the four reader-facing facts. The structural test now locks both
-ID linkage and all four facts without claiming runtime assistive-technology certification.
+[Release-note guidance (#9)](https://github.com/drevendev/BeautifulRepo/pull/9) adds a guide,
+editable draft and tests distinguishing tags, GitHub Releases and maintained changelogs.
 
-On 2026-10-05 the cited README examples were rechecked. The guide now distinguishes
-Immich's useful product-first placement from its missing main-image alt text and uses
-immutable README permalinks for the inspected repository examples.
+[README accessibility (#11)](https://github.com/drevendev/BeautifulRepo/pull/11) replaces a
+layout-only feature table with a list and preserves the visitor journey as real text next
+to the Mermaid diagram. Tests guard these structural properties, not assistive-technology certification.
 
-This is a stacked production candidate based on BR-FOUNDATION-001, not acceptance or a
-released edition. Rendered GitHub light/dark appearance and assistive-technology behavior
-remain manual review items.
+## Earlier handbook foundations — October 2026
 
-## Initial foundation candidate — 2026-10-03
+The initial handbook introduced a reader-first front page, repository checklist, README
+scaffold, annotated pattern studies, dated program guidance and an offline source catalog.
+Later additions included the CLI row-counting starter, theme-aware PocketDiff before/after
+example, public contribution guidance and explicit community reporting limitations.
 
-Added the reader-first front page, repository checklist, README guide and scaffold,
-three source-bounded pattern studies, dated program guidance and contribution workflow.
-Added a structured catalog, offline validator, deterministic view and negative tests.
-Preserved the existing MIT LICENSE.
+The documentation-destination checker gained coverage for nested/escaped parentheses and
+labels, character references, multiline links, equal-length inline code delimiters,
+indented/fenced code and list/quote containers. It also handles invalid UTF-8 and NUL paths
+with controlled diagnostics. Its documented exclusions still apply: it is not an external
+link crawler, reference-link parser or heading-anchor validator.
 
-This is production evidence, not a claim of independent review or a released version.
-The bootstrap issue owns its acceptance work; repository-native checks and merge state
-remain the evidence for integration. Later semantic changes should name their affected
-unit or issue rather than silently rewriting the original rationale.
+Visual regressions preserve theme switching, meaningful alt text, nearby text equivalence,
+SVG title/description linkage and non-color labels. Historical source observations remain
+qualified in their guides. Linked content keeps its original rights and trademarks.
+
+The [MIT license](LICENSE) is unchanged.
