@@ -16,6 +16,7 @@
   <a href="checklists/repository.md">Checklist</a> ·
   <a href="guides/readme.md">README guide</a> ·
   <a href="guides/readme-visuals.md">Visual patterns</a> ·
+  <a href="examples/README.md">Working examples</a> ·
   <a href="templates/README.template.md">Templates</a> ·
   <a href="catalog/README.md">Resources</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
@@ -38,7 +39,9 @@
 | looking for proven references | [Annotated pattern studies](case-studies/first-patterns.md) | Borrow patterns without copying branding or protected expression |
 | documenting a CLI | [CLI starter guide](guides/cli-repositories.md) and [working example](examples/cli-starter/README.md) | Show a command, expected output and honest install boundaries |
 | documenting a library | [Library repository guide](guides/library-repositories.md) and [checkout-only example](examples/library-starter/README.md) | Demonstrate the public API without claiming an unpublished package |
+| documenting an application | [Application repository guide](guides/application-repositories.md) and [Pocket Board demo](examples/application-starter/README.md) | Run a real local first-success journey, inspect safe boundaries and read honest deployment limits |
 | documenting research or data | [Research/data guide](guides/research-data-repositories.md) and [synthetic example](examples/research-data-starter/README.md) | Reproduce one result with explicit input provenance and reuse limits |
+| curating a small reference list | [Curated collections guide](guides/curated-collections.md) and [tested example](examples/curated-starter/README.md) | Keep dated recommendations with concrete uses and limitations |
 | automating quality checks | [Repository tools](tools/README.md) | Check metadata, local links and reader-facing entry points offline |
 
 ## The visitor journey
@@ -63,7 +66,7 @@ That sequence is the core BeautifulRepo test. Decoration is optional; a clear pa
 
 - **📋 Checklists** — prioritize clarity, onboarding, trust, accessibility and maintenance.
 - **🧱 Patterns** — source-backed examples of what strong repositories do and why it works.
-- **🧰 Templates** — reusable README and security-policy scaffolds with explicit placeholders.
+- **🧰 Templates** — reusable README, application, collection, research and security-policy scaffolds with explicit placeholders.
 - **🔎 Tools** — small dependency-free checks that keep repository documentation honest.
 - **🖼️ Visual guidance** — theme-aware media, useful alt text and evidence-first screenshots.
 - **🧭 Community guidance** — contribution and reporting surfaces that do not invent unsupported promises.
@@ -96,6 +99,10 @@ They do **not** claim to be a live-link crawler, security scanner, runtime acces
 
 ## Explore the handbook
 
+Choose a [working example](examples/README.md), apply the
+[first-success checklist](checklists/first-success.md), then use the
+[maintenance workflow](guides/maintenance-workflow.md) to reproduce and review the result.
+
 | Material | Use it for |
 | --- | --- |
 | [Repository checklist](checklists/repository.md) | Prioritize essential information, polish and maintenance |
@@ -103,11 +110,13 @@ They do **not** claim to be a live-link crawler, security scanner, runtime acces
 | [Visual README patterns](guides/readme-visuals.md) | Make screenshots, diagrams and theme-aware media carry evidence |
 | [CLI repository starter](guides/cli-repositories.md) | Document commands, predictable outputs, error cases and installation claims with a tested example |
 | [Library repository starter](guides/library-repositories.md) | Show a working import and explicit checkout-only distribution boundaries using the [library README template](templates/LIBRARY_README.template.md) |
+| [Application repository starter](guides/application-repositories.md) | Try the [read-only Pocket Board example](examples/application-starter/README.md) with a native filter, local HTTP checks and no production claims |
 | [Research/data repository starter](guides/research-data-repositories.md) | Reproduce a synthetic CSV analysis and adapt the [research/data README template](templates/RESEARCH_DATA_README.template.md) without inventing data access or citation claims |
 | [Offline repository audit](guides/repository-audit.md) | Find specific entry-point problems with explanations, not a beauty score |
 | [Release-note writing guide](guides/release-notes.md) | Explain user impact, upgrade steps and verification; adapt the [release-note template](templates/RELEASE_NOTES.template.md) |
 | [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
 | [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab, Gum and other inspected repositories |
+| [Curated collection starter](guides/curated-collections.md) | Render annotated references and adapt the [collection template](templates/CURATED_README.template.md) |
 | [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
 | [Programs and community events](guides/programs.md) | Separate current program rules from evergreen preparation |
 | [Community safety readiness](guides/community-safety.md) | Keep reporting and enforcement promises operationally honest |
