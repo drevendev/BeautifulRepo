@@ -48,6 +48,39 @@ Use headings such as **Breaking changes**, **Added**, **Changed**, **Fixed**, an
 The second example explains impact and an action instead of treating engineering
 activity as the product. Its evidence remains visibly unverified.
 
+## Announce the same change without launch filler
+
+These two **illustrative announcements** use the same fictional ExampleCLI 0.4.0
+facts as the release note above. They do not describe a real release,
+a downloadable package, or tests performed by BeautifulRepo.
+
+**Weak announcement:**
+
+> Exciting ExampleCLI 0.4.0 update! `--csv-output` was renamed to `--output`
+> and the old option is no longer accepted. Malformed CSV now exits with code 1.
+> PowerShell behavior has not been verified. Enjoy these amazing improvements!
+
+**Useful announcement:**
+
+> **ExampleCLI 0.4.0 (fictional): update your CSV option.**
+> If a script uses `--csv-output`, replace it with `--output` before upgrading;
+> the old option is no longer accepted. Malformed CSV now exits with code 1,
+> so scripts can handle that failure explicitly. PowerShell behavior has not
+> been verified.
+
+The facts did not change; the wording and reader path did:
+
+- **Claim:** replace "amazing improvements" with the specific option rename and
+  CSV error behavior. Neither superlatives nor an invented success metric prove value.
+- **Evidence:** keep the unverified PowerShell limitation and the fictional status
+  visible. Before a *real* announcement, link the tag, diff and actual test evidence.
+  This example provides none of those artifacts.
+- **Reader impact:** tell maintainers which flag to replace and what exit code
+  to handle instead of asking them to "enjoy" an unspecified improvement.
+
+A short announcement can prioritize the next action; the release note should
+carry the detailed migration, known limitations and verification references.
+
 ## Generated notes are a starting inventory
 
 GitHub-generated notes can list merged pull requests, contributors and comparisons.
