@@ -14,6 +14,20 @@ ROOT = Path(__file__).resolve().parents[1]
 FIELDS = {"id", "title", "category", "url", "why", "apply", "caveat", "coverage", "reviewed_on", "evidence"}
 CATEGORIES = {"guide", "checklist", "program", "tool", "example"}
 
+class DuplicateJSONKeyError(ValueError):
+    """Raised when source metadata ambiguously repeats a JSON object key."""
+
+
+def reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject duplicates at every nesting level, including escaped key spellings."""
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateJSONKeyError("duplicate JSON object key")
+        result[key] = value
+    return result
+
+
 
 def validate(data: object, today: date) -> tuple[list[str], list[str]]:
     """Return structural errors and freshness warnings without mutating input."""
@@ -112,7 +126,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--write", action="store_true", help="explicitly regenerate the Markdown view")
     args = parser.parse_args(argv)
     try:
-        data = json.loads(args.data.read_text(encoding="utf-8"))
+        data = json.loads(args.data.read_text(encoding="utf-8"),
+                          object_pairs_hook=reject_duplicate_json_keys)
         errors, warnings = validate(data, datetime.now(timezone.utc).date())
         for warning in warnings:
             print(f"WARN: {warning}", file=sys.stderr)
@@ -128,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"OK: {len(data['resources'])} resources; generated catalog is current")
         return 0
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, DuplicateJSONKeyError) as exc:
         print(f"ERROR: cannot process catalog: {exc}", file=sys.stderr)
         return 1
 
