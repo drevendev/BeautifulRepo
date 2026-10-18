@@ -1,5 +1,6 @@
 """Regressions for ambiguous JSON keys in the public source-backed catalog."""
 from contextlib import redirect_stderr, redirect_stdout
+from datetime import datetime, timezone
 import importlib.util
 import io
 import json
@@ -20,7 +21,7 @@ def valid_item():
         "id": "example-guide", "title": "Example guide", "category": "guide",
         "url": "https://example.org/guide", "why": "Source-backed reason",
         "apply": "A specific useful action", "caveat": "Not tested in production",
-        "coverage": "Documentation section inspected", "reviewed_on": "2026-10-17",
+        "coverage": "Documentation section inspected", "reviewed_on": datetime.now(timezone.utc).date().isoformat(),
         "evidence": "source-reviewed",
     }
 
