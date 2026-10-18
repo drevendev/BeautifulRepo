@@ -57,7 +57,7 @@ def checked_url(value: object) -> str:
                    for label in labels)
             or re.search(r"%(?![0-9A-Fa-f]{2})", value)):
         raise ValueError("Invalid link URL")
-    if parts.fragment:
+    if "#" in value:
         raise ValueError("Use an unfragmented canonical URL")
     return value
 
@@ -121,11 +121,12 @@ def report(raw: object, as_of: date, max_age: int) -> dict:
 
 def markdown_text(value: str) -> str:
     """Escape inline Markdown controls as well as HTML, including link-label delimiters."""
-    return re.sub(r"([\\\[\]*_`])", r"\\\1", escape(value, quote=False))
+    return re.sub(r"([\\\[\]*_`~])", r"\\\1", escape(value, quote=False))
 
 
 def markdown(result: dict) -> str:
-    lines = [f'# {markdown_text(result["title"])}', "", markdown_text(result["scope"]), "",
+    # Render a user-authored scope as prose, never as a Markdown block.
+    lines = [f'# {markdown_text(result["title"])}', "", f'**Scope:** {markdown_text(result["scope"])}', "",
              f'Offline audit as of {result["as_of"]}. The script does not visit links.', ""]
     prior = None
     for item in result["entries"]:
