@@ -1,0 +1,211 @@
+/* Local-only task-board demo: intentionally readable, theme-aware CSS. */
+:root {
+  color-scheme:light dark;
+  --bg:#f4f5f0;
+  --ink:#142222;
+  --panel:#fff;
+  --muted:#475d5a;
+  --line:#c3d4cf;
+  --accent:#144c3d;
+  --focus:#a74a16
+}
+@media(prefers-color-scheme:dark) {
+  :root {
+    --bg:#111b19;
+    --ink:#e8f0e9;
+    --panel:#1c2926;
+    --muted:#bdd0c7;
+    --line:#516e61;
+    --accent:#8be2b1;
+    --focus:#f5bd7e
+  }
+}
+* {
+  box-sizing:border-box
+}
+html {
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  line-height:1.55
+}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink)
+}
+a {
+  color:inherit;
+  text-underline-offset:.2em
+}
+.skip {
+  position:absolute;
+  left:-9999px;
+  top:0;
+  background:var(--panel);
+  padding:.65rem 1rem
+}
+.skip:focus {
+  left:.5rem;
+  z-index:2
+}
+.top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:1rem max(1rem,calc((100vw - 60rem)/2));
+  border-bottom:1px solid var(--line);
+  background:var(--panel)
+}
+.top a {
+  font-weight:800;
+  text-decoration:none
+}
+.top__note,.section-head p,.task p,.footer,.notice {
+  color:var(--muted)
+}
+.wrap {
+  max-width:60rem;
+  margin:auto;
+  padding:1.5rem 1rem 3rem
+}
+.intro {
+  padding:2.5rem 0 1.8rem;
+  max-width:43rem
+}
+.eyebrow {
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-size:.8rem;
+  font-weight:700;
+  color:var(--accent)
+}
+h1 {
+  font-size:clamp(2.1rem,5vw,4rem);
+  line-height:1.1;
+  letter-spacing:-.03em;
+  margin:.5rem 0
+}
+h2 {
+  font-size:1.6rem;
+  margin:0
+}
+h3 {
+  font-size:1.08rem;
+  margin:0
+}
+.panel {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:1.1rem;
+  padding:1.5rem;
+  box-shadow:0 8px 28px #001e1613
+}
+.section-head {
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  align-items:baseline
+}
+.section-head p {
+  margin:0
+}
+.filters {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:.7rem;
+  margin:1.5rem 0
+}
+.filters label {
+  font-weight:700
+}
+select,button {
+  font:inherit;
+  border-radius:.55rem;
+  padding:.5rem .7rem;
+  border:1px solid var(--line)
+}
+select {
+  background:var(--panel);
+  color:var(--ink)
+}
+button {
+  background:var(--accent);
+  color:var(--bg);
+  font-weight:700;
+  cursor:pointer
+}
+button:hover {
+  filter:brightness(1.13)
+}
+:focus-visible {
+  outline:3px solid var(--focus);
+  outline-offset:3px
+}
+.summary {
+  font-weight:550;
+  background:var(--bg);
+  border-radius:.5rem;
+  padding:.8rem 1rem
+}
+.tasks {
+  list-style:none;
+  margin:1rem 0 0;
+  padding:0;
+  display:grid;
+  gap:.8rem
+}
+.task,.empty {
+  border:1px solid var(--line);
+  border-radius:.7rem;
+  padding:1rem
+}
+.task__heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.7rem
+}
+.task p {
+  margin:.5rem 0 0
+}
+.badge {
+  border:1px solid var(--line);
+  border-radius:50rem;
+  padding:.1rem .6rem;
+  font-size:.8rem;
+  white-space:nowrap
+}
+.notice {
+  max-width:42rem;
+  margin-top:1.5rem
+}
+.footer {
+  border-top:1px solid var(--line);
+  padding:1.5rem;
+  text-align:center;
+  font-size:.9rem
+}
+@media(max-width:36rem) {
+  .section-head {
+    display:block
+  }
+  .section-head p {
+    margin-top:.3rem
+  }
+  .top__note {
+    font-size:.8rem
+  }
+  .panel {
+    padding:1rem
+  }
+  .task__heading {
+    align-items:start
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  * {
+    animation:none!important;
+    transition:none!important
+  }
+}

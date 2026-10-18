@@ -1,0 +1,7 @@
+[
+  {"id": "readme", "title": "Write the first-success README", "status": "done", "effort": 2},
+  {"id": "demo", "title": "Record a genuine demonstration", "status": "open", "effort": 3},
+  {"id": "tests", "title": "Run the sample's checks", "status": "done", "effort": 1},
+  {"id": "accessibility", "title": "Test keyboard and screen-reader routes", "status": "open", "effort": 5},
+  {"id": "release", "title": "Document honest release boundaries", "status": "open", "effort": 4}
+]
