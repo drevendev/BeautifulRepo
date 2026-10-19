@@ -158,23 +158,31 @@ button:hover {
 .task,.empty {
   border:1px solid var(--line);
   border-radius:.7rem;
-  padding:1rem
+  padding:1rem;
+  min-width:0
 }
 .task__heading {
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:.7rem
+  gap:.7rem;
+  min-width:0
+}
+.task__heading h3 {
+  min-width:0;
+  overflow-wrap:anywhere
 }
 .task p {
-  margin:.5rem 0 0
+  margin:.5rem 0 0;
+  overflow-wrap:anywhere
 }
 .badge {
   border:1px solid var(--line);
   border-radius:50rem;
   padding:.1rem .6rem;
   font-size:.8rem;
-  white-space:nowrap
+  white-space:nowrap;
+  flex-shrink:0
 }
 .notice {
   max-width:42rem;
