@@ -41,7 +41,7 @@ class CatalogAtomicWriteTests(unittest.TestCase):
             folder = Path(root)
             source, output = folder / "resources.json", folder / "catalog.md"
             source.write_text(json.dumps({"schema_version": 1, "resources": [
-                example_resource("Broken\\ud800title")
+                example_resource("Broken" + chr(0xD800) + "title")
             ]}), encoding="utf-8")
             output.write_bytes(b"existing generated content\n")
             code, stdout, stderr = run_cli(source, output)
