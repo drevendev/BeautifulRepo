@@ -29,3 +29,5 @@ jobs:
         run: python tools/catalog.py
       - name: Check repository-owned Markdown destinations
         run: python tools/docs_links.py
+      - name: Check HTML navigation and local anchors
+        run: python tools/html_navigation.py

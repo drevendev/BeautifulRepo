@@ -90,12 +90,15 @@ From a checkout with **Python 3.11+**:
 ```bash
 python tools/catalog.py
 python tools/docs_links.py
+python tools/html_navigation.py
 python -m unittest discover -s tests -v
 ```
 
 The same checks run in GitHub Actions. They validate structured catalog metadata, generated catalog drift, repository-owned relative Markdown destinations, and structural regressions in the examples and public repository surfaces.
 
-They do **not** claim to be a live-link crawler, security scanner, runtime accessibility certification, or repository beauty score. Manual judgement still matters.
+The additional HTML navigation check verifies bounded local HTML links, media assets and section fragments.
+
+These tools do **not** claim to be a live-link crawler, complete GitHub Markdown renderer, security scanner, runtime accessibility certification, or repository beauty score. Manual judgement still matters.
 
 ## Explore the handbook
 

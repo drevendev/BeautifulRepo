@@ -6,6 +6,7 @@
 python tools/catalog.py                 # validate and check the generated view
 python tools/catalog.py --write         # explicitly regenerate catalog/README.md
 python tools/docs_links.py               # check repository-owned Markdown destinations
+python tools/html_navigation.py          # verify local HTML/media and Markdown section anchors
 python -m unittest discover -s tests -v
 ```
 
@@ -52,6 +53,19 @@ Reference-style Markdown links and raw HTML links are not parsed in this first b
 GitHub recommends relative links for repository-owned files because they follow the branch a
 reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
 <https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#relative-links>.
+
+## HTML navigation and fragment checker
+
+`html_navigation.py` complements `docs_links.py`: it checks repository-local
+`a href`, `img src` and `source srcset` destinations in active Markdown
+HTML, plus local section fragments in HTML and inline Markdown links.
+It ignores code examples using the same GFM literal-region masking as the
+existing checker. Explicit HTML `id` and `a name` anchors and ordinary
+Markdown ATX headings (including duplicate suffixes) are supported.
+
+This offline source check is not a complete GitHub-flavored Markdown renderer.
+It does not crawl external resources, support every Markdown extension or
+reference-style link, or certify browser, keyboard or assistive-tech behavior.
 
 ## Repository entry-point audit
 

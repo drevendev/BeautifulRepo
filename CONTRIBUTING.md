@@ -24,13 +24,16 @@ From the repository root with Python 3.11 or newer:
 python tools/catalog.py --write
 python tools/catalog.py
 python tools/docs_links.py
+python tools/html_navigation.py
 python -m unittest discover -s tests -v
 ```
 
 The first command explicitly regenerates `catalog/README.md`; the others are checks.
-The documentation-link check covers repository-owned inline Markdown link and image paths,
-not external URLs or section fragments. Review the generated diff. No network access or
-third-party Python packages are needed.
+The original documentation-link check covers repository-owned inline Markdown
+link and image paths. The HTML navigation checker adds bounded local HTML/media
+and section-fragment checks. Neither checks external URLs, completely renders
+Markdown, or certifies accessibility. Review the generated diff. No network
+access or third-party Python packages are needed.
 
 ## Quality expectations
 
