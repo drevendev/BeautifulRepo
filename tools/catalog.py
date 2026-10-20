@@ -5,8 +5,11 @@ from __future__ import annotations
 import argparse
 from datetime import date, datetime, timezone
 import json
+import os
 from pathlib import Path
 import re
+import stat
+import tempfile
 import sys
 from urllib.parse import urlsplit, urlunsplit
 
@@ -105,6 +108,33 @@ def render(data: dict) -> str:
     return "\n".join(lines)
 
 
+def write_generated_catalog_atomically(destination: Path, content: str) -> None:
+    """Replace the generated view only after UTF-8 encoding and a complete write.
+
+    A temporary sibling keeps the original output intact when encoding, writing
+    or replacement fails. This is atomic replacement, not crash-durable fsync.
+    """
+    payload = content.encode("utf-8")
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", prefix=f".{destination.name}.", suffix=".tmp",
+            dir=destination.parent, delete=False,
+        ) as temporary:
+            temporary_path = Path(temporary.name)
+            temporary.write(payload)
+            try:
+                previous_mode = stat.S_IMODE(destination.stat().st_mode) & 0o777
+            except FileNotFoundError:
+                pass
+            else:
+                temporary_path.chmod(previous_mode)
+        os.replace(temporary_path, destination)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=ROOT / "catalog/resources.json")
@@ -122,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         expected = render(data)
         if args.write:
-            args.output.write_text(expected, encoding="utf-8")
+            write_generated_catalog_atomically(args.output, expected)
         elif not args.output.is_file() or args.output.read_text(encoding="utf-8") != expected:
             print("ERROR: generated catalog is missing or stale; run tools/catalog.py --write", file=sys.stderr)
             return 1
