@@ -198,7 +198,7 @@ def heading_ids(markdown_without_code: str, explicit_ids: set[str],
     heading restores visible inline-code text excluded from HTML destination scans.
     """
     found = set(explicit_ids)
-    used_slugs: dict[str, int] = {}
+    used_heading_ids: set[str] = set()
     original_lines = (original_markdown or markdown_without_code).splitlines()
     for line, original_line in zip(markdown_without_code.splitlines(), original_lines):
         match = HEADING.match(line)
@@ -214,10 +214,14 @@ def heading_ids(markdown_without_code: str, explicit_ids: set[str],
         label = re.sub(r"<[^>]+>", "", label)
         label = "".join(char for char in label if char.isalnum() or char in " _-")
         slug = re.sub(r"[ \t]+", "-", label)
-        occurrence = used_slugs.get(slug, 0)
-        used_slugs[slug] = occurrence + 1
         if slug:
-            found.add(slug if occurrence == 0 else f"{slug}-{occurrence}")
+            candidate = slug
+            suffix = 0
+            while candidate in used_heading_ids:
+                suffix += 1
+                candidate = f"{slug}-{suffix}"
+            used_heading_ids.add(candidate)
+            found.add(candidate)
     return found
 
 

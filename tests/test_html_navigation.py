@@ -111,6 +111,18 @@ class HtmlNavigationTests(unittest.TestCase):
         )
         self.assertEqual(errors, [])
 
+    def test_generated_heading_suffix_does_not_collide_with_literal_suffix(self):
+        errors, checked, _ = self.check(
+            "## Intro\n## Intro-1\n## Intro\n"
+            "[Third heading](#intro-2)\n"
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+        self.assertEqual(
+            html_navigation.heading_ids("## Intro\n## Intro-1\n## Intro\n", set()),
+            {"intro", "intro-1", "intro-2"},
+        )
+
     def test_named_html_anchor_is_resolved(self):
         errors, checked, _ = self.check(
             '<a name="handmade"></a>\n'
