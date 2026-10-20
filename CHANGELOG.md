@@ -3,6 +3,20 @@
 This log describes handbook and source changes, not packaged releases or version tags.
 Dates identify work on the repository; the linked pull requests retain integration history.
 
+## Unreleased — input integrity and reading fidelity
+
+- Refuse ambiguous repeated JSON keys before validating catalog resources or
+  loading the Pocket Board fixture; nested and Unicode-escaped aliases are errors.
+- Reject control characters and malformed percent escapes in catalog URLs while
+  retaining percent-encoded paths, queries, IPv6 and fragment normalization.
+- Keep literal empty fragments out of the curated collection's canonical URLs.
+- Render user-authored scope as labelled prose and escape GFM strikethrough
+  markers in generated catalogue and collection Markdown.
+- Strengthen form-control boundary colors in both Pocket Board themes; this
+  source-level contrast check is not a browser or assistive-technology audit.
+- Preserve existing generated catalog bytes on UTF-8 encoding or replacement
+  errors (PR #36) and test Python 3.11/3.14 explicitly in CI (PR #35).
+
 ## Unreleased — working repository workshop
 
 ### Added

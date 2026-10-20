@@ -18,6 +18,20 @@ FIELDS = {"id", "title", "category", "url", "why", "apply", "caveat", "coverage"
 CATEGORIES = {"guide", "checklist", "program", "tool", "example"}
 
 
+class DuplicateJSONKeyError(ValueError):
+    """Input JSON repeats an object key before structural validation."""
+
+
+def reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject nested and Unicode-escaped equivalent object keys."""
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateJSONKeyError("duplicate JSON object key")
+        result[key] = value
+    return result
+
+
 def validate(data: object, today: date) -> tuple[list[str], list[str]]:
     """Return structural errors and freshness warnings without mutating input."""
     errors: list[str] = []
@@ -53,6 +67,12 @@ def validate(data: object, today: date) -> tuple[list[str], list[str]]:
             errors.append(f"{label}: evidence must be source-reviewed; runtime trials need separate evidence")
         url = item["url"]
         try:
+            # urlsplit() may silently strip some control characters: reject
+            # invalid source bytes and broken percent escapes *first*.
+            if (any(ord(char) < 32 or ord(char) == 127
+                    or 0xD800 <= ord(char) <= 0xDFFF for char in url)
+                    or re.search(r"%(?![0-9A-Fa-f]{2})", url)):
+                raise ValueError("control characters or malformed percent escape")
             parts = urlsplit(url)
             if (parts.scheme != "https" or not parts.hostname or parts.username is not None
                     or parts.password is not None or any(c.isspace() for c in url)
@@ -90,7 +110,7 @@ def escape(text: str) -> str:
     """Render text fields literally, not as active HTML or Markdown structure."""
     text = " ".join(text.split())
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    return re.sub(r"([\\`*_{}\[\]#!|])", r"\\\1", text)
+    return re.sub(r"([\\`*_{}\[\]#!|~])", r"\\\1", text)
 
 
 def render(data: dict) -> str:
@@ -142,7 +162,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--write", action="store_true", help="explicitly regenerate the Markdown view")
     args = parser.parse_args(argv)
     try:
-        data = json.loads(args.data.read_text(encoding="utf-8"))
+        data = json.loads(args.data.read_text(encoding="utf-8"),
+                          object_pairs_hook=reject_duplicate_json_keys)
         errors, warnings = validate(data, datetime.now(timezone.utc).date())
         for warning in warnings:
             print(f"WARN: {warning}", file=sys.stderr)
@@ -158,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"OK: {len(data['resources'])} resources; generated catalog is current")
         return 0
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, DuplicateJSONKeyError) as exc:
         print(f"ERROR: cannot process catalog: {exc}", file=sys.stderr)
         return 1
 
