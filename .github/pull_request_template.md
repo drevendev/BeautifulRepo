@@ -1,6 +1,8 @@
 ## Reader problem and change
 
 Explain the improvement and link the relevant issue when there is one.
+For unfinished work, use `Related: #<issue-number>` and describe what remains.
+Only use an issue-closing keyword when the PR actually completes that issue.
 
 ## Evidence
 
