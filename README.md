@@ -119,6 +119,7 @@ Choose a [working example](examples/README.md), apply the
 | [Curated collection starter](guides/curated-collections.md) | Render annotated references and adapt the [collection template](templates/CURATED_README.template.md) |
 | [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
 | [Programs and community events](guides/programs.md) | Separate current program rules from evergreen preparation |
+| [Repository discoverability](guides/discoverability.md) | Choose accurate About descriptions, topics, homepages and previews without fabricated traffic claims |
 | [Community safety readiness](guides/community-safety.md) | Keep reporting and enforcement promises operationally honest |
 | [Roadmap](ROADMAP.md) | See what exists and what comes next |
 
