@@ -45,8 +45,19 @@ def validate_tasks(raw: object) -> list[dict[str, object]]:
     return tasks
 
 
+def reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject ambiguous fields before the JSON decoder overwrites values."""
+    fields: dict[str, object] = {}
+    for key, value in pairs:
+        if key in fields:
+            raise ValueError("Duplicate JSON object key")
+        fields[key] = value
+    return fields
+
+
 def read_sample() -> list[dict[str, object]]:
-    return validate_tasks(json.loads(FIXTURE.read_text(encoding="utf-8")))
+    return validate_tasks(json.loads(FIXTURE.read_text(encoding="utf-8"),
+                                     object_pairs_hook=reject_duplicate_json_keys))
 
 
 def render_page(tasks: list[dict[str, object]], status_filter: str = "all") -> bytes:

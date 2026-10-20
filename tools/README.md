@@ -10,7 +10,7 @@ python -m unittest discover -s tests -v
 ```
 
 `--data` and `--output` accept alternative paths for a separate collection.
-`--write` replaces the selected output file; review the path before using it.
+`--write` prepares UTF-8 bytes and atomically replaces the selected output via a temporary sibling; review the path before using it. Failed encoding/replacement leaves the previous file unchanged (this is not an fsync/crash-durability guarantee).
 
 ## Contract
 
@@ -20,9 +20,9 @@ program, tool and example. Metadata currently records only `source-reviewed` evi
 runtime verification belongs in separate, reproducible trial records before the schema
 claims to represent it.
 
-Errors include missing or blank fields, malformed identifiers, duplicate IDs, duplicate
+Errors include ambiguous repeated JSON object keys (including nested/escaped equivalents), missing or blank fields, malformed identifiers, duplicate IDs, duplicate
 source URLs (ignoring fragment, trailing slash, host case and default HTTPS port), malformed
-HTTPS URLs, unsupported categories and invalid/future dates. Query strings remain meaningful.
+HTTPS URLs (including raw controls and malformed percent escapes), unsupported categories and invalid/future dates. Query strings remain meaningful; fragments are ignored for duplicate-source normalization rather than banned.
 URL syntax validation does not establish destination safety or availability.
 
 Exit code 0 means the metadata is structurally valid and its generated view is current.
