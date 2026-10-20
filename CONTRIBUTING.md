@@ -32,6 +32,35 @@ The documentation-link check covers repository-owned inline Markdown link and im
 not external URLs or section fragments. Review the generated diff. No network access or
 third-party Python packages are needed.
 
+## Link issues without closing unfinished work
+
+A pull request can **mention** an issue without promising to finish it. If acceptance
+remains open, use a plain reference such as `Related: #28` or `Follow-up: #28`
+and say what remains. For example:
+
+> Related: #28 — Pocket Board's keyboard, contrast, and zoom review is still open.
+
+Do **not** write a negated closing phrase such as `Does not fix #28`.
+GitHub recognizes the closing keyword next to the issue number even when
+the surrounding sentence says the work is unfinished. In this repository,
+[PR #37](https://github.com/drevendev/BeautifulRepo/pull/37) unintentionally
+closed [Issue #28](https://github.com/drevendev/BeautifulRepo/issues/28)
+on merge; the issue was reopened because its visual/accessibility acceptance
+was not complete. A negative sentence is not a safe substitute for a plain
+issue reference.
+
+When a pull request **actually completes** all acceptance criteria, deliberately
+include `Closes #<issue-number>` in its description. Before merging, check the
+linked issues and the PR description (and relevant commit messages) for unintended
+closing references. GitHub recognizes `close` / `closes` / `closed`,
+`fix` / `fixes` / `fixed`, and `resolve` / `resolves` / `resolved`.
+The PR-description keyword behavior applies when the PR targets the default branch.
+
+**Primary source (reviewed 2026-10-20):**
+[GitHub Docs — Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
+This is guidance about native issue-linking behavior, not an automated policy
+or a change to the repository's auto-close settings.
+
 ## Quality expectations
 
 Public documentation is in English. Use descriptive headings and links, text alternatives
