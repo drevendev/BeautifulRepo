@@ -12,13 +12,9 @@
 </p>
 
 <p align="center">
+  <a href="#working-proof">Working proof</a> ·
   <a href="#start-here">Start here</a> ·
-  <a href="checklists/repository.md">Checklist</a> ·
-  <a href="guides/readme.md">README guide</a> ·
-  <a href="guides/readme-visuals.md">Visual patterns</a> ·
   <a href="examples/README.md">Working examples</a> ·
-  <a href="templates/README.template.md">Templates</a> ·
-  <a href="catalog/README.md">Resources</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
@@ -27,22 +23,40 @@
 > [!TIP]
 > **Beautiful is not “more decoration.”** A strong repository reduces the time from landing on the page to understanding the result, trying it, trusting it, and knowing how to contribute.
 
+## Working proof
+
+**A real checkout command, not a concept image.** The tested
+[Rowcount starter](examples/cli-starter/README.md) reads a bundled CSV fixture
+locally. With **Python 3.11+**, from the repository root:
+
+```bash
+python examples/cli-starter/rowcount.py examples/cli-starter/sample.csv
+```
+
+Expected stdout, checked by the example's unit tests:
+
+```text
+Data rows: 3
+```
+
+The [input CSV](examples/cli-starter/sample.csv) and
+[Python implementation](examples/cli-starter/rowcount.py) are available to inspect.
+This is a deliberately small count of data records, not a schema validator or a
+hosted service. No package installation or network access is required.
+
+For an actual **before/after documentation diagnostic**, run
+`python examples/repository-audit/demo.py` from the same root. Its
+[test-backed walkthrough](examples/repository-audit/README.md) shows four
+warnings becoming one after README fixes; the fictional input is disclosed,
+and unresolved license/contribution observations remain visible.
+
 ## Start here
 
-| If you are… | Start with… | Outcome |
+| Your goal | First step | Visible result |
 | --- | --- | --- |
-| improving an existing repository | [Essential repository checklist](checklists/repository.md) | Find the first broken step in the visitor journey |
-| starting a repository from scratch | [README scaffold](templates/README.template.md) | Get a useful structure without filler |
-| polishing the first screen | [Visual README patterns](guides/readme-visuals.md) | Use screenshots, diagrams, badges and theme-aware media as evidence |
-| preparing community surfaces | [Community safety readiness](guides/community-safety.md) | Publish only promises your project can actually operate |
-| writing upgrade announcements | [Release-note writing guide](guides/release-notes.md) and [editable template](templates/RELEASE_NOTES.template.md) | Explain impact, upgrade steps and verified evidence without inventing a release |
-| looking for proven references | [Annotated pattern studies](case-studies/first-patterns.md) | Borrow patterns without copying branding or protected expression |
-| documenting a CLI | [CLI starter guide](guides/cli-repositories.md) and [working example](examples/cli-starter/README.md) | Show a command, expected output and honest install boundaries |
-| documenting a library | [Library repository guide](guides/library-repositories.md) and [checkout-only example](examples/library-starter/README.md) | Demonstrate the public API without claiming an unpublished package |
-| documenting an application | [Application repository guide](guides/application-repositories.md) and [Pocket Board demo](examples/application-starter/README.md) | Run a real local first-success journey, inspect safe boundaries and read honest deployment limits |
-| documenting research or data | [Research/data guide](guides/research-data-repositories.md) and [synthetic example](examples/research-data-starter/README.md) | Reproduce one result with explicit input provenance and reuse limits |
-| curating a small reference list | [Curated collections guide](guides/curated-collections.md) and [tested example](examples/curated-starter/README.md) | Keep dated recommendations with concrete uses and limitations |
-| automating quality checks | [Repository tools](tools/README.md) | Check metadata, local links and reader-facing entry points offline |
+| Diagnose an existing repository | Run the [offline audit](guides/repository-audit.md) and use the [repository checklist](checklists/repository.md) | Specific findings, not a beauty score |
+| Start a new one | Adapt the [README scaffold](templates/README.template.md) with the [first-success checklist](checklists/first-success.md) | A reproducible command and an honest scope |
+| Borrow a working example | Choose from [five starter types](examples/README.md) | Real source, tests and exact limitations |
 
 ## The visitor journey
 
@@ -73,13 +87,17 @@ That sequence is the core BeautifulRepo test. Decoration is optional; a clear pa
 
 ## See the difference
 
-The fictional [PocketDiff before/after example](examples/readme-visuals/README.md) shows the principle in one screen:
+The [PocketDiff before/after page](examples/readme-visuals/README.md) is an
+**explicitly fictional** copy and visual-layout exercise. It contrasts vague
+superlatives and decorative badges with a concrete (illustrative) CSV report,
+a text alternative and a command transcript. **PocketDiff is not an installable
+or tested CLI.**
 
-**Before:** vague superlatives, badge clutter, and a missing demo doing all the explanatory work.
-
-**After:** one concrete outcome, a representative result, nearby text equivalence, a real command, and a clear first-success path.
-
-That is the standard this repository applies to itself: **promise → evidence → action**, with important information remaining readable without images.
+The [design-intent brief](examples/readme-visuals/DESIGN_INTENT.md) explains
+why the light/dark illustrations fit that imagined reader, what was rejected,
+and how to replace them with evidence from a real product. For a genuinely
+runnable result, use the Rowcount command in
+[Working proof](#working-proof) instead.
 
 ## This repository checks itself
 
@@ -102,29 +120,38 @@ These tools do **not** claim to be a live-link crawler, complete GitHub Markdown
 
 ## Explore the handbook
 
-Choose a [working example](examples/README.md), apply the
-[first-success checklist](checklists/first-success.md), then use the
-[maintenance workflow](guides/maintenance-workflow.md) to reproduce and review the result.
+Keep the three decisions above short. These are the detailed reference routes,
+not a second copy of the first-screen chooser.
 
-| Material | Use it for |
-| --- | --- |
-| [Repository checklist](checklists/repository.md) | Prioritize essential information, polish and maintenance |
-| [README design guide](guides/readme.md) | Build a useful front page without turning it into a manual |
-| [Visual README patterns](guides/readme-visuals.md) | Make screenshots, diagrams and theme-aware media carry evidence |
-| [CLI repository starter](guides/cli-repositories.md) | Document commands, predictable outputs, error cases and installation claims with a tested example |
-| [Library repository starter](guides/library-repositories.md) | Show a working import and explicit checkout-only distribution boundaries using the [library README template](templates/LIBRARY_README.template.md) |
-| [Application repository starter](guides/application-repositories.md) | Try the [read-only Pocket Board example](examples/application-starter/README.md) with a native filter, local HTTP checks and no production claims |
-| [Research/data repository starter](guides/research-data-repositories.md) | Reproduce a synthetic CSV analysis and adapt the [research/data README template](templates/RESEARCH_DATA_README.template.md) without inventing data access or citation claims |
-| [Offline repository audit](guides/repository-audit.md) | Find specific entry-point problems with explanations, not a beauty score |
-| [Release-note writing guide](guides/release-notes.md) | Explain user impact, upgrade steps and verification; adapt the [release-note template](templates/RELEASE_NOTES.template.md) |
-| [README scaffold](templates/README.template.md) | Adapt a starting structure to your own project |
-| [Annotated pattern studies](case-studies/first-patterns.md) | Learn from Devostasis, Hungry Crab, Gum and other inspected repositories |
-| [Curated collection starter](guides/curated-collections.md) | Render annotated references and adapt the [collection template](templates/CURATED_README.template.md) |
-| [Curated source catalog](catalog/README.md) | Find primary guidance with application notes and caveats |
-| [Programs and community events](guides/programs.md) | Separate current program rules from evergreen preparation |
-| [Repository discoverability](guides/discoverability.md) | Choose accurate About descriptions, topics, homepages and previews without fabricated traffic claims |
-| [Community safety readiness](guides/community-safety.md) | Keep reporting and enforcement promises operationally honest |
-| [Roadmap](ROADMAP.md) | See what exists and what comes next |
+- **Explain and present:** [README design](guides/readme.md),
+  [visual README patterns](guides/readme-visuals.md),
+  [editorial evidence kit](guides/editorial-evidence.md),
+  [repository discoverability](guides/discoverability.md).
+- **Adapt an actual starter:** [CLI guide](guides/cli-repositories.md) and
+  [example](examples/cli-starter/README.md);
+  [library guide](guides/library-repositories.md) and
+  [example](examples/library-starter/README.md);
+  [application guide](guides/application-repositories.md) and
+  [example](examples/application-starter/README.md);
+  [research/data guide](guides/research-data-repositories.md) and
+  [example](examples/research-data-starter/README.md);
+  [curated-collection guide](guides/curated-collections.md) and
+  [example](examples/curated-starter/README.md).
+- **Maintain evidence and trust:** [release notes](guides/release-notes.md) with
+  a [release-note template](templates/RELEASE_NOTES.template.md),
+  [maintenance workflow](guides/maintenance-workflow.md),
+  [offline repository audit](guides/repository-audit.md),
+  [tools](tools/README.md),
+  [Community safety readiness](guides/community-safety.md).
+- **Research and adapt:** [annotated studies](case-studies/first-patterns.md),
+  [reviewed sources](catalog/README.md),
+  [programs and community events](guides/programs.md),
+  [README template](templates/README.template.md),
+  [application template](templates/APPLICATION_README.template.md),
+  [library template](templates/LIBRARY_README.template.md),
+  [research/data template](templates/RESEARCH_DATA_README.template.md),
+  [curated README template](templates/CURATED_README.template.md),
+  and the [roadmap](ROADMAP.md).
 
 ## Principles
 

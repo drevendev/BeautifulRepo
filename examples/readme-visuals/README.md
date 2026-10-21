@@ -41,6 +41,8 @@ Wrote changes.csv
 writes a local report; it does not need an upload step in this fictional example.
 
 [Read the visual README guide](../../guides/readme-visuals.md).
+[Read the design-intent brief](DESIGN_INTENT.md) for the audience, hierarchy,
+theme/fallback rationale and deliberate trade-offs behind this fictional page.
 
 ## Why the after version is stronger
 
