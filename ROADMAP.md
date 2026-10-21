@@ -37,6 +37,8 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   Markdown/JSON output and explicit input boundaries.
 - [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md),
   [maintenance workflow](guides/maintenance-workflow.md) and application/collection README templates.
+- [Maintainer handoff recipe](guides/maintainer-handoff.md), with a fictional
+  one-maintainer pause notice, responsibility checklist and real checkout commands.
 
 These linked resources are repository source files, not evidence that
 BeautifulRepo has published a packaged software release.
