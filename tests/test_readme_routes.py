@@ -31,7 +31,7 @@ class ReaderRoutesTests(unittest.TestCase):
         )
         self.assertIn("Data rows: 3", top)
         self.assertIn("from the repository root", top)
-        self.assertIn("not a hosted service", " ".join(top.split()))
+        self.assertIn("not a schema validator or a hosted service", " ".join(top.split()))
 
     def test_detailed_handbook_remains_complete_but_not_duplicate_table(self):
         section = README.split("## Explore the handbook\n", 1)[1].split(
