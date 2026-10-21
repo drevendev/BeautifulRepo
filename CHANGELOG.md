@@ -3,6 +3,19 @@
 This log describes handbook and source changes, not packaged releases or version tags.
 Dates identify work on the repository; the linked pull requests retain integration history.
 
+## Unreleased — evidence-first reader journey
+
+- Put a tested local Rowcount result and an honest source/command path near
+  BeautifulRepo's README introduction, replacing duplicated navigation with
+  three clear entry routes while retaining all five working starter types.
+- Document why the explicitly fictional PocketDiff visual example uses its
+  existing theme-aware assets, text equivalents and restrained hierarchy.
+- Add an editorial evidence kit with fact-preserving README, announcement and
+  changelog examples, plus three distinct lead angles and explicit limits.
+- Expand regression checks for reader routes and editorial/example contracts.
+  Rendered desktop/mobile, high-zoom and assistive-technology acceptance remain
+  separately scoped, not claimed by these source-level tests.
+
 ## Unreleased — input integrity and reading fidelity
 
 - Refuse ambiguous repeated JSON keys before validating catalog resources or
