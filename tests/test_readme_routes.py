@@ -16,7 +16,7 @@ class ReaderRoutesTests(unittest.TestCase):
         for row in rows:
             with self.subTest(row=row):
                 self.assertEqual(row.count("|"), 4)
-        self.assertIn("tools/repo_audit.py", section)
+        self.assertIn("guides/repository-audit.md", section)
         self.assertIn("templates/README.template.md", section)
         self.assertIn("examples/README.md", section)
 
@@ -31,7 +31,7 @@ class ReaderRoutesTests(unittest.TestCase):
         )
         self.assertIn("Data rows: 3", top)
         self.assertIn("from the repository root", top)
-        self.assertIn("not a hosted service", top)
+        self.assertIn("not a hosted service", " ".join(top.split()))
 
     def test_detailed_handbook_remains_complete_but_not_duplicate_table(self):
         section = README.split("## Explore the handbook\n", 1)[1].split(
