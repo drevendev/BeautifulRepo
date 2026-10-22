@@ -44,8 +44,13 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Maintainer handoff recipe](guides/maintainer-handoff.md), with a fictional
   one-maintainer pause notice, responsibility checklist and real checkout commands.
 
-These linked resources are repository source files, not evidence that
-BeautifulRepo has published a packaged software release.
+- [GitHub Action and adoption guide](guides/adopting-the-checks.md) for running the
+  audit and link checks in other repositories, first tagged as
+  [`v0.1.0`](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0).
+
+These linked resources are repository source files. Tagged versions are listed on
+the [Releases page](https://github.com/drevendev/BeautifulRepo/releases). There is
+no installable package.
 
 ## Next: practical reference examples
 

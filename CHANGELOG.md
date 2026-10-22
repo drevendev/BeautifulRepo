@@ -1,9 +1,22 @@
 # Changelog
 
-This log describes handbook and source changes, not packaged releases or version tags.
-Dates identify work on the repository; the linked pull requests retain integration history.
+This log describes handbook, tool and GitHub Action changes. Tagged versions are
+published as [GitHub Releases](https://github.com/drevendev/BeautifulRepo/releases).
+Pin the commit SHA a tag points to rather than the tag name. Dates identify work on
+the repository, and the linked pull requests keep the integration history.
 
-## Unreleased — checks for other repositories
+## Unreleased
+
+- Pin the adoption guide's example workflow to the `v0.1.0` commit and explain how
+  to check where a tag points.
+
+## v0.1.0 — 2026-10-22
+
+First tagged version, at commit `96e04e6a79027354c5e84a4a28f3ba5f5441d484`.
+See the [release notes](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0).
+It includes all earlier handbook work listed below.
+
+### Checks for other repositories
 
 - Publish the audit and both link checks as a composite GitHub Action
   (`action.yml`) that other repositories pin to a reviewed commit. It uses the
@@ -14,7 +27,7 @@ Dates identify work on the repository; the linked pull requests retain integrati
   plus a CI self-test that runs the action on Ubuntu and Windows, including
   cases that must fail.
 
-## Unreleased — Windows checkout parity
+### Windows checkout parity
 
 - Check out text files with LF everywhere so fixture hashes and the
   generated-catalog comparison no longer fail on a Windows `core.autocrlf` checkout.
@@ -23,13 +36,13 @@ Dates identify work on the repository; the linked pull requests retain integrati
 - Compare the preserved catalog file mode with what the platform actually stores,
   and run the full checks on Windows with Python 3.14 in CI.
 
-## Unreleased — maintainer continuity recipe
+### Maintainer continuity recipe
 
 - Add a source-backed one-maintainer handoff checklist, fictional filled-in
   before/after example and actual local-check recovery route; distinguish public
   contributor rules from write/admin permissions and unverified private intake.
 
-## Unreleased — evidence-first reader journey
+### Evidence-first reader journey
 
 - Put a tested local Rowcount result and an honest source/command path near
   BeautifulRepo's README introduction, replacing duplicated navigation with
@@ -42,7 +55,7 @@ Dates identify work on the repository; the linked pull requests retain integrati
   Rendered desktop/mobile, high-zoom and assistive-technology acceptance remain
   separately scoped, not claimed by these source-level tests.
 
-## Unreleased — input integrity and reading fidelity
+### Input integrity and reading fidelity
 
 - Refuse ambiguous repeated JSON keys before validating catalog resources or
   loading the Pocket Board fixture; nested and Unicode-escaped aliases are errors.
@@ -56,9 +69,9 @@ Dates identify work on the repository; the linked pull requests retain integrati
 - Preserve existing generated catalog bytes on UTF-8 encoding or replacement
   errors (PR #36) and test Python 3.11/3.14 explicitly in CI (PR #35).
 
-## Unreleased — working repository workshop
+### Working repository workshop
 
-### Added
+#### Added
 
 - [Pocket Board application starter](examples/application-starter/README.md): a read-only,
   standard-library web example with a native status filter, light/dark styles, fictional
@@ -71,7 +84,7 @@ Dates identify work on the repository; the linked pull requests retain integrati
 - [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md)
   and [reproducible maintenance workflow](guides/maintenance-workflow.md).
 
-### Corrected
+#### Corrected
 
 - Collection parsing rejects repeated JSON keys, including nested and escaped spellings,
   before a decoder can silently overwrite metadata. Invalid UTF-8, excessive nesting and
@@ -84,7 +97,7 @@ Dates identify work on the repository; the linked pull requests retain integrati
 - Application testing instructions now disclose the temporary loopback listener. README
   and roadmap routes preserve all five starter types rather than replacing earlier additions.
 
-## Research/data and test discovery — 2026-10-17
+### Research/data and test discovery — 2026-10-17
 
 [Research/data starter (#13)](https://github.com/drevendev/BeautifulRepo/pull/13) adds a fully
 fabricated CSV, deterministic analysis, fixture digest, README template, provenance/citation
@@ -94,7 +107,7 @@ advice and mandatory navigation tests. The example makes no scientific or data-r
 fixed nested test count with successful nonempty discovery. Real temporary suites cover
 legitimate growth, zero tests, test failures, import errors and missing execution summaries.
 
-## Library starter and local audit — 2026-10-16
+### Library starter and local audit — 2026-10-16
 
 [Library starter (#10)](https://github.com/drevendev/BeautifulRepo/pull/10) provides a tested
 checkout-only API example, guide and README template without advertising an unpublished package.
@@ -104,7 +117,7 @@ read-only checks for reader entry points, actionable findings, text/JSON reports
 before/after example. Empty image alternatives and absent dedicated contribution guidance
 are informational, not universal failures; no beauty score or certification is produced.
 
-## Release guidance and accessible front page — 2026-10-14
+### Release guidance and accessible front page — 2026-10-14
 
 [Release-note guidance (#9)](https://github.com/drevendev/BeautifulRepo/pull/9) adds a guide,
 editable draft and tests distinguishing tags, GitHub Releases and maintained changelogs.
@@ -113,7 +126,7 @@ editable draft and tests distinguishing tags, GitHub Releases and maintained cha
 layout-only feature table with a list and preserves the visitor journey as real text next
 to the Mermaid diagram. Tests guard these structural properties, not assistive-technology certification.
 
-## Earlier handbook foundations — October 2026
+### Earlier handbook foundations — October 2026
 
 The initial handbook introduced a reader-first front page, repository checklist, README
 scaffold, annotated pattern studies, dated program guidance and an offline source catalog.

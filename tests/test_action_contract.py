@@ -39,7 +39,7 @@ class ActionContractTests(unittest.TestCase):
 
     def test_guide_pins_a_commit_and_is_linked(self):
         guide = (ROOT / "guides/adopting-the-checks.md").read_text(encoding="utf-8")
-        self.assertIn("uses: drevendev/BeautifulRepo@<full-commit-sha>", guide)
+        self.assertRegex(guide, r"uses: drevendev/BeautifulRepo@[0-9a-f]{40} # v\d+\.\d+\.\d+\n")
         for page in ("README.md", "tools/README.md"):
             with self.subTest(page=page):
                 text = (ROOT / page).read_text(encoding="utf-8")
