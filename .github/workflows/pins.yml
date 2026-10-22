@@ -1,0 +1,59 @@
+# Every BeautifulRepo pin the documentation publishes must still resolve.
+#
+# Adopters copy `drevendev/BeautifulRepo@<sha> # vX.Y.Z` from the guides. If the
+# tag were missing or pointed at another commit, they would copy a pin nobody
+# released. Pattern borrowed from Devostasis's "Released pins resolve" check.
+# Scheduled rather than per push: a release PR may name a tag that is created
+# only after it merges.
+name: Scheduled checks
+on:
+  schedule:
+    - cron: "37 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pins:
+    name: Documented pins match their tags
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          persist-credentials: false
+      - name: Collect pins from README and guides
+        run: |
+          grep -ohE 'drevendev/BeautifulRepo@[0-9a-f]{40} # v[0-9][0-9A-Za-z.+-]*' README.md guides/*.md \
+            | sed -E 's/.*@([0-9a-f]{40}) # (v.*)/\1 \2/' | sort -u > pins.txt
+          echo "pins found:"; cat pins.txt
+          test -s pins.txt || { echo "::error::no pins found: the pattern or the docs have drifted"; exit 1; }
+      - name: Each tag exists and points at the documented commit
+        run: |
+          status=0
+          while read -r sha tag; do
+            remote=$(git ls-remote https://github.com/drevendev/BeautifulRepo "refs/tags/$tag^{}" "refs/tags/$tag" | awk 'NR==1{print $1}')
+            if [ -z "$remote" ]; then
+              echo "::error::$tag does not exist"; status=1
+            elif [ "$remote" != "$sha" ]; then
+              echo "::error::$tag points at $remote, documentation pins $sha"; status=1
+            else
+              echo "ok: $tag -> $sha"
+            fi
+          done < pins.txt
+          exit $status
+
+  freshness:
+    name: Catalog freshness and self-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0 inspected 2026-10-19
+        with:
+          python-version: '3.14'
+      - name: Catalog metadata and review-date warnings
+        run: python tools/catalog.py
+      - name: Audit BeautifulRepo's own entry points
+        run: python tools/repo_audit.py . --fail-on warning

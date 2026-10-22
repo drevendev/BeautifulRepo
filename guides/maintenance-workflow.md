@@ -66,6 +66,20 @@ Do not create a release, public support channel or response-time promise just to
 make a checklist look complete. The [community guide](community-safety.md) explains
 why such promises must match the project's actual capacity.
 
+## 5. Keep pinned dependencies and published pins current
+
+- **Actions used by CI** are pinned to full commit SHAs with a dated comment, for
+  example `# v7.0.1 inspected 2026-10-05`. Dependabot (`.github/dependabot.yml`)
+  proposes updates weekly for the `github-actions` ecosystem only. Before merging such
+  a PR, look at the new release and refresh the inspected date by hand; Dependabot
+  updates the SHA, not your review.
+- **Pins this repository publishes**, such as `drevendev/BeautifulRepo@<sha> # v0.1.0`
+  in the adoption guide, are checked daily by `.github/workflows/pins.yml`: every
+  tag must exist and point at the documented commit. The same scheduled workflow
+  runs `tools/catalog.py` and `tools/repo_audit.py . --fail-on warning`, so review-date
+  and entry-point drift show up without a push. Run it by hand from the Actions tab
+  (`workflow_dispatch`) after tagging a release.
+
 ## Sources and boundaries
 
 Reviewed **2026-10-17**:

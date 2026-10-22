@@ -7,6 +7,11 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- CI hygiene borrowed from the owner's other repositories: a superseded pull-request
+  run is cancelled and checks can be started by hand; Dependabot proposes weekly
+  updates for the SHA-pinned Actions; a daily scheduled workflow verifies that every
+  `drevendev/BeautifulRepo@<sha> # vX.Y.Z` pin in the docs matches its tag, and
+  reports catalog freshness and self-audit warnings.
 - Pin the adoption guide's example workflow to the `v0.1.0` commit and explain how
   to check where a tag points.
 - `docs_links.py` and `html_navigation.py` now scan the current directory when
