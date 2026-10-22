@@ -7,6 +7,10 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Publish BeautifulRepo's own `SECURITY.md`, backed by GitHub private vulnerability
+  reporting (enabled 2026-10-22): triage owner, scope for the tools, Action and plugin,
+  no promised response time. Issue forms link the private route. A conduct policy is
+  still pending a verified reporting channel.
 - Name one check list everywhere: README, CONTRIBUTING, the maintenance guide and
   CI now all run the same five checks, including `repo_audit.py .`. The workflow is
   renamed "Quality checks" (required job names unchanged), and CONTRIBUTING

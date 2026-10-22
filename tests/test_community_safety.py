@@ -52,7 +52,11 @@ class CommunitySafetyTests(unittest.TestCase):
             normalized,
         )
         self.assertIn(
-            "A dedicated conduct policy and confirmed confidential reporting route remain on the roadmap",
+            "Report security vulnerabilities privately as described in [SECURITY.md](SECURITY.md).",
+            normalized,
+        )
+        self.assertIn(
+            "A dedicated conduct policy remains on the roadmap",
             normalized,
         )
         self.assertIn(
@@ -75,6 +79,15 @@ class CommunitySafetyTests(unittest.TestCase):
             text,
         )
         self.assertTrue((path.parent / "../guides/community-safety.md").resolve().is_file())
+
+    def test_security_policy_uses_only_the_verified_github_route(self):
+        policy = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+        self.assertIn("https://github.com/drevendev/BeautifulRepo/security/advisories/new", policy)
+        self.assertIsNone(PRIVATE_REPORTING_ROUTE_RE.search(policy), "no invented email route")
+        self.assertIn("no response time is", " ".join(policy.split()))
+        for form in ("problem.yml", "improvement.yml"):
+            text = (ROOT / ".github/ISSUE_TEMPLATE" / form).read_text(encoding="utf-8")
+            self.assertIn("security/advisories/new", text)
 
     def test_reporting_route_matcher_detects_real_email_addresses(self):
         self.assertIsNotNone(PRIVATE_REPORTING_ROUTE_RE.search("security@example.com"))

@@ -6,6 +6,7 @@ body:
     attributes:
       value: >-
         Do not post secrets, security-vulnerability details, exploit steps, or personal data in this public issue.
+        Report vulnerabilities privately instead: https://github.com/drevendev/BeautifulRepo/security/advisories/new
   - type: textarea
     id: location
     attributes:
