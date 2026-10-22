@@ -225,7 +225,7 @@ def heading_ids(markdown_without_code: str, explicit_ids: set[str],
     return found
 
 
-def check_repo(root: Path) -> tuple[list[str], int, int]:
+def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
     """Return (errors, checked_local_destinations, Markdown files inspected)."""
     root = root.resolve()
     errors: list[str] = []
@@ -242,9 +242,7 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
             parsed_files[path] = (heading_ids(masked, markup.ids, content), markup.refs)
         return parsed_files[path]
 
-    for source in sorted(root.rglob("*.md")):
-        if ".git" in source.parts:
-            continue
+    for source in docs_links.iter_markdown_files(root, exclude):
         name = source.relative_to(root).as_posix()
         try:
             resolved_source = source.resolve(strict=True)
@@ -302,10 +300,11 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    docs_links.add_exclude_argument(parser)
     args = parser.parse_args(argv)
     if not args.root.is_dir():
         parser.error("root must be an existing directory")
-    errors, checked, inspected = check_repo(args.root)
+    errors, checked, inspected = check_repo(args.root, args.exclude)
     for error in errors:
         print(error, file=sys.stderr)
     if errors:

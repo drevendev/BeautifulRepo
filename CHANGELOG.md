@@ -3,6 +3,17 @@
 This log describes handbook and source changes, not packaged releases or version tags.
 Dates identify work on the repository; the linked pull requests retain integration history.
 
+## Unreleased — checks for other repositories
+
+- Publish the audit and both link checks as a composite GitHub Action
+  (`action.yml`) that other repositories pin to a reviewed commit. It uses the
+  caller's Python 3.11+, validates its inputs and makes no network requests.
+- Never scan `.git` or `node_modules` Markdown, and add a repeatable `--exclude`
+  glob to `docs_links.py` and `html_navigation.py` for vendored or archived docs.
+- Add a consumer guide with a copy-paste workflow and a step-by-step rollout,
+  plus a CI self-test that runs the action on Ubuntu and Windows, including
+  cases that must fail.
+
 ## Unreleased — Windows checkout parity
 
 - Check out text files with LF everywhere so fixture hashes and the
