@@ -118,6 +118,8 @@ The additional HTML navigation check verifies bounded local HTML links, media as
 
 Other repositories can run the audit and both link checks as a GitHub Action
 pinned to a reviewed commit. See [run the checks in your repository](guides/adopting-the-checks.md).
+Coding agents can run the same audit through the BeautifulRepo plugin for
+Claude Code and Codex. See [use BeautifulRepo from an agent](guides/agent-plugin.md).
 
 These tools do **not** claim to be a live-link crawler, complete GitHub Markdown renderer, security scanner, runtime accessibility certification, or repository beauty score. Manual judgement still matters.
 
@@ -145,7 +147,9 @@ not a second copy of the first-screen chooser.
   [maintenance workflow](guides/maintenance-workflow.md),
   [offline repository audit](guides/repository-audit.md),
   [tools](tools/README.md) and how to
-  [run them in your repository's CI](guides/adopting-the-checks.md),
+  [run them in your repository's CI](guides/adopting-the-checks.md) or
+  [from Claude Code and Codex](guides/agent-plugin.md) under the
+  [agent ground rules](guides/agent-safety.md),
   [Community safety readiness](guides/community-safety.md).
 - **Research and adapt:** [annotated studies](case-studies/first-patterns.md),
   [reviewed sources](catalog/README.md),

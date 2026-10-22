@@ -1,0 +1,19 @@
+{
+  "name": "beautifulrepo",
+  "owner": {
+    "name": "Dreven",
+    "url": "https://github.com/drevendev"
+  },
+  "metadata": {
+    "description": "BeautifulRepo: make repositories easy to understand, try and trust."
+  },
+  "plugins": [
+    {
+      "name": "beautifulrepo",
+      "source": "./",
+      "description": "Audit how a repository presents itself to readers, offline and read-only, using BeautifulRepo's checklists and tools.",
+      "category": "productivity",
+      "keywords": ["readme", "documentation", "repository-audit"]
+    }
+  ]
+}
