@@ -116,6 +116,9 @@ The same checks run in GitHub Actions. They validate structured catalog metadata
 
 The additional HTML navigation check verifies bounded local HTML links, media assets and section fragments.
 
+Other repositories can run the audit and both link checks as a GitHub Action
+pinned to a reviewed commit. See [run the checks in your repository](guides/adopting-the-checks.md).
+
 These tools do **not** claim to be a live-link crawler, complete GitHub Markdown renderer, security scanner, runtime accessibility certification, or repository beauty score. Manual judgement still matters.
 
 ## Explore the handbook
@@ -141,7 +144,8 @@ not a second copy of the first-screen chooser.
   a [release-note template](templates/RELEASE_NOTES.template.md),
   [maintenance workflow](guides/maintenance-workflow.md),
   [offline repository audit](guides/repository-audit.md),
-  [tools](tools/README.md),
+  [tools](tools/README.md) and how to
+  [run them in your repository's CI](guides/adopting-the-checks.md),
   [Community safety readiness](guides/community-safety.md).
 - **Research and adapt:** [annotated studies](case-studies/first-patterns.md),
   [reviewed sources](catalog/README.md),

@@ -1,0 +1,103 @@
+name: BeautifulRepo checks
+description: >-
+  Offline checks for a repository's reader entry points (README, license,
+  contribution guide) and its repository-owned Markdown links, local HTML
+  destinations and section anchors. No network requests, no project execution.
+
+inputs:
+  path:
+    description: Repository directory to check, relative to the workspace.
+    required: false
+    default: '.'
+  checks:
+    description: >-
+      Space-separated checks to run: audit (tools/repo_audit.py),
+      docs-links (tools/docs_links.py), html-navigation (tools/html_navigation.py).
+    required: false
+    default: audit docs-links html-navigation
+  audit-fail-on:
+    description: Lowest audit severity that fails the step - error, warning or never.
+    required: false
+    default: error
+  exclude:
+    description: >-
+      Newline-separated globs, relative to path, for Markdown sources the link
+      checks skip (for example vendor or docs/archive). .git and node_modules
+      are always skipped. Excluded files still count as link destinations.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    # Tools come from this action's own checkout, so they always match the ref
+    # the caller pinned. No setup-python: the caller's interpreter is left alone.
+    - name: Select Python 3.11+ and validate inputs
+      id: setup
+      shell: bash
+      env:
+        CHECKS: ${{ inputs.checks }}
+        TARGET: ${{ inputs.path }}
+      run: |
+        python=""
+        for candidate in python3 python; do
+          if command -v "$candidate" >/dev/null 2>&1 &&
+             "$candidate" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then
+            python="$candidate"
+            break
+          fi
+        done
+        if [ -z "$python" ]; then
+          echo "::error title=BeautifulRepo checks::Python 3.11 or newer is required on PATH (add actions/setup-python first)."
+          exit 1
+        fi
+        "$python" --version
+        echo "python=$python" >> "$GITHUB_OUTPUT"
+        if [ ! -d "$TARGET" ]; then
+          echo "::error title=BeautifulRepo checks::path is not a directory: $TARGET"
+          exit 1
+        fi
+        for check in $CHECKS; do
+          case "$check" in
+            audit|docs-links|html-navigation) ;;
+            *) echo "::error title=BeautifulRepo checks::unknown check '$check' (expected audit, docs-links, html-navigation)"; exit 1 ;;
+          esac
+        done
+
+    - name: Audit reader entry points
+      if: contains(format(' {0} ', inputs.checks), ' audit ')
+      shell: bash
+      env:
+        PYTHON: ${{ steps.setup.outputs.python }}
+        TARGET: ${{ inputs.path }}
+        FAIL_ON: ${{ inputs.audit-fail-on }}
+      run: |
+        "$PYTHON" "$GITHUB_ACTION_PATH/tools/repo_audit.py" "$TARGET" --fail-on "$FAIL_ON"
+
+    - name: Check repository-owned Markdown destinations
+      if: contains(format(' {0} ', inputs.checks), ' docs-links ')
+      shell: bash
+      env:
+        PYTHON: ${{ steps.setup.outputs.python }}
+        TARGET: ${{ inputs.path }}
+        EXCLUDE: ${{ inputs.exclude }}
+      run: |
+        args=()
+        while IFS= read -r pattern; do
+          if [ -n "${pattern//[[:space:]]/}" ]; then args+=(--exclude "$pattern"); fi
+        done <<< "$EXCLUDE"
+        "$PYTHON" "$GITHUB_ACTION_PATH/tools/docs_links.py" --root "$TARGET" "${args[@]}"
+
+    - name: Check HTML navigation and local anchors
+      if: contains(format(' {0} ', inputs.checks), ' html-navigation ')
+      shell: bash
+      env:
+        PYTHON: ${{ steps.setup.outputs.python }}
+        TARGET: ${{ inputs.path }}
+        EXCLUDE: ${{ inputs.exclude }}
+      run: |
+        args=()
+        while IFS= read -r pattern; do
+          if [ -n "${pattern//[[:space:]]/}" ]; then args+=(--exclude "$pattern"); fi
+        done <<< "$EXCLUDE"
+        "$PYTHON" "$GITHUB_ACTION_PATH/tools/html_navigation.py" --root "$TARGET" "${args[@]}"

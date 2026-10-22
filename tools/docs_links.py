@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 from html.entities import html5
+import os
 import re
 import string
 import sys
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+
+# Version control and installed dependency trees are never repository-owned documentation.
+SKIPPED_DIRECTORIES = frozenset({".git", "node_modules"})
 
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
@@ -779,16 +784,56 @@ def resolve_local_destination(root: Path, source: Path, destination: str):
     return resolved, None
 
 
-def check_repo(root: Path):
+def normalize_exclude(pattern: str) -> str:
+    """Return a root-relative POSIX glob without surrounding space, ``./`` or trailing ``/``."""
+    pattern = pattern.strip().replace("\\", "/")
+    while pattern.startswith("./"):
+        pattern = pattern[2:]
+    return pattern.rstrip("/")
+
+
+def iter_markdown_files(root: Path, exclude=()) -> list[Path]:
+    """Sorted Markdown sources under root, without skipped or excluded paths.
+
+    Each ``exclude`` glob is matched case-sensitively against root-relative POSIX
+    paths of directories and files; a matching directory is not descended into.
+    Excluded files can still be link destinations.
+    """
+    patterns = [pattern for pattern in map(normalize_exclude, exclude) if pattern]
+
+    def excluded(relative: str) -> bool:
+        return any(fnmatch.fnmatchcase(relative, pattern) for pattern in patterns)
+
+    found = []
+    for directory, dirnames, filenames in os.walk(root):
+        relative_dir = Path(directory).relative_to(root).as_posix()
+        prefix = "" if relative_dir == "." else f"{relative_dir}/"
+        dirnames[:] = [name for name in dirnames
+                       if name not in SKIPPED_DIRECTORIES and not excluded(prefix + name)]
+        found.extend(Path(directory) / name for name in filenames
+                     if fnmatch.fnmatch(name, "*.md") and not excluded(prefix + name))
+    return sorted(found)
+
+
+def add_exclude_argument(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="skip Markdown sources whose root-relative path or parent directory matches "
+             "(repeatable); .git and node_modules are always skipped",
+    )
+
+
+def check_repo(root: Path, exclude=()):
     """Return (errors, checked_destinations, markdown_files)."""
     root = root.resolve()
     errors = []
     checked = 0
     markdown_files = 0
 
-    for path in sorted(root.rglob("*.md")):
-        if ".git" in path.parts:
-            continue
+    for path in iter_markdown_files(root, exclude):
         markdown_files += 1
         relative_source = path.relative_to(root).as_posix()
         try:
@@ -832,13 +877,14 @@ def main(argv=None):
         default=Path(__file__).resolve().parents[1],
         help="repository root to scan (default: parent of tools/)",
     )
+    add_exclude_argument(parser)
     args = parser.parse_args(argv)
 
     root = args.root.resolve()
     if not root.is_dir():
         parser.error(f"root is not a directory: {root}")
 
-    errors, checked, markdown_files = check_repo(root)
+    errors, checked, markdown_files = check_repo(root, args.exclude)
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
