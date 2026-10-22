@@ -7,6 +7,10 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Name one check list everywhere: README, CONTRIBUTING, the maintenance guide and
+  CI now all run the same five checks, including `repo_audit.py .`. The workflow is
+  renamed "Quality checks" (required job names unchanged), and CONTRIBUTING
+  describes the protected `master`.
 - Add `.editorconfig` (UTF-8, LF, final newline, 4/2-space indents) that keeps
   trailing spaces in Markdown, where two of them are a hard line break.
 - CI hygiene borrowed from the owner's other repositories: a superseded pull-request
