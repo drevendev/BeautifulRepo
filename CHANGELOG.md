@@ -7,6 +7,8 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Add `.editorconfig` (UTF-8, LF, final newline, 4/2-space indents) that keeps
+  trailing spaces in Markdown, where two of them are a hard line break.
 - CI hygiene borrowed from the owner's other repositories: a superseded pull-request
   run is cancelled and checks can be started by hand; Dependabot proposes weekly
   updates for the SHA-pinned Actions; a daily scheduled workflow verifies that every
