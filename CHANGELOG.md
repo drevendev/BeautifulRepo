@@ -7,6 +7,9 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Commit the Hungry Crab maw config (`.crab.yml`) and decision ledger
+  (`.crab/ledger.json`), so later `crab` runs skip practices already served and
+  `crab tune` can learn from decisions.
 - Route questions to the newly enabled Discussions from the issue chooser (blank
   issues off; security and abuse routes listed), label new issues from the forms, and
   explain every label in CONTRIBUTING.
