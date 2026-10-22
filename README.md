@@ -175,7 +175,7 @@ not a second copy of the first-screen chooser.
 BeautifulRepo is a working handbook, not an exhaustive or independently certified standard.
 The [roadmap](ROADMAP.md) tracks deeper examples, more reusable templates, tool experiments and accessibility work.
 
-Suggestions and small improvements are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Please report accessibility barriers through [GitHub Issues](https://github.com/drevendev/BeautifulRepo/issues/new/choose), and follow the [community safety guidance](guides/community-safety.md) before posting sensitive material.
+Suggestions and small improvements are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Ask questions in [Discussions](https://github.com/drevendev/BeautifulRepo/discussions). Please report accessibility barriers through [GitHub Issues](https://github.com/drevendev/BeautifulRepo/issues/new/choose), and follow the [community safety guidance](guides/community-safety.md) before posting sensitive material.
 
 Public documentation is maintained in English.
 

@@ -1,6 +1,7 @@
 name: Improvement or resource
 description: Propose an actionable improvement with evidence.
 title: "[Improvement] "
+labels: ["enhancement"]
 body:
   - type: markdown
     attributes:

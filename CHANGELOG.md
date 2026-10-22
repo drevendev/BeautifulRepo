@@ -7,6 +7,9 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Route questions to the newly enabled Discussions from the issue chooser (blank
+  issues off; security and abuse routes listed), label new issues from the forms, and
+  explain every label in CONTRIBUTING.
 - Publish BeautifulRepo's own `SECURITY.md`, backed by GitHub private vulnerability
   reporting (enabled 2026-10-22): triage owner, scope for the tools, Action and plugin,
   no promised response time. Issue forms link the private route. A conduct policy is
