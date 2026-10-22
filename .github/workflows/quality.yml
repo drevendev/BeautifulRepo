@@ -36,3 +36,57 @@ jobs:
         run: python tools/docs_links.py
       - name: Check HTML navigation and local anchors
         run: python tools/html_navigation.py
+
+  action:
+    # Exercises action.yml the way another repository would call it.
+    name: Action self-test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0 inspected 2026-10-19
+        with:
+          python-version: '3.11'
+      - name: Check BeautifulRepo with its own action
+        uses: ./
+      - name: Create a fixture with a broken link in vendor/
+        shell: bash
+        run: |
+          mkdir -p .selftest/broken/vendor
+          printf '# Fixture\n\nA healthy entry point.\n' > .selftest/broken/README.md
+          printf '[Missing](does-not-exist.md)\n' > .selftest/broken/vendor/README.md
+      - name: Broken link must fail
+        id: broken
+        continue-on-error: true
+        uses: ./
+        with:
+          path: .selftest/broken
+          checks: docs-links html-navigation
+      - name: Unknown check name must fail
+        id: typo
+        continue-on-error: true
+        uses: ./
+        with:
+          checks: audit doc-links
+      - name: Excluding vendor/ must pass
+        uses: ./
+        with:
+          path: .selftest/broken
+          checks: docs-links html-navigation
+          exclude: |
+            vendor
+      - name: Require the negative cases to have failed
+        shell: bash
+        env:
+          BROKEN: ${{ steps.broken.outcome }}
+          TYPO: ${{ steps.typo.outcome }}
+        run: |
+          echo "broken-link run: $BROKEN; unknown-check run: $TYPO"
+          test "$BROKEN" = failure
+          test "$TYPO" = failure

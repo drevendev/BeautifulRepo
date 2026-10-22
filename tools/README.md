@@ -10,6 +10,9 @@ python tools/html_navigation.py          # verify local HTML/media and Markdown 
 python -m unittest discover -s tests -v
 ```
 
+To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
+repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
+
 `--data` and `--output` accept alternative paths for a separate collection.
 `--write` prepares UTF-8 bytes and atomically replaces the selected output via a temporary sibling; review the path before using it. Failed encoding/replacement leaves the previous file unchanged (this is not an fsync/crash-durability guarantee).
 
@@ -44,6 +47,11 @@ repository-owned link and image destinations resolve to existing files or direct
 supports paths relative to the current document, repository-root paths beginning with `/`,
 URL-encoded path characters, and ordinary query/fragment suffixes on an otherwise local path.
 It rejects destinations that escape the repository root.
+
+`.git` and `node_modules` directories are never scanned. Repeat `--exclude GLOB` to
+skip other root-relative paths, such as `--exclude vendor`. A matching directory is
+not descended into, and excluded files remain valid link destinations.
+`html_navigation.py` accepts the same option.
 
 The checker deliberately does **not** fetch external URLs, validate redirect targets, certify
 rendered HTML, or validate section fragments/heading anchors. It ignores links inside fenced
