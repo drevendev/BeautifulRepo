@@ -18,13 +18,18 @@ From the BeautifulRepo root, with Python 3.11+:
 ```bash
 python tools/catalog.py
 python tools/docs_links.py
+python tools/html_navigation.py
 python -m unittest discover -s tests -v
 ```
 
 These commands check catalog metadata and generated drift, repository-owned
-Markdown destinations and the full default regression suite. They do not fetch
-external sources, certify accessibility or evaluate a deployed production service.
+Markdown destinations, local HTML links/media and Markdown section anchors, and the
+full default regression suite. The HTML checker complements the Markdown checker;
+it is not a complete GitHub renderer, external URL crawler or screen-reader audit.
+These commands do not fetch external sources, certify accessibility or evaluate a
+deployed production service.
 The application tests open and close a short-lived loopback HTTP listener.
+See [tool contracts](../tools/README.md) for the precise offline check boundaries.
 
 When changing `catalog/resources.json`, regenerate deliberately, inspect the diff,
 then rerun the check:

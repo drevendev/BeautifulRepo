@@ -8,7 +8,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - Reader-first [README](README.md), [repository checklist](checklists/repository.md),
   [README guide](guides/readme.md) and [README scaffold](templates/README.template.md).
 - [Visual README patterns](guides/readme-visuals.md), including a before/after example
-  with theme-aware assets and text equivalents.
+  with theme-aware assets, text equivalents and a
+  [project-specific design brief](examples/readme-visuals/DESIGN_INTENT.md).
+- [Editorial evidence kit](guides/editorial-evidence.md), with fact-preserving
+  before/after README, announcement and changelog copy examples.
 - [Offline catalog validation](tools/README.md) and repository-owned Markdown
   destination checks, both exercised by CI.
 - [Offline repository entry-point audit](guides/repository-audit.md), with bounded
@@ -37,6 +40,7 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   Markdown/JSON output and explicit input boundaries.
 - [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md),
   [maintenance workflow](guides/maintenance-workflow.md) and application/collection README templates.
+
 - [Maintainer handoff recipe](guides/maintainer-handoff.md), with a fictional
   one-maintainer pause notice, responsibility checklist and real checkout commands.
 
