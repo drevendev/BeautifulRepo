@@ -1,7 +1,29 @@
 # Changelog
 
+## Unreleased — real README adaptation evidence
+
+- Publish a concrete BeautifulRepo README before/after case with fixed source
+  revisions, a reproduced local command, tradeoffs and honest untested areas.
+- Link the case from the main README; rendered visual and assistive-technology
+  acceptance remain open rather than being claimed from source inspection.
+
 This log describes handbook and source changes, not packaged releases or version tags.
 Dates identify work on the repository; the linked pull requests retain integration history.
+
+## Unreleased — Windows checkout parity
+
+- Check out text files with LF everywhere so fixture hashes and the
+  generated-catalog comparison no longer fail on a Windows `core.autocrlf` checkout.
+- Write the curated starter's JSON/Markdown output as UTF-8 when stdout is
+  redirected on Windows, instead of crashing on non-ASCII collection text.
+- Compare the preserved catalog file mode with what the platform actually stores,
+  and run the full checks on Windows with Python 3.14 in CI.
+
+## Unreleased — maintainer continuity recipe
+
+- Add a source-backed one-maintainer handoff checklist, fictional filled-in
+  before/after example and actual local-check recovery route; distinguish public
+  contributor rules from write/admin permissions and unverified private intake.
 
 ## Unreleased — evidence-first reader journey
 

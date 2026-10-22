@@ -44,6 +44,11 @@ The [input CSV](examples/cli-starter/sample.csv) and
 This is a deliberately small count of data records, not a schema validator or a
 hosted service. No package installation or network access is required.
 
+For a real application of this approach to BeautifulRepo itself, see the
+[README before/after case](case-studies/readme-first-success-case.md): immutable
+revisions, independently reproduced command output, and explicit gaps in
+GitHub-rendered visual and assistive-technology verification.
+
 For an actual **before/after documentation diagnostic**, run
 `python examples/repository-audit/demo.py` from the same root. Its
 [test-backed walkthrough](examples/repository-audit/README.md) shows four
@@ -169,6 +174,9 @@ The [roadmap](ROADMAP.md) tracks deeper examples, more reusable templates, tool 
 Suggestions and small improvements are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Please report accessibility barriers through [GitHub Issues](https://github.com/drevendev/BeautifulRepo/issues/new/choose), and follow the [community safety guidance](guides/community-safety.md) before posting sensitive material.
 
 Public documentation is maintained in English.
+
+For a practical continuity example, see the [maintainer handoff recipe](guides/maintainer-handoff.md):
+it separates public onboarding from permissions, releases, and private reporting.
 
 ## License
 

@@ -26,7 +26,7 @@ class CuratedCollectionTests(unittest.TestCase):
 
     def cli(self, *args):
         return subprocess.run([sys.executable, str(EXAMPLE / "curate.py"), *args],
-                              cwd=EXAMPLE, capture_output=True, text=True,
+                              cwd=EXAMPLE, capture_output=True, text=True, encoding="utf-8",
                               check=False, timeout=10)
 
     def fixture(self, data):

@@ -7,6 +7,7 @@ from html import escape
 import json
 from pathlib import Path
 import re
+import sys
 from urllib.parse import urlsplit
 
 HERE = Path(__file__).resolve().parent
@@ -164,6 +165,9 @@ def main(argv: list[str] | None = None) -> int:
         output = report(raw, as_of, options.max_age_days)
     except (OSError, ValueError, UnicodeError, RecursionError):
         parser.exit(1, "Invalid collection input or unavailable file\n")
+    # Output is UTF-8 like the input; a redirected Windows stdout would otherwise use cp1252.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     if options.format == "json":
         print(json.dumps(output, indent=2, ensure_ascii=False, sort_keys=True))
     else:
