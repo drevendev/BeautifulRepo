@@ -1,0 +1,20 @@
+{
+  "name": "beautifulrepo",
+  "interface": {
+    "displayName": "BeautifulRepo"
+  },
+  "plugins": [
+    {
+      "name": "beautifulrepo",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

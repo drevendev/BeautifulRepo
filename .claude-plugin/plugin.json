@@ -1,0 +1,13 @@
+{
+  "name": "beautifulrepo",
+  "version": "0.2.0-dev.0",
+  "description": "Audit how a repository presents itself to readers, offline and read-only, using BeautifulRepo's checklists and tools.",
+  "author": {
+    "name": "Dreven",
+    "url": "https://github.com/drevendev"
+  },
+  "homepage": "https://github.com/drevendev/BeautifulRepo",
+  "repository": "https://github.com/drevendev/BeautifulRepo",
+  "license": "MIT",
+  "keywords": ["readme", "documentation", "repository-audit", "agent-skills"]
+}

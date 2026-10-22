@@ -13,6 +13,11 @@ the repository, and the linked pull requests keep the integration history.
   `--root` is omitted, like `repo_audit.py`. Previously they silently checked
   BeautifulRepo's own checkout. `html_navigation.py` also runs under `python -I`.
   Commands run from the BeautifulRepo root behave as before.
+- Package BeautifulRepo as one plugin for Claude Code and Codex, version
+  `0.2.0-dev.0`. Its read-only `audit-repo` skill runs the offline tools from the
+  installed copy against a target repository and applies the checklists. The plugin
+  comes with ground rules for agents (`guides/agent-safety.md`), an install guide
+  (`guides/agent-plugin.md`) and manifest/skill contract tests.
 
 ## v0.1.0 — 2026-10-22
 
