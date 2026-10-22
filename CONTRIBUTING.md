@@ -92,7 +92,7 @@ abandoned queue. No guaranteed response-time service level is claimed.
 
 Discuss the work, not personal attributes. Harassment, doxxing and discriminatory conduct
 are not welcome. Do not post secrets, private logs or personal contact information in
-issues. A dedicated conduct policy and confirmed confidential reporting route remain on
-the roadmap; their absence must not be represented as complete community compliance.
-For sensitive abuse that cannot safely be posted here, use GitHub's platform reporting
-facilities rather than disclosing private details in an issue.
+issues. Report security vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
+A dedicated conduct policy remains on the roadmap; its absence must not be represented
+as complete community compliance. For sensitive abuse that cannot safely be posted here,
+use GitHub's platform reporting facilities rather than disclosing private details in an issue.

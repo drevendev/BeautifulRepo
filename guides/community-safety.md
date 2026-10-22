@@ -97,17 +97,19 @@ the checklist as discovery, then inspect whether the process works.
 
 ## BeautifulRepo's current decision
 
-As reviewed on **2026-10-07**, BeautifulRepo does not publish a repository-level
-`SECURITY.md` or `CODE_OF_CONDUCT.md` in GitHub's recognized `.github`, repository-root or
-`docs` locations. No public `drevendev/.github` defaults are visible either. That is
-intentional: a dedicated confidential reporting route and conduct-enforcement path have not
-been verified. `CONTRIBUTING.md` therefore tells readers not to post private material and
-points sensitive abuse to GitHub's platform reporting facilities without pretending that
-this repository operates a confidential inbox.
+**Security (updated 2026-10-22).** The owner enabled GitHub private vulnerability
+reporting for this repository and published [`SECURITY.md`](../SECURITY.md). It names the
+maintainer who triages, the reporter-facing form, what counts as a vulnerability for these
+tools, and supported versions. It promises no response time, because one maintainer cannot
+guarantee one. The intake side still depends on the maintainer's GitHub notification
+settings, as described above.
 
-The next step is operational, not cosmetic: verify a private reporting mechanism and an
-enforcement owner, then adapt and publish the relevant policy. Until then, the reusable
-security scaffold remains a template, not BeautifulRepo's own security policy.
+**Conduct (as reviewed on 2026-10-07, unchanged).** BeautifulRepo does not publish a
+`CODE_OF_CONDUCT.md`: a private channel for conduct reports and an enforcement path have
+not been verified. `CONTRIBUTING.md` tells readers not to post private material and points
+sensitive abuse to GitHub's platform reporting facilities, without pretending that this
+repository operates a confidential inbox. The reusable security scaffold in `templates/`
+remains a template for other projects.
 
 ## Sources and limits
 
