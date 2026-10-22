@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 from html import unescape
+import importlib.util
 from html.parser import HTMLParser
 from pathlib import Path
 import re
@@ -16,8 +17,17 @@ from urllib.parse import unquote, urlsplit
 
 try:
     from . import docs_links
-except ImportError:  # direct invocation: python tools/html_navigation.py
-    import docs_links
+except ImportError:
+    # Direct invocation. Load the sibling by path: `python -I` drops the script's
+    # directory from sys.path, so a plain `import docs_links` would fail there.
+    _SIBLING = Path(__file__).resolve().with_name("docs_links.py")
+    docs_links = sys.modules.get("docs_links")
+    if docs_links is None or Path(getattr(docs_links, "__file__", "")).resolve() != _SIBLING:
+        _spec = importlib.util.spec_from_file_location("docs_links", _SIBLING)
+        assert _spec is not None and _spec.loader is not None
+        docs_links = importlib.util.module_from_spec(_spec)
+        sys.modules["docs_links"] = docs_links
+        _spec.loader.exec_module(docs_links)
 
 HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$")
 LINK = re.compile(r"\[([^\]]+)\]\([^)]*\)")
@@ -299,7 +309,8 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--root", type=Path, default=Path("."),
+                        help="repository root to scan (default: current directory)")
     docs_links.add_exclude_argument(parser)
     args = parser.parse_args(argv)
     if not args.root.is_dir():

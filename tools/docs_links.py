@@ -874,8 +874,8 @@ def main(argv=None):
     parser.add_argument(
         "--root",
         type=Path,
-        default=Path(__file__).resolve().parents[1],
-        help="repository root to scan (default: parent of tools/)",
+        default=Path("."),
+        help="repository root to scan (default: current directory)",
     )
     add_exclude_argument(parser)
     args = parser.parse_args(argv)

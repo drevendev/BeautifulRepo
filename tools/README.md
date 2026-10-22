@@ -53,6 +53,17 @@ skip other root-relative paths, such as `--exclude vendor`. A matching directory
 not descended into, and excluded files remain valid link destinations.
 `html_navigation.py` accepts the same option.
 
+Without `--root`, both link checkers scan the **current directory**, like
+`repo_audit.py`, never the checkout the tools live in. All three also run under
+`python -I` (isolated mode), the safer way to run them next to a repository you
+don't control. For example, from inside another repository:
+
+```bash
+python -I /path/to/BeautifulRepo/tools/docs_links.py
+python -I /path/to/BeautifulRepo/tools/html_navigation.py
+python -I /path/to/BeautifulRepo/tools/repo_audit.py .
+```
+
 The checker deliberately does **not** fetch external URLs, validate redirect targets, certify
 rendered HTML, or validate section fragments/heading anchors. It ignores links inside fenced
 and single-backtick inline code because documentation examples should not become dependencies.

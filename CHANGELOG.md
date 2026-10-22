@@ -9,6 +9,10 @@ the repository, and the linked pull requests keep the integration history.
 
 - Pin the adoption guide's example workflow to the `v0.1.0` commit and explain how
   to check where a tag points.
+- `docs_links.py` and `html_navigation.py` now scan the current directory when
+  `--root` is omitted, like `repo_audit.py`. Previously they silently checked
+  BeautifulRepo's own checkout. `html_navigation.py` also runs under `python -I`.
+  Commands run from the BeautifulRepo root behave as before.
 
 ## v0.1.0 — 2026-10-22
 
