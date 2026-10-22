@@ -1,4 +1,4 @@
-name: Catalog quality
+name: Quality checks
 on:
   pull_request:
   push:
@@ -33,7 +33,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Show selected interpreter
         run: python --version
-      - name: Test catalog behavior
+      - name: Run the unit tests
         run: python -m unittest discover -s tests -v
       - name: Check catalog metadata and generated view
         run: python tools/catalog.py
@@ -41,6 +41,8 @@ jobs:
         run: python tools/docs_links.py
       - name: Check HTML navigation and local anchors
         run: python tools/html_navigation.py
+      - name: Audit BeautifulRepo's own entry points
+        run: python tools/repo_audit.py .
 
   action:
     # Exercises action.yml the way another repository would call it.

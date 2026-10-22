@@ -26,14 +26,26 @@ python tools/catalog.py
 python tools/docs_links.py
 python tools/html_navigation.py
 python -m unittest discover -s tests -v
+python tools/repo_audit.py .
 ```
 
-The first command explicitly regenerates `catalog/README.md`; the others are checks.
+The first command explicitly regenerates `catalog/README.md`; the others are the five
+checks CI runs. `repo_audit.py` audits BeautifulRepo's own README, licence and
+contribution entry points.
 The original documentation-link check covers repository-owned inline Markdown
 link and image paths. The HTML navigation checker adds bounded local HTML/media
 and section-fragment checks. Neither checks external URLs, completely renders
 Markdown, or certifies accessibility. Review the generated diff. No network
 access or third-party Python packages are needed.
+
+## How a change reaches `master`
+
+`master` is protected: every change arrives through a pull request, merged with
+**squash** only, after the required checks pass on a branch that is up to date with
+`master`. The required checks are `Python 3.11`, `Python 3.14`,
+`Python 3.14 (Windows)`, `Action self-test (ubuntu-latest)` and
+`Action self-test (windows-latest)`. Force-pushes and deletion of `master`, and
+moving or deleting `v*` release tags, are blocked for everyone, including admins.
 
 ## Link issues without closing unfinished work
 

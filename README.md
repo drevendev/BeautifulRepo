@@ -110,6 +110,7 @@ python tools/catalog.py
 python tools/docs_links.py
 python tools/html_navigation.py
 python -m unittest discover -s tests -v
+python tools/repo_audit.py .
 ```
 
 The same checks run in GitHub Actions. They validate structured catalog metadata, generated catalog drift, repository-owned relative Markdown destinations, and structural regressions in the examples and public repository surfaces.

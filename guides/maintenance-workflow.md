@@ -20,6 +20,7 @@ python tools/catalog.py
 python tools/docs_links.py
 python tools/html_navigation.py
 python -m unittest discover -s tests -v
+python tools/repo_audit.py .
 ```
 
 These commands check catalog metadata and generated drift, repository-owned

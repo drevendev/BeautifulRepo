@@ -10,8 +10,8 @@ Name primary sources, inspected revisions and any reuse permissions that matter.
 
 ## Verification
 
-- [ ] Catalog validation and generated-view check completed.
-- [ ] Relevant tests passed; exact commands and results are recorded below.
+- [ ] The five local checks from CONTRIBUTING passed (unit tests, catalog, docs links,
+      HTML navigation, repo audit); exact commands and results are recorded below.
 - [ ] Documentation links and examples were inspected.
 - [ ] Accessibility and visual checks actually performed are described, not assumed.
 
