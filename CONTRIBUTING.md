@@ -10,6 +10,30 @@ Read the [roadmap](ROADMAP.md) and search existing issues and pull requests. Des
 reader's problem before proposing a solution. An issue is helpful for a large change;
 a small correction can go straight to a pull request. Keep one topic per contribution.
 
+## Ask a question
+
+Questions, ideas and stories about using BeautifulRepo belong in
+[Discussions](https://github.com/drevendev/BeautifulRepo/discussions); the **Q&A**
+category lets an answer be marked as accepted. Issues are for reproducible problems and
+concrete improvements. Security vulnerabilities go through [SECURITY.md](SECURITY.md).
+
+## Find work by label
+
+| Label | Meaning |
+| --- | --- |
+| `good first issue` | Scoped, with files and acceptance criteria named; a good first contribution. |
+| `bug`, `enhancement`, `documentation`, `accessibility` | The kind of change. Issue forms set the first two. |
+| `epic` | An umbrella issue; the work happens in its sub-issues. |
+| `self-check` | BeautifulRepo passing its own checklists. |
+| `borrowed-practice` | A practice adopted from another drevendev repository (`hungry-crab` marks those Hungry Crab suggested). |
+| `agent-skill` | The Claude Code and Codex plugin and its skills. |
+| `private-repos` | Support for private and internal repositories. |
+| `real-case` | A before/after case on a real repository. |
+| `hacktoberfest` | Hacktoberfest 2026 participation, reviewed after the event. |
+
+If no `good first issue` is open, none is curated right now; ask in Discussions before
+starting something large.
+
 ## Add a resource
 
 Edit `catalog/resources.json`, not its generated README. Each resource needs a primary

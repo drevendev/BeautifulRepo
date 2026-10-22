@@ -1,0 +1,12 @@
+# Every route below exists; nothing here advertises an unverified channel.
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question or share how you used BeautifulRepo
+    url: https://github.com/drevendev/BeautifulRepo/discussions
+    about: Questions, ideas and show-and-tell go to Discussions, not issues.
+  - name: Report a security vulnerability privately
+    url: https://github.com/drevendev/BeautifulRepo/security/advisories/new
+    about: Private vulnerability reporting. See SECURITY.md; never post exploit details in public.
+  - name: Report abuse or harassment to GitHub
+    url: https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam
+    about: BeautifulRepo has no private conduct inbox yet; GitHub's platform reporting is the safe route.

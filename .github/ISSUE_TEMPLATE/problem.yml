@@ -1,6 +1,7 @@
 name: Bug, broken guidance or accessibility barrier
 description: Report a reproducible problem in the handbook or tools.
 title: "[Problem] "
+labels: ["bug"]
 body:
   - type: markdown
     attributes:
