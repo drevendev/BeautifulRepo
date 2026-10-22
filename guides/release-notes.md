@@ -115,4 +115,5 @@ Reviewed **2026-10-09**:
 - [Keep a Changelog 2.0](https://keepachangelog.com/en/2.0.0/)
 
 This guide is writing advice, not a release tool. No release, tag, artifact
-verification or deployment is performed or claimed by BeautifulRepo.
+verification or deployment is performed by following it. BeautifulRepo's own
+tagged versions are listed on its [Releases page](https://github.com/drevendev/BeautifulRepo/releases).

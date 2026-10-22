@@ -39,18 +39,22 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - uses: drevendev/BeautifulRepo@<full-commit-sha> # BeautifulRepo commit you reviewed
+      - uses: drevendev/BeautifulRepo@96e04e6a79027354c5e84a4a28f3ba5f5441d484 # v0.1.0
         with:
           exclude: |
             vendor
 ```
 
-Replace `<full-commit-sha>` with the 40-character SHA of the BeautifulRepo
-commit you reviewed. Pin a SHA rather than a branch or a tag: a tag can be moved
-and a branch changes under you, while the tools that check your pull requests
-should change only when you update the pin. BeautifulRepo has **not yet published
-a tagged release**; until it does, pick a `master` commit, for example with
-`git ls-remote https://github.com/drevendev/BeautifulRepo refs/heads/master`.
+The example pins [`v0.1.0`](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0)
+by its full commit SHA, with the tag kept as a comment. Pin a SHA rather than a
+branch or a tag: a tag can be moved and a branch changes under you, while the
+tools that check your pull requests should change only when you update the pin.
+Each [release](https://github.com/drevendev/BeautifulRepo/releases) names its
+commit. To confirm where a tag points before you copy it:
+
+```bash
+git ls-remote https://github.com/drevendev/BeautifulRepo refs/tags/v0.1.0
+```
 
 Each check also runs on Ubuntu and Windows runners in BeautifulRepo's own CI.
 macOS runners are not tested.
@@ -94,8 +98,8 @@ link as a relative path, so the checker reports it as missing.
 
 ## Keep the pin current
 
-Update the SHA deliberately and read the [changelog](../CHANGELOG.md) when you
-do. Dependabot's `github-actions` version updates can propose new commits for
+Update the SHA deliberately, and read the release notes and the
+[changelog](../CHANGELOG.md) when you do. Dependabot's `github-actions` version updates can propose new commits for
 SHA-pinned actions. It does **not** raise vulnerability alerts for SHA-pinned
 actions.
 
