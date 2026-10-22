@@ -1,0 +1,4 @@
+# Check out text with LF on every platform. Fixture SHA-256 values and the
+# generated-catalog drift check compare exact bytes, so a CRLF checkout on
+# Windows (core.autocrlf=true) would fail them without any real change.
+* text=auto eol=lf

@@ -26,7 +26,7 @@ class CuratedInputTests(unittest.TestCase):
             path.write_bytes(source if isinstance(source, bytes) else source.encode('utf-8'))
             return subprocess.run(
                 [sys.executable, str(SCRIPT), '--data', str(path), '--as-of', '2026-10-17', *args],
-                capture_output=True, text=True, check=False, timeout=10,
+                capture_output=True, text=True, encoding='utf-8', check=False, timeout=10,
             )
 
     def assert_invalid(self, source):

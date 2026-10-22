@@ -78,12 +78,14 @@ class CatalogAtomicWriteTests(unittest.TestCase):
             ]}), encoding="utf-8")
             output.write_bytes(b"prior")
             output.chmod(0o640)
+            # Windows chmod only toggles the read-only bit, so compare with what stuck.
+            expected_mode = stat.S_IMODE(output.stat().st_mode)
             code, stdout, stderr = run_cli(source, output)
             self.assertEqual(code, 0, stderr)
             self.assertIn("Bright 🚀 guide", output.read_text("utf-8"))
             self.assertIn("1 resources", stdout)
             self.assertEqual(stderr, "")
-            self.assertEqual(stat.S_IMODE(output.stat().st_mode), 0o640)
+            self.assertEqual(stat.S_IMODE(output.stat().st_mode), expected_mode)
 
     def test_new_generated_file_is_written(self):
         with tempfile.TemporaryDirectory() as root:
