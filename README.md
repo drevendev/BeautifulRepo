@@ -170,6 +170,9 @@ Suggestions and small improvements are welcome. Start with [CONTRIBUTING.md](CON
 
 Public documentation is maintained in English.
 
+For a practical continuity example, see the [maintainer handoff recipe](guides/maintainer-handoff.md):
+it separates public onboarding from permissions, releases, and private reporting.
+
 ## License
 
 [MIT](LICENSE). Linked projects and their assets retain their own licenses and trademarks.

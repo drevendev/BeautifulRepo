@@ -3,6 +3,13 @@
 This log describes handbook and source changes, not packaged releases or version tags.
 Dates identify work on the repository; the linked pull requests retain integration history.
 
+## Unreleased — maintainer continuity recipe
+
+- Add a source-backed one-maintainer handoff checklist, fictional filled-in
+  before/after example and actual local-check recovery route; distinguish public
+  contributor rules from write/admin permissions and unverified private intake.
+
+
 ## Unreleased — evidence-first reader journey
 
 - Put a tested local Rowcount result and an honest source/command path near
