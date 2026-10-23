@@ -76,7 +76,9 @@ Public-only expectations don't apply as-is: public conduct and reporting channel
 topics, the social preview and community-profile checkmarks. Mark them "not applicable"
 with a reason. Check instead for an owner or contact, access instructions and internal
 setup. Never move internal names, hostnames or screenshots into public places, such as
-an issue filed against BeautifulRepo.
+an issue filed against BeautifulRepo. Apply the
+[confidentiality checklist](../checklists/confidentiality.md) to inputs, metadata,
+CI output, agent messages and any publication before sharing results.
 
 ## Limits
 
