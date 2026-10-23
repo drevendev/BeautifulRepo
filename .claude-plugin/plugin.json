@@ -1,6 +1,6 @@
 {
   "name": "beautifulrepo",
-  "version": "0.2.0",
+  "version": "0.3.0-dev.0",
   "description": "Audit a repository with BeautifulRepo's local, read-only Python checks and agent-guided documentation checklists.",
   "author": {
     "name": "Dreven",

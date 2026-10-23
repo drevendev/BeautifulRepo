@@ -170,7 +170,8 @@ not a second copy of the first-screen chooser.
   [from Claude Code and Codex](guides/agent-plugin.md) under the
   [agent ground rules](guides/agent-safety.md),
   [Community safety readiness](guides/community-safety.md).
-- **Research and adapt:** [annotated studies](case-studies/first-patterns.md),
+- **Research and adapt:** [case studies and their procedure](case-studies/README.md),
+  [annotated studies](case-studies/first-patterns.md),
   [reviewed sources](catalog/README.md),
   [programs and community events](guides/programs.md),
   [README template](templates/README.template.md),

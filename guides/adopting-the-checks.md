@@ -39,13 +39,13 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - uses: drevendev/BeautifulRepo@96e04e6a79027354c5e84a4a28f3ba5f5441d484 # v0.1.0
+      - uses: drevendev/BeautifulRepo@4f06f26ccef6e8b28d77c71633482b7a1a68518a # v0.2.0
         with:
           exclude: |
             vendor
 ```
 
-The example pins [`v0.1.0`](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0)
+The example pins [`v0.2.0`](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.2.0)
 by its full commit SHA, with the tag kept as a comment. Pin a SHA rather than a
 branch or a tag: a tag can be moved and a branch changes under you, while the
 tools that check your pull requests should change only when you update the pin.
@@ -53,7 +53,7 @@ Each [release](https://github.com/drevendev/BeautifulRepo/releases) names its
 commit. To confirm where a tag points before you copy it:
 
 ```bash
-git ls-remote https://github.com/drevendev/BeautifulRepo refs/tags/v0.1.0
+git ls-remote https://github.com/drevendev/BeautifulRepo refs/tags/v0.2.0
 ```
 
 Each check also runs on Ubuntu and Windows runners in BeautifulRepo's own CI.
