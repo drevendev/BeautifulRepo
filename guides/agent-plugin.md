@@ -88,10 +88,13 @@ Run the same portable test that CI discovers:
 python -m unittest discover -s tests -p 'test_agent_fixtures.py' -v
 ```
 
-The test calls the installed-style tools with absolute paths, `python -I`,
-explicit targets and an unrelated working directory. It compares deterministic
-JSON findings, checks link-checker exit codes and verifies that no fixture bytes
-changed. It does **not** execute fixture code, call an LLM or prove that a model
+The test copies each fixture to a temporary target. For the broken-link case
+only, it removes the link destination **from that temporary copy**; the checked-in
+handbook remains internally link-clean. The test calls the installed-style tools
+with absolute paths, `python -I`, explicit targets and an unrelated working
+directory. It compares deterministic JSON findings, checks link-checker exit
+codes and verifies that neither the source nor the test target was modified by
+the tools. It does **not** execute fixture code, call an LLM or prove that a model
 would ignore a malicious README.
 
 For a **manual Codex smoke check** after installing the plugin, try two positive

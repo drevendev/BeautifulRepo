@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -56,8 +57,15 @@ class AgentFixtureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="beautifulrepo-foreign-cwd-") as foreign:
             for name in CASES:
                 with self.subTest(case=name):
-                    root = FIXTURES / name
-                    expected = json.loads((root / "expected.json").read_text(encoding="utf-8"))
+                    fixture = FIXTURES / name
+                    root = Path(foreign) / name
+                    shutil.copytree(fixture, root)
+                    # The committed checkout must pass BeautifulRepo's own
+                    # link checks. Make a broken target only inside a temp copy.
+                    if name == "broken-links":
+                        (root / "docs" / "missing.md").unlink()
+                    expected = json.loads((fixture / "expected.json").read_text(encoding="utf-8"))
+                    original_before = snapshot(fixture)
                     before = snapshot(root)
                     command = [str(root), "--format", "json", "--fail-on", "never"]
                     audit = self.tool("repo_audit.py", command, cwd=foreign)
@@ -86,6 +94,7 @@ class AgentFixtureTests(unittest.TestCase):
                     if name == "broken-links":
                         self.assertIn("missing.md", html.stdout + html.stderr)
                     self.assertEqual(snapshot(root), before, "a read-only tool changed fixture bytes")
+                    self.assertEqual(snapshot(fixture), original_before, "a tool changed source fixtures")
                     self.assertFalse((root / "AGENT_WROTE.txt").exists())
 
     def test_injection_case_is_explicitly_untrusted_input(self):
