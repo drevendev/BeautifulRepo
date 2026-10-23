@@ -3,6 +3,7 @@ on:
   pull_request:
   push:
     branches: [master]
+    tags: ['v*']
   workflow_dispatch:
 # A new push to a pull request cancels its superseded run; master runs always finish.
 concurrency:
