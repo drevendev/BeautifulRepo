@@ -126,6 +126,7 @@ abandoned queue. No guaranteed response-time service level is claimed.
 Discuss the work, not personal attributes. Harassment, doxxing and discriminatory conduct
 are not welcome. Do not post secrets, private logs or personal contact information in
 issues. Report security vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
-A dedicated conduct policy remains on the roadmap; its absence must not be represented
+BeautifulRepo has no conduct policy yet, for the reasons in the
+[community safety guide](guides/community-safety.md); its absence must not be represented
 as complete community compliance. For sensitive abuse that cannot safely be posted here,
 use GitHub's platform reporting facilities rather than disclosing private details in an issue.

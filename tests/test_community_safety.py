@@ -56,9 +56,11 @@ class CommunitySafetyTests(unittest.TestCase):
             normalized,
         )
         self.assertIn(
-            "A dedicated conduct policy remains on the roadmap",
+            "BeautifulRepo has no conduct policy yet",
             normalized,
         )
+        self.assertIn("its absence must not be represented as complete community compliance",
+                      normalized)
         self.assertIn(
             "use GitHub's platform reporting facilities rather than disclosing private details in an issue.",
             normalized,

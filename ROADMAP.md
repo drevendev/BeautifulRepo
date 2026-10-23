@@ -48,30 +48,58 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   audit and link checks in other repositories, first tagged as
   [`v0.1.0`](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0).
 
+- [Claude Code and Codex plugin](guides/agent-plugin.md) with a read-only `audit-repo`
+  skill and [ground rules for agents](guides/agent-safety.md). It is on `master` and
+  first ships in a tagged release with v0.2.0.
+- A [security policy](SECURITY.md) backed by GitHub private vulnerability reporting,
+  Discussions for questions, and labelled issue forms. A conduct policy is
+  [not applicable for now](guides/community-safety.md), with the reason recorded.
+- Hardened checks: link destinations and symlink targets are resolved inside the
+  repository, wrong letter case and Windows-only names are reported, heading anchors
+  follow GitHub's rules, and worst-case scanning time is bounded.
+- Maintenance automation: scheduled pin and review-date checks, a
+  [release draft workflow](guides/maintenance-workflow.md), a hash-pinned linter in
+  CI, [AGENTS.md](AGENTS.md) and [decision records](docs/decisions/README.md).
+- A [real README before/after case](case-studies/readme-first-success-case.md) for
+  BeautifulRepo itself, including a clean-clone run and GitHub's rendering at three
+  widths in both themes.
+
 These linked resources are repository source files. Tagged versions are listed on
 the [Releases page](https://github.com/drevendev/BeautifulRepo/releases). There is
 no installable package.
 
-## Next: practical reference examples
+## Next: agent skills, real cases and private repositories
 
-- Turn useful Open Source Guides material on governance, legal considerations,
-  sustainability, metrics and finding users into bounded practical examples
-  rather than an unannotated link collection.
-- Extend the five working starter types with concrete adaptation stories and
-  observed reader problems rather than another empty scaffold.
-- Evaluate lightweight maintenance tools and recipes where they improve the reader
-  experience, with real examples and explicit limitations.
-- Extend release-note advice with a verified, non-fictional migration story after
-  a real release exists. Never manufacture releases or acceptance evidence.
-- Publish a concrete conduct policy and security reporting channel only when
-  maintainers can operationally support them.
+Each workstream is an epic issue whose sub-issues hold the concrete work.
 
-## Later: evidence-backed tools
+- **Agent skills** ([#86](https://github.com/drevendev/BeautifulRepo/issues/86)):
+  release the plugin as v0.2.0
+  ([#101](https://github.com/drevendev/BeautifulRepo/issues/101)), validate the
+  manifests and skills in CI, add `improve-readme`, `trust-surfaces` and
+  `release-notes` skills, and evaluate every skill against fixture repositories.
+- **Real before/after cases**
+  ([#88](https://github.com/drevendev/BeautifulRepo/issues/88)): document the
+  repeatable case workflow, then apply it through normal pull requests to three of
+  the owner's public repositories, with fixed revisions and stated limits.
+- **Private and internal repositories**
+  ([#87](https://github.com/drevendev/BeautifulRepo/issues/87)): a visibility
+  profile for the audit and the Action, plan-aware guidance, an internal README
+  template, a confidentiality checklist for people and agents, and a tested
+  no-network promise for mirrored or enterprise use of the Action.
+- **Self-check** ([#85](https://github.com/drevendev/BeautifulRepo/issues/85),
+  readiness index [#33](https://github.com/drevendev/BeautifulRepo/issues/33)):
+  re-audit BeautifulRepo against its own checklists at a named commit and record
+  the result.
 
-Explore cross-ecosystem case studies, optional searchable documentation when
-justified, and contribution preparation kits. Extend the existing local audit
-only where observations are actionable and its limitations remain explicit. Spending, domains, releases, applications and
-external promotion require separate owner authority.
+## Later: evidence-backed extensions
+
+Explore cross-ecosystem case studies, distinctive presentation patterns backed by
+real visual evidence ([#16](https://github.com/drevendev/BeautifulRepo/issues/16)),
+practical examples drawn from Open Source Guides material on governance,
+sustainability and finding users, and a verified migration story in the
+release-note guide once real releases exist. Extend the local audit only where
+observations are actionable and its limitations remain explicit. Spending, domains,
+releases, applications and external promotion require separate owner authority.
 
 ## Maintenance
 
