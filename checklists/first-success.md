@@ -24,6 +24,10 @@ Its server and JSON fixture demonstrate that interaction, not durability or real
 workload performance. [Research/data](../examples/research-data-starter/README.md)
 instead exposes a reproducible aggregate (6 fabricated rows, total 60) and fixture digest.
 
+For private or internal projects, check the disclosure boundaries in the
+[confidentiality checklist](confidentiality.md) before pasting first-run output,
+screenshots or logs into public reports.
+
 See the broader [repository checklist](repository.md) and the
 [maintenance workflow](../guides/maintenance-workflow.md). The checklist is an aid to
 judgement, not accessibility, security or scientific certification.
