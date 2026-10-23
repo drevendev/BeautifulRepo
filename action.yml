@@ -20,6 +20,12 @@ inputs:
     description: Lowest audit severity that fails the step - error, warning or never.
     required: false
     default: error
+  audit-profile:
+    description: >-
+      Explicit source-inspection profile: public, internal or private.
+      Never inferred from repository or GitHub visibility.
+    required: false
+    default: public
   exclude:
     description: >-
       Newline-separated globs, relative to path, for Markdown sources the link
@@ -40,6 +46,7 @@ runs:
         CHECKS: ${{ inputs.checks }}
         TARGET: ${{ inputs.path }}
         FAIL_ON: ${{ inputs.audit-fail-on }}
+        PROFILE: ${{ inputs.audit-profile }}
       run: |
         python=""
         for candidate in python3 python; do
@@ -62,6 +69,10 @@ runs:
         case "$FAIL_ON" in
           error|warning|never) ;;
           *) echo "::error title=BeautifulRepo checks::audit-fail-on must be error, warning or never"; exit 1 ;;
+        esac
+        case "$PROFILE" in
+          public|internal|private) ;;
+          *) echo "::error title=BeautifulRepo checks::audit-profile must be public, internal or private"; exit 1 ;;
         esac
         # Spaces, tabs and newlines all separate names. The check steps below read
         # this normalized list, so a name that passes validation always runs.
@@ -90,8 +101,9 @@ runs:
         PYTHON: ${{ steps.setup.outputs.python }}
         TARGET: ${{ inputs.path }}
         FAIL_ON: ${{ inputs.audit-fail-on }}
+        PROFILE: ${{ inputs.audit-profile }}
       run: |
-        "$PYTHON" "$GITHUB_ACTION_PATH/tools/repo_audit.py" "$TARGET" --fail-on "$FAIL_ON"
+        "$PYTHON" "$GITHUB_ACTION_PATH/tools/repo_audit.py" "$TARGET" --fail-on "$FAIL_ON" --profile "$PROFILE"
 
     - name: Check repository-owned Markdown destinations
       if: contains(format(' {0} ', steps.setup.outputs.checks), ' docs-links ')
