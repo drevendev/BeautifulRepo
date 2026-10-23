@@ -21,24 +21,22 @@ You need Python 3.11 or newer on `PATH`.
 **Claude Code:**
 
 ```bash
-claude plugin marketplace add drevendev/BeautifulRepo
+claude plugin marketplace add drevendev/BeautifulRepo@v0.2.0
 claude plugin install beautifulrepo@beautifulrepo
 ```
 
 **Codex:**
 
 ```bash
-codex plugin marketplace add drevendev/BeautifulRepo
+codex plugin marketplace add drevendev/BeautifulRepo --ref v0.2.0
 codex plugin add beautifulrepo@beautifulrepo
 ```
 
 Restart the agent session afterwards so it loads the skill.
 
-The plugin is **not yet in a tagged release**: `v0.1.0` contains only the GitHub
-Action. Until the next release, these commands follow `master`. Once a release
-includes the plugin, pin it instead. For Codex, use
-`codex plugin marketplace add drevendev/BeautifulRepo --ref vX.Y.Z`. For Claude Code,
-the marketplace documentation describes `drevendev/BeautifulRepo@vX.Y.Z`.
+These commands pin release `v0.2.0`, the first release that contains the plugin.
+Leave out `@v0.2.0` or `--ref v0.2.0` to follow `master` instead, for example
+while working on the plugin.
 
 ## Use
 

@@ -49,8 +49,8 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   [`v0.1.0`](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0).
 
 - [Claude Code and Codex plugin](guides/agent-plugin.md) with a read-only `audit-repo`
-  skill and [ground rules for agents](guides/agent-safety.md). It is on `master` and
-  first ships in a tagged release with v0.2.0.
+  skill and [ground rules for agents](guides/agent-safety.md), first released in
+  v0.2.0.
 - A [security policy](SECURITY.md) backed by GitHub private vulnerability reporting,
   Discussions for questions, and labelled issue forms. A conduct policy is
   [not applicable for now](guides/community-safety.md), with the reason recorded.
