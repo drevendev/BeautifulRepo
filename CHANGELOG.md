@@ -13,6 +13,9 @@ keep their original themed headings.
 
 ### Added
 
+- Private/enterprise Action adoption guidance (organization policy, runner costs,
+  SHA-preserving mirrors, GHES/GHE.com caveats, and local-only use) and an offline
+  contract regression test for tools and composite Action shell steps (#79).
 - A source-backed [confidentiality checklist](checklists/confidentiality.md)
   for private and internal repositories: content, public metadata exceptions,
   CI/report output, and safe agent use, with explicit secret-scanning limits (#78).
