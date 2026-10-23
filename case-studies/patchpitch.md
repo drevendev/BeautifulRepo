@@ -1,8 +1,8 @@
 # PatchPitch: an offline first success for a local-AI app
 
-**Case status, 2026-10-23:** in progress. The before snapshot, the audit, the change
-(a pull request in PatchPitch) and a model-free first run are done. The after
-snapshot waits for that pull request to merge.
+**Case status, 2026-10-23:** complete. The change merged through PatchPitch's own pull
+request, and the documented first run was repeated from a fresh clone of the merge
+commit. The model, the X composer, Linux and macOS, and real devices were not tested.
 
 ## Target and revisions
 
@@ -13,7 +13,8 @@ snapshot waits for that pull request to merge.
   2026-10-22. One commit adding demo media landed in between, and none of the findings
   changed.
 - Change: [PatchPitch#90](https://github.com/drevendev/PatchPitch/pull/90), branch
-  commit `df50116`. After: pending merge.
+  commit `df50116`. After: merge commit
+  `43284a7286ead07d37ff32b8206ac4000856fd04` (2026-10-23).
 - BeautifulRepo tools: `4f06f26ccef6e8b28d77c71633482b7a1a68518a` (v0.2.0), run with
   `python -I` and an explicit root, per the [case procedure](README.md).
 
@@ -64,6 +65,7 @@ documentation only:
   limits and the Sentry allowlist. Merging waits for the owner to enable private
   vulnerability reporting, so the route exists when it is advertised.
 - **Not changed here:** topics are a setting for the owner, and the PR suggests five.
+  They were still unset at the after snapshot.
 
 On the branch, the same pinned tools report 0 errors, 0 warnings and 0
 informational findings, with CONTRIBUTING detected. Links and anchors are 13 of 13,
@@ -103,12 +105,46 @@ They belong in a separate PatchPitch issue.
 
 ## After
 
-Pending the merge of PatchPitch#90: the merge SHA, a re-run of the pinned tools, the
-first run repeated from a fresh clone of the merge commit, and the CI run URL.
+Snapshot of 2026-10-23, after the merge.
+
+- **Metadata:** private vulnerability reporting is on (`enabled: true`), so the route in
+  `SECURITY.md` exists. Description and licence are unchanged, and there are still no
+  topics.
+- **Tools** (the same v0.2.0 commit, on a fresh clone of `43284a7`): `repo_audit.py`
+  0 errors, 0 warnings, 0 informational findings, with `CONTRIBUTING.md` detected.
+  The before run had 1 informational finding. Links and anchors: 13 of 13.
+- **First run, following the new README word for word:** in a fresh clone of the
+  merge commit, on Windows 11 with Python 3.14.7 and Ollama not running.
+  `python -m venv .venv`, then `.venv` pip install and uvicorn on port 8000.
+  - `/api/health` reported `ollama_unavailable`.
+  - **Load facts** showed "Facts loaded. Review the selected notes before generating."
+    with 8 selected and 1 excluded.
+  - **Write the announcement** showed "Ollama is not reachable at 127.0.0.1:11434.
+    Start Ollama and try again." and the status "Your input and any previous draft
+    are still here."
+
+  Every message matched the README.
+- **Rendering at 320 px:** the same as before, as expected for a documentation-only
+  change. There is no sideways scroll, a single light palette in both colour schemes,
+  and 14 of 33 texts below 4.5:1 (minimum 2.98:1).
+- **CI** on the merge commit: `pytest -q`, 277 passed
+  ([run 39945177303](https://github.com/drevendev/PatchPitch/actions/runs/39945177303)).
+
+## What changed for a reader
+
+Before, the README gave a visitor without a several-GB local model no way to try
+PatchPitch locally, although the app already worked without one, and its first
+section described a review candidate. After, the first section gets them to
+a running app with real fact packs in a few commands, and states exactly what they
+will see without a model. The model setup follows. Contributors and security
+reporters have documented routes, and the security route works. The application
+itself did not change, and its contrast and dark-mode findings remain open.
 
 ## Not tested
 
 - Live model quality and the X composer, as #81 requires.
-- `pytest -q` locally. The Playwright browser download was skipped; the pull request's
-  CI is the test evidence.
+- `pytest -q` locally. The Playwright browser download was skipped; CI on the pull
+  request and on the merge commit is the test evidence.
+- Screenshots: the app window was hidden during the session, so the 320 px results
+  are in-page measurements with the text equivalents above, not images.
 - The Linux and macOS commands, real phones and screen readers.
