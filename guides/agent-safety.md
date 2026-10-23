@@ -40,8 +40,9 @@ services; report external links as unverified rather than fetching them.
 Keep private repository content out of public issues, examples and reports.
 
 See [Claude Code data usage](https://code.claude.com/docs/en/data-usage)
-and [OpenAI data controls](https://help.openai.com/en/articles/7730893).
-Reviewed 2026-10-22; recheck when agent providers or configurations change.
+and [OpenAI data controls](https://help.openai.com/en/articles/7730893), whose
+"Manage model training for Codex tasks" section covers Codex. Both reviewed
+2026-10-23; recheck when agent providers or configurations change.
 
 ## Don't run the target's code
 
