@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Four synthetic repositories and an isolated, read-only CLI regression suite for
+  the `audit-repo` skill. They pin expected audit findings, broken-link behavior,
+  deterministic output and no writes, including hostile README text. These do not
+  claim to test actual agent triggering or prompt-injection resistance (#74).
 - Run the existing plugin contract tests on v* tag pushes too: validate
   release versions against both plugin manifests and a dated CHANGELOG
   heading, reject duplicate or unclosed skill frontmatter, and document
