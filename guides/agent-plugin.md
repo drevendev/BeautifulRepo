@@ -9,7 +9,10 @@ BeautifulRepo ships as **one plugin** for Claude Code and Codex. Its first skill
   [first-success](../checklists/first-success.md) checklists.
 - It reports prioritized findings, each with the smallest fix and a way to verify it.
 
-The local Python checkers are read-only and make no network requests. An agent session may still transfer repository context to the configured model provider. Review approved data controls before inspecting private code. See the [agent ground rules](agent-safety.md).
+The local Python checkers are read-only and make no network requests. An agent
+session may still transfer repository context to the configured model provider.
+Review approved data controls before inspecting private code. See the
+[agent ground rules](agent-safety.md).
 
 ## Install
 

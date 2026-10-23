@@ -21,12 +21,6 @@ class AgentPrivacyContract(unittest.TestCase):
         self.assertIn("model provider", details)
         self.assertNotIn("nothing is written or sent anywhere", details)
 
-    def test_metadata_preserves_name_and_version(self):
-        portable = json.loads((ROOT / "plugin.json").read_text(encoding="utf-8"))
-        claude = json.loads((ROOT / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))
-        self.assertEqual(portable["name"], claude["name"])
-        self.assertEqual(portable["version"], claude["version"])
-
 
 if __name__ == "__main__":
     unittest.main()

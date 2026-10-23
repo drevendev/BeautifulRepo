@@ -7,6 +7,10 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- The plugin manifests, the `audit-repo` skill and the agent guides no longer
+  promise that nothing leaves the machine. BeautifulRepo's Python checks make no
+  network requests, but an agent session may send repository context to its model
+  provider; the guides link Claude Code's and OpenAI's data-control pages (#97).
 - `repo_audit.py` matches backtick code spans within one paragraph or heading. Two
   stray backticks in different paragraphs used to form one span and hide every
   finding between them, such as a TODO or an image without alt text (#106).
