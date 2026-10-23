@@ -1,0 +1,4 @@
+# Developer-only: the lint job in quality.yml installs this. The tools never import it.
+# The hash pins the manylinux x86_64 wheel that ubuntu-latest uses (PyPI, 2026-10-01).
+ruff==0.16.10 \
+    --hash=sha256:f33f43a864a8483eebd160e713336c8bab02c934feaff0a33cf5ccb41546d09a

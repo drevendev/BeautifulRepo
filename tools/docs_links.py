@@ -524,7 +524,7 @@ def _mask_list_item_code_blocks(text: str) -> str:
             index += 1
         inner_masked = _mask_markdown_code("".join(inner_parts))
         offset = 0
-        for prefix, residual, inner_length in zip(prefixes, residuals, inner_lengths):
+        for prefix, residual, inner_length in zip(prefixes, residuals, inner_lengths, strict=True):
             piece = inner_masked[offset:offset + inner_length]
             offset += inner_length
             masked.append(prefix + piece[residual:])
@@ -670,7 +670,7 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
         inner_masked = _mask_markdown_code("".join(inner_parts))
         offset = 0
-        for prefix, content_length in zip(prefixes, content_lengths):
+        for prefix, content_length in zip(prefixes, content_lengths, strict=True):
             masked.append(prefix + inner_masked[offset:offset + content_length])
             offset += content_length
 

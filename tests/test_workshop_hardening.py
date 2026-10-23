@@ -35,7 +35,7 @@ def luminance(value):
     channels = [int(code[i:i + 2], 16) / 255 for i in (0, 2, 4)]
     linear = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
               for c in channels]
-    return sum(c * weight for c, weight in zip(linear, (0.2126, 0.7152, 0.0722)))
+    return sum(c * weight for c, weight in zip(linear, (0.2126, 0.7152, 0.0722), strict=True))
 
 
 def contrast(a, b):
@@ -105,7 +105,7 @@ class WorkshopHardeningTests(unittest.TestCase):
         self.assertIn("border:1px solid var(--line)", css)
         themes = re.findall(r":root\s*\{([^{}]*)\}", css)
         self.assertEqual(len(themes), 2)
-        for theme, text in zip(("light", "dark"), themes):
+        for theme, text in zip(("light", "dark"), themes, strict=True):
             colors = dict(re.findall(r"--([a-z]+):\s*(#[0-9a-fA-F]{3,6})\b", text))
             # Control boundaries and the focus outline are non-text cues (3:1); body and
             # muted text need 4.5:1. The 2026-10-23 rendered check measured the same pairs.

@@ -44,6 +44,24 @@ jobs:
       - name: Audit BeautifulRepo's own entry points
         run: python tools/repo_audit.py .
 
+  lint:
+    # Developer-only lint with a hash-pinned ruff (ruff.toml). Not a required check
+    # until it has stayed green for a while; the tools never import ruff.
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0 inspected 2026-10-19
+        with:
+          python-version: '3.14'
+      - name: Install the pinned linter
+        run: python -m pip install --require-hashes --no-deps -r .github/lint-requirements.txt
+      - name: Lint tools, tests and examples
+        run: ruff check --output-format github
+
   action:
     # Exercises action.yml the way another repository would call it.
     name: Action self-test (${{ matrix.os }})
