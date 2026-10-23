@@ -17,6 +17,9 @@ keep their original themed headings.
   (`case-studies/readme-first-success-case.md`): fixed revisions, a clean-clone run
   of the first success and all five checks, and GitHub's rendering measured at
   1280, 375 and 320 px in light and dark themes, with its limits stated (#21).
+- The Pocket Board example records a dated, rendered keyboard, contrast and reflow
+  check: light and dark themes at 375 and 320 px in Chrome 152, with what was not
+  checked. Its contrast test now also guards the focus outline and text colours (#28).
 - `tools/review_dates.py` lists guide sources whose "Reviewed" date is due for a
   recheck (180 days, 30 for the programs guide) and rejects future or impossible
   dates. The maintenance workflow describes the recheck routine (#64).

@@ -61,6 +61,34 @@ and no writes to the input fixture.
 This does **not** validate screen-reader interoperability, visual contrast on every
 display, browser support, WSGI server hardening or real production traffic.
 
+### Rendered keyboard, contrast and reflow check (2026-10-23)
+
+The running app (`python app.py --port 8765`) was checked once by hand in Chrome 152,
+the browser built into the Claude desktop app. Widths and colour schemes were set by
+viewport emulation, and colours and layout were measured in the page. These are not
+screenshots of real devices.
+
+| Check | Light | Dark |
+| --- | --- | --- |
+| Status `select` border against the panel | 4.5:1 | 4.9:1 |
+| Focus outline (about 3 px, solid) against its background | 5.3–5.8:1 | 8.9–10.4:1 |
+| Body / muted text against the background | 15.0:1 / 7.0:1 | 15.1:1 / 9.3:1 |
+| Sideways page scroll at 375 px and 320 px | none | none |
+
+- Tab moves through the skip link, which appears when focused, then the "Pocket
+  Board" link, the status filter and the button. Each shows the outline.
+- Arrow keys change the filter and Enter on the button applies it. The chosen value
+  stays selected after the page reloads.
+- At 320 px, about 400% zoom of a 1280 px window, the header wraps and long task
+  titles break inside their cards.
+- The dropdown keeps the browser's native arrow (`appearance: auto`); its drawing was
+  not measured.
+- `tests/test_workshop_hardening.py` keeps the colour pairs above at 3:1 for
+  boundaries and focus, and 4.5:1 for text.
+
+**Not checked:** screen readers, Windows high-contrast or other forced-colours modes,
+real phones, browsers other than Chrome, and real 400% browser zoom.
+
 The implementation uses the `wsgiref` reference server. Python explicitly warns
 that it is **not recommended for production**. It is appropriate here only to
 demonstrate a local first-success route with no third-party dependencies.

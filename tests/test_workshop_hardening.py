@@ -107,9 +107,12 @@ class WorkshopHardeningTests(unittest.TestCase):
         self.assertEqual(len(themes), 2)
         for theme, text in zip(("light", "dark"), themes):
             colors = dict(re.findall(r"--([a-z]+):\s*(#[0-9a-fA-F]{3,6})\b", text))
-            for adjacent in ("bg", "panel"):
-                with self.subTest(theme=theme, adjacent=adjacent):
-                    self.assertGreaterEqual(contrast(colors["line"], colors[adjacent]), 3.0)
+            # Control boundaries and the focus outline are non-text cues (3:1); body and
+            # muted text need 4.5:1. The 2026-10-23 rendered check measured the same pairs.
+            for token, minimum in (("line", 3.0), ("focus", 3.0), ("ink", 4.5), ("muted", 4.5)):
+                for adjacent in ("bg", "panel"):
+                    with self.subTest(theme=theme, token=token, adjacent=adjacent):
+                        self.assertGreaterEqual(contrast(colors[token], colors[adjacent]), minimum)
 
 
 if __name__ == "__main__":
