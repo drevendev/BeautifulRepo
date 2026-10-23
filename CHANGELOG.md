@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- The first case that follows the case procedure: PatchPitch, a local-AI app
+  (`case-studies/patchpitch.md`). A documentation-only pull request in PatchPitch
+  (PatchPitch#90) leads its README with a run that needs no model. The case records
+  the before and after commits, pinned tool runs, a fresh-clone first run with Ollama
+  stopped, 320 px measurements, CI on the merge commit, and what was not tested (#81).
 - `case-studies/README.md` describes the procedure every real case follows: before
   snapshot, audit with pinned tools, a pull request in the target, after snapshot and
   write-up. It adds a fill-in skeleton, the rule that unlicensed repositories are used

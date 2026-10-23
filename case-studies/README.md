@@ -7,6 +7,7 @@ command or an observation.
 | Case | Repository | Status |
 | --- | --- | --- |
 | [README before/after](readme-first-success-case.md) | BeautifulRepo | complete; written before this procedure, which it shaped |
+| [Offline first success](patchpitch.md) | PatchPitch | complete; change merged as PatchPitch#90 |
 | [First pattern studies](first-patterns.md) | Devostasis, Hungry Crab, Gum | source observations only, no changes made |
 
 ## The procedure
