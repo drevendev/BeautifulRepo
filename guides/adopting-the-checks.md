@@ -72,6 +72,94 @@ macOS runners are not tested.
 to Git and to installed packages, not to your repository. An excluded file is
 not scanned, but a link **to** it from a scanned file is still checked.
 
+## Private and enterprise repositories
+
+These source checks can inspect a private checkout without uploading its files.
+The **Python check scripts** read local paths; they do not fetch external URLs
+or call a model provider. The Actions runner, checkout step, action retrieval,
+and any interpreter installation are separate infrastructure that **can**
+require network access. Review those dependencies and any uploaded workflow
+logs before calling a workflow air-gapped or confidential.
+
+### Policy and cost on GitHub.com
+
+- Ask an organization or enterprise owner to permit the public action if
+  external actions are restricted. A narrow allow-list entry for this release
+  is `drevendev/BeautifulRepo@4f06f26ccef6e8b28d77c71633482b7a1a68518a`.
+  This is compatible with **Require actions to be pinned to a full-length
+  commit SHA**. The workflow's checkout/setup-python actions also require
+  permission and full SHAs when that policy is enabled.
+- For private repositories, check the account's Actions billing and included
+  minutes. The example above uses an Ubuntu runner and
+  `timeout-minutes: 5` to bound each job's duration; it does not
+  promise a free run or a five-minute total queue time. Windows and macOS
+  hosted runners typically cost more than Linux. No paid runner is required by
+  these Python scripts.
+- Use minimum `contents: read` permissions. Avoid uploading private
+  audit JSON, source snapshots or runner logs to public issues.
+
+### Internal mirror or restricted runner
+
+An organization can mirror this action while keeping the original Git commit
+history. For the v0.2.0 commit, the following reference works **only if that
+same commit object exists in the mirror**:
+
+```yaml
+- uses: YOUR-ORG/BeautifulRepo-mirror@4f06f26ccef6e8b28d77c71633482b7a1a68518a
+```
+
+Check the commit in **both** fetched checkouts before updating the workflow:
+
+```bash
+git -C BeautifulRepo rev-parse 4f06f26ccef6e8b28d77c71633482b7a1a68518a^{commit}
+git -C BeautifulRepo-mirror rev-parse 4f06f26ccef6e8b28d77c71633482b7a1a68518a^{commit}
+```
+
+Both must print the same full SHA. A source-file copy or a new history is
+**not** a byte-identical mirror and cannot honestly use that pin. Ensure the
+commit is reachable to your runner under the mirror's access rules. Mirror
+updates must be deliberate, reviewed changes, not silent tracking of master.
+
+A self-hosted runner requires **Bash and Python 3.11+ on PATH** for this
+composite action; the runner must also reach its configured GitHub Actions
+service. The action does not install Python for you. Treat self-hosted
+runners handling untrusted pull requests as a separate security risk.
+
+### Enterprise Server and GHE.com (not tested)
+
+- **GitHub Enterprise Server:** public GitHub.com actions are not directly
+  available by default. Administrators can enable GitHub Connect with the
+  requisite outbound access or use `actions-sync` to copy selected
+  public actions, then follow the local instance's action policy. Server
+  workflows use self-hosted runners. Check the installed GHES version and
+  the administrator's policy; **BeautifulRepo has not been run on GHES**.
+- **GitHub Enterprise Cloud with data residency (GHE.com):** GitHub Marketplace
+  browsing/installation is unavailable, although actions may still be
+  installed from source. Some GitHub.com-targeting actions do not work, and
+  external-action namespace retirement can affect mirror names. Verify
+  resolution, permissions and matching commits before adopting an action.
+  **BeautifulRepo has not been run on GHE.com**.
+
+### Without GitHub Actions
+
+From a reviewed BeautifulRepo checkout with Python 3.11+, run all three
+checks against a local target. No Action, Marketplace or hosted runner is
+needed:
+
+```bash
+python -I tools/repo_audit.py ../private-repo
+python -I tools/docs_links.py --root ../private-repo
+python -I tools/html_navigation.py --root ../private-repo
+```
+
+The repository's `tests/test_offline_contract.py` guards against direct
+network/process-library imports in `tools/*.py` and direct
+`curl`, `wget` or `gh` mentions inside the Action's shell
+blocks. This is deliberately **static**: it is not a sandbox, firewall,
+dependency audit or proof about dynamic imports, caller workflows or the
+runner's network. Do not execute an untrusted repository's code as part of
+this check.
+
 ## Roll it out without a red wall
 
 1. **Run it locally first.** From a BeautifulRepo checkout:
@@ -105,10 +193,23 @@ actions.
 
 ## Sources
 
-Reviewed **2026-10-22**:
+Reviewed **2026-10-23**:
 
 - [GitHub Docs — Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax):
   composite actions, `$GITHUB_ACTION_PATH`, and step `shell`/`if`/`env`/`continue-on-error`.
 - [GitHub Docs — Secure use reference](https://docs.github.com/en/actions/reference/security/secure-use):
   pinning actions to a full-length commit SHA, mutable tags, and Dependabot
   behavior for SHA-pinned actions.
+
+- [GitHub Docs — Disabling or limiting actions for your organization](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization):
+  allow-list entries and full-length SHA requirements.
+- [GitHub Docs — GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions):
+  included minutes and operating-system cost differences.
+- [GitHub Docs — Self-hosted runners](https://docs.github.com/en/actions/reference/runners/self-hosted-runners):
+  runner connectivity and security requirements.
+- [GitHub Enterprise Server — GitHub Connect](https://docs.github.com/en/enterprise-server@3.20/admin/managing-github-actions-for-your-enterprise/managing-access-to-actions-from-githubcom/enabling-automatic-access-to-githubcom-actions-using-github-connect):
+  public action access and outbound connectivity.
+- [GitHub Enterprise Server — actions-sync](https://docs.github.com/en/enterprise-server@3.21/admin/managing-github-actions-for-your-enterprise/managing-access-to-actions-from-githubcom/manually-syncing-actions-from-githubcom):
+  syncing selected public actions.
+- [GitHub Enterprise Cloud with data residency — feature overview](https://docs.github.com/en/enterprise-cloud@latest/admin/data-residency/feature-overview-for-github-enterprise-cloud-with-data-residency):
+  Marketplace limits and namespace retirement.
