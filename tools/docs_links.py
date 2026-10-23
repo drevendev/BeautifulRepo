@@ -52,12 +52,26 @@ MARKDOWN_WHITESPACE = " \t\r\n"
 # lines full of "[a](" from costing one scan to the end of the line per link.
 MAX_DESTINATION_PARENS = 32
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
+MARKDOWN_LINE_END_RE = re.compile(r"(?<=\n)|(?<=\r)(?!\n)")
 INLINE_HTML_COMMENT_RE = re.compile(
     r"<!--(?!>|->)(?:(?!--).)*?-->", re.DOTALL
 )
 CHARACTER_REFERENCE_RE = re.compile(
     r"&(?:#(?P<dec>[0-9]{1,7})|#[xX](?P<hex>[0-9A-Fa-f]{1,6})|(?P<named>[A-Za-z][A-Za-z0-9]*));"
 )
+
+
+def split_markdown_lines(text: str) -> list[str]:
+    """Split after each Markdown line ending (\\n, \\r\\n or \\r), keeping the ending.
+
+    str.splitlines also breaks at \\f, \\v, \\x1c-\\x1e, \\x85, U+2028 and U+2029,
+    which Markdown treats as ordinary characters. A masked copy that blanks them
+    would then have fewer lines than its source.
+    """
+    parts = MARKDOWN_LINE_END_RE.split(text)
+    if parts and parts[-1] == "":
+        parts.pop()
+    return parts
 
 
 def _decode_character_references(value: str) -> str:
@@ -284,7 +298,7 @@ def _mask_inline_html_comments(text: str) -> str:
                 if masked[index] not in "\r\n":
                     masked[index] = " "
 
-    for raw_line in text.splitlines(keepends=True):
+    for raw_line in split_markdown_lines(text):
         line = raw_line.rstrip("\r\n")
         quote_depth = 0
         body = line
@@ -429,7 +443,7 @@ def _consume_indent_columns(line: str, columns: int):
 
 def _mask_list_item_code_blocks(text: str) -> str:
     """Mask code inside explicit list-item containers before root-level fence parsing."""
-    lines = text.splitlines(keepends=True)
+    lines = split_markdown_lines(text)
     masked = []
     index = 0
     paragraph_open = False
@@ -534,7 +548,7 @@ def _mask_indented_code_blocks(text: str) -> str:
     in_indented_code = False
     code_threshold = 4
 
-    for raw_line in text.splitlines(keepends=True):
+    for raw_line in split_markdown_lines(text):
         if raw_line.endswith("\r\n"):
             line, ending = raw_line[:-2], "\r\n"
         elif raw_line.endswith(("\n", "\r")):
@@ -606,7 +620,7 @@ def _block_quote_content_start(line: str):
 
 def _mask_block_quote_code_blocks(text: str) -> str:
     """Mask code inside explicit block-quote containers without shifting offsets."""
-    lines = text.splitlines(keepends=True)
+    lines = split_markdown_lines(text)
     masked = []
     index = 0
 
@@ -666,7 +680,7 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
     in_type1_html = False
     in_type2_comment = False
 
-    for raw_line in text.splitlines(keepends=True):
+    for raw_line in split_markdown_lines(text):
         if raw_line.endswith("\r\n"):
             line, ending = raw_line[:-2], "\r\n"
         elif raw_line.endswith(("\n", "\r")):
