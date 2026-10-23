@@ -104,12 +104,17 @@ tools, and supported versions. It promises no response time, because one maintai
 guarantee one. The intake side still depends on the maintainer's GitHub notification
 settings, as described above.
 
-**Conduct (as reviewed on 2026-10-07, unchanged).** BeautifulRepo does not publish a
-`CODE_OF_CONDUCT.md`: a private channel for conduct reports and an enforcement path have
-not been verified. `CONTRIBUTING.md` tells readers not to post private material and points
-sensitive abuse to GitHub's platform reporting facilities, without pretending that this
-repository operates a confidential inbox. The reusable security scaffold in `templates/`
-remains a template for other projects.
+**Conduct (decided 2026-10-23: not applicable for now).** BeautifulRepo does not publish a
+`CODE_OF_CONDUCT.md`. A conduct policy needs two things this one-maintainer project does
+not have: a private channel for conduct reports that someone checks, and an enforcement
+path that doesn't rest on the person a report might concern. The owner decided not to
+create a placeholder in the meantime. `CONTRIBUTING.md` tells readers not to post private
+material and points sensitive abuse to GitHub's platform reporting facilities, without
+pretending that this repository operates a confidential inbox. On BeautifulRepo's own
+repository checklist, the conduct item is therefore "not applicable, with this reason",
+not a pass. Reconsider when a second maintainer joins or a verified private channel
+exists ([decision record 0006](../docs/decisions/0006-no-unverified-channels.md)). The
+reusable security scaffold in `templates/` remains a template for other projects.
 
 ## Sources and limits
 

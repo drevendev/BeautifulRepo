@@ -66,6 +66,10 @@ keep their original themed headings.
 
 ### Changed
 
+- The community safety guide records the owner's conduct decision (2026-10-23):
+  no `CODE_OF_CONDUCT.md` until a checked private channel and an independent
+  enforcement path exist. The repository checklist's conduct item is "not applicable,
+  with a reason" rather than a pass, with a trigger to reconsider (#30).
 - The discoverability guide's BeautifulRepo example matches the live repository: a
   signed-out read-back of 2026-10-23, a one-line reason for each of the seven topics,
   the decision to keep GitHub's default social card, and the decision to turn off the
