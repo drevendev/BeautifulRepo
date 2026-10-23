@@ -13,6 +13,9 @@ keep their original themed headings.
 
 ### Added
 
+- A source-backed [confidentiality checklist](checklists/confidentiality.md)
+  for private and internal repositories: content, public metadata exceptions,
+  CI/report output, and safe agent use, with explicit secret-scanning limits (#78).
 - The first case that follows the case procedure: PatchPitch, a local-AI app
   (`case-studies/patchpitch.md`). A documentation-only pull request in PatchPitch
   (PatchPitch#90) leads its README with a run that needs no model. The case records
