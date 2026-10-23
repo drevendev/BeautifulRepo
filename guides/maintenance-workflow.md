@@ -61,7 +61,9 @@ visual evidence but does not prove navigation over HTTP.
 Review the actual diff, tests and current check results. Respect repository rules
 and unresolved material findings. Keep unrelated polish in a follow-up rather than
 continually enlarging a useful, already-correct change. Update reader-facing
-navigation and the [changelog](../CHANGELOG.md) in the feature's own pull request.
+navigation and the [changelog](../CHANGELOG.md) in the feature's own pull request,
+under the matching `Unreleased` section (Added, Changed, Deprecated, Removed, Fixed
+or Security).
 
 Do not create a release, public support channel or response-time promise just to
 make a checklist look complete. The [community guide](community-safety.md) explains
