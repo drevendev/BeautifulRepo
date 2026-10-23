@@ -48,6 +48,14 @@ supports paths relative to the current document, repository-root paths beginning
 URL-encoded path characters, and ordinary query/fragment suffixes on an otherwise local path.
 It rejects destinations that escape the repository root.
 
+A destination containing a backslash or a drive letter (`docs\guide.md`, `C:/x`,
+or either one percent-encoded) is reported as non-portable without being opened. On
+Windows such a path could name another drive, a UNC network share or a device. GitHub
+doesn't treat a backslash as a folder separator either. Symbolic links and NTFS
+junctions are never descended into while looking for Markdown files. When a source or
+destination passes through one, its target is read as text first and followed only
+if it stays inside the root. A link cycle is reported after 40 hops.
+
 `.git` and `node_modules` directories are never scanned. Repeat `--exclude GLOB` to
 skip other root-relative paths, such as `--exclude vendor`. A matching directory is
 not descended into, and excluded files remain valid link destinations.

@@ -254,10 +254,8 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
 
     for source in docs_links.iter_markdown_files(root, exclude):
         name = source.relative_to(root).as_posix()
-        try:
-            resolved_source = source.resolve(strict=True)
-            resolved_source.relative_to(root)
-        except (OSError, ValueError, RuntimeError):
+        resolved_source, error = docs_links.resolve_markdown_source(root, source)
+        if error:
             errors.append(f"{name}: invalid Markdown source location")
             continue
         inspected += 1
