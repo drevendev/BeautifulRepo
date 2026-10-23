@@ -9,7 +9,9 @@ workflow or a small tool with a well-defined purpose.
 Read the [roadmap](ROADMAP.md) and search existing issues and pull requests. Describe the
 reader's problem before proposing a solution. An issue is helpful for a large change;
 a small correction can go straight to a pull request. Keep one topic per contribution.
-Coding agents follow the short contract in [AGENTS.md](AGENTS.md).
+Coding agents follow the short contract in [AGENTS.md](AGENTS.md). The
+[decision records](docs/decisions/README.md) explain why the tools, the Action and
+`master` work the way they do.
 
 ## Ask a question
 

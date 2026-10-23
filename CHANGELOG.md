@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Decision records in `docs/decisions/` explain seven standing choices: standard
+  library only, offline and read-only tools, commit pins and immutable tags, a
+  composite Action, the protected `master`, no unverified contact routes, and the
+  plugin living at the repository root. CONTRIBUTING and the handoff guide link
+  them, and a test keeps their shape (#61).
 - A real before/after case for BeautifulRepo's own README
   (`case-studies/readme-first-success-case.md`): fixed revisions, a clean-clone run
   of the first success and all five checks, and GitHub's rendering measured at

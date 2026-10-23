@@ -99,6 +99,9 @@ credentials, internal runbooks, private queues, secrets, or backup codes.
   intake owner *before* advertising it; otherwise disclose the limitation.
 - [ ] **Continuity:** post a dated public status only after the owner approves it;
   revisit it when someone accepts responsibility or access changes.
+- [ ] **Decisions:** hand over the project's decision records with the access, so the
+  next maintainer knows which constraints are deliberate. BeautifulRepo keeps its own
+  in [`docs/decisions/`](../docs/decisions/README.md).
 
 Repository **transfer**, **archiving**, adding collaborators, changing security
 settings or using credentials are separate owner-authorized administrative acts,
