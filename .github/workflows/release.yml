@@ -1,0 +1,109 @@
+# A pushed v* tag gets a draft GitHub Release, never a published one.
+#
+# The job refuses a tag whose commit is not on master, or whose required checks,
+# read from the master ruleset, did not all pass on that commit. It fills
+# templates/RELEASE_NOTES.template.md with the facts it can verify (tag, full
+# SHA, previous tag, compare link, CI run) and leaves every prose placeholder for
+# a maintainer, who edits and publishes the draft. An existing release for the
+# tag is never touched.
+name: Release draft
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  draft:
+    name: Draft release notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Tagged commit is on master
+        id: commit
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          sha=$(git rev-parse "refs/tags/$TAG^{commit}")
+          if ! git merge-base --is-ancestor "$sha" origin/master; then
+            echo "::error title=Release draft::$TAG points at $sha, which is not on master"
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "$TAG -> $sha (on master)"
+      - name: Required checks passed on that commit
+        id: checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          required=$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/master" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context')
+          if [ -z "$required" ]; then
+            echo "::error title=Release draft::the master ruleset names no required checks"
+            exit 1
+          fi
+          runs=$(gh api --paginate "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs" \
+            --jq '.check_runs[] | "\(.name)\t\(.conclusion)"')
+          status=0
+          while IFS= read -r check; do
+            conclusion=$(printf '%s\n' "$runs" | awk -F'\t' -v name="$check" '$1 == name {print $2; exit}')
+            if [ "$conclusion" = success ]; then
+              echo "ok: $check"
+            else
+              echo "::error title=Release draft::required check '$check' is '${conclusion:-missing}' on $SHA; re-run this workflow once it passes"
+              status=1
+            fi
+          done <<< "$required"
+          [ "$status" -eq 0 ] || exit 1
+          ci=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$SHA&event=push" \
+            --jq '[.workflow_runs[] | select(.path == ".github/workflows/quality.yml")][0].html_url // ""')
+          {
+            echo "ci=$ci"
+            echo "required=$(printf '%s\n' "$required" | paste -sd ',' - | sed 's/,/, /g')"
+          } >> "$GITHUB_OUTPUT"
+      - name: Draft the release from the notes template
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          SHA: ${{ steps.commit.outputs.sha }}
+          CI_RUN: ${{ steps.checks.outputs.ci }}
+          REQUIRED: ${{ steps.checks.outputs.required }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "A release for $TAG already exists; it is left as it is."
+            exit 0
+          fi
+          previous=$(git tag --list 'v*' --sort=-v:refname --merged "$SHA" | grep -vxF "$TAG" | head -n 1 || true)
+          PREVIOUS="$previous" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          tag, sha, previous = os.environ["TAG"], os.environ["SHA"], os.environ.get("PREVIOUS", "")
+          base = previous or "the first commit"
+          compare = (f"https://github.com/{repo}/compare/{previous}...{tag}" if previous
+                     else f"https://github.com/{repo}/commits/{tag}")
+          facts = f"required checks passed on {sha}: {os.environ['REQUIRED']}"
+          if os.environ.get("CI_RUN"):
+              facts += f"; CI run {os.environ['CI_RUN']}"
+          notes = Path("templates/RELEASE_NOTES.template.md").read_text(encoding="utf-8")
+          for placeholder, value in {
+              "{{VERSION}}": tag,
+              "{{TAG}}": tag,
+              "{{COMMIT_SHA}}": sha,
+              "{{PREVIOUS_TAG_OR_BASE}}": base,
+              "{{RELEASE_PUBLICATION_DATE_OR_NOT_YET_PUBLISHED}}": "not yet published (draft)",
+              "{{VERIFICATION_FACTS}}": facts,
+              "{{COMPARE_URL}}": compare,
+              "{{CHANGELOG_URL}}": f"https://github.com/{repo}/blob/{tag}/CHANGELOG.md",
+          }.items():
+              notes = notes.replace(placeholder, value)
+          Path(os.environ["RUNNER_TEMP"], "notes.md").write_text(notes, encoding="utf-8")
+          PY
+          gh release create "$TAG" --draft --verify-tag --title "$TAG" \
+            --notes-file "$RUNNER_TEMP/notes.md"
+          echo "Draft created. Replace the remaining {{...}} placeholders, then publish it."
