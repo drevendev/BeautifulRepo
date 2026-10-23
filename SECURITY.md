@@ -24,7 +24,11 @@ other people wrote. They are designed so that a hostile target repository cannot
    files with the Python standard library. They never import, build or run the target,
    and they make no network requests.
 2. **escape its root.** Markdown sources and link destinations that resolve outside the
-   repository root, including through symlinks, are reported, not followed.
+   repository root, including through symlinks and NTFS junctions, are reported, not
+   followed. Link targets are read as text and checked before they are followed, and a
+   destination with a backslash or a drive letter is rejected unopened, so a path that
+   names another drive, a UNC network share or a device is never opened. Fixed in
+   v0.2.0 ([GHSA-9rpm-g83x-47w7](https://github.com/drevendev/BeautifulRepo/security/advisories/GHSA-9rpm-g83x-47w7)).
 3. **inject shell commands through the Action.** `action.yml` passes every input to its
    scripts through environment variables, never through `${{ }}` inside a `run:` block,
    and rejects unknown check names.

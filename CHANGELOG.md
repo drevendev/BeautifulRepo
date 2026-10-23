@@ -11,6 +11,11 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+## [v0.2.0] — 2026-10-23
+
+First release with the Claude Code and Codex plugin. The GitHub Action changes too,
+including a security fix, so adopters should update their pin.
+
 ### Added
 
 - A `Lint` CI job runs ruff 0.16.10, installed by hash, over `tools/`, `tests/` and
@@ -107,13 +112,6 @@ keep their original themed headings.
   The setup step now hands a normalized list to the check steps, fails on an empty
   list, and rejects an invalid `audit-fail-on` even when `audit` is not selected.
   The self-test covers both new failure cases (#104).
-- Link checkers: a destination with a backslash or a drive letter (`docs\guide.md`,
-  `C:/x`, or either one percent-encoded) is reported as non-portable. GitHub doesn't
-  read a backslash as a folder separator, and on Windows such a path could point
-  outside the repository. Sources and destinations are now resolved inside the root,
-  step by step: a symbolic link or junction target is read and checked before it is
-  followed. The Markdown file walk no longer follows links or junctions, so junction
-  loops no longer hang the checkers (part of #108).
 - Link checkers report destinations that only work on case-insensitive or Windows
   file systems: wrong letter case (`docs/guide.md` for `docs/Guide.md`), a `:`, a
   trailing dot or space, and Windows device names such as `NUL` or `con.md`. Before,
@@ -142,6 +140,18 @@ keep their original themed headings.
   promise that nothing leaves the machine. BeautifulRepo's Python checks make no
   network requests, but an agent session may send repository context to its model
   provider; the guides link Claude Code's and OpenAI's data-control pages (#97).
+
+### Security
+
+- [GHSA-9rpm-g83x-47w7](https://github.com/drevendev/BeautifulRepo/security/advisories/GHSA-9rpm-g83x-47w7): on Windows, a Markdown link, an HTML attribute or
+  a symbolic link in the checked repository that named a UNC share (`\\host\share`,
+  also percent-encoded) made `docs_links.py`, `html_navigation.py` and the Action open
+  that share before reporting "escapes repository root". The connection could expose
+  the user's Windows credentials to that host. Destinations with a backslash or a drive
+  letter are now reported as non-portable without being opened, sources and
+  destinations are resolved inside the root with link and junction targets checked
+  as text first, and the Markdown walk no longer follows links or junctions (#110).
+  **Action adopters should move their pin to v0.2.0.**
 
 ## [v0.1.0] — 2026-10-22
 
@@ -278,5 +288,6 @@ qualified in their guides. Linked content keeps its original rights and trademar
 
 The [MIT license](LICENSE) is unchanged.
 
-[Unreleased]: https://github.com/drevendev/BeautifulRepo/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/drevendev/BeautifulRepo/compare/v0.2.0...HEAD
+[v0.2.0]: https://github.com/drevendev/BeautifulRepo/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0
