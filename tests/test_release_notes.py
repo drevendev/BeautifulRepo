@@ -1,5 +1,6 @@
 """Structural checks for the reader-facing release notes starter."""
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,6 +61,18 @@ class ReleaseNotesTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("(guides/release-notes.md)", readme)
         self.assertIn("(templates/RELEASE_NOTES.template.md)", readme)
+
+    def test_changelog_unreleased_uses_keep_a_changelog_sections(self):
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        unreleased = changelog.split("## [Unreleased]\n", 1)[1].split("\n## [", 1)[0]
+        allowed = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
+        sections = re.findall(r"^### (.+)$", unreleased, re.MULTILINE)
+        self.assertTrue(set(sections) <= set(allowed), sections)
+        self.assertEqual(sorted(sections, key=allowed.index), sections)
+        self.assertEqual(len(sections), len(set(sections)))
+        before_first = unreleased.split("### ", 1)[0]
+        self.assertNotIn("\n- ", "\n" + before_first, "entries must sit under a section")
+        self.assertIn("[Unreleased]: https://github.com/drevendev/BeautifulRepo/compare/", changelog)
 
 
 

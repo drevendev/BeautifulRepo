@@ -5,24 +5,73 @@ published as [GitHub Releases](https://github.com/drevendev/BeautifulRepo/releas
 Pin the commit SHA a tag points to rather than the tag name. Dates identify work on
 the repository, and the linked pull requests keep the integration history.
 
-## Unreleased
+From v0.2.0 on, entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+sections: Added, Changed, Deprecated, Removed, Fixed and Security. v0.1.0 and earlier
+keep their original themed headings.
 
-- The plugin manifests, the `audit-repo` skill and the agent guides no longer
-  promise that nothing leaves the machine. BeautifulRepo's Python checks make no
-  network requests, but an agent session may send repository context to its model
-  provider; the guides link Claude Code's and OpenAI's data-control pages (#97).
-- `repo_audit.py` matches backtick code spans within one paragraph or heading. Two
-  stray backticks in different paragraphs used to form one span and hide every
-  finding between them, such as a TODO or an image without alt text (#106).
+## [Unreleased]
+
+### Added
+
+- Package BeautifulRepo as one plugin for Claude Code and Codex, version
+  `0.2.0-dev.0`. Its read-only `audit-repo` skill runs the offline tools from the
+  installed copy against a target repository and applies the checklists. The plugin
+  comes with ground rules for agents (`guides/agent-safety.md`), an install guide
+  (`guides/agent-plugin.md`) and manifest/skill contract tests.
+- Publish BeautifulRepo's own `SECURITY.md`, backed by GitHub private vulnerability
+  reporting (enabled 2026-10-22): triage owner, scope for the tools, Action and plugin,
+  no promised response time. Issue forms link the private route. A conduct policy is
+  still pending a verified reporting channel.
+- Route questions to the newly enabled Discussions from the issue chooser (blank
+  issues off; security and abuse routes listed), label new issues from the forms, and
+  explain every label in CONTRIBUTING.
+- CI hygiene borrowed from the owner's other repositories: a superseded pull-request
+  run is cancelled and checks can be started by hand; Dependabot proposes weekly
+  updates for the SHA-pinned Actions; a daily scheduled workflow verifies that every
+  `drevendev/BeautifulRepo@<sha> # vX.Y.Z` pin in the docs matches its tag, and
+  reports catalog freshness and self-audit warnings.
+- Add `.editorconfig` (UTF-8, LF, final newline, 4/2-space indents) that keeps
+  trailing spaces in Markdown, where two of them are a hard line break.
+- Commit the Hungry Crab maw config (`.crab.yml`) and decision ledger
+  (`.crab/ledger.json`), so later `crab` runs skip practices already served and
+  `crab tune` can learn from decisions.
+
+### Changed
+
+- `docs_links.py` and `html_navigation.py` now scan the current directory when
+  `--root` is omitted, like `repo_audit.py`. Previously they silently checked
+  BeautifulRepo's own checkout. `html_navigation.py` also runs under `python -I`.
+  Commands run from the BeautifulRepo root behave as before.
+- Name one check list everywhere: README, CONTRIBUTING, the maintenance guide and
+  CI now all run the same five checks, including `repo_audit.py .`. The workflow is
+  renamed "Quality checks" (required job names unchanged), and CONTRIBUTING
+  describes the protected `master`.
+- Pin the adoption guide's example workflow to the `v0.1.0` commit and explain how
+  to check where a tag points.
+
+### Fixed
+
+- Action: a `checks` list written one name per line, separated by tabs, or left
+  empty used to pass validation and then run **no** checks, so the job went green.
+  The setup step now hands a normalized list to the check steps, fails on an empty
+  list, and rejects an invalid `audit-fail-on` even when `audit` is not selected.
+  The self-test covers both new failure cases (#104).
+- Link checkers: a destination with a backslash or a drive letter (`docs\guide.md`,
+  `C:/x`, or either one percent-encoded) is reported as non-portable. GitHub doesn't
+  read a backslash as a folder separator, and on Windows such a path could point
+  outside the repository. Sources and destinations are now resolved inside the root,
+  step by step: a symbolic link or junction target is read and checked before it is
+  followed. The Markdown file walk no longer follows links or junctions, so junction
+  loops no longer hang the checkers (part of #108).
+- Link checkers report destinations that only work on case-insensitive or Windows
+  file systems: wrong letter case (`docs/guide.md` for `docs/Guide.md`), a `:`, a
+  trailing dot or space, and Windows device names such as `NUL` or `con.md`. Before,
+  these passed on Windows and macOS although GitHub serves none of them (#103).
 - `html_navigation.py` generates heading anchors the way GitHub does: each space is
   its own hyphen (`terms--conditions`), entities are decoded after tags are
   stripped, emphasis underscores and images drop out, and combining marks stay. A
   link to the anchor GitHub actually generates no longer fails, and a link to a
   collapsed one no longer passes (#102).
-- Link checkers report destinations that only work on case-insensitive or Windows
-  file systems: wrong letter case (`docs/guide.md` for `docs/Guide.md`), a `:`, a
-  trailing dot or space, and Windows device names such as `NUL` or `con.md`. Before,
-  these passed on Windows and macOS although GitHub serves none of them (#103).
 - Only `\n`, `\r\n` and `\r` end a line in the tools now, as in CommonMark. A form
   feed, vertical tab, NEL or Unicode line/paragraph separator inside code or prose
   used to crash `html_navigation.py` or make it reject a valid anchor, and to shift
@@ -35,52 +84,15 @@ the repository, and the linked pull requests keep the integration history.
 - `repo_audit.py` treats an NTFS junction in `.github` or `docs` like a directory
   symlink: it reports `path.symlink` and does not read through it. Before, a junction
   passed the symlink check, and documents outside the target were read (#108).
-- Link checkers: a destination with a backslash or a drive letter (`docs\guide.md`,
-  `C:/x`, or either one percent-encoded) is reported as non-portable. GitHub doesn't
-  read a backslash as a folder separator, and on Windows such a path could point
-  outside the repository. Sources and destinations are now resolved inside the root,
-  step by step: a symbolic link or junction target is read and checked before it is
-  followed. The Markdown file walk no longer follows links or junctions, so junction
-  loops no longer hang the checkers (part of #108).
-- Action: a `checks` list written one name per line, separated by tabs, or left
-  empty used to pass validation and then run **no** checks, so the job went green.
-  The setup step now hands a normalized list to the check steps, fails on an empty
-  list, and rejects an invalid `audit-fail-on` even when `audit` is not selected.
-  The self-test covers both new failure cases (#104).
-- Commit the Hungry Crab maw config (`.crab.yml`) and decision ledger
-  (`.crab/ledger.json`), so later `crab` runs skip practices already served and
-  `crab tune` can learn from decisions.
-- Route questions to the newly enabled Discussions from the issue chooser (blank
-  issues off; security and abuse routes listed), label new issues from the forms, and
-  explain every label in CONTRIBUTING.
-- Publish BeautifulRepo's own `SECURITY.md`, backed by GitHub private vulnerability
-  reporting (enabled 2026-10-22): triage owner, scope for the tools, Action and plugin,
-  no promised response time. Issue forms link the private route. A conduct policy is
-  still pending a verified reporting channel.
-- Name one check list everywhere: README, CONTRIBUTING, the maintenance guide and
-  CI now all run the same five checks, including `repo_audit.py .`. The workflow is
-  renamed "Quality checks" (required job names unchanged), and CONTRIBUTING
-  describes the protected `master`.
-- Add `.editorconfig` (UTF-8, LF, final newline, 4/2-space indents) that keeps
-  trailing spaces in Markdown, where two of them are a hard line break.
-- CI hygiene borrowed from the owner's other repositories: a superseded pull-request
-  run is cancelled and checks can be started by hand; Dependabot proposes weekly
-  updates for the SHA-pinned Actions; a daily scheduled workflow verifies that every
-  `drevendev/BeautifulRepo@<sha> # vX.Y.Z` pin in the docs matches its tag, and
-  reports catalog freshness and self-audit warnings.
-- Pin the adoption guide's example workflow to the `v0.1.0` commit and explain how
-  to check where a tag points.
-- `docs_links.py` and `html_navigation.py` now scan the current directory when
-  `--root` is omitted, like `repo_audit.py`. Previously they silently checked
-  BeautifulRepo's own checkout. `html_navigation.py` also runs under `python -I`.
-  Commands run from the BeautifulRepo root behave as before.
-- Package BeautifulRepo as one plugin for Claude Code and Codex, version
-  `0.2.0-dev.0`. Its read-only `audit-repo` skill runs the offline tools from the
-  installed copy against a target repository and applies the checklists. The plugin
-  comes with ground rules for agents (`guides/agent-safety.md`), an install guide
-  (`guides/agent-plugin.md`) and manifest/skill contract tests.
+- `repo_audit.py` matches backtick code spans within one paragraph or heading. Two
+  stray backticks in different paragraphs used to form one span and hide every
+  finding between them, such as a TODO or an image without alt text (#106).
+- The plugin manifests, the `audit-repo` skill and the agent guides no longer
+  promise that nothing leaves the machine. BeautifulRepo's Python checks make no
+  network requests, but an agent session may send repository context to its model
+  provider; the guides link Claude Code's and OpenAI's data-control pages (#97).
 
-## v0.1.0 — 2026-10-22
+## [v0.1.0] — 2026-10-22
 
 First tagged version, at commit `96e04e6a79027354c5e84a4a28f3ba5f5441d484`.
 See the [release notes](https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0).
@@ -214,3 +226,6 @@ SVG title/description linkage and non-color labels. Historical source observatio
 qualified in their guides. Linked content keeps its original rights and trademarks.
 
 The [MIT license](LICENSE) is unchanged.
+
+[Unreleased]: https://github.com/drevendev/BeautifulRepo/compare/v0.1.0...HEAD
+[v0.1.0]: https://github.com/drevendev/BeautifulRepo/releases/tag/v0.1.0
