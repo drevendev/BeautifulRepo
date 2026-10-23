@@ -7,6 +7,11 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- `html_navigation.py` generates heading anchors the way GitHub does: each space is
+  its own hyphen (`terms--conditions`), entities are decoded after tags are
+  stripped, emphasis underscores and images drop out, and combining marks stay. A
+  link to the anchor GitHub actually generates no longer fails, and a link to a
+  collapsed one no longer passes (#102).
 - Link checkers report destinations that only work on case-insensitive or Windows
   file systems: wrong letter case (`docs/guide.md` for `docs/Guide.md`), a `:`, a
   trailing dot or space, and Windows device names such as `NUL` or `con.md`. Before,
