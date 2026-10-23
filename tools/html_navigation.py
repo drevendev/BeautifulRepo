@@ -246,6 +246,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
     checked = 0
     inspected = 0
     parsed_files: dict[Path, tuple[set[str], list[tuple[int, str, str]]]] = {}
+    names: dict = {}  # directory listings shared by every resolution in this scan
 
     def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]]]:
         if path not in parsed_files:
@@ -258,7 +259,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
 
     for source in docs_links.iter_markdown_files(root, exclude):
         name = source.relative_to(root).as_posix()
-        resolved_source, error = docs_links.resolve_markdown_source(root, source)
+        resolved_source, error = docs_links.resolve_markdown_source(root, source, names)
         if error:
             errors.append(f"{name}: invalid Markdown source location")
             continue
@@ -281,7 +282,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
                 continue
             if parsed.scheme or parsed.netloc:
                 continue
-            target, error = docs_links.resolve_local_destination(root, source, value)
+            target, error = docs_links.resolve_local_destination(root, source, value, names)
             if target is None and error is None:
                 if parsed.path:
                     continue

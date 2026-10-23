@@ -23,6 +23,12 @@ MAX_LINK_HOPS = 40
 # replace the repository root, so such a component is never joined.
 DRIVE_PREFIX_RE = re.compile(r"^[A-Za-z]:")
 ESCAPES_ROOT = "escapes repository root"
+CASE_MISMATCH = "letter case differs from the name on disk (GitHub is case-sensitive)"
+# Windows reserves these device names in every folder, with or without an extension.
+WINDOWS_RESERVED_NAME_RE = re.compile(
+    r"^(?:CON|PRN|AUX|NUL|COM[0-9\u00b9\u00b2\u00b3]|LPT[0-9\u00b9\u00b2\u00b3])(?:\..*)?$",
+    re.IGNORECASE,
+)
 
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
@@ -817,13 +823,52 @@ def link_target_parts(root: str, target: str, windows: bool = os.name == "nt"):
     return _parts_under(root, target, windows)
 
 
-def _follow_within_root(root: Path, parts):
+def _entry_names(directory: Path, names: dict | None):
+    """Return the exact names in ``directory`` (None if unreadable), cached in ``names``."""
+    key = os.fspath(directory)
+    if names is not None and key in names:
+        return names[key]
+    try:
+        with os.scandir(directory) as entries:
+            found = frozenset(entry.name for entry in entries)
+    except OSError:
+        found = None
+    if names is not None:
+        names[key] = found
+    return found
+
+
+def _non_portable_reason(path: str):
+    """Return why a decoded destination path would not work everywhere, or None.
+
+    Checked as text before any filesystem call: on Windows a backslash or a drive
+    prefix turns a "relative" path into another drive, a UNC network share or a
+    device, and the other cases name a file Windows cannot check out or opens as
+    something else. None of them works in GitHub's rendering of the file either.
+    """
+    if "\\" in path:
+        return "backslash"
+    for part in path.split("/"):
+        if part in ("", ".", ".."):
+            continue
+        if ":" in part:
+            return "drive letter or colon"
+        if part.endswith((".", " ")):
+            return "trailing dot or space"
+        if WINDOWS_RESERVED_NAME_RE.match(part):
+            return "Windows reserved name"
+    return None
+
+
+def _follow_within_root(root: Path, parts, names: dict | None = None):
     """Follow root-relative ``parts`` like the filesystem would, without leaving ``root``.
 
-    Return (path, None) or (None, error). Every filesystem call is an lstat or
-    readlink of an entry already known to be inside ``root``: link targets are
-    checked as text before they are followed. Once an entry is missing, the
-    remaining parts are joined lexically and the returned path does not exist.
+    Return (path, None) or (None, error). Every filesystem call is an lstat,
+    readlink or directory listing of an entry already known to be inside
+    ``root``: link targets are checked as text before they are followed. Each
+    name must match its directory entry exactly, as on a case-sensitive file
+    system. Once an entry is missing, the remaining parts are joined lexically
+    and the returned path does not exist. ``names`` caches directory listings.
     """
     pending = list(parts)
     current = root
@@ -840,6 +885,14 @@ def _follow_within_root(root: Path, parts):
             return None, ESCAPES_ROOT
         candidate = current / part
         if missing:
+            current = candidate
+            continue
+        listing = _entry_names(current, names)
+        if listing is not None and part not in listing:
+            folded = part.casefold()
+            if any(name.casefold() == folded for name in listing):
+                return None, CASE_MISMATCH
+            missing = True
             current = candidate
             continue
         try:
@@ -868,13 +921,13 @@ def _follow_within_root(root: Path, parts):
     return current, None
 
 
-def resolve_markdown_source(root: Path, path: Path):
+def resolve_markdown_source(root: Path, path: Path, names: dict | None = None):
     """Return (real_path, None) for a Markdown file found under ``root``, or (None, error).
 
     ``root`` must already be resolved. The error is ESCAPES_ROOT when the file or a
     link on its way points outside ``root``.
     """
-    resolved, error = _follow_within_root(root, path.relative_to(root).parts)
+    resolved, error = _follow_within_root(root, path.relative_to(root).parts, names)
     if error:
         return None, error
     if not resolved.is_file():
@@ -882,8 +935,12 @@ def resolve_markdown_source(root: Path, path: Path):
     return resolved, None
 
 
-def resolve_local_destination(root: Path, source: Path, destination: str):
-    """Return (resolved_path, error) or (None, None) when destination is out of scope."""
+def resolve_local_destination(root: Path, source: Path, destination: str,
+                              names: dict | None = None):
+    """Return (resolved_path, error) or (None, None) when destination is out of scope.
+
+    Pass the same ``names`` dict for every call in one scan to reuse directory listings.
+    """
     if not destination:
         return None, None
 
@@ -905,11 +962,9 @@ def resolve_local_destination(root: Path, source: Path, destination: str):
         return None, None
     if "\x00" in raw_path:
         return None, "invalid relative destination"
-    # Checked as text before any filesystem call: on Windows a backslash or a drive
-    # prefix turns a "relative" path into another drive, a UNC network share or a
-    # device. Neither works in GitHub's rendering of the file either.
-    if "\\" in raw_path or any(DRIVE_PREFIX_RE.match(part) for part in raw_path.split("/")):
-        return None, "non-portable destination (backslash or drive letter)"
+    reason = _non_portable_reason(raw_path)
+    if reason:
+        return None, f"non-portable destination ({reason})"
 
     root = root.resolve()
     if raw_path.startswith("/"):
@@ -919,7 +974,7 @@ def resolve_local_destination(root: Path, source: Path, destination: str):
             base = source.parent.relative_to(root).parts
         except ValueError:
             return None, ESCAPES_ROOT
-    return _follow_within_root(root, [*base, *_split_parts(raw_path, "/")])
+    return _follow_within_root(root, [*base, *_split_parts(raw_path, "/")], names)
 
 
 def normalize_exclude(pattern: str) -> str:
@@ -988,11 +1043,12 @@ def check_repo(root: Path, exclude=()):
     errors = []
     checked = 0
     markdown_files = 0
+    names: dict = {}
 
     for path in iter_markdown_files(root, exclude):
         markdown_files += 1
         relative_source = path.relative_to(root).as_posix()
-        source_target, error = resolve_markdown_source(root, path)
+        source_target, error = resolve_markdown_source(root, path, names)
         if error == ESCAPES_ROOT:
             errors.append(f"{relative_source}: Markdown source escapes repository root")
             continue
@@ -1002,7 +1058,7 @@ def check_repo(root: Path, exclude=()):
 
         try:
             for lineno, destination in iter_markdown_destinations(source_target):
-                resolved, error = resolve_local_destination(root, path, destination)
+                resolved, error = resolve_local_destination(root, path, destination, names)
                 if resolved is None and error is None:
                     continue
                 checked += 1
