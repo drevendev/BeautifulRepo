@@ -7,6 +7,18 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Link checkers: a destination with a backslash or a drive letter (`docs\guide.md`,
+  `C:/x`, or either one percent-encoded) is reported as non-portable. GitHub doesn't
+  read a backslash as a folder separator, and on Windows such a path could point
+  outside the repository. Sources and destinations are now resolved inside the root,
+  step by step: a symbolic link or junction target is read and checked before it is
+  followed. The Markdown file walk no longer follows links or junctions, so junction
+  loops no longer hang the checkers (part of #108).
+- Action: a `checks` list written one name per line, separated by tabs, or left
+  empty used to pass validation and then run **no** checks, so the job went green.
+  The setup step now hands a normalized list to the check steps, fails on an empty
+  list, and rejects an invalid `audit-fail-on` even when `audit` is not selected.
+  The self-test covers both new failure cases (#104).
 - Commit the Hungry Crab maw config (`.crab.yml`) and decision ledger
   (`.crab/ledger.json`), so later `crab` runs skip practices already served and
   `crab tune` can learn from decisions.

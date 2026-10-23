@@ -7,13 +7,22 @@ import fnmatch
 from html.entities import html5
 import os
 import re
+import stat
 import string
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from urllib.parse import unquote, urlsplit
 
 # Version control and installed dependency trees are never repository-owned documentation.
 SKIPPED_DIRECTORIES = frozenset({".git", "node_modules"})
+
+# NTFS junctions redirect like directory symlinks, but lstat reports them only by tag.
+JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
+MAX_LINK_HOPS = 40
+# Windows reads a component such as "C:" or "c:file" as a drive; joining one would
+# replace the repository root, so such a component is never joined.
+DRIVE_PREFIX_RE = re.compile(r"^[A-Za-z]:")
+ESCAPES_ROOT = "escapes repository root"
 
 FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})(?P<info>.*)$")
 CLOSING_FENCE_RE = re.compile(r"^ {0,3}(?P<fence>\x60{3,}|~{3,})[ \t]*$")
@@ -746,6 +755,118 @@ def iter_markdown_destinations(path: Path):
         block_start = separator.end()
 
 
+def _is_redirect(info: os.stat_result) -> bool:
+    """Return True for a symbolic link or an NTFS junction, which lstat does not follow."""
+    return (stat.S_ISLNK(info.st_mode)
+            or getattr(info, "st_reparse_tag", 0) == JUNCTION_REPARSE_TAG)
+
+
+def _split_parts(text: str, separators: str) -> list[str]:
+    return [part for part in re.split(f"[{re.escape(separators)}]", text)
+            if part not in ("", ".")]
+
+
+def _parts_under(root: str, absolute: str, windows: bool):
+    """Return ``(True, parts)`` when ``absolute`` names a path under ``root``, else None."""
+    separators = "\\/" if windows else "/"
+    base = root.rstrip(separators)
+    head, rest = absolute[:len(base)], absolute[len(base):]
+    if windows:
+        same = head.replace("/", "\\").lower() == base.replace("/", "\\").lower()
+    else:
+        same = head == base
+    if not same or (rest and rest[0] not in separators):
+        return None
+    return True, _split_parts(rest, separators)
+
+
+def link_target_parts(root: str, target: str, windows: bool = os.name == "nt"):
+    """Classify a symbolic link or junction target by its text alone.
+
+    Return ``(from_root, parts)``: the components to follow next, either from the
+    repository root or from the link's own directory. Return None for a target
+    outside ``root``, including another drive, a UNC network share or a device.
+    Such a target is reported, never opened.
+    """
+    if not windows:
+        if target.startswith("/"):
+            return _parts_under(root, target, windows)
+        return False, _split_parts(target, "/")
+    if target.startswith("\\\\?\\") and not target.upper().startswith("\\\\?\\UNC\\"):
+        target = target[4:]  # Win32 long-path prefix in front of a drive path
+    anchor = PureWindowsPath(target)
+    if not anchor.drive and not anchor.root:
+        return False, _split_parts(target, "\\/")
+    if anchor.drive.startswith(("\\", "/")) or not (anchor.drive and anchor.root):
+        return None  # UNC share, device, drive-relative or current-drive path
+    return _parts_under(root, target, windows)
+
+
+def _follow_within_root(root: Path, parts):
+    """Follow root-relative ``parts`` like the filesystem would, without leaving ``root``.
+
+    Return (path, None) or (None, error). Every filesystem call is an lstat or
+    readlink of an entry already known to be inside ``root``: link targets are
+    checked as text before they are followed. Once an entry is missing, the
+    remaining parts are joined lexically and the returned path does not exist.
+    """
+    pending = list(parts)
+    current = root
+    hops = 0
+    missing = False
+    while pending:
+        part = pending.pop(0)
+        if part == "..":
+            if current == root:
+                return None, ESCAPES_ROOT
+            current = current.parent
+            continue
+        if os.name == "nt" and DRIVE_PREFIX_RE.match(part):
+            return None, ESCAPES_ROOT
+        candidate = current / part
+        if missing:
+            current = candidate
+            continue
+        try:
+            info = os.lstat(candidate)
+        except (OSError, ValueError):
+            missing = True
+            current = candidate
+            continue
+        if not _is_redirect(info):
+            current = candidate
+            continue
+        hops += 1
+        if hops > MAX_LINK_HOPS:
+            return None, "too many levels of symbolic links"
+        try:
+            target = os.readlink(candidate)
+        except (OSError, ValueError):
+            return None, "cannot read symbolic link"
+        followed = link_target_parts(str(root), target)
+        if followed is None:
+            return None, ESCAPES_ROOT
+        from_root, target_parts = followed
+        if from_root:
+            current = root
+        pending[:0] = target_parts
+    return current, None
+
+
+def resolve_markdown_source(root: Path, path: Path):
+    """Return (real_path, None) for a Markdown file found under ``root``, or (None, error).
+
+    ``root`` must already be resolved. The error is ESCAPES_ROOT when the file or a
+    link on its way points outside ``root``.
+    """
+    resolved, error = _follow_within_root(root, path.relative_to(root).parts)
+    if error:
+        return None, error
+    if not resolved.is_file():
+        return None, "cannot resolve"
+    return resolved, None
+
+
 def resolve_local_destination(root: Path, source: Path, destination: str):
     """Return (resolved_path, error) or (None, None) when destination is out of scope."""
     if not destination:
@@ -769,19 +890,21 @@ def resolve_local_destination(root: Path, source: Path, destination: str):
         return None, None
     if "\x00" in raw_path:
         return None, "invalid relative destination"
+    # Checked as text before any filesystem call: on Windows a backslash or a drive
+    # prefix turns a "relative" path into another drive, a UNC network share or a
+    # device. Neither works in GitHub's rendering of the file either.
+    if "\\" in raw_path or any(DRIVE_PREFIX_RE.match(part) for part in raw_path.split("/")):
+        return None, "non-portable destination (backslash or drive letter)"
 
     root = root.resolve()
     if raw_path.startswith("/"):
-        candidate = root / raw_path.lstrip("/")
+        base = ()
     else:
-        candidate = source.parent / raw_path
-
-    resolved = candidate.resolve()
-    try:
-        resolved.relative_to(root)
-    except ValueError:
-        return None, "escapes repository root"
-    return resolved, None
+        try:
+            base = source.parent.relative_to(root).parts
+        except ValueError:
+            return None, ESCAPES_ROOT
+    return _follow_within_root(root, [*base, *_split_parts(raw_path, "/")])
 
 
 def normalize_exclude(pattern: str) -> str:
@@ -798,6 +921,10 @@ def iter_markdown_files(root: Path, exclude=()) -> list[Path]:
     Each ``exclude`` glob is matched case-sensitively against root-relative POSIX
     paths of directories and files; a matching directory is not descended into.
     Excluded files can still be link destinations.
+
+    Symbolic links and junctions are never followed here, not even to ask whether
+    they point at a directory. A link named ``*.md`` is listed, and
+    ``resolve_markdown_source`` decides where it leads.
     """
     patterns = [pattern for pattern in map(normalize_exclude, exclude) if pattern]
 
@@ -805,13 +932,27 @@ def iter_markdown_files(root: Path, exclude=()) -> list[Path]:
         return any(fnmatch.fnmatchcase(relative, pattern) for pattern in patterns)
 
     found = []
-    for directory, dirnames, filenames in os.walk(root):
-        relative_dir = Path(directory).relative_to(root).as_posix()
+    pending = [root]
+    while pending:
+        directory = pending.pop()
+        relative_dir = directory.relative_to(root).as_posix()
         prefix = "" if relative_dir == "." else f"{relative_dir}/"
-        dirnames[:] = [name for name in dirnames
-                       if name not in SKIPPED_DIRECTORIES and not excluded(prefix + name)]
-        found.extend(Path(directory) / name for name in filenames
-                     if fnmatch.fnmatch(name, "*.md") and not excluded(prefix + name))
+        try:
+            with os.scandir(directory) as entries:
+                names = [entry.name for entry in entries]
+        except OSError:
+            continue
+        for name in names:
+            try:
+                # os.lstat, unlike DirEntry, reports junction reparse tags on every version.
+                info = os.lstat(directory / name)
+            except OSError:
+                continue
+            if stat.S_ISDIR(info.st_mode) and not _is_redirect(info):
+                if name not in SKIPPED_DIRECTORIES and not excluded(prefix + name):
+                    pending.append(directory / name)
+            elif fnmatch.fnmatch(name, "*.md") and not excluded(prefix + name):
+                found.append(directory / name)
     return sorted(found)
 
 
@@ -836,15 +977,12 @@ def check_repo(root: Path, exclude=()):
     for path in iter_markdown_files(root, exclude):
         markdown_files += 1
         relative_source = path.relative_to(root).as_posix()
-        try:
-            source_target = path.resolve(strict=True)
-        except (OSError, RuntimeError):
-            errors.append(f"{relative_source}: cannot resolve Markdown source")
-            continue
-        try:
-            source_target.relative_to(root)
-        except ValueError:
+        source_target, error = resolve_markdown_source(root, path)
+        if error == ESCAPES_ROOT:
             errors.append(f"{relative_source}: Markdown source escapes repository root")
+            continue
+        if error:
+            errors.append(f"{relative_source}: cannot resolve Markdown source")
             continue
 
         try:
