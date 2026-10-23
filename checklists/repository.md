@@ -4,6 +4,10 @@ Use this as an audit, not a points system. Record **done**, **missing**, **not c
 or **not applicable with a reason**. File presence is not proof that the file is useful.
 Choose the smallest change that removes an actual reader or contributor obstacle.
 
+For **private or internal repositories**, also use the
+[confidentiality checklist](confidentiality.md) before sharing findings, examples,
+logs or screenshots outside the permitted audience.
+
 ## 1. Make the project understandable
 
 - [ ] The name and first sentence explain the outcome and intended user.
