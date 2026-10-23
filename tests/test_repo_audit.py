@@ -343,9 +343,9 @@ class AuditTests(unittest.TestCase):
         explicit = audit.audit_repository(self.root, profile="public")
         self.assertEqual(implicit, explicit)
         self.assertEqual(audit.render_text(implicit), audit.render_text(explicit))
-        self.assertEqual(implicit["profile"], "public")
+        self.assertNotIn("profile", implicit)
         result = self.cli("--format", "json")
-        self.assertEqual(json.loads(result.stdout)["profile"], "public")
+        self.assertNotIn("profile", json.loads(result.stdout))
 
     def test_internal_and_private_license_and_owner_contact(self):
         (self.root / "LICENSE").unlink()
