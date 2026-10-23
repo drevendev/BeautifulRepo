@@ -53,7 +53,11 @@ keeps scanning time roughly linear in the size of a file.
 A destination containing a backslash or a drive letter (`docs\guide.md`, `C:/x`,
 or either one percent-encoded) is reported as non-portable without being opened. On
 Windows such a path could name another drive, a UNC network share or a device. GitHub
-doesn't treat a backslash as a folder separator either. Symbolic links and NTFS
+doesn't treat a backslash as a folder separator either. A `:`, a trailing dot or space,
+or a Windows device name (`NUL`, `CON`, `COM1.txt` and so on) is non-portable too.
+Every name must match its directory entry exactly, letter case included, so
+`docs/guide.md` for `docs/Guide.md` is reported on Windows and macOS as it is on
+GitHub and Linux. Symbolic links and NTFS
 junctions are never descended into while looking for Markdown files. When a source or
 destination passes through one, its target is read as text first and followed only
 if it stays inside the root. A link cycle is reported after 40 hops.

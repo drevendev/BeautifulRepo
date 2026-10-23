@@ -117,7 +117,9 @@ class LinkTargetTextTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
             # Only the walk runs under the patch: Path.resolve also calls os.lstat on POSIX.
-            with mock.patch.object(docs_links.os, "lstat",
+            # No directory listing either, so the walk relies on the mocked lstat alone.
+            with mock.patch.object(docs_links, "_entry_names", return_value=None), \
+                    mock.patch.object(docs_links.os, "lstat",
                                    return_value=os.stat_result((0o120777,) + (0,) * 9)), \
                     mock.patch.object(docs_links.os, "readlink",
                                       return_value=str(root / ".." / "outside")):

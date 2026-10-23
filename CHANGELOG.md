@@ -7,6 +7,10 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Link checkers report destinations that only work on case-insensitive or Windows
+  file systems: wrong letter case (`docs/guide.md` for `docs/Guide.md`), a `:`, a
+  trailing dot or space, and Windows device names such as `NUL` or `con.md`. Before,
+  these passed on Windows and macOS although GitHub serves none of them (#103).
 - Only `\n`, `\r\n` and `\r` end a line in the tools now, as in CommonMark. A form
   feed, vertical tab, NEL or Unicode line/paragraph separator inside code or prose
   used to crash `html_navigation.py` or make it reject a valid anchor, and to shift
