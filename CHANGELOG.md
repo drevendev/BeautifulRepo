@@ -7,6 +7,9 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- `repo_audit.py` matches backtick code spans within one paragraph or heading. Two
+  stray backticks in different paragraphs used to form one span and hide every
+  finding between them, such as a TODO or an image without alt text (#106).
 - Link checkers report destinations that only work on case-insensitive or Windows
   file systems: wrong letter case (`docs/guide.md` for `docs/Guide.md`), a `:`, a
   trailing dot or space, and Windows device names such as `NUL` or `con.md`. Before,

@@ -25,6 +25,8 @@ LEVELS = {"error": 0, "warning": 1, "info": 2}
 # NTFS junctions redirect like directory symlinks, but only lstat's reparse tag shows them.
 JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
 MARKDOWN_LINE_END_RE = re.compile(r"(?<=\n)|(?<=\r)(?!\n)")
+# Lines that stand alone as a block: ATX headings, setext underlines, thematic breaks.
+BLOCK_BOUNDARY_LINE = re.compile(r" {0,3}(?:#{1,6}(?:[ \t]|$)|=+[ \t]*$|-+[ \t]*$|(?:[*_][ \t]*){3,}$)")
 
 
 class AuditInputError(ValueError):
@@ -202,7 +204,35 @@ def visible_source(text: str, *, mask_inline: bool = True) -> str:
         else:
             lines.append(visible_line)
     source = "".join(lines)
-    return _mask_code_spans(source) if mask_inline else source
+    return _mask_code_spans_by_block(source) if mask_inline else source
+
+
+def _mask_code_spans_by_block(source: str) -> str:
+    """Mask code spans block by block: a span never crosses a blank line or a heading.
+
+    GitHub renders a lone backtick as plain text, so two stray backticks in
+    different paragraphs must not hide everything between them.
+    """
+    masked: list[str] = []
+    block: list[str] = []
+
+    def flush() -> None:
+        if block:
+            masked.append(_mask_code_spans("".join(block)))
+            block.clear()
+
+    for line in _split_lines(source):
+        content = line.rstrip("\r\n")
+        if not content.strip():
+            flush()
+            masked.append(line)
+        elif BLOCK_BOUNDARY_LINE.match(content):
+            flush()
+            masked.append(_mask_code_spans(line))
+        else:
+            block.append(line)
+    flush()
+    return "".join(masked)
 
 
 class _HTMLFacts(HTMLParser):
