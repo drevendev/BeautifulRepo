@@ -169,6 +169,7 @@ not a second copy of the first-screen chooser.
   [run them in your repository's CI](guides/adopting-the-checks.md) or
   [from Claude Code and Codex](guides/agent-plugin.md) under the
   [agent ground rules](guides/agent-safety.md),
+  [confidentiality checklist for private repositories](checklists/confidentiality.md),
   [Community safety readiness](guides/community-safety.md).
 - **Research and adapt:** [case studies and their procedure](case-studies/README.md),
   [annotated studies](case-studies/first-patterns.md),
