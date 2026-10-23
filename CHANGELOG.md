@@ -23,6 +23,13 @@ keep their original themed headings.
 - The adoption guide pins the Action to the `v0.2.0` commit, and `master` starts
   plugin version `0.3.0-dev.0` (#101).
 
+### Removed
+
+- Remove the Hungry Crab execution configuration (`.crab.yml`) and decision ledger
+  (`.crab/ledger.json`) from the public repository. These were maintainer tooling
+  state, not reusable BeautifulRepo product examples. Ignore future local Crab files;
+  public guidance and issue history remain available.
+
 ## [v0.2.0] — 2026-10-23
 
 First release with the Claude Code and Codex plugin. The GitHub Action changes too,
