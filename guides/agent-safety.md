@@ -25,15 +25,23 @@ Auditing never writes. When the user asks for changes, use this **write gate**:
 Never commit, push, tag, publish a release, or open issues or pull requests without a
 separate instruction from the user.
 
-## Offline, and nothing leaves the machine
+## Offline Python checks versus online agent sessions
 
-BeautifulRepo's tools use only the Python standard library and make no network
-requests. The agent should match that:
+BeautifulRepo's standalone Python audit and link-checking tools do not make
+network requests. Using these tools inside Claude Code or Codex does **not**
+guarantee that the agent session is offline: prompts, repository excerpts and
+tool output may reach the configured model provider.
 
-- Don't paste the target's content into web searches or external services.
-- Don't fetch links from the target to "check" them; report them as not verified.
-- For private or internal repositories, don't quote their content anywhere outside
-  that repository and the user's session.
+Before analyzing confidential repositories with an agent, verify the selected
+provider, workspace access and applicable data-handling controls. If those
+controls are not approved, run BeautifulRepo's Python tools directly without
+an agent. Do not send additional target content to web searches or unrelated
+services; report external links as unverified rather than fetching them.
+Keep private repository content out of public issues, examples and reports.
+
+See [Claude Code data usage](https://code.claude.com/docs/en/data-usage)
+and [OpenAI data controls](https://help.openai.com/en/articles/7730893).
+Reviewed 2026-10-22; recheck when agent providers or configurations change.
 
 ## Don't run the target's code
 

@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "beautifulrepo",
   "version": "0.2.0-dev.0",
-  "description": "Audit how a repository presents itself to readers, offline and read-only, using BeautifulRepo's checklists and tools.",
+  "description": "Audit a repository with BeautifulRepo's local, read-only Python checks and agent-guided documentation checklists.",
   "author": {
     "name": "Dreven",
     "url": "https://github.com/drevendev"
@@ -15,8 +15,8 @@
     "com.openai": {
       "interface": {
         "displayName": "BeautifulRepo",
-        "shortDescription": "Audit a repository's README, trust files and links offline.",
-        "longDescription": "Run BeautifulRepo's offline checks and checklists against a local repository and get prioritized, evidence-backed findings about its README, license, contribution guide, links and first-success path. Read-only: nothing is written or sent anywhere.",
+        "shortDescription": "Audit a repository's README, trust files and links with local checks.",
+        "longDescription": "Run BeautifulRepo's read-only, offline Python checks and checklists against a local repository to get evidence-backed findings about its README, license, contribution guide, links and first-success path. The agent session may send repository context to its configured model provider.",
         "developerName": "Dreven",
         "category": "Developer Tools",
         "capabilities": ["Interactive", "Read"],

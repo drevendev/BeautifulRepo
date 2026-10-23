@@ -11,7 +11,7 @@
     {
       "name": "beautifulrepo",
       "source": "./",
-      "description": "Audit how a repository presents itself to readers, offline and read-only, using BeautifulRepo's checklists and tools.",
+      "description": "Audit a repository with BeautifulRepo's local, read-only Python checks and agent-guided documentation checklists.",
       "category": "productivity",
       "keywords": ["readme", "documentation", "repository-audit"]
     }
