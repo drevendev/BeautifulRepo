@@ -269,20 +269,20 @@ class _HTMLFacts(HTMLParser):
 def _is_repository_raw_asset(url: str) -> bool:
     """Identify GitHub-hosted raw images that depend on a remote/session."""
     return bool(re.match(
-        r"^https?://(?:raw\\.githubusercontent\\.com/|"
-        r"github\\.com/[^/?#]+/[^/?#]+/raw/)", url, re.IGNORECASE,
+        r"^https?://(?:raw\.githubusercontent\.com/|"
+        r"github\.com/[^/?#]+/[^/?#]+/raw/)", url, re.IGNORECASE,
     ))
 
 
 def _has_owner_contact(text: str) -> bool:
     """Recognize an explicit owner/contact/support heading or labelled field."""
     heading = re.search(
-        r"(?im)^ {0,3}#{1,6}[ \\t]+(?:owners?|ownership|owning team|"
-        r"maintainers?|contacts?|support|help desk|team)(?:\\b|[ \\t:/&-])", text,
+        r"(?im)^ {0,3}#{1,6}[ \t]+(?:owners?|ownership|owning team|"
+        r"maintainers?|contacts?|support|help desk|team)(?:\b|[ \t:/&-])", text,
     )
     field = re.search(
         r"(?im)^ {0,3}(?:owner|owning team|maintainer|contact|"
-        r"support(?: channel)?|team):[ \\t]*\\S+", text,
+        r"support(?: channel)?|team):[ \t]*\S+", text,
     )
     return bool(heading or field)
 
@@ -292,12 +292,12 @@ def _absolute_image_findings(visible: str, path: str,
                              ) -> list[dict[str, Any]]:
     """Report common inline/reference Markdown images and HTML <img> raw URLs."""
     findings: list[dict[str, Any]] = []
-    lines = [line.rstrip("\\r\\n") for line in _split_lines(visible)]
+    lines = [line.rstrip("\r\n") for line in _split_lines(visible)]
     references: dict[str, str] = {}
-    definition = re.compile(r"^ {0,3}\\[([^\\]\\r\\n]{1,128})\\]:[ \\t]*<?(https?://[^\\s)>]+)", re.I)
-    inline = re.compile(r"(?<!\\\\)!\\[[^\\]\\r\\n]{0,256}\\]\\(\\s*<?(https?://[^\\s)>]+)", re.I)
-    referenced = re.compile(r"(?<!\\\\)!\\[([^\\]\\r\\n]{1,256})\\]\\[([^\\]\\r\\n]{0,128})\\]")
-    shortcut = re.compile(r"(?<!\\\\)!\\[([^\\]\\r\\n]{1,256})\\](?![\\[(])")
+    definition = re.compile(r"^ {0,3}\[([^\]\r\n]{1,128})\]:[ \t]*<?(https?://[^\s)>]+)", re.I)
+    inline = re.compile(r"(?<!\\)!\[[^\]\r\n]{0,256}\]\(\s*<?(https?://[^\s)>]+)", re.I)
+    referenced = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\]\[([^\]\r\n]{0,128})\]")
+    shortcut = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\](?![\[(])")
 
     for line in lines:
         match = definition.match(line)
