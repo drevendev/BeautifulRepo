@@ -78,10 +78,15 @@ why such promises must match the project's actual capacity.
   updates the SHA, not your review.
 - **Pins this repository publishes**, such as `drevendev/BeautifulRepo@<sha> # v0.1.0`
   in the adoption guide, are checked daily by `.github/workflows/pins.yml`: every
-  tag must exist and point at the documented commit. The same scheduled workflow
-  runs `tools/catalog.py` and `tools/repo_audit.py . --fail-on warning`, so review-date
-  and entry-point drift show up without a push. Run it by hand from the Actions tab
-  (`workflow_dispatch`) after tagging a release.
+  tag must exist and point at the documented commit. Run it by hand from the Actions
+  tab (`workflow_dispatch`) after tagging a release.
+- **Source review dates** are checked by the same scheduled workflow:
+  `tools/catalog.py --fail-on-warning` for catalog entries,
+  `tools/review_dates.py --fail-on-warning` for guide sources, and
+  `tools/repo_audit.py . --fail-on warning` for entry-point drift. A due recheck turns
+  the run red, and GitHub notifies the owner. To clear it, re-read the source, update
+  the claim if the source changed, and only then change the date. Never move a date
+  just to make the run green.
 
 ## 6. Cut a release
 

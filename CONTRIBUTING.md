@@ -105,6 +105,7 @@ or a change to the repository's auto-close settings.
 
 Public documentation is in English. Use descriptive headings and links, text alternatives
 for meaningful images, and short, verified examples. Identify incomplete investigations.
+Change a "Reviewed" or `reviewed_on` date only after actually re-reading that source.
 Do not add tracking images, copied brand assets, misleading badges, unsupported benchmark
 claims, referral promotions or bulk low-effort changes.
 

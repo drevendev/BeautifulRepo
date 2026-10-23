@@ -13,6 +13,9 @@ keep their original themed headings.
 
 ### Added
 
+- `tools/review_dates.py` lists guide sources whose "Reviewed" date is due for a
+  recheck (180 days, 30 for the programs guide) and rejects future or impossible
+  dates. The maintenance workflow describes the recheck routine (#64).
 - `AGENTS.md` gives coding agents the five checks, the house rules and the layout.
   Codex reads it directly; Claude Code reads it through `.claude/CLAUDE.md`, because
   a root `CLAUDE.md` fails `claude plugin validate --strict` (#53).
@@ -62,6 +65,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- The daily scheduled run now fails when a catalog entry or a guide source is due for
+  a recheck, so GitHub notifies the owner. It used to print warnings and stay green
+  (`catalog.py` and `review_dates.py` gain `--fail-on-warning`; pull-request checks
+  are unchanged and calendar-independent) (#99).
 - Action: a `checks` list written one name per line, separated by tabs, or left
   empty used to pass validation and then run **no** checks, so the job went green.
   The setup step now hands a normalized list to the check steps, fails on an empty

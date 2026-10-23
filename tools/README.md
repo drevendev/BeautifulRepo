@@ -34,11 +34,23 @@ Exit code 1 means validation, input/output or synchronization failed. Argument-p
 errors use argparse's exit code 2. Warnings request rechecking programs after 30 days and
 other entries after 180 days; they do not assert that a source actually changed.
 Current UTC date affects freshness warnings and future-date validation, not rendering.
+`--fail-on-warning` turns a due recheck into exit code 1. Only the scheduled
+workflow uses it, because pull-request checks must not depend on the calendar.
 
 The tool does not fetch links, follow redirects, execute repositories, judge editorial
 quality, decide licenses, verify claims or score beauty. Source review dates must come
 from real inspection, never from regenerating the view. Markdown output order is stable.
 
+
+## Guide review dates
+
+`review_dates.py` finds the dates on which someone re-read a guide's sources, such as
+`Reviewed **2026-10-22**` or `Checked: 2026-10-03`, in `guides/`, `checklists/`,
+`CONTRIBUTING.md`, `SECURITY.md` and this file. It warns when a date is older than
+180 days (30 for `guides/programs.md`, whose rules change every season) and reports
+impossible or future dates as errors. As with the catalog, `--fail-on-warning` is for
+the scheduled run, and `--today YYYY-MM-DD` fixes the date for tests. A warning means
+"re-read this source", not "this source changed".
 
 ## Relative documentation link checker
 
