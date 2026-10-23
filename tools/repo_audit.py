@@ -24,6 +24,7 @@ DOCUMENT_SUFFIXES = (".md", ".markdown", ".rst", ".txt", "")
 LEVELS = {"error": 0, "warning": 1, "info": 2}
 # NTFS junctions redirect like directory symlinks, but only lstat's reparse tag shows them.
 JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
+MARKDOWN_LINE_END_RE = re.compile(r"(?<=\n)|(?<=\r)(?!\n)")
 
 
 class AuditInputError(ValueError):
@@ -119,6 +120,19 @@ def _read_document(path: Path, root: Path, findings: list[dict[str, Any]],
     return None
 
 
+def _split_lines(text: str) -> list[str]:
+    """Split after each Markdown line ending (\\n, \\r\\n or \\r), keeping the ending.
+
+    str.splitlines also breaks at \\f, \\v, \\x1c-\\x1e, \\x85, U+2028 and U+2029,
+    which Markdown treats as ordinary characters. A masked copy that blanks them
+    would then have fewer lines than its source.
+    """
+    parts = MARKDOWN_LINE_END_RE.split(text)
+    if parts and parts[-1] == "":
+        parts.pop()
+    return parts
+
+
 def _masked(text: str) -> str:
     return "".join("\n" if char == "\n" else " " for char in text)
 
@@ -152,7 +166,7 @@ def visible_source(text: str, *, mask_inline: bool = True) -> str:
     lines = []
     active: tuple[str, int] | None = None
     in_comment = False
-    for line in text.splitlines(keepends=True):
+    for line in _split_lines(text):
         if active is not None:
             match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line.rstrip("\r\n"))
             if match and match[1][0] == active[0] and len(match[1]) >= active[1] and not match[2].strip():
@@ -224,8 +238,9 @@ class _HTMLFacts(HTMLParser):
 def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     visible = visible_source(text)
-    lines = visible.splitlines()
-    heading_lines = visible_source(text, mask_inline=False).splitlines()
+    lines = [line.rstrip("\r\n") for line in _split_lines(visible)]
+    heading_lines = [line.rstrip("\r\n")
+                     for line in _split_lines(visible_source(text, mask_inline=False))]
     html = _HTMLFacts()
     html.feed(visible)
     html.close()

@@ -199,6 +199,10 @@ def protect_inline_code_angles(label: str) -> str:
     return "".join(rendered)
 
 
+def _lines(text: str) -> list[str]:
+    return [line.rstrip("\r\n") for line in docs_links.split_markdown_lines(text)]
+
+
 def heading_ids(markdown_without_code: str, explicit_ids: set[str],
                 original_markdown: str | None = None) -> set[str]:
     """Approximate GitHub's automatic ATX heading IDs with duplicate suffixes.
@@ -209,8 +213,8 @@ def heading_ids(markdown_without_code: str, explicit_ids: set[str],
     """
     found = set(explicit_ids)
     used_heading_ids: set[str] = set()
-    original_lines = (original_markdown or markdown_without_code).splitlines()
-    for line, original_line in zip(markdown_without_code.splitlines(), original_lines):
+    original_lines = _lines(original_markdown or markdown_without_code)
+    for line, original_line in zip(_lines(markdown_without_code), original_lines):
         match = HEADING.match(line)
         if match is not None and original_markdown is not None:
             line = restore_heading_code(line, original_line)

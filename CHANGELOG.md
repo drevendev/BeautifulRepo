@@ -7,6 +7,10 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Only `\n`, `\r\n` and `\r` end a line in the tools now, as in CommonMark. A form
+  feed, vertical tab, NEL or Unicode line/paragraph separator inside code or prose
+  used to crash `html_navigation.py` or make it reject a valid anchor, and to shift
+  `repo_audit.py` line numbers (#105).
 - Scanning time no longer grows quadratically on adversarial Markdown. Link text
   brackets are paired in one pass. A bare link destination stops at its 33rd unclosed
   `(`, as in GitHub's cmark-gfm. The audit's heading parser no longer backtracks over
