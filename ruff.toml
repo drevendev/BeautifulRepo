@@ -1,0 +1,8 @@
+# Linting runs in CI only (the "Lint" job). Contributors don't need ruff locally.
+target-version = "py311"
+include = ["tools/**/*.py", "tests/**/*.py", "examples/**/*.py"]
+
+[lint]
+# Syntax and statement errors, pyflakes (unused or undefined names) and bugbear
+# (likely bugs such as zip() without strict=). No style or formatting rules.
+select = ["E4", "E7", "E9", "F", "B"]

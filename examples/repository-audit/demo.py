@@ -8,7 +8,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from repo_audit import audit_repository
+from repo_audit import audit_repository  # noqa: E402 (needs the sys.path entry above)
 
 BEFORE = """# Parcel
 

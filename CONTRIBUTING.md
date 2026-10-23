@@ -65,6 +65,11 @@ and section-fragment checks. Neither checks external URLs, completely renders
 Markdown, or certifies accessibility. Review the generated diff. No network
 access or third-party Python packages are needed.
 
+CI also runs [ruff](https://docs.astral.sh/ruff/) in a separate `Lint` job, with the
+rules in `ruff.toml`. You don't need it locally. To run it anyway, install the pinned
+version with `python -m pip install --require-hashes -r .github/lint-requirements.txt`
+on Linux x86-64, or the same `ruff==` version elsewhere, then run `ruff check`.
+
 ## How a change reaches `master`
 
 `master` is protected: every change arrives through a pull request, merged with

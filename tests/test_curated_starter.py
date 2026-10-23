@@ -70,7 +70,6 @@ class CuratedCollectionTests(unittest.TestCase):
             curate.validate(self.sample, self.today)
 
     def test_unsafe_urls_and_dates_are_rejected(self):
-        entry = self.sample["entries"][0]
         for url in ("http://example.com", "https://example.com/hello)evil", "https://user@example.com/x",
                     "https://example.com/x y", "javascript:alert(1)", "https://example.com/#frag"):
             with self.subTest(url=url):

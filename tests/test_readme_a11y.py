@@ -22,7 +22,7 @@ class FeatureOverviewAccessibilityTests(unittest.TestCase):
         items = [line for line in self.section.splitlines()
                  if line.startswith("- ")]
         self.assertEqual(len(items), len(labels))
-        for label, item in zip(labels, items):
+        for label, item in zip(labels, items, strict=True):
             with self.subTest(label=label):
                 self.assertTrue(item.startswith(f"- **{label}** — "), item)
                 self.assertGreater(len(item), len(label) + 8)

@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- A `Lint` CI job runs ruff 0.16.10, installed by hash, over `tools/`, `tests/` and
+  `examples/` with a small rule set: syntax, pyflakes and bugbear, no style rules. The
+  first run's 20 findings are fixed: an unused variable, semicolon-joined statements,
+  and `zip()` calls that now state `strict=True` where the lengths must match. The
+  tools still have no runtime dependencies, and the job is not yet required (#55).
 - Decision records in `docs/decisions/` explain seven standing choices: standard
   library only, offline and read-only tools, commit pins and immutable tags, a
   composite Action, the protected `master`, no unverified contact routes, and the

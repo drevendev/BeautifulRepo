@@ -34,13 +34,16 @@ class CatalogTests(unittest.TestCase):
             self.assertTrue(catalog.validate(data, TODAY)[0])
 
     def test_boolean_is_not_schema_version(self):
-        data = document(); data["schema_version"] = True
+        data = document()
+        data["schema_version"] = True
         self.assertTrue(catalog.validate(data, TODAY)[0])
 
     def test_missing_and_unknown_field(self):
-        data = document(); del data["resources"][0]["why"]
+        data = document()
+        del data["resources"][0]["why"]
         self.assertTrue(catalog.validate(data, TODAY)[0])
-        data = document(); data["resources"][0]["unknown"] = "value"
+        data = document()
+        data["resources"][0]["unknown"] = "value"
         self.assertTrue(catalog.validate(data, TODAY)[0])
 
     def test_empty_or_non_string_fields(self):
@@ -53,14 +56,18 @@ class CatalogTests(unittest.TestCase):
         self.assertTrue(self.errors_for("evidence", "tested-and-secure"))
 
     def test_duplicate_id(self):
-        data = document(); item = copy.deepcopy(data["resources"][0]); item["url"] += "/other"
+        data = document()
+        item = copy.deepcopy(data["resources"][0])
+        item["url"] += "/other"
         data["resources"].append(item)
         self.assertTrue(any("duplicate id" in x for x in catalog.validate(data, TODAY)[0]))
 
     def test_equivalent_url_variants_are_duplicates(self):
         for url in ("https://EXAMPLE.org/guide/", "https://example.org:443/guide#part"):
-            data = document(); item = copy.deepcopy(data["resources"][0])
-            item.update(id="second-guide", url=url); data["resources"].append(item)
+            data = document()
+            item = copy.deepcopy(data["resources"][0])
+            item.update(id="second-guide", url=url)
+            data["resources"].append(item)
             self.assertTrue(any("duplicate source" in x for x in catalog.validate(data, TODAY)[0]))
 
     def test_invalid_urls(self):
@@ -73,17 +80,21 @@ class CatalogTests(unittest.TestCase):
             self.assertTrue(self.errors_for("reviewed_on", value), value)
 
     def test_stale_warning_is_not_structural_failure(self):
-        data = document(); data["resources"][0].update(category="program", reviewed_on="2026-08-01")
+        data = document()
+        data["resources"][0].update(category="program", reviewed_on="2026-08-01")
         errors, warnings = catalog.validate(data, TODAY)
-        self.assertFalse(errors); self.assertEqual(len(warnings), 1)
+        self.assertFalse(errors)
+        self.assertEqual(len(warnings), 1)
 
     def test_render_deterministic_and_does_not_mutate(self):
-        data = document(); before = copy.deepcopy(data)
+        data = document()
+        before = copy.deepcopy(data)
         self.assertEqual(catalog.render(data), catalog.render(data))
         self.assertEqual(data, before)
 
     def test_render_escapes_active_markup(self):
-        data = document(); data["resources"][0]["title"] = "<script> [link] *bold*"
+        data = document()
+        data["resources"][0]["title"] = "<script> [link] *bold*"
         result = catalog.render(data)
         self.assertNotIn("<script>", result)
         self.assertIn("&lt;script&gt;", result)
@@ -92,7 +103,8 @@ class CatalogTests(unittest.TestCase):
     def test_cli_write_check_drift_and_bad_json(self):
         import json
         with tempfile.TemporaryDirectory() as directory:
-            data = Path(directory) / "source.json"; out = Path(directory) / "view.md"
+            data = Path(directory) / "source.json"
+            out = Path(directory) / "view.md"
             # Old-but-valid dates cause at most warnings on future executions.
             data.write_text(json.dumps(document()), encoding="utf-8")
             args = ["--data", str(data), "--output", str(out)]

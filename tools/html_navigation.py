@@ -224,7 +224,7 @@ def heading_ids(markdown_without_code: str, explicit_ids: set[str],
     found = set(explicit_ids)
     used_heading_ids: set[str] = set()
     original_lines = _lines(original_markdown or markdown_without_code)
-    for line, original_line in zip(_lines(markdown_without_code), original_lines):
+    for line, original_line in zip(_lines(markdown_without_code), original_lines, strict=True):
         match = HEADING.match(line)
         if match is None:
             continue
