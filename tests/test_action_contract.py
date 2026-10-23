@@ -49,7 +49,7 @@ class ActionContractTests(unittest.TestCase):
     def test_documented_inputs_match_the_action(self):
         guide = (ROOT / "guides/adopting-the-checks.md").read_text(encoding="utf-8")
         declared = re.findall(r"^  ([a-z-]+):\n    description:", self.action, re.MULTILINE)
-        self.assertEqual(declared, ["path", "checks", "audit-fail-on", "exclude"])
+        self.assertEqual(declared, ["path", "checks", "audit-fail-on", "audit-profile", "exclude"])
         for name in declared:
             with self.subTest(input=name):
                 self.assertIn(f"| `{name}` |", guide)
@@ -67,7 +67,7 @@ class ActionContractTests(unittest.TestCase):
                 self.assertIn("steps.setup.outputs.checks", condition)
                 self.assertNotIn("inputs.checks", condition)
 
-    def run_setup(self, checks: str, fail_on: str = "error"):
+    def run_setup(self, checks: str, fail_on: str = "error", profile: str = "public"):
         """Run the action's setup step with bash, the way the runner would."""
         bash = working_bash()
         if bash is None:
@@ -79,7 +79,7 @@ class ActionContractTests(unittest.TestCase):
             output = Path(folder) / "output"
             output.touch()
             env = dict(os.environ, CHECKS=checks, TARGET=folder, FAIL_ON=fail_on,
-                       GITHUB_OUTPUT=str(output))
+                       PROFILE=profile, GITHUB_OUTPUT=str(output))
             result = subprocess.run([bash, "-c", script], env=env, cwd=folder,
                                     capture_output=True, text=True, timeout=60, check=False)
             outputs = dict(line.split("=", 1) for line in
@@ -106,6 +106,15 @@ class ActionContractTests(unittest.TestCase):
         self.assertEqual(1, result.returncode)
         self.assertIn("audit-fail-on must be error, warning or never", result.stdout)
 
+    def test_audit_profile_is_validated_for_every_check_selection(self):
+        for profile in ("public", "internal", "private"):
+            with self.subTest(profile=profile):
+                result, _ = self.run_setup("docs-links", profile=profile)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result, _ = self.run_setup("docs-links", profile="secret")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("audit-profile must be public, internal or private", result.stdout)
+
     def test_guide_pins_a_commit_and_is_linked(self):
         guide = (ROOT / "guides/adopting-the-checks.md").read_text(encoding="utf-8")
         self.assertRegex(guide, r"uses: drevendev/BeautifulRepo@[0-9a-f]{40} # v\d+\.\d+\.\d+\n")
@@ -121,6 +130,7 @@ class ActionContractTests(unittest.TestCase):
         self.assertIn('test "$TYPO" = failure', workflow)
         self.assertIn('test "$NEWLINE" = failure', workflow)
         self.assertIn('test "$EMPTY" = failure', workflow)
+        self.assertIn('test "$INVALID_PROFILE" = failure', workflow)
 
 
 if __name__ == "__main__":
