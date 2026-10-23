@@ -46,7 +46,9 @@ from real inspection, never from regenerating the view. Markdown output order is
 repository-owned link and image destinations resolve to existing files or directories. It
 supports paths relative to the current document, repository-root paths beginning with `/`,
 URL-encoded path characters, and ordinary query/fragment suffixes on an otherwise local path.
-It rejects destinations that escape the repository root.
+It rejects destinations that escape the repository root. Like GitHub's renderer
+(cmark-gfm), it stops reading a bare destination at its 33rd unclosed `(`, which also
+keeps scanning time roughly linear in the size of a file.
 
 A destination containing a backslash or a drive letter (`docs\guide.md`, `C:/x`,
 or either one percent-encoded) is reported as non-portable without being opened. On

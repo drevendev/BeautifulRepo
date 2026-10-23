@@ -7,6 +7,11 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Scanning time no longer grows quadratically on adversarial Markdown. Link text
+  brackets are paired in one pass. A bare link destination stops at its 33rd unclosed
+  `(`, as in GitHub's cmark-gfm. The audit's heading parser no longer backtracks over
+  trailing spaces. 200 KB of unmatched `[` went from hours (extrapolated) to under a
+  second (#107).
 - `repo_audit.py` treats an NTFS junction in `.github` or `docs` like a directory
   symlink: it reports `path.symlink` and does not read through it. Before, a junction
   passed the symlink check, and documents outside the target were read (#108).

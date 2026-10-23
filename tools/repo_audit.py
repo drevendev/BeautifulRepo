@@ -232,7 +232,9 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
     headings = list(html.headings)
     for index, line in enumerate(lines):
         heading_line = heading_lines[index]
-        atx = re.match(r"^ {0,3}(#{1,6})[ \t]+(.+?)\s*$", heading_line)
+        # rstrip() instead of a lazy `(.+?)\s*$`, which backtracks quadratically on
+        # a long run of trailing spaces.
+        atx = re.match(r" {0,3}(#{1,6})[ \t]+(.+)", heading_line.rstrip())
         if atx and atx[2].strip("# \t"):
             headings.append((index + 1, len(atx[1])))
         elif index and heading_lines[index - 1].strip() and re.fullmatch(r" {0,3}(?:=+|-+)[ \t]*", heading_line):

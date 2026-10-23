@@ -47,6 +47,10 @@ TYPE1_HTML_BLOCK_CLOSE_RE = re.compile(
 TYPE2_HTML_COMMENT_OPEN_RE = re.compile(r"^ {0,3}<!--")
 TYPE2_HTML_COMMENT_CLOSE_RE = re.compile(r"-->")
 MARKDOWN_WHITESPACE = " \t\r\n"
+# cmark-gfm stops reading a bare link destination at its 33rd unclosed '(' (see
+# manual_scan_link_url_2), and CommonMark allows such a limit. It also keeps
+# lines full of "[a](" from costing one scan to the end of the line per link.
+MAX_DESTINATION_PARENS = 32
 BLANK_LINE_RE = re.compile(r"\r?\n[ \t]*\r?\n")
 INLINE_HTML_COMMENT_RE = re.compile(
     r"<!--(?!>|->)(?:(?!--).)*?-->", re.DOTALL
@@ -74,39 +78,34 @@ def _decode_character_references(value: str) -> str:
 
 
 def _iter_inline_link_starts(line: str):
-    """Yield destination start indices for inline links with balanced link text."""
+    """Yield destination start indices for inline links with balanced link text.
+
+    One pass pairs every unescaped '[' with its closing ']' through a stack, so text
+    full of unmatched brackets costs linear time instead of a rescan per bracket.
+    """
+    opened: list[int] = []
+    starts: list[int] = []
+    closing: dict[int, int] = {}
     position = 0
     while position < len(line):
         char = line[position]
-        if char == "\\" and position + 1 < len(line):
-            if line[position + 1] in string.punctuation:
-                position += 2
-                continue
-        if char != "[":
-            position += 1
+        if char == "\\" and position + 1 < len(line) and line[position + 1] in string.punctuation:
+            position += 2
             continue
-
-        depth = 1
-        cursor = position + 1
-        while cursor < len(line):
-            char = line[cursor]
-            if char == "\\" and cursor + 1 < len(line):
-                if line[cursor + 1] in string.punctuation:
-                    cursor += 2
-                    continue
-            if char == "[":
-                depth += 1
-            elif char == "]":
-                depth -= 1
-                if depth == 0:
-                    if cursor + 1 < len(line) and line[cursor + 1] == "(":
-                        destination = cursor + 2
-                        while destination < len(line) and line[destination] in MARKDOWN_WHITESPACE:
-                            destination += 1
-                        yield destination
-                    break
-            cursor += 1
+        if char == "[":
+            opened.append(position)
+            starts.append(position)
+        elif char == "]" and opened:
+            closing[opened.pop()] = position
         position += 1
+
+    for start in starts:
+        close = closing.get(start)
+        if close is not None and close + 1 < len(line) and line[close + 1] == "(":
+            destination = close + 2
+            while destination < len(line) and line[destination] in MARKDOWN_WHITESPACE:
+                destination += 1
+            yield destination
 
 
 def _consume_title_and_close(line: str, position: int):
@@ -185,6 +184,8 @@ def _parse_destination(line: str, position: int):
                 continue
         if char == "(":
             depth += 1
+            if depth > MAX_DESTINATION_PARENS:
+                return None
             chars.append(char)
             position += 1
             continue
