@@ -96,6 +96,15 @@ It ignores code examples using the same GFM literal-region masking as the
 existing checker. Explicit HTML `id` and `a name` anchors and ordinary
 Markdown ATX headings (including duplicate suffixes) are supported.
 
+Heading anchors follow GitHub's rules. The rendered text is lowercased. Every
+character other than a letter, mark, digit, connector punctuation, hyphen or space
+is dropped, and each space becomes a hyphen, so `Terms & Conditions` becomes
+`terms--conditions`. Code-span text counts. Images, tags, comments and emphasis
+markers don't. The expected values in `tests/test_github_heading_slugs.py` were read
+back from GitHub's Markdown API. Known differences: setext headings aren't scanned,
+and characters newer than the Unicode version GitHub uses may be kept or dropped
+differently.
+
 This offline source check is not a complete GitHub-flavored Markdown renderer.
 It does not crawl external resources, support every Markdown extension or
 reference-style link, or certify browser, keyboard or assistive-tech behavior.
