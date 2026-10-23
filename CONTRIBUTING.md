@@ -79,6 +79,34 @@ on Linux x86-64, or the same `ruff==` version elsewhere, then run `ruff check`.
 `Action self-test (windows-latest)`. Force-pushes and deletion of `master`, and
 moving or deleting `v*` release tags, are blocked for everyone, including admins.
 
+## Before an authorized Action or plugin release
+
+The Action and the Claude Code/Codex plugin share this repository. A release
+must be reviewed as one compatible public artifact, not as unrelated version
+numbers. A release/tag requires separate owner authorization.
+
+1. Set the same release version in `.claude-plugin/plugin.json` and
+   `plugin.json`; marketplace entries must **not** have a version.
+2. Add a dated `## [vX.Y.Z] — YYYY-MM-DD` heading to `CHANGELOG.md`.
+   Document Action compatibility, security changes and whether consumers
+   should update a commit pin.
+3. Run the five local checks above and review the actual required Ubuntu,
+   Windows and Action self-test jobs on the intended commit. The existing
+   `tests/test_agent_plugin.py` checks skill frontmatter, commands,
+   references and manifest consistency.
+4. If an authorized `vX.Y.Z` tag is pushed, the quality workflow also runs
+   on the tag and checks that the two manifest versions equal `X.Y.Z` and
+   the changelog contains the dated release heading. A green check does
+   not independently approve the release or a public announcement.
+5. Review the resulting draft GitHub Release and the immutable tag's
+   commit before any authorized publication; never rewrite an existing
+   tag. Keep `master` on an explicit development version afterwards.
+
+The agent skill reference tests are static contract checks, not proof that
+an agent will trigger correctly or ignore prompt injections. Those model-
+driven evaluations are tracked separately in
+[Issue #74](https://github.com/drevendev/BeautifulRepo/issues/74).
+
 ## Link issues without closing unfinished work
 
 A pull request can **mention** an issue without promising to finish it. If acceptance

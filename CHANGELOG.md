@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Run the existing plugin contract tests on v* tag pushes too: validate
+  release versions against both plugin manifests and a dated CHANGELOG
+  heading, reject duplicate or unclosed skill frontmatter, and document
+  a joint Action/plugin release checklist in CONTRIBUTING (#73).
 - An internal/private README scaffold, navigable template index and filled
   fictional Sample Queue example with a real offline fixture verifier and a
   regression asserting zero warnings under `repo_audit.py --profile internal` (#77).
