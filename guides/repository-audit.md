@@ -73,9 +73,9 @@ remote settings, branch protection, or private reporting routes.
 Reads are capped at 500 KiB per document. A larger document is reported and not parsed.
 Each of the three entry-point directories is capped at 4,096 entries; exceeding the bound
 stops with an input error rather than silently reporting an incomplete inventory.
-Selected symlinks and special files are not read. Directory symlinks in `.github` or `docs`
-are not traversed. These protections assume a stable checkout: the tool is not a sandbox
-against another process concurrently replacing filesystem entries.
+Selected symlinks and special files are not read. Directory symlinks and NTFS junctions
+in `.github` or `docs` are not traversed. These protections assume a stable checkout: the
+tool is not a sandbox against another process concurrently replacing filesystem entries.
 
 The parser recognizes common ATX, setext and HTML headings; backtick/tilde fenced blocks;
 HTML comments; inline backtick spans; and simple Markdown/HTML image forms. It is not a

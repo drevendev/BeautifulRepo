@@ -22,6 +22,8 @@ MAX_DIRECTORY_ENTRIES = 4096
 LOCATIONS = (".github", "", "docs")
 DOCUMENT_SUFFIXES = (".md", ".markdown", ".rst", ".txt", "")
 LEVELS = {"error": 0, "warning": 1, "info": 2}
+# NTFS junctions redirect like directory symlinks, but only lstat's reparse tag shows them.
+JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
 
 
 class AuditInputError(ValueError):
@@ -34,13 +36,23 @@ def finding(rule: str, severity: str, path: str, line: int | None,
             "message": message, "remediation": remedy}
 
 
+def _is_redirect(path: Path) -> bool:
+    """Return True for a symbolic link or an NTFS junction; neither is followed."""
+    try:
+        info = path.lstat()
+    except OSError:
+        return False
+    return (stat.S_ISLNK(info.st_mode)
+            or getattr(info, "st_reparse_tag", 0) == JUNCTION_REPARSE_TAG)
+
+
 def _inventory(root: Path, findings: list[dict[str, Any]]) -> dict[str, list[Path]]:
     inventory: dict[str, list[Path]] = {}
     for location in LOCATIONS:
         directory = root / location
-        if directory.is_symlink():
+        if _is_redirect(directory):
             findings.append(finding("path.symlink", "warning", location, None,
-                                    "Directory symlink was not followed.",
+                                    "Directory symlink or junction was not followed.",
                                     "Audit a stable checkout with ordinary directories."))
             inventory[location] = []
             continue
@@ -75,7 +87,7 @@ def _read_document(path: Path, root: Path, findings: list[dict[str, Any]],
     relative = path.relative_to(root).as_posix()
     try:
         # A stable checkout is required: these checks are not a hostile-filesystem sandbox.
-        if path.is_symlink() or not stat.S_ISREG(path.lstat().st_mode):
+        if _is_redirect(path) or not stat.S_ISREG(path.lstat().st_mode):
             findings.append(finding("path.non_regular", "error", relative, None,
                                     "Selected document is not an ordinary file; it was not read.",
                                     "Use a regular file rather than a symlink or special device."))
