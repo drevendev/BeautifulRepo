@@ -66,6 +66,11 @@ keep their original themed headings.
 
 ### Changed
 
+- The roadmap lists what shipped since v0.1.0: the plugin, the security policy,
+  hardened checks, maintenance automation and the real README case. "Next" names the
+  open epics with links: agent skills, real cases, private repositories and the
+  self-check. The README and CONTRIBUTING describe the roadmap and the conduct
+  decision the same way (#98).
 - The community safety guide records the owner's conduct decision (2026-10-23):
   no `CODE_OF_CONDUCT.md` until a checked private channel and an independent
   enforcement path exist. The repository checklist's conduct item is "not applicable,
