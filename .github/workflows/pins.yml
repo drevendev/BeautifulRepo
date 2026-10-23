@@ -42,8 +42,11 @@ jobs:
           done < pins.txt
           exit $status
 
+  # A source due for a recheck fails this scheduled job, so GitHub notifies the owner.
+  # Pull-request CI runs the same tools without --fail-on-warning: a PR must not turn
+  # red because a date passed. Every step runs, so one red step shows all three results.
   freshness:
-    name: Catalog freshness and self-audit
+    name: Review dates and self-audit
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -53,7 +56,11 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0 inspected 2026-10-19
         with:
           python-version: '3.14'
-      - name: Catalog metadata and review-date warnings
-        run: python tools/catalog.py
+      - name: Catalog sources due for a recheck
+        run: python tools/catalog.py --fail-on-warning
+      - name: Guide sources due for a recheck
+        if: ${{ !cancelled() }}
+        run: python tools/review_dates.py --fail-on-warning
       - name: Audit BeautifulRepo's own entry points
+        if: ${{ !cancelled() }}
         run: python tools/repo_audit.py . --fail-on warning

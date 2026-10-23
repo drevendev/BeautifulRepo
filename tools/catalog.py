@@ -160,6 +160,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--data", type=Path, default=ROOT / "catalog/resources.json")
     parser.add_argument("--output", type=Path, default=ROOT / "catalog/README.md")
     parser.add_argument("--write", action="store_true", help="explicitly regenerate the Markdown view")
+    parser.add_argument("--fail-on-warning", action="store_true",
+                        help="exit 1 when a source is due for a recheck (for scheduled runs, "
+                             "not pull requests, which must not depend on the calendar)")
     args = parser.parse_args(argv)
     try:
         data = json.loads(args.data.read_text(encoding="utf-8"),
@@ -176,6 +179,10 @@ def main(argv: list[str] | None = None) -> int:
             write_generated_catalog_atomically(args.output, expected)
         elif not args.output.is_file() or args.output.read_text(encoding="utf-8") != expected:
             print("ERROR: generated catalog is missing or stale; run tools/catalog.py --write", file=sys.stderr)
+            return 1
+        if warnings and args.fail_on_warning:
+            print(f"ERROR: {len(warnings)} source(s) due for a recheck; re-read each one, "
+                  "then update reviewed_on", file=sys.stderr)
             return 1
         print(f"OK: {len(data['resources'])} resources; generated catalog is current")
         return 0
