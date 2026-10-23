@@ -114,6 +114,19 @@ jobs:
         uses: ./
         with:
           checks: ' '
+      - name: Invalid audit profile must fail
+        id: invalid_profile
+        continue-on-error: true
+        uses: ./
+        with:
+          checks: docs-links
+          audit-profile: unknown
+      - name: Internal profile can run on an internal-shaped checkout
+        uses: ./
+        with:
+          path: .selftest/broken
+          checks: audit
+          audit-profile: internal
       - name: Excluding vendor/ must pass
         uses: ./
         with:
@@ -128,6 +141,7 @@ jobs:
           TYPO: ${{ steps.typo.outcome }}
           NEWLINE: ${{ steps.newline.outcome }}
           EMPTY: ${{ steps.empty.outcome }}
+          INVALID_PROFILE: ${{ steps.invalid_profile.outcome }}
         run: |
           echo "broken-link run: $BROKEN; unknown-check run: $TYPO"
           echo "one-per-line run: $NEWLINE; empty-list run: $EMPTY"
@@ -135,3 +149,4 @@ jobs:
           test "$TYPO" = failure
           test "$NEWLINE" = failure
           test "$EMPTY" = failure
+          test "$INVALID_PROFILE" = failure
