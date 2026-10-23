@@ -27,7 +27,14 @@
 
 **A real checkout command, not a concept image.** The tested
 [Rowcount starter](examples/cli-starter/README.md) reads a bundled CSV fixture
-locally. With **Python 3.11+**, from the repository root:
+locally. You need **Python 3.11+** and Git. Get a checkout:
+
+```bash
+git clone https://github.com/drevendev/BeautifulRepo.git
+cd BeautifulRepo
+```
+
+Then, from the repository root:
 
 ```bash
 python examples/cli-starter/rowcount.py examples/cli-starter/sample.csv
@@ -43,6 +50,13 @@ The [input CSV](examples/cli-starter/sample.csv) and
 [Python implementation](examples/cli-starter/rowcount.py) are available to inspect.
 This is a deliberately small count of data records, not a schema validator or a
 hosted service. No package installation or network access is required.
+CI runs the examples and checks on Ubuntu (Python 3.11 and 3.14) and Windows
+(Python 3.14); macOS is not tested.
+
+For a real application of this approach to BeautifulRepo itself, see the
+[README before/after case](case-studies/readme-first-success-case.md): fixed
+revisions, a clean-clone run, GitHub's rendering checked at three widths in both
+themes, and what was not checked.
 
 For an actual **before/after documentation diagnostic**, run
 `python examples/repository-audit/demo.py` from the same root. Its
@@ -112,6 +126,10 @@ python tools/html_navigation.py
 python -m unittest discover -s tests -v
 python tools/repo_audit.py .
 ```
+
+Each command exits with status 0 when the check passes. The tools print a line
+starting with `OK:` (the audit prints a summary with `0 error(s)`), and the unit
+tests end with `OK`. A failure prints `ERROR:` or a test name with the file to fix.
 
 The same checks run in GitHub Actions. They validate structured catalog metadata, generated catalog drift, repository-owned relative Markdown destinations, and structural regressions in the examples and public repository surfaces.
 

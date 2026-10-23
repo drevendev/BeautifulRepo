@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- A real before/after case for BeautifulRepo's own README
+  (`case-studies/readme-first-success-case.md`): fixed revisions, a clean-clone run
+  of the first success and all five checks, and GitHub's rendering measured at
+  1280, 375 and 320 px in light and dark themes, with its limits stated (#21).
 - The Pocket Board example records a dated, rendered keyboard, contrast and reflow
   check: light and dark themes at 375 and 320 px in Chrome 152, with what was not
   checked. Its contrast test now also guards the focus outline and text colours (#28).
@@ -52,6 +56,9 @@ keep their original themed headings.
 
 ### Changed
 
+- The README's first-use path starts with a copyable `git clone` and `cd`, names
+  the platforms CI tests (Ubuntu with Python 3.11 and 3.14, Windows with 3.14; not
+  macOS) and says what a passing self-check looks like, without fixed counts (#66).
 - CONTRIBUTING describes the `hacktoberfest` label as historical instead of as
   participation, in line with the programs guide: Hacktoberfest 2026 does not count
   pull requests. The label itself stays until its post-event review (#100).
