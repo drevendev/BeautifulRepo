@@ -454,9 +454,13 @@ def audit_repository(target: str | Path, *, profile: str = "public") -> dict[str
                         "Name the owning team and an approved internal contact or support route.",
                     ))
     findings.sort(key=lambda f: (LEVELS[f["severity"]], f["path"], f["line"] or 0, f["rule_id"]))
-    return {"schema_version": 1, "profile": profile, "documents": documents, "read_files": sorted(read_files),
-            "summary": {level: sum(f["severity"] == level for f in findings) for level in LEVELS},
-            "findings": findings}
+    report = {"schema_version": 1, "documents": documents, "read_files": sorted(read_files),
+              "summary": {level: sum(f["severity"] == level for f in findings) for level in LEVELS},
+              "findings": findings}
+    # An opt-in key keeps the default public JSON and text contracts unchanged.
+    if profile != "public":
+        report["profile"] = profile
+    return report
 
 
 def exit_status(report: dict[str, Any], fail_on: str) -> int:
