@@ -83,6 +83,34 @@ why such promises must match the project's actual capacity.
   and entry-point drift show up without a push. Run it by hand from the Actions tab
   (`workflow_dispatch`) after tagging a release.
 
+## 6. Cut a release
+
+A release needs the owner's decision; nothing here creates one on a schedule.
+
+1. In a pull request, rename `## [Unreleased]` in the changelog to the new version
+   and date, bump `version` in `plugin.json` and `.claude-plugin/plugin.json`, and
+   merge it once the required checks pass.
+2. Wait for the `Quality checks` run on that `master` commit to finish green. Then
+   tag exactly that commit and push the tag:
+
+   ```bash
+   git tag vX.Y.Z <commit-sha>
+   git push origin vX.Y.Z
+   ```
+
+   The tag ruleset blocks moving or deleting `v*` tags, so check the SHA before you
+   push.
+3. `.github/workflows/release.yml` checks that the commit is on `master` and that
+   every required check named by the `master` ruleset passed on it. It then opens a
+   **draft** release from the
+   [release-note template](../templates/RELEASE_NOTES.template.md) with the tag,
+   SHA, previous tag, compare link and CI run filled in. If a check had not finished,
+   re-run the workflow from the Actions tab once it passes.
+4. Replace every remaining `{{...}}` placeholder in the draft with verified facts,
+   then publish it.
+5. Run `pins.yml` by hand, move the adoption guide's pin to the new commit in a
+   follow-up pull request, and start the next `-dev` version.
+
 ## Sources and boundaries
 
 Reviewed **2026-10-17**:

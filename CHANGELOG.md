@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- A pushed `v*` tag opens a **draft** GitHub Release (`.github/workflows/release.yml`)
+  once its commit is on `master` and every required check from the `master` ruleset
+  passed there. The draft is filled from the release-note template with the tag,
+  SHA, previous tag, compare link and CI run; a maintainer edits and publishes it.
+  `guides/maintenance-workflow.md` describes the release steps (#56).
 - Package BeautifulRepo as one plugin for Claude Code and Codex, version
   `0.2.0-dev.0`. Its read-only `audit-repo` skill runs the offline tools from the
   installed copy against a target repository and applies the checklists. The plugin
