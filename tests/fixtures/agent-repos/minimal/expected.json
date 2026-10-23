@@ -1,0 +1,7 @@
+{
+  "audit_rule_ids": [
+    "contributing.missing",
+    "license.missing"
+  ],
+  "docs_links_exit": 0
+}

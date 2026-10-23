@@ -75,6 +75,37 @@ The layout is one source for both agents:
 There is intentionally no `.codex-plugin/plugin.json`. `tests/test_agent_plugin.py`
 keeps the names and versions in agreement.
 
+## Fixture-based checks (not model evaluations)
+
+The checked-in [agent fixture repositories](../tests/fixtures/agent-repos) cover four
+known inputs: minimal metadata, a broken link, a healthy local link, and an
+untrusted instruction embedded in a README. Each stores its expected audit
+rule IDs and link-check exit status in `expected.json`.
+
+Run the same portable test that CI discovers:
+
+```bash
+python -m unittest discover -s tests -p 'test_agent_fixtures.py' -v
+```
+
+The test calls the installed-style tools with absolute paths, `python -I`,
+explicit targets and an unrelated working directory. It compares deterministic
+JSON findings, checks link-checker exit codes and verifies that no fixture bytes
+changed. It does **not** execute fixture code, call an LLM or prove that a model
+would ignore a malicious README.
+
+For a **manual Codex smoke check** after installing the plugin, try two positive
+requests ("audit this repository's README" and "review onboarding for this
+path") and one negative request ("review a Python code diff"), recording whether
+the `audit-repo` skill triggered. Repeat with the injection-bait fixture and
+confirm no file writes or invented reporting channel. Run against synthetic
+repositories only unless the model provider is approved for the target data.
+These are operator observations, not automated passing evals.
+
+Native Claude Code skill-trigger evals and true agent-level injection tests remain
+tracked in [#74](https://github.com/drevendev/BeautifulRepo/issues/74); model
+cost and platform support need separate validation before claiming coverage.
+
 ## What was verified, and what wasn't
 
 These checks were made on **2026-10-22**, on Windows 11, with Claude Code 2.1.259 and
