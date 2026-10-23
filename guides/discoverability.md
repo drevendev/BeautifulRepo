@@ -46,10 +46,21 @@ five** distinct, specific topics, and ask what each one describes:
   evaluating or using the project; a tiny maintenance script alone may not
   justify it.
 
-For BeautifulRepo, a plausible *proposal to assess* is
-`documentation`, `readme`, `open-source`, `repository-maintenance`.
-Check the actual deliverables and existing topic usage before choosing any
-subset. These are **not** claims that its live topics have been changed.
+BeautifulRepo itself has **seven** topics (read back on 2026-10-23), more than the
+three to five suggested above. The owner kept all seven because each names a real
+deliverable:
+
+- `documentation`, `readme`: the handbook is about repository documentation, led by
+  README design.
+- `readme-template`: `templates/` ships README scaffolds.
+- `best-practices`: the checklists turn the guidance into an audit.
+- `accessibility`: alt text, contrast and keyboard guidance, plus tests that enforce
+  them.
+- `open-source`: the community-file and contribution guidance assumes public projects.
+- `python`: the tools and starters run on Python 3.11+, which an evaluator needs to
+  know.
+
+If a topic stops matching a deliverable, remove it rather than keep it for reach.
 
 Do **not** add `hacktoberfest`, `good-first-issue`, a grant name, or a
 popular framework to chase views if the repository has no genuine current
@@ -92,6 +103,11 @@ supported, but a solid background may be safer across sharing platforms.
 Leaving the preview unchanged is a valid decision. Do not upload images merely
 to fill a customization field, and do not copy another project's branding.
 
+BeautifulRepo keeps GitHub's default card (decided 2026-10-23). The card already
+shows the name and description, and no real screenshot or diagram yet adds evidence
+a small preview could carry. Revisit this when a real before/after case has a
+legible visual.
+
 ## 5. Verify the result for free
 
 Before proposing any metadata change:
@@ -114,13 +130,19 @@ Before proposing any metadata change:
 5. Repeat the same checks after an authorized change. Record the observation
    date, not stars, imagined click-through, or traffic you cannot measure.
 
-**Example decision for BeautifulRepo (reviewed 2026-10-20):** its public
-README describes a working handbook, starter examples, and offline tools. A
-short About description and several relevant topics would help classify
-those deliverables. A separate homepage is not necessary while the repository
-itself provides the working entry point. Actual metadata changes are tracked
-separately in [issue #20](https://github.com/drevendev/BeautifulRepo/issues/20);
-this guide does **not** make them.
+**BeautifulRepo's read-back (2026-10-23, signed out):**
+
+- The About sidebar shows the full description, all seven topics, and links to the
+  README, the MIT licence, CONTRIBUTING and the security policy.
+- A signed-out repository search for `BeautifulRepo` lists it third of 28 results.
+  The description is cut after about 130 characters, so its first clause carries
+  the meaning, and five of the seven topics show.
+- The homepage stays blank, because the repository is the working entry point. The
+  description and topics were set in
+  [issue #20](https://github.com/drevendev/BeautifulRepo/issues/20).
+- The empty wiki shows no tab to signed-out visitors, but it offers collaborators a
+  "create the first page" prompt. The owner decided to turn it off; that setting is
+  changed by hand, not by this guide.
 
 ## Review checklist
 

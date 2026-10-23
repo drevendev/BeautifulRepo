@@ -66,6 +66,10 @@ keep their original themed headings.
 
 ### Changed
 
+- The discoverability guide's BeautifulRepo example matches the live repository: a
+  signed-out read-back of 2026-10-23, a one-line reason for each of the seven topics,
+  the decision to keep GitHub's default social card, and the decision to turn off the
+  empty wiki (#67).
 - The README's first-use path starts with a copyable `git clone` and `cd`, names
   the platforms CI tests (Ubuntu with Python 3.11 and 3.14, Windows with 3.14; not
   macOS) and says what a passing self-check looks like, without fixed counts (#66).
