@@ -338,5 +338,83 @@ class AuditTests(unittest.TestCase):
         self.assertIn("\\nname", text)
 
 
+    def test_default_public_profile_preserves_text_format(self):
+        implicit = self.report()
+        explicit = audit.audit_repository(self.root, profile="public")
+        self.assertEqual(implicit, explicit)
+        self.assertEqual(audit.render_text(implicit), audit.render_text(explicit))
+        self.assertEqual(implicit["profile"], "public")
+        result = self.cli("--format", "json")
+        self.assertEqual(json.loads(result.stdout)["profile"], "public")
+
+    def test_internal_and_private_license_and_owner_contact(self):
+        (self.root / "LICENSE").unlink()
+        for profile in ("internal", "private"):
+            with self.subTest(profile=profile):
+                report = audit.audit_repository(self.root, profile=profile)
+                by_rule = {item["rule_id"]: item for item in report["findings"]}
+                self.assertEqual(by_rule["license.missing"]["severity"], "info")
+                self.assertIn("internal-use terms", by_rule["license.missing"]["remediation"])
+                self.assertEqual(by_rule["readme.owner_contact"]["severity"], "warning")
+                self.assertEqual(audit.exit_status(report, "warning"), 1)
+        public = self.report()
+        self.assertNotIn("readme.owner_contact", self.codes(public))
+        self.assertEqual(next(f for f in public["findings"]
+                              if f["rule_id"] == "license.missing")["severity"], "warning")
+        self.write("README.md", "# Example\n\n## Owner and contact\n\nInternal Ops Team.\n")
+        updated = audit.audit_repository(self.root, profile="internal")
+        self.assertNotIn("readme.owner_contact", self.codes(updated))
+        self.assertEqual(updated["summary"], {"error": 0, "warning": 0, "info": 1})
+
+    def test_contact_must_be_a_section_not_a_vague_prose_mention(self):
+        self.write("README.md", "# Example\n\nThe owner can get support later.\n")
+        self.assertIn("readme.owner_contact", self.codes(
+            audit.audit_repository(self.root, profile="internal")))
+        self.write("README.md", "# Example\n\nSupport: #internal-help\n")
+        self.assertNotIn("readme.owner_contact", self.codes(
+            audit.audit_repository(self.root, profile="private")))
+
+    def test_absolute_github_image_urls_in_markdown_reference_and_html(self):
+        self.write("README.md",
+                   "# Example\n\n"
+                   "![inline](https://raw.githubusercontent.com/acme/app/main/banner.png)\n"
+                   "![ref][banner]\n"
+                   "[banner]: https://github.com/acme/app/raw/main/screenshot.png\n"
+                   '<img src="https://github.com/acme/app/raw/main/chart.svg" alt="Chart">\n')
+        for profile in audit.PROFILES:
+            with self.subTest(profile=profile):
+                report = audit.audit_repository(self.root, profile=profile)
+                items = [f for f in report["findings"]
+                         if f["rule_id"] == "readme.absolute_repo_asset"]
+                self.assertEqual([f["line"] for f in items], [3, 4, 6])
+
+    def test_absolute_image_rule_ignores_non_images_code_and_lookalike_hosts(self):
+        tick = chr(96)
+        self.write("README.md",
+                   "# Example\n"
+                   "[repo](https://raw.githubusercontent.com/u/r/main/README.md)\n"
+                   "![safe](https://raw.githubusercontent.com.evil.example/img.png)\n"
+                   "![local](assets/logo.svg)\n"
+                   "\n"
+                   f"{tick}![inline](https://raw.githubusercontent.com/u/r/main/code.png){tick}\n"
+                   f"{tick * 3}markdown\n"
+                   "![code](https://github.com/u/r/raw/main/code.png)\n"
+                   f"{tick * 3}\n"
+                   "<!-- ![comment](https://raw.githubusercontent.com/u/r/main/hide.png) -->\n")
+        self.assertNotIn("readme.absolute_repo_asset", self.codes())
+
+    def test_profile_validation_and_json_contract(self):
+        self.assertEqual(self.cli("--profile", "hidden").returncode, 2)
+        for profile in ("internal", "private"):
+            with self.subTest(profile=profile):
+                result = self.cli("--profile", profile, "--format", "json")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report["schema_version"], 1)
+                self.assertEqual(report["profile"], profile)
+        with self.assertRaises(audit.AuditInputError):
+            audit.audit_repository(self.root, profile="hidden")
+
+
 if __name__ == "__main__":
     unittest.main()
