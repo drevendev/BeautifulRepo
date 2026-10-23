@@ -241,6 +241,18 @@ class AuditTests(unittest.TestCase):
         self.assertIn("path.symlink", self.codes(report))
         self.assertEqual(report["documents"]["readme"], "README.md")
 
+    @unittest.skipUnless(os.name == "nt", "NTFS junctions exist only on Windows")
+    def test_directory_junction_is_not_followed(self):
+        import _winapi
+        with tempfile.TemporaryDirectory() as outside:
+            (Path(outside) / "README.md").write_text("PRIVATE\n", encoding="utf-8")
+            _winapi.CreateJunction(outside, str(self.root / "docs"))
+            report = self.report()
+            (self.root / "docs").rmdir()  # removes the junction, not its target
+        self.assertIn("path.symlink", self.codes(report))
+        self.assertNotIn("PRIVATE", json.dumps(report))
+        self.assertNotIn("docs/README.md", report["read_files"])
+
     @unittest.skipUnless(hasattr(os, "mkfifo"), "FIFO not supported on this platform")
     def test_fifo_is_rejected_without_blocking(self):
         (self.root / "README.md").unlink()

@@ -7,6 +7,9 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- `repo_audit.py` treats an NTFS junction in `.github` or `docs` like a directory
+  symlink: it reports `path.symlink` and does not read through it. Before, a junction
+  passed the symlink check, and documents outside the target were read (#108).
 - Link checkers: a destination with a backslash or a drive letter (`docs\guide.md`,
   `C:/x`, or either one percent-encoded) is reported as non-portable. GitHub doesn't
   read a backslash as a folder separator, and on Windows such a path could point
