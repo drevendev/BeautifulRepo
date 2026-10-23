@@ -1,0 +1,12 @@
+{
+  "records": [
+    {
+      "id": "A-1",
+      "state": "open"
+    },
+    {
+      "id": "A-2",
+      "state": "closed"
+    }
+  ]
+}

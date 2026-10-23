@@ -13,6 +13,9 @@ keep their original themed headings.
 
 ### Added
 
+- An internal/private README scaffold, navigable template index and filled
+  fictional Sample Queue example with a real offline fixture verifier and a
+  regression asserting zero warnings under `repo_audit.py --profile internal` (#77).
 - An explicit public/internal/private profile for the offline repository audit and
   composite Action, with internal owner/contact observations, less prescriptive
   missing-license guidance, additive JSON profile metadata, and raw GitHub image

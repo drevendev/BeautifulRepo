@@ -75,6 +75,13 @@ not scanned, but a link **to** it from a scanned file is still checked.
 
 ## Private and enterprise repositories
 
+For an internal project's **reader-facing README**, start with the
+[internal README template](../templates/INTERNAL_README.template.md) and compare it
+with a [filled, fictional example](../examples/internal-repository/README.md).
+It covers verified owners and contacts, access, private dependencies, relative
+runbooks, data classification and approved usage terms instead of assuming an
+open-source license. The fixture is offline, not a deployed company service.
+
 These source checks can inspect a private checkout without uploading its files.
 The **Python check scripts** read local paths; they do not fetch external URLs
 or call a model provider. The Actions runner, checkout step, action retrieval,
