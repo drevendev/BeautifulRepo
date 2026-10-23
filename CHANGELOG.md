@@ -7,6 +7,9 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- `repo_audit.py` matches backtick code spans within one paragraph or heading. Two
+  stray backticks in different paragraphs used to form one span and hide every
+  finding between them, such as a TODO or an image without alt text (#106).
 - `html_navigation.py` generates heading anchors the way GitHub does: each space is
   its own hyphen (`terms--conditions`), entities are decoded after tags are
   stripped, emphasis underscores and images drop out, and combining marks stay. A

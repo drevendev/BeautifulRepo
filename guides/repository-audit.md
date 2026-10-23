@@ -79,8 +79,9 @@ in `.github` or `docs` are not traversed. These protections assume a stable chec
 tool is not a sandbox against another process concurrently replacing filesystem entries.
 
 The parser recognizes common ATX, setext and HTML headings; backtick/tilde fenced blocks;
-HTML comments; inline backtick spans; and simple Markdown/HTML image forms. It is not a
-CommonMark renderer. Indented code, complex nested HTML, multiline image syntax and unusual
+HTML comments; inline backtick spans; and simple Markdown/HTML image forms. A backtick
+span is matched within one paragraph or heading, never across a blank line, so a stray
+backtick stays plain text as it does on GitHub. It is not a CommonMark renderer. Indented code, complex nested HTML, multiline image syntax and unusual
 cross-line code/comment combinations can require manual interpretation. It does not verify
 anchors, image destinations, external URLs, colors, keyboard navigation, image meaning,
 Mermaid rendering, or screen-reader output. Use the existing
