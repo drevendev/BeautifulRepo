@@ -30,7 +30,7 @@ concrete improvements. Security vulnerabilities go through [SECURITY.md](SECURIT
 | `agent-skill` | The Claude Code and Codex plugin and its skills. |
 | `private-repos` | Support for private and internal repositories. |
 | `real-case` | A before/after case on a real repository. |
-| `hacktoberfest` | Hacktoberfest 2026 participation, reviewed after the event. |
+| `hacktoberfest` | Historical: marks two 2026 starter issues. Hacktoberfest 2026 doesn't count pull requests ([programs guide](guides/programs.md)); the label is reviewed after the event. |
 
 If no `good first issue` is open, none is curated right now; ask in Discussions before
 starting something large.
