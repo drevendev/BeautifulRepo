@@ -11,8 +11,9 @@ inputs:
     default: '.'
   checks:
     description: >-
-      Space-separated checks to run: audit (tools/repo_audit.py),
+      Checks to run, separated by spaces or one per line: audit (tools/repo_audit.py),
       docs-links (tools/docs_links.py), html-navigation (tools/html_navigation.py).
+      An unknown name or an empty list fails the step.
     required: false
     default: audit docs-links html-navigation
   audit-fail-on:
@@ -38,6 +39,7 @@ runs:
       env:
         CHECKS: ${{ inputs.checks }}
         TARGET: ${{ inputs.path }}
+        FAIL_ON: ${{ inputs.audit-fail-on }}
       run: |
         python=""
         for candidate in python3 python; do
@@ -57,15 +59,32 @@ runs:
           echo "::error title=BeautifulRepo checks::path is not a directory: $TARGET"
           exit 1
         fi
+        case "$FAIL_ON" in
+          error|warning|never) ;;
+          *) echo "::error title=BeautifulRepo checks::audit-fail-on must be error, warning or never"; exit 1 ;;
+        esac
+        # Spaces, tabs and newlines all separate names. The check steps below read
+        # this normalized list, so a name that passes validation always runs.
+        set -f
+        selected=""
         for check in $CHECKS; do
           case "$check" in
             audit|docs-links|html-navigation) ;;
             *) echo "::error title=BeautifulRepo checks::unknown check '$check' (expected audit, docs-links, html-navigation)"; exit 1 ;;
           esac
+          case " $selected " in
+            *" $check "*) ;;
+            *) selected="${selected:+$selected }$check" ;;
+          esac
         done
+        if [ -z "$selected" ]; then
+          echo "::error title=BeautifulRepo checks::checks selects nothing (expected audit, docs-links, html-navigation)"
+          exit 1
+        fi
+        echo "checks=$selected" >> "$GITHUB_OUTPUT"
 
     - name: Audit reader entry points
-      if: contains(format(' {0} ', inputs.checks), ' audit ')
+      if: contains(format(' {0} ', steps.setup.outputs.checks), ' audit ')
       shell: bash
       env:
         PYTHON: ${{ steps.setup.outputs.python }}
@@ -75,7 +94,7 @@ runs:
         "$PYTHON" "$GITHUB_ACTION_PATH/tools/repo_audit.py" "$TARGET" --fail-on "$FAIL_ON"
 
     - name: Check repository-owned Markdown destinations
-      if: contains(format(' {0} ', inputs.checks), ' docs-links ')
+      if: contains(format(' {0} ', steps.setup.outputs.checks), ' docs-links ')
       shell: bash
       env:
         PYTHON: ${{ steps.setup.outputs.python }}
@@ -89,7 +108,7 @@ runs:
         "$PYTHON" "$GITHUB_ACTION_PATH/tools/docs_links.py" --root "$TARGET" "${args[@]}"
 
     - name: Check HTML navigation and local anchors
-      if: contains(format(' {0} ', inputs.checks), ' html-navigation ')
+      if: contains(format(' {0} ', steps.setup.outputs.checks), ' html-navigation ')
       shell: bash
       env:
         PYTHON: ${{ steps.setup.outputs.python }}

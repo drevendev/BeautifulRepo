@@ -64,8 +64,8 @@ macOS runners are not tested.
 | Input | Default | Meaning |
 | --- | --- | --- |
 | `path` | `.` | Directory to check, relative to the workspace. |
-| `checks` | `audit docs-links html-navigation` | Space-separated subset to run. An unknown name fails the step instead of being skipped silently. |
-| `audit-fail-on` | `error` | `error`, `warning` or `never`. Findings are printed either way. |
+| `checks` | `audit docs-links html-navigation` | Subset to run, separated by spaces or one name per line. An unknown name, or an empty list, fails the step instead of being skipped silently. |
+| `audit-fail-on` | `error` | `error`, `warning` or `never`. Findings are printed either way. Any other value fails the step, even when `audit` is not selected. |
 | `exclude` | empty | One glob per line, relative to `path`, for Markdown sources the link checks skip, such as `vendor`, `third_party` or `docs/archive/*.md`. |
 
 `.git` and `node_modules` directories are always skipped. Their Markdown belongs

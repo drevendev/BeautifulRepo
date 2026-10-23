@@ -7,6 +7,11 @@ the repository, and the linked pull requests keep the integration history.
 
 ## Unreleased
 
+- Action: a `checks` list written one name per line, separated by tabs, or left
+  empty used to pass validation and then run **no** checks, so the job went green.
+  The setup step now hands a normalized list to the check steps, fails on an empty
+  list, and rejects an invalid `audit-fail-on` even when `audit` is not selected.
+  The self-test covers both new failure cases (#104).
 - Commit the Hungry Crab maw config (`.crab.yml`) and decision ledger
   (`.crab/ledger.json`), so later `crab` runs skip practices already served and
   `crab tune` can learn from decisions.
