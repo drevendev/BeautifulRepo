@@ -76,7 +76,7 @@ why such promises must match the project's actual capacity.
   proposes updates weekly for the `github-actions` ecosystem only. Before merging such
   a PR, look at the new release and refresh the inspected date by hand; Dependabot
   updates the SHA, not your review.
-- **Pins this repository publishes**, such as `drevendev/BeautifulRepo@<sha> # v0.1.0`
+- **Pins this repository publishes**, such as `drevendev/BeautifulRepo@<sha> # v0.2.0`
   in the adoption guide, are checked daily by `.github/workflows/pins.yml`: every
   tag must exist and point at the documented commit. Run it by hand from the Actions
   tab (`workflow_dispatch`) after tagging a release.
