@@ -31,6 +31,10 @@ regenerate the view with `python tools/catalog.py --write`.
   write a negated closing phrase such as "does not fix #N".
 - **Every change gets a changelog entry** under the matching `## [Unreleased]`
   section: Added, Changed, Deprecated, Removed, Fixed or Security.
+- **Private targets stay private.** Before sharing findings, generated reports,
+  screenshots or agent output, apply the
+  [confidentiality checklist](checklists/confidentiality.md). Offline Python checks
+  do not make an online agent session private.
 - **Security problems are private.** Don't describe a vulnerability in a public
   issue, pull request or commit; follow [SECURITY.md](SECURITY.md).
 - **One topic per pull request**, using the template's sections. `master` is
