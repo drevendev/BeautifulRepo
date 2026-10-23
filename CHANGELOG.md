@@ -11,6 +11,11 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Changed
+
+- The adoption guide pins the Action to the `v0.2.0` commit, and `master` starts
+  plugin version `0.3.0-dev.0` (#101).
+
 ## [v0.2.0] — 2026-10-23
 
 First release with the Claude Code and Codex plugin. The GitHub Action changes too,
