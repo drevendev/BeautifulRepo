@@ -70,7 +70,8 @@ rather than a false missing-README finding. The audit does not inspect individua
 licenses, SPDX declarations, nested packages, inherited organization community files,
 remote settings, branch protection, or private reporting routes.
 
-Reads are capped at 500 KiB per document. A larger document is reported and not parsed.
+Reads are capped at 500 KiB per document. A larger document is reported and not parsed;
+parsing time grows roughly linearly with document size up to that cap.
 Each of the three entry-point directories is capped at 4,096 entries; exceeding the bound
 stops with an input error rather than silently reporting an incomplete inventory.
 Selected symlinks and special files are not read. Directory symlinks and NTFS junctions
