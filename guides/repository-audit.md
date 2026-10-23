@@ -125,10 +125,11 @@ for its separately documented path checks.
 
 ## JSON contract and exit codes
 
-`--format json` emits an object with `schema_version: 1`, a `profile` string,
-a `documents` mapping, a `read_files` list, severity counts in `summary`, and
-an ordered `findings` array. The added `profile` field is additive under schema 1;
-consumers requiring an exact set of keys must update their validation. Each
+`--format json` emits an object with `schema_version: 1`, a `documents`
+mapping, a `read_files` list, severity counts in `summary`, and an ordered
+`findings` array. With an explicitly selected `internal` or `private` profile,
+JSON also includes `profile` as an additive field under schema 1. The default
+`public` profile **does not add a JSON key**, preserving existing consumers. Each
 finding contains `rule_id`, `severity`, `path`, `line` (integer or null), `message` and
 `remediation`. Output contains no timestamps or machine-specific absolute root path, and
 findings are sorted by severity, relative path, line and rule identifier.
