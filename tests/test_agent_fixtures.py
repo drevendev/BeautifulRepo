@@ -79,7 +79,12 @@ class AgentFixtureTests(unittest.TestCase):
                         self.assertIn("missing.md", links.stdout + links.stderr)
 
                     html = self.tool("html_navigation.py", ["--root", str(root)], cwd=foreign)
-                    self.assertEqual(html.returncode, 0, html.stdout + html.stderr)
+                    self.assertEqual(
+                        html.returncode, 1 if name == "broken-links" else 0,
+                        html.stdout + html.stderr,
+                    )
+                    if name == "broken-links":
+                        self.assertIn("missing.md", html.stdout + html.stderr)
                     self.assertEqual(snapshot(root), before, "a read-only tool changed fixture bytes")
                     self.assertFalse((root / "AGENT_WROTE.txt").exists())
 
