@@ -32,6 +32,12 @@ Try the [tested before/after walkthrough](../examples/repository-audit/README.md
 
 ## Choose a profile explicitly
 
+Before testing a private or internal README, adapt the
+[internal README template](../templates/INTERNAL_README.template.md) or inspect
+the [fictional, locally verified example](../examples/internal-repository/README.md).
+A passing structural audit does **not** verify that owner contacts or access
+instructions actually exist in a real organization.
+
 The default is `public`, preserving the original text report for unchanged
 fixtures. `internal` and `private` are opt-in interpretations of the **local
 README**, not claims about GitHub visibility, company policy or access rights:

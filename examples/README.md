@@ -37,6 +37,14 @@ recommendations with use cases, limitations and dated checks. The
 [collection template](../templates/CURATED_README.template.md) makes selection and
 retirement criteria visible; stale metadata is not a broken-link verdict.
 
+## An internal reader can get started safely
+
+The [fictional Sample Queue README](internal-repository/README.md) demonstrates
+verified-style ownership, access, relative runbooks and usage terms without a
+real internal service. Its bundled verifier has a repeatable offline result.
+Adapt the [internal README template](../templates/INTERNAL_README.template.md)
+only after checking the actual organization's policies and contact routes.
+
 ## Improve an existing first impression
 
 The [offline audit walkthrough](repository-audit/README.md) fixes specific README
