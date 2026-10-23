@@ -46,6 +46,9 @@ keep their original themed headings.
 
 ### Changed
 
+- CONTRIBUTING describes the `hacktoberfest` label as historical instead of as
+  participation, in line with the programs guide: Hacktoberfest 2026 does not count
+  pull requests. The label itself stays until its post-event review (#100).
 - `docs_links.py` and `html_navigation.py` now scan the current directory when
   `--root` is omitted, like `repo_audit.py`. Previously they silently checked
   BeautifulRepo's own checkout. `html_navigation.py` also runs under `python -I`.
