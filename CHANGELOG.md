@@ -11,6 +11,13 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Added
+
+- `case-studies/README.md` describes the procedure every real case follows: before
+  snapshot, audit with pinned tools, a pull request in the target, after snapshot and
+  write-up. It adds a fill-in skeleton, the rule that unlicensed repositories are used
+  for ideas only, and the known tool caveats (#80).
+
 ### Changed
 
 - The adoption guide pins the Action to the `v0.2.0` commit, and `master` starts
