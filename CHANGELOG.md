@@ -13,6 +13,9 @@ keep their original themed headings.
 
 ### Added
 
+- `AGENTS.md` gives coding agents the five checks, the house rules and the layout.
+  Codex reads it directly; Claude Code reads it through `.claude/CLAUDE.md`, because
+  a root `CLAUDE.md` fails `claude plugin validate --strict` (#53).
 - A pushed `v*` tag opens a **draft** GitHub Release (`.github/workflows/release.yml`)
   once its commit is on `master` and every required check from the `master` ruleset
   passed there. The draft is filled from the release-note template with the tag,
