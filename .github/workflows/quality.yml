@@ -81,6 +81,21 @@ jobs:
         uses: ./
         with:
           checks: audit doc-links
+      - name: One check per line must still run, and find the broken link
+        id: newline
+        continue-on-error: true
+        uses: ./
+        with:
+          path: .selftest/broken
+          checks: |
+            docs-links
+            html-navigation
+      - name: An empty check list must fail
+        id: empty
+        continue-on-error: true
+        uses: ./
+        with:
+          checks: ' '
       - name: Excluding vendor/ must pass
         uses: ./
         with:
@@ -93,7 +108,12 @@ jobs:
         env:
           BROKEN: ${{ steps.broken.outcome }}
           TYPO: ${{ steps.typo.outcome }}
+          NEWLINE: ${{ steps.newline.outcome }}
+          EMPTY: ${{ steps.empty.outcome }}
         run: |
           echo "broken-link run: $BROKEN; unknown-check run: $TYPO"
+          echo "one-per-line run: $NEWLINE; empty-list run: $EMPTY"
           test "$BROKEN" = failure
           test "$TYPO" = failure
+          test "$NEWLINE" = failure
+          test "$EMPTY" = failure
