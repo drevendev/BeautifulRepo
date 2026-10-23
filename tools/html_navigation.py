@@ -13,6 +13,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 import re
 import sys
+import unicodedata
 from urllib.parse import unquote, urlsplit
 
 try:
@@ -31,6 +32,17 @@ except ImportError:
 
 HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$")
 LINK = re.compile(r"\[([^\]]+)\]\([^)]*\)")
+IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+TAG = re.compile(r"<[^>]+>")
+# Backslash-escaped ASCII punctuation is set aside in a private-use range while links,
+# tags and emphasis are removed, then restored as the literal character.
+ESCAPED_PUNCTUATION = re.compile(r"\\([!-/:-@\[-`{-~])")
+ESCAPE_BASE = 0xE000
+SET_ASIDE = re.compile("[\uE021-\uE07E]")
+# An underscore run opens emphasis only when not preceded by a letter or digit,
+# and closes it only when not followed by one, so snake_case stays intact.
+UNDERSCORE_EMPHASIS = re.compile(r"(?<![^\W_])(_+)(?=\S)(.+?)(?<=\S)\1(?![^\W_])")
+CLOSING_HASHES = re.compile(r"(?:^|[ \t]+)#+[ \t]*$")
 
 
 def srcset_urls(value: str) -> list[str]:
@@ -117,58 +129,14 @@ def mask_escaped_html_openers(markdown: str) -> str:
     return "".join(chars)
 
 
-def restore_heading_code(masked: str, original: str) -> str:
-    """Keep inline code *text* in live headings without unmasking code blocks.
-
-    docs_links masks code spans to prevent false active HTML links. GitHub's
-    heading anchors nevertheless include the visible text within inline code.
-    Restore matched backtick spans only for heading-slug normalization, never
-    for scanning active HTML destinations.
-    """
-    restored = list(masked)
-    position = 0
-    while position < len(original):
-        if original[position] != "`":
-            position += 1
-            continue
-        run_end = position
-        while run_end < len(original) and original[run_end] == "`":
-            run_end += 1
-        run_length = run_end - position
-        if docs_links._is_backslash_escaped(original, position):
-            position = run_end
-            continue
-        close = run_end
-        matched = False
-        while close < len(original):
-            next_open = original.find("`", close)
-            if next_open == -1:
-                break
-            next_end = next_open
-            while next_end < len(original) and original[next_end] == "`":
-                next_end += 1
-            if next_end - next_open == run_length:
-                for index in range(position, next_end):
-                    if restored[index] == " ":
-                        restored[index] = original[index]
-                position = next_end
-                matched = True
-                break
-            close = next_end
-        if not matched:
-            position = run_end
-    return "".join(restored)
+def _lines(text: str) -> list[str]:
+    return [line.rstrip("\r\n") for line in docs_links.split_markdown_lines(text)]
 
 
-def protect_inline_code_angles(label: str) -> str:
-    """Keep code-span text visible when stripping actual HTML heading tags.
-
-    A code span like `<token>` contributes `token` to a GitHub heading slug;
-    it is not an HTML tag to discard. Only paired equal-length backtick runs
-    are considered, consistent with the code-region masking contract.
-    """
-    rendered = list(label)
-    cursor = 0
+def _heading_segments(label: str) -> list[tuple[bool, str]]:
+    """Split heading text into (is_code, text) parts at paired equal-length backtick runs."""
+    segments: list[tuple[bool, str]] = []
+    cursor = plain_start = 0
     while cursor < len(label):
         if label[cursor] != "`":
             cursor += 1
@@ -176,13 +144,13 @@ def protect_inline_code_angles(label: str) -> str:
         opening_end = cursor
         while opening_end < len(label) and label[opening_end] == "`":
             opening_end += 1
-        length = opening_end - cursor
         if docs_links._is_backslash_escaped(label, cursor):
             cursor = opening_end
             continue
-        next_at = opening_end
+        length = opening_end - cursor
+        search = opening_end
         while True:
-            close = label.find("`", next_at)
+            close = label.find("`", search)
             if close == -1:
                 cursor = opening_end
                 break
@@ -190,17 +158,58 @@ def protect_inline_code_angles(label: str) -> str:
             while closing_end < len(label) and label[closing_end] == "`":
                 closing_end += 1
             if closing_end - close == length:
-                for position in range(opening_end, close):
-                    if rendered[position] in "<>":
-                        rendered[position] = ""
-                cursor = closing_end
+                code = label[opening_end:close]
+                if len(code) > 2 and code[0] == code[-1] == " " and code.strip():
+                    code = code[1:-1]
+                segments.append((False, label[plain_start:cursor]))
+                segments.append((True, code))
+                cursor = plain_start = closing_end
                 break
-            next_at = closing_end
-    return "".join(rendered)
+            search = closing_end
+    segments.append((False, label[plain_start:]))
+    return segments
 
 
-def _lines(text: str) -> list[str]:
-    return [line.rstrip("\r\n") for line in docs_links.split_markdown_lines(text)]
+def _rendered_text(markdown: str) -> str:
+    """Approximate the visible text GitHub renders for non-code heading Markdown."""
+    text = ESCAPED_PUNCTUATION.sub(lambda m: chr(ESCAPE_BASE + ord(m.group(1))), markdown)
+    text = IMAGE.sub("", text)  # an image contributes no text, not even its alt
+    text = LINK.sub(r"\1", text)
+    text = TAG.sub("", text)  # tags and comments first, then entities
+    previous = None
+    while previous != text:
+        previous, text = text, UNDERSCORE_EMPHASIS.sub(r"\2", text)
+    text = SET_ASIDE.sub(lambda m: chr(ord(m.group()) - ESCAPE_BASE), text)
+    return unescape(text)
+
+
+def github_heading_slug(label: str) -> str:
+    """Return the anchor GitHub generates for ATX heading text, before duplicate suffixes.
+
+    GitHub lowercases the rendered text, removes every character that is not a
+    letter, mark, decimal digit, connector punctuation, hyphen or space, and turns
+    each space into a hyphen. Code-span text counts literally; images, tags and
+    emphasis markers do not.
+    """
+    text = "".join(part if is_code else _rendered_text(part)
+                   for is_code, part in _heading_segments(label))
+    return "".join(char for char in text.lower() if _kept_in_slug(char)).replace(" ", "-")
+
+
+def _kept_in_slug(char: str) -> bool:
+    """Approximate the \\p{Word} class GitHub's Ruby regex keeps, plus hyphen and space.
+
+    \\p{Word} is Alphabetic, marks, decimal digits and connector punctuation. Python
+    has no Alphabetic property, so letters, letter numbers and the enclosed Latin
+    letters (circled and squared) stand in for it.
+    """
+    if char in "- ":
+        return True
+    category = unicodedata.category(char)
+    return (category[0] in "LM" or category in ("Nd", "Nl", "Pc")
+            or "Ⓐ" <= char <= "ⓩ"  # circled A-Z and a-z
+            or any(start <= ord(char) < start + 26  # squared, negative circled, negative squared
+                   for start in (0x1F130, 0x1F150, 0x1F170)))
 
 
 def heading_ids(markdown_without_code: str, explicit_ids: set[str],
@@ -208,26 +217,21 @@ def heading_ids(markdown_without_code: str, explicit_ids: set[str],
     """Approximate GitHub's automatic ATX heading IDs with duplicate suffixes.
 
     We intentionally only claim ATX headings here, not every Markdown extension.
-    Explicit HTML IDs are additionally supported by the HTML parser. The source
-    heading restores visible inline-code text excluded from HTML destination scans.
+    Explicit HTML IDs are additionally supported by the HTML parser. The masked
+    copy decides which lines are headings (none inside code blocks); the text
+    comes from the source line, so code spans and comments keep their effect.
     """
     found = set(explicit_ids)
     used_heading_ids: set[str] = set()
     original_lines = _lines(original_markdown or markdown_without_code)
     for line, original_line in zip(_lines(markdown_without_code), original_lines):
         match = HEADING.match(line)
-        if match is not None and original_markdown is not None:
-            line = restore_heading_code(line, original_line)
-            match = HEADING.match(line)
         if match is None:
             continue
-        label = match.group(1).strip().rstrip("#").strip()
-        label = LINK.sub(r"\1", label)
-        label = protect_inline_code_angles(label)
-        label = unescape(label).lower()
-        label = re.sub(r"<[^>]+>", "", label)
-        label = "".join(char for char in label if char.isalnum() or char in " _-")
-        slug = re.sub(r"[ \t]+", "-", label)
+        if original_markdown is not None:
+            match = HEADING.match(original_line) or match
+        label = CLOSING_HASHES.sub("", match.group(1).strip()).strip()
+        slug = github_heading_slug(label)
         if slug:
             candidate = slug
             suffix = 0
