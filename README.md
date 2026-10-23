@@ -53,6 +53,11 @@ hosted service. No package installation or network access is required.
 CI runs the examples and checks on Ubuntu (Python 3.11 and 3.14) and Windows
 (Python 3.14); macOS is not tested.
 
+For a real application of this approach to BeautifulRepo itself, see the
+[README before/after case](case-studies/readme-first-success-case.md): fixed
+revisions, a clean-clone run, GitHub's rendering checked at three widths in both
+themes, and what was not checked.
+
 For an actual **before/after documentation diagnostic**, run
 `python examples/repository-audit/demo.py` from the same root. Its
 [test-backed walkthrough](examples/repository-audit/README.md) shows four

@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- A real before/after case for BeautifulRepo's own README
+  (`case-studies/readme-first-success-case.md`): fixed revisions, a clean-clone run
+  of the first success and all five checks, and GitHub's rendering measured at
+  1280, 375 and 320 px in light and dark themes, with its limits stated (#21).
 - `tools/review_dates.py` lists guide sources whose "Reviewed" date is due for a
   recheck (180 days, 30 for the programs guide) and rejects future or impossible
   dates. The maintenance workflow describes the recheck routine (#64).
@@ -49,6 +53,9 @@ keep their original themed headings.
 
 ### Changed
 
+- The README's first-use path starts with a copyable `git clone` and `cd`, names
+  the platforms CI tests (Ubuntu with Python 3.11 and 3.14, Windows with 3.14; not
+  macOS) and says what a passing self-check looks like, without fixed counts (#66).
 - CONTRIBUTING describes the `hacktoberfest` label as historical instead of as
   participation, in line with the programs guide: Hacktoberfest 2026 does not count
   pull requests. The label itself stays until its post-event review (#100).

@@ -1,6 +1,6 @@
 # BeautifulRepo's README: from a directory to inspectable evidence
 
-**Case status, 2026-10-22:** reproducible source/command evidence captured; GitHub-native rendered desktop/narrow/light/dark and keyboard/assistive-technology checks **not yet completed**. This is a real-repository adaptation, not evidence of improved user conversion or a finished accessibility audit.
+**Case status, 2026-10-23:** a full clean-clone run and GitHub's own rendering were checked, at desktop and narrow widths, in light and dark themes. Screen readers and visible keyboard focus were **not** checked. This is a real-repository adaptation, not evidence of improved user conversion or a finished accessibility audit.
 
 ## The real repository and immutable baselines
 
@@ -49,30 +49,50 @@ Data rows: 3
 
 The original change's [GitHub Actions workflow run #39556116102](https://github.com/drevendev/BeautifulRepo/actions/runs/39556116102) completed successfully on the PR's exact head with Python 3.11 and 3.14. This is repository CI evidence, distinct from the isolated Python 3.13.5 reproduction above; it is not a substitute for the visual inspection below.
 
-To repeat the **full-checkout** acceptance, clone the fixed `baeb53dd...` revision, run the command, and separately execute:
+**Full clean clone, 2026-10-23.** The README since gained a copyable clone step (#66). A fresh `git clone` from GitHub of the README-update branch at commit `198b2e9ca94881075743805a930520ad8a81709c` was made on Windows 11 with Python 3.14.7 and Git's `core.autocrlf=true`. There, `rowcount.py` printed `Data rows: 3` and exited 0, and all five documented checks exited 0:
 
 ```bash
 python tools/catalog.py
 python tools/docs_links.py
 python tools/html_navigation.py
 python -m unittest discover -s tests -v
+python tools/repo_audit.py .
 ```
 
-**Not claimed as run locally here:** the full checkout or this four-command local suite. CI evidence is linked above, rather than converted into an invented local result.
+The results were 11 catalog resources, 199 Markdown destinations, 210 HTML destinations, 301 tests (7 skipped) and an audit with 0 findings. The counts belong to that commit and will change as the handbook grows.
 
-## Visual and accessible acceptance: still open
+## Rendered review on GitHub, 2026-10-23
 
-The source-level counts above do not establish rendered layout, color contrast, horizontal reflow, landmark order, or keyboard focus visibility. To complete this case and inform [Issue #21](https://github.com/drevendev/BeautifulRepo/issues/21): capture GitHub's **actual rendered README** at both fixed revisions; inspect desktop and 320 CSS-pixel-equivalent/narrow or 400%-zoom viewports; inspect light and dark mode with a text equivalent; and record keyboard focus/link reachability and any necessary correction. Distinguish each observed PASS/FAIL from untested screen-reader or platform combinations. Do not pass off a locally styled Markdown approximation as a GitHub renderer screenshot.
+Checked on GitHub's own rendering of `README.md` on that branch, signed out, in the Chromium-based browser built into the Claude desktop app. Widths and colour schemes were set by viewport emulation, and layout and colours were measured in the page. These are not screenshots of a phone.
 
-A different issue, [#28](https://github.com/drevendev/BeautifulRepo/issues/28), tracks Pocket Board controls and must not be silently closed on the strength of this README source change.
+| Check | 1280 px | 375 px | 320 px |
+| --- | --- | --- | --- |
+| Page scrolls sideways | no | no | no |
+| Blocks with their own horizontal scroll | none | 3 code blocks, `Start here` table (3 px) | 3 code blocks, `Start here` table |
+| Text contrast, light theme | 15.8:1 (links 5.2:1) | | |
+| Text contrast, dark theme | | 17.4:1 (links 6.1:1, code 15.9:1) | |
+
+The first screen at 375 px shows the title, the one-sentence promise, the four badges in two rows and the four navigation links, without overlap. Every image has alt text: the four badges are named `CI status`, `License: MIT`, `Python 3.11+` and `Runtime dependencies: zero`. The Mermaid journey keeps its adjacent text alternative. All 72 README links are keyboard-focusable (none has a negative `tabindex`), and the four section anchors the navigation uses exist.
+
+Long commands scroll inside their code blocks rather than widening the page. That is acceptable for copyable commands, and the copy button stays available. The three-column `Start here` table scrolls inside its own container at 320 px; WCAG 1.4.10 allows two-dimensional layouts such as data tables to do so.
+
+**Not checked:** a screen reader, visible focus styles while tabbing, real phones, 400% browser zoom as opposed to a 320 px viewport, and the earlier `e1c3123` revision's rendering. The before/after comparison above stays source-level.
+
+A different issue, [#28](https://github.com/drevendev/BeautifulRepo/issues/28), tracks Pocket Board controls and is not settled by this README review.
 
 ## Decision and limits
 
 **Adoptable pattern:** lead with a small, reproducible piece of product evidence, then offer a few audience-specific routes and leave full reference navigation discoverable. Cite exact files and outputs; label demonstrations and hypotheses.
 
-**What is verified:** immutable README differences; links to the actual implementation and sample; byte-identity of two runnable files; isolated Python output; provider CI on the PR head.
+**What is verified:**
 
-**What is not verified:** improved traffic/conversion, time to first success for actual users, full clean-clone run locally, real GitHub visual checks and assistive-technology compatibility.
+- immutable README differences and links to the actual implementation and sample;
+- byte-identity of two runnable files and isolated Python output;
+- a full clean-clone run of the first success and the five checks;
+- provider CI on the PR head;
+- GitHub's rendered layout and contrast at three widths in both themes.
+
+**What is not verified:** improved traffic or conversion, time to first success for actual users, screen-reader and visible-focus behaviour, and real devices.
 
 ### Primary guidance consulted (2026-10-22)
 
