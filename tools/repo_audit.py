@@ -22,6 +22,7 @@ MAX_DIRECTORY_ENTRIES = 4096
 LOCATIONS = (".github", "", "docs")
 DOCUMENT_SUFFIXES = (".md", ".markdown", ".rst", ".txt", "")
 LEVELS = {"error": 0, "warning": 1, "info": 2}
+PROFILES = ("public", "internal", "private")
 # NTFS junctions redirect like directory symlinks, but only lstat's reparse tag shows them.
 JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
 MARKDOWN_LINE_END_RE = re.compile(r"(?<=\n)|(?<=\r)(?!\n)")
@@ -265,6 +266,69 @@ class _HTMLFacts(HTMLParser):
             self._heading = None
 
 
+def _is_repository_raw_asset(url: str) -> bool:
+    """Identify GitHub-hosted raw images that depend on a remote/session."""
+    return bool(re.match(
+        r"^https?://(?:raw\.githubusercontent\.com/|"
+        r"github\.com/[^/?#]+/[^/?#]+/raw/)", url, re.IGNORECASE,
+    ))
+
+
+def _has_owner_contact(text: str) -> bool:
+    """Recognize an explicit owner/contact/support heading or labelled field."""
+    heading = re.search(
+        r"(?im)^ {0,3}#{1,6}[ \t]+(?:owners?|ownership|owning team|"
+        r"maintainers?|contacts?|support|help desk|team)(?:\b|[ \t:/&-])", text,
+    )
+    field = re.search(
+        r"(?im)^ {0,3}(?:owner|owning team|maintainer|contact|"
+        r"support(?: channel)?|team):[ \t]*\S+", text,
+    )
+    return bool(heading or field)
+
+
+def _absolute_image_findings(visible: str, path: str,
+                             html_images: list[tuple[int, dict[str, str | None]]]
+                             ) -> list[dict[str, Any]]:
+    """Report common inline/reference Markdown images and HTML <img> raw URLs."""
+    findings: list[dict[str, Any]] = []
+    lines = [line.rstrip("\r\n") for line in _split_lines(visible)]
+    references: dict[str, str] = {}
+    definition = re.compile(r"^ {0,3}\[([^\]\r\n]{1,128})\]:[ \t]*<?(https?://[^\s)>]+)", re.I)
+    inline = re.compile(r"(?<!\\)!\[[^\]\r\n]{0,256}\]\(\s*<?(https?://[^\s)>]+)", re.I)
+    referenced = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\]\[([^\]\r\n]{0,128})\]")
+    shortcut = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\](?![\[(])")
+
+    for line in lines:
+        match = definition.match(line)
+        if match:
+            references.setdefault(" ".join(match[1].casefold().split()), match[2])
+
+    def record(line_number: int) -> None:
+        findings.append(finding(
+            "readme.absolute_repo_asset", "warning", path, line_number,
+            "Image uses a GitHub raw URL that may fail in clones, mirrors or private views.",
+            "Prefer a checked-in repository-relative image path; review any external dependency.",
+        ))
+
+    for number, line in enumerate(lines, 1):
+        for match in inline.finditer(line):
+            if _is_repository_raw_asset(match[1]):
+                record(number)
+        for match in referenced.finditer(line):
+            label = " ".join((match[2] or match[1]).casefold().split())
+            if _is_repository_raw_asset(references.get(label, "")):
+                record(number)
+        for match in shortcut.finditer(line):
+            label = " ".join(match[1].casefold().split())
+            if _is_repository_raw_asset(references.get(label, "")):
+                record(number)
+    for number, attrs in html_images:
+        if _is_repository_raw_asset(attrs.get("src") or ""):
+            record(number)
+    return findings
+
+
 def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     visible = visible_source(text)
@@ -274,6 +338,7 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
     html = _HTMLFacts()
     html.feed(visible)
     html.close()
+    findings.extend(_absolute_image_findings(visible, path, html.images))
     headings = list(html.headings)
     for index, line in enumerate(lines):
         heading_line = heading_lines[index]
@@ -334,7 +399,9 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
     return findings
 
 
-def audit_repository(target: str | Path) -> dict[str, Any]:
+def audit_repository(target: str | Path, *, profile: str = "public") -> dict[str, Any]:
+    if profile not in PROFILES:
+        raise AuditInputError("profile must be public, internal or private.")
     try:
         root = Path(target).resolve(strict=True)
         if not root.is_dir():
@@ -353,9 +420,13 @@ def audit_repository(target: str | Path) -> dict[str, Any]:
         documents[kind] = paths[0].relative_to(root).as_posix() if paths else None
         if not paths:
             severity = {"readme": "error", "license": "warning", "contributing": "info"}[kind]
+            remedy = "Inspect the documented scope; add a real document or provide an intentional alternative."
+            if kind == "license" and profile != "public":
+                severity = "info"
+                remedy = "State internal-use terms in the README or link the company policy."
             findings.append(finding(f"{kind}.missing", severity, ".", None,
                                     f"No dedicated {kind} document found in the supported local locations.",
-                                    "Inspect the documented scope; add a real document or provide an intentional alternative."))
+                                    remedy))
             continue
         text = _read_document(paths[0], root, findings, read_files)
         if text is None:
@@ -367,16 +438,29 @@ def audit_repository(target: str | Path) -> dict[str, Any]:
                                     relative, 1, "Selected document is empty.",
                                     "Replace the empty file with useful project-specific information."))
         elif kind == "readme":
-            if paths[0].suffix.lower() in {".md", ".markdown"}:
+            is_markdown = paths[0].suffix.lower() in {".md", ".markdown"}
+            if is_markdown:
                 findings.extend(_inspect_markdown(text, relative))
             else:
                 findings.append(finding("readme.unsupported_format", "info", relative, None,
                                         "README was found, but its format is outside the Markdown checks.",
                                         "Review the rendered document manually; it is not treated as missing."))
+            if profile != "public":
+                source = visible_source(text, mask_inline=False) if is_markdown else text
+                if not _has_owner_contact(source):
+                    findings.append(finding(
+                        "readme.owner_contact", "warning", relative, None,
+                        "No explicit owner, maintainer, contact or support section was found.",
+                        "Name the owning team and an approved internal contact or support route.",
+                    ))
     findings.sort(key=lambda f: (LEVELS[f["severity"]], f["path"], f["line"] or 0, f["rule_id"]))
-    return {"schema_version": 1, "documents": documents, "read_files": sorted(read_files),
-            "summary": {level: sum(f["severity"] == level for f in findings) for level in LEVELS},
-            "findings": findings}
+    report = {"schema_version": 1, "documents": documents, "read_files": sorted(read_files),
+              "summary": {level: sum(f["severity"] == level for f in findings) for level in LEVELS},
+              "findings": findings}
+    # An opt-in key keeps the default public JSON and text contracts unchanged.
+    if profile != "public":
+        report["profile"] = profile
+    return report
 
 
 def exit_status(report: dict[str, Any], fail_on: str) -> int:
@@ -403,11 +487,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", nargs="?", default=".", help="local repository directory (default: current directory)")
     parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--profile", choices=PROFILES, default="public",
+                        help="locally selected guidance profile; no remote visibility is inspected")
     parser.add_argument("--fail-on", choices=("error", "warning", "never"), default="error",
                         help="failure threshold; informational findings never fail a valid audit")
     args = parser.parse_args(argv)
     try:
-        report = audit_repository(args.root)
+        report = audit_repository(args.root, profile=args.profile)
     except AuditInputError as exc:
         print(f"repo_audit: {exc}", file=sys.stderr)
         return 2

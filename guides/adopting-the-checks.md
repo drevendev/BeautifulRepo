@@ -66,6 +66,7 @@ macOS runners are not tested.
 | `path` | `.` | Directory to check, relative to the workspace. |
 | `checks` | `audit docs-links html-navigation` | Subset to run, separated by spaces or one name per line. An unknown name, or an empty list, fails the step instead of being skipped silently. |
 | `audit-fail-on` | `error` | `error`, `warning` or `never`. Findings are printed either way. Any other value fails the step, even when `audit` is not selected. |
+| `audit-profile` | `public` | Explicit `public`, `internal` or `private`. Alters missing-license guidance and owner/contact observations; invalid values fail even when audit is not selected. This input is **Unreleased**, not supported by the v0.2.0 pin above. |
 | `exclude` | empty | One glob per line, relative to `path`, for Markdown sources the link checks skip, such as `vendor`, `third_party` or `docs/archive/*.md`. |
 
 `.git` and `node_modules` directories are always skipped. Their Markdown belongs
@@ -147,10 +148,16 @@ checks against a local target. No Action, Marketplace or hosted runner is
 needed:
 
 ```bash
-python -I tools/repo_audit.py ../private-repo
+python -I tools/repo_audit.py ../private-repo --profile private
 python -I tools/docs_links.py --root ../private-repo
 python -I tools/html_navigation.py --root ../private-repo
 ```
+
+The `--profile private` option is available in the **Unreleased** source after
+issue #75; the pinned v0.2.0 Action example above predates the option. Do not
+pass `audit-profile` to that pinned Action until you move deliberately to a
+reviewed commit or a future release that includes it. Neither the option nor
+the static checks inspect organization settings or discover visibility.
 
 The repository's `tests/test_offline_contract.py` guards against direct
 network/process-library imports in `tools/*.py` and direct

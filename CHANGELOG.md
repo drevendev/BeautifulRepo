@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- An explicit public/internal/private profile for the offline repository audit and
+  composite Action, with internal owner/contact observations, less prescriptive
+  missing-license guidance, additive JSON profile metadata, and raw GitHub image
+  portability warnings. Default profile stays public; no remote visibility lookup (#75).
 - Private/enterprise Action adoption guidance (organization policy, runner costs,
   SHA-preserving mirrors, GHES/GHE.com caveats, and local-only use) and an offline
   contract regression test for tools and composite Action shell steps (#79).

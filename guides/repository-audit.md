@@ -30,6 +30,38 @@ includes relative document names and the kinds of findings detected.
 
 Try the [tested before/after walkthrough](../examples/repository-audit/README.md).
 
+## Choose a profile explicitly
+
+The default is `public`, preserving the original text report for unchanged
+fixtures. `internal` and `private` are opt-in interpretations of the **local
+README**, not claims about GitHub visibility, company policy or access rights:
+
+```bash
+python tools/repo_audit.py ../team-repository --profile internal
+python tools/repo_audit.py ../private-repository --profile private --format json
+```
+
+In these two profiles a missing dedicated license is **informational**, with
+a suggestion to state internal-use terms or link the applicable company policy,
+rather than an automatic recommendation to add an open-source license. They
+also warn as `readme.owner_contact` when the README has no recognizable
+owner, maintainer, contact or support heading or labelled field. Put an approved
+internal contact route in the actual README; never invent one. A missing or
+unreadable README retains its existing error instead of duplicating that warning.
+
+Every profile also warns as `readme.absolute_repo_asset` for common
+Markdown inline/reference or HTML images loaded from
+`raw.githubusercontent.com` or a `github.com/OWNER/REPO/raw/…` URL.
+Prefer checked-in relative image paths that work in authorized clones and
+mirrors. A legitimate external image can be documented as an exception; these
+heuristics cannot determine whether a viewer has access. Code spans, fenced
+blocks and HTML comments are ignored in the supported syntax subset.
+
+**Compatibility:** the new `--profile` option and Action input are
+Unreleased additions on `master`; they are **not** part of the v0.2.0
+Action pin used by the adoption-guide example. Use a reviewed checkout
+containing this change until a release includes it.
+
 ## Findings you can act on
 
 **Entry-point availability:** missing or empty README; missing or empty dedicated license
@@ -64,7 +96,10 @@ are `.md`, `.markdown`, `.rst`, `.txt`, and no suffix. This is a deliberately bo
 of the formats and license arrangements a real project may use, not an exact reproduction
 of every GitHub rendering rule.
 
-Only the three selected documents are read. Markdown analysis applies to `.md` and
+Only the three selected documents are read. Profiles are chosen by the caller,
+never auto-detected from remote settings. The profile check recognizes common
+Markdown contact headings and labelled fields; it does not establish the
+existence or reachability of a contact channel. Markdown analysis applies to `.md` and
 `.markdown` READMEs; other recognized README formats produce an informational limitation
 rather than a false missing-README finding. The audit does not inspect individual source
 licenses, SPDX declarations, nested packages, inherited organization community files,
@@ -90,8 +125,11 @@ for its separately documented path checks.
 
 ## JSON contract and exit codes
 
-`--format json` emits an object with `schema_version: 1`, a `documents` mapping, a
-`read_files` list, severity counts in `summary`, and an ordered `findings` array. Each
+`--format json` emits an object with `schema_version: 1`, a `documents`
+mapping, a `read_files` list, severity counts in `summary`, and an ordered
+`findings` array. With an explicitly selected `internal` or `private` profile,
+JSON also includes `profile` as an additive field under schema 1. The default
+`public` profile **does not add a JSON key**, preserving existing consumers. Each
 finding contains `rule_id`, `severity`, `path`, `line` (integer or null), `message` and
 `remediation`. Output contains no timestamps or machine-specific absolute root path, and
 findings are sorted by severity, relative path, line and rule identifier.
