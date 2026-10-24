@@ -13,6 +13,7 @@ keep their original themed headings.
 
 ### Added
 
+- Add a read-only offline Git commit inventory tool for release-note drafting with exact base/head SHAs, no-tag/root fallback, bounded history and synthetic Git regression tests. It does not publish a release or verify commit claims (related to #72).
 - Add a portable offline agent-eval file-integrity snapshot tool with
   an outside-target baseline, byte hashes, symlink-safe traversal, black-box
   tests and a Codex/Claude manual smoke recipe. This verifies target-file
