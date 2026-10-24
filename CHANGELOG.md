@@ -79,6 +79,12 @@ keep their original themed headings.
   state, not reusable BeautifulRepo product examples. Ignore future local Crab files;
   public guidance and issue history remain available.
 
+### Fixed
+
+- Reject ambiguous duplicate JSON members and boolean format versions in
+  agent-evaluation snapshot baselines. Verification now fails closed instead of
+  potentially reporting `UNCHANGED` for an edited or malformed baseline (#74).
+
 ## [v0.2.0] — 2026-10-23
 
 First release with the Claude Code and Codex plugin. The GitHub Action changes too,

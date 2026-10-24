@@ -67,6 +67,31 @@ class SnapshotTests(unittest.TestCase):
         self.baseline.write_text("broken", encoding="utf-8")
         self.assertEqual(2, self.run_tool("verify").returncode)
 
+    def test_duplicate_members_or_boolean_version_fail_closed(self):
+        self.assertEqual(0, self.run_tool("capture").returncode)
+        original = self.baseline.read_text(encoding="utf-8")
+        snapshot = json.loads(original)
+        duplicate_file = json.dumps(snapshot["entries"]["README.md"], sort_keys=True)
+        cases = [
+            ("duplicate top-level", original.replace(
+                '"format": 1,', '"format": 1, "format": 1,', 1), "duplicate JSON key"),
+            ("duplicate entry", original.replace(
+                '"README.md": {',
+                '"README.md": ' + duplicate_file + ', "README.md": {', 1),
+                "duplicate JSON key"),
+            ("boolean version", original.replace(
+                '"format": 1,', '"format": true,', 1), "baseline format"),
+        ]
+        for label, modified, expected_error in cases:
+            with self.subTest(label=label):
+                self.assertNotEqual(original, modified)
+                self.baseline.write_text(modified, encoding="utf-8")
+                outcome = self.run_tool("verify")
+                self.assertEqual(2, outcome.returncode,
+                                 outcome.stdout + outcome.stderr)
+                self.assertIn(expected_error, outcome.stderr)
+                self.assertNotIn("UNCHANGED", outcome.stdout)
+
     def test_symlink_target_is_not_followed(self):
         external = self.home / "outside.txt"
         external.write_text("secret before", encoding="utf-8")
