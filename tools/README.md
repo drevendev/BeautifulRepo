@@ -56,6 +56,31 @@ refuses to write the JSON baseline inside the target. A match only establishes
 unchanged watched entries, not successful agent skill triggering, a sandbox,
 resistance to prompt injection, or absence of side effects elsewhere.
 
+## Local release-history inventory
+
+[release_inventory.py](release_inventory.py) produces a **read-only JSON inventory** of
+commits for drafting release notes from a local Git checkout:
+
+```bash
+python -I tools/release_inventory.py .
+python -I tools/release_inventory.py ../another-checkout --base 0123456789abcdef
+```
+
+Replace the illustrative base SHA with an actual ancestor commit. By default the
+tool compares HEAD against the nearest reachable `v[0-9]*` tag, or the unique
+root commit if there is no matching tag. It names both exact commit SHAs, the
+boundary kind and each commit SHA/subject. The initial root commit itself is
+excluded from a root-based comparison. More than 200 commits (configurable up
+to 500) fails instead of silently truncating; the tool requires a unique root
+or an explicit base on unusual histories.
+
+This inventory **is not a release and does not prove anything shipped**.
+Tag presence does not establish a GitHub Release, downloadable asset or test pass.
+Commit subjects are untrusted inputs, not verified user-visible behavior. Review
+the underlying diffs and [release-note guidance](../guides/release-notes.md)
+before writing public claims. The tool needs Python 3.11+ and Git, makes no
+network requests, doesn't execute project code and writes no files. Exit 0
+prints JSON; invalid inputs or Git read errors exit 2 without partial JSON.
 ## Guide review dates
 
 `review_dates.py` finds the dates on which someone re-read a guide's sources, such as
