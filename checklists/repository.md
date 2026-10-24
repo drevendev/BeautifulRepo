@@ -6,7 +6,19 @@ Choose the smallest change that removes an actual reader or contributor obstacle
 
 For **private or internal repositories**, also use the
 [confidentiality checklist](confidentiality.md) before sharing findings, examples,
-logs or screenshots outside the permitted audience.
+logs or screenshots outside the permitted audience. Also read the
+[plan-aware private repository guide](../guides/private-repositories.md):
+some GitHub features do not exist on private Free repositories, and public
+sharing paths may leak data.
+
+When applying the checklist internally, mark **not applicable, with a reason**
+where a public-only requirement does not fit. For example: "Open-source
+licence: N/A — distribution is governed by verified internal company terms";
+"Public contributor instructions: N/A — employees use a restricted issue
+tracker"; "Public conduct/reporting page: N/A — a verified organization
+policy and private reporting route are provided to approved users."
+A *missing* workable internal conduct or security route is **missing**, not
+automatically N/A. This does not waive third-party licence obligations.
 
 ## 1. Make the project understandable
 
