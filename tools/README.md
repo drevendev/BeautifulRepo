@@ -69,7 +69,10 @@ python -I scripts/release_inventory.py ../another-checkout --base 0123456789abcd
 Replace the illustrative base SHA with an actual ancestor commit. By default the
 tool compares HEAD against the nearest reachable `v[0-9]*` tag, or the unique
 root commit if there is no matching tag. It names both exact commit SHAs, the
-boundary kind and each commit SHA/subject. The initial root commit itself is
+boundary kind and each commit SHA/subject. **Shallow checkouts are rejected**,
+even with an explicit `--base`: Git can mistake a truncated boundary for a
+history root. Use a complete local history (for GitHub Actions checkout, set
+`fetch-depth: 0`) before running the inventory. The initial root commit itself is
 excluded from a root-based comparison. More than 200 commits (configurable up
 to 500) fails instead of silently truncating; the tool requires a unique root
 or an explicit base on unusual histories.
