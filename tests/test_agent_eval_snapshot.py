@@ -86,5 +86,23 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(1, self.run_tool("verify").returncode)
 
 
+    def test_unreadable_directory_is_an_error_not_a_clean_snapshot(self):
+        """An os.walk scandir error must never produce a false UNCHANGED."""
+        import importlib.util
+        from unittest import mock
+
+        spec = importlib.util.spec_from_file_location("agent_eval_snapshot_test", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        def unreadable_walk(root, **kwargs):
+            kwargs["onerror"](PermissionError("synthetic scandir failure"))
+            yield (str(root), [], [])
+
+        with mock.patch.object(module.os, "walk", side_effect=unreadable_walk):
+            with self.assertRaisesRegex(PermissionError, "synthetic scandir"):
+                module.inventory(self.target)
+
+
 if __name__ == "__main__":
     unittest.main()
