@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Prepared four native Claude Code plugin-eval scenarios for `audit-repo`:
+  two positive triggers, one negative trigger and hostile README bait.
+  Added static coverage checks and a manual, usage-gated evaluation guide.
+  **No model eval run or injection-resistance result is claimed** (#74).
 - Four synthetic repositories and an isolated, read-only CLI regression suite for
   the `audit-repo` skill. They pin expected audit findings, broken-link behavior,
   deterministic output and no writes, including hostile README text. These do not

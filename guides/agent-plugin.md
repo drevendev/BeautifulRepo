@@ -105,9 +105,13 @@ confirm no file writes or invented reporting channel. Run against synthetic
 repositories only unless the model provider is approved for the target data.
 These are operator observations, not automated passing evals.
 
-Native Claude Code skill-trigger evals and true agent-level injection tests remain
-tracked in [#74](https://github.com/drevendev/BeautifulRepo/issues/74); model
-cost and platform support need separate validation before claiming coverage.
+Source-controlled [Claude Code eval scenarios](../evals/README.md) now cover
+two positive `audit-repo` requests, a negative trigger and a hostile README.
+The case files are validated structurally in CI, **not executed with a model**.
+Running `claude plugin eval` requires separately approved model usage and a
+suitable sandbox. Real skill triggering, prompt-injection resistance and actual
+outcomes remain unverified under
+[#74](https://github.com/drevendev/BeautifulRepo/issues/74).
 
 ## What was verified, and what wasn't
 
@@ -130,5 +134,5 @@ codex-cli 0.146.1:
 - macOS and Linux.
 - Installing from GitHub rather than a local path.
 
-Automated agent evaluations are planned in
+The eval scenarios are prepared but model-execution results remain pending in
 [#74](https://github.com/drevendev/BeautifulRepo/issues/74).
