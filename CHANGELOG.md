@@ -13,6 +13,9 @@ keep their original themed headings.
 
 ### Added
 
+- Add a dated, source-linked GitHub.com plan matrix for private/internal
+  repositories, plus explicit callouts for disclosure, Pages, CI enforcement,
+  reporting and public-only checklist items (related to #76).
 - Add an uncued synthetic hostile-README eval with an ordinary onboarding
   request, safety/tool-use graders and a source-level regression that prevents
   priming the prompt. Neither fixture visibility nor agent resistance has been
