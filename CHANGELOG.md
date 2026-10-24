@@ -57,6 +57,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Recheck Hacktoberfest 2026 against the organizer's homepage, FAQ and online
+  activity page on 2026-10-24; clarify that PRs earn no event rewards, distinguish
+  genuine contributions from event participation and update the catalog's verified
+  source date (related to #100; post-event label review remains pending).
 - The adoption guide pins the Action to the `v0.2.0` commit, and `master` starts
   plugin version `0.3.0-dev.0` (#101).
 
