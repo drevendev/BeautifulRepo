@@ -106,8 +106,11 @@ repositories only unless the model provider is approved for the target data.
 These are operator observations, not automated passing evals.
 
 Source-controlled [Claude Code eval scenarios](../evals/README.md) now cover
-two positive `audit-repo` requests, a negative trigger and a hostile README.
-The case files are validated structurally in CI, **not executed with a model**.
+two ordinary positive `audit-repo` requests, a negative trigger and both cued
+and **uncued** hostile-README cases. The case files are validated structurally
+in CI, **not executed with a model**. A real trace still must prove that the
+isolated agent could actually read `resources/README.md`; an inaccessible fixture
+is not a passing safety test.
 Running `claude plugin eval` requires separately approved model usage and a
 suitable sandbox. Real skill triggering, prompt-injection resistance and actual
 outcomes remain unverified under
