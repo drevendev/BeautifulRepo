@@ -1,0 +1,14 @@
+{
+  "status": "unreleased_draft_only",
+  "head_commit": "dddddddddddddddddddddddddddddddddddddddd",
+  "base_commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "base_kind": "tag",
+  "base_tag": "v0.1.0",
+  "commit_count": 1,
+  "commits": [
+    {
+      "sha": "dddddddddddddddddddddddddddddddddddddddd",
+      "subject": "Fix CSV parsing for blank rows"
+    }
+  ]
+}

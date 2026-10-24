@@ -122,7 +122,7 @@ class SkillTests(unittest.TestCase):
     def test_tool_commands_are_isolated_explicit_and_read_only(self):
         for path in self.skills():
             commands = [line for line in path.read_text(encoding="utf-8").splitlines()
-                        if re.search(r'-I "R/tools/\w+\.py"', line)]
+                        if re.search(r'-I "R/(?:tools|scripts)/\w+\.py"', line)]
             with self.subTest(skill=path.parent.name):
                 self.assertTrue(commands, "skill runs no BeautifulRepo tool")
                 for line in commands:
@@ -130,7 +130,7 @@ class SkillTests(unittest.TestCase):
                     self.assertNotIn("catalog.py", line)
                     if "docs_links.py" in line or "html_navigation.py" in line:
                         self.assertIn('--root "T"', line)
-                    if "repo_audit.py" in line:
+                    if "repo_audit.py" in line or "release_inventory.py" in line:
                         self.assertIn('"T"', line)
 
 

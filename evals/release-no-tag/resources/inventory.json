@@ -1,0 +1,14 @@
+{
+  "status": "unreleased_draft_only",
+  "head_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "base_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "base_kind": "root",
+  "base_tag": null,
+  "commit_count": 1,
+  "commits": [
+    {
+      "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "subject": "Add CSV export option"
+    }
+  ]
+}

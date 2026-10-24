@@ -13,6 +13,7 @@ keep their original themed headings.
 
 ### Added
 
+- Add a development-only `draft-release-notes` agent skill using the offline Git inventory, exact SHA evidence and explicitly unpublished no-tag fallback. Include synthetic positive/negative eval definitions and structural safety tests; **no model-run result or released plugin version is claimed** (related to #72 and #74).
 - Add a read-only offline Git commit inventory tool for release-note drafting with exact base/head SHAs, no-tag/root fallback, bounded history and synthetic Git regression tests. It does not publish a release or verify commit claims (related to #72).
 - Add a portable offline agent-eval file-integrity snapshot tool with
   an outside-target baseline, byte hashes, symlink-safe traversal, black-box
