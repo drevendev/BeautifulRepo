@@ -36,6 +36,11 @@ def inventory(target: Path, base: str | None = None, limit: int = 200) -> dict:
     if not root:
         raise InventoryError("target must be inside a local Git checkout")
     target = Path(root)
+    # Git treats the boundary of a shallow clone as a root, which would
+    # otherwise silently produce an incomplete (often empty) inventory.
+    # Reject even explicit-base requests: this is a complete-history tool.
+    if git(target, "rev-parse", "--is-shallow-repository") != "false":
+        raise InventoryError("shallow or unverified Git history; fetch complete history first")
     head = git(target, "rev-parse", "--verify", "HEAD^{commit}")
     assert head is not None
     tag = None
