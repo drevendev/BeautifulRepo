@@ -9,6 +9,14 @@ This recipe changes no repository settings. Adapting its suggestions requires
 maintainer authority; a guide or a pull request does not authorize metadata,
 hosting, or promotional changes.
 
+**In a private or internal repository:** signed-out browsing and anonymous
+repository API calls are not validation methods; a 404 is expected without
+access. Topic **names remain public** even when the repository is private,
+and social-preview images cannot be shared externally from private repositories.
+A Pages website may be public although its source is private. Verify the
+audience and [plan/visibility constraints](private-repositories.md) before
+reusing the public workflow below; never publish a demo to test confidentiality.
+
 ## 1. Write the promise before choosing keywords
 
 Read the opening of your current README and one verified first-success example.

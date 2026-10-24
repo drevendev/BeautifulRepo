@@ -20,6 +20,12 @@ versions and how to report vulnerabilities. Keep three GitHub mechanisms distinc
   discussing, fixing and eventually disclosing a vulnerability. Authorized maintainers can
   create a draft advisory even when private vulnerability reporting is not enabled.
 
+**In a private or internal repository:** GitHub.com private vulnerability reporting
+and repository security advisories are currently **public-repository features**.
+Do not instruct colleagues to look for those controls in a private repository.
+Use an organization-approved, verified private intake process instead; never
+invent a mailbox. See the [plan-aware private repository guide](private-repositories.md).
+
 Do not advertise "security advisories" by themselves as a reporter-facing private route.
 Verify the actual entry point a reporter can use before publishing it in a policy.
 

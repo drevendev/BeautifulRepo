@@ -4,6 +4,14 @@
 pages before suggesting participation. Listing a program does not mean this repository
 is enrolled, accepted, eligible, sponsored or ready to mentor contributors.
 
+**In a private or internal repository:** these are public open-source
+participation programs, not proof that a confidential repository can accept
+outside contributions or count toward any event. Do not publish internal
+source, invite external contributors or promise a reward based on a private
+project's existence. Use the [private repository guide](private-repositories.md)
+for access and disclosure limits; check each program's current rules before
+claiming eligibility.
+
 ## Hacktoberfest: use the current year's model
 
 The [official 2026 site](https://hacktoberfest.com/) describes in-person and online

@@ -75,6 +75,14 @@ not scanned, but a link **to** it from a scanned file is still checked.
 
 ## Private and enterprise repositories
 
+**Check the plan before requiring CI:** branch protection and repository
+rulesets for **private** GitHub.com repositories require Pro, Team or
+Enterprise Cloud; they are not available for private repositories on Free.
+The [plan-aware guide](private-repositories.md) lists sources and
+alternatives. You can still run these checks on a private checkout without
+making the job required. Organization action policy and hosted-minute
+billing are separate decisions.
+
 For an internal project's **reader-facing README**, start with the
 [internal README template](../templates/INTERNAL_README.template.md) and compare it
 with a [filled, fictional example](../examples/internal-repository/README.md).
@@ -189,7 +197,9 @@ this check.
 3. **Add the workflow** and let it pass on a pull request.
 4. **Make it required.** Add the job's check name (`beautifulrepo` in the
    example) to the default branch's ruleset or branch protection, so a broken
-   link cannot be merged.
+   link cannot be merged. **For a private repository on Free, omit this
+   enforcement step:** the checks can run, but that plan does not provide
+   protected branches or rulesets for private repositories.
 
 A trial on seven unpublished local repositories (2026-10-22) shaped the defaults.
 In two of them almost every link finding came from installed `node_modules`

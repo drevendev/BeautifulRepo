@@ -16,7 +16,11 @@ If the project does not yet make support commitments, say so directly rather tha
 REPLACE_WITH_A_VERIFIED_PRIVATE_REPORTING_ROUTE
 
 Before publishing, test the route from the reporter's side and confirm that the intended
-maintainer can receive a message. Do not substitute a public issue URL for a private route.
+maintainer can receive a message. **For private and internal GitHub.com repositories,**
+private vulnerability reporting and repository security advisories are
+public-repository features, not a built-in internal inbox. Name a verified
+organization-controlled reporting route instead; see the
+[private-repository guide](../guides/private-repositories.md). Do not substitute a public issue URL for a private route.
 If you name GitHub Private Vulnerability Reporting, first verify that the repository setting
 is enabled; a `SECURITY.md` file or the ability to create advisories does not enable it.
 Also name who owns intake and verify that their GitHub security-alert notification settings
