@@ -86,8 +86,10 @@ def capture(root: Path, baseline: Path) -> int:
 def verify(root: Path, baseline: Path) -> int:
     if baseline.stat().st_size > 10_000_000:
         raise ValueError("baseline is too large")
-    data = json.loads(baseline.read_text(encoding="utf-8"),\n                      object_pairs_hook=reject_duplicate_json_members)
-    if (not isinstance(data, dict) or type(data.get("format")) is not int\n            or data.get("format") != VERSION
+    data = json.loads(baseline.read_text(encoding="utf-8"),
+                      object_pairs_hook=reject_duplicate_json_members)
+    if (not isinstance(data, dict) or type(data.get("format")) is not int
+            or data.get("format") != VERSION
             or data.get("root") != str(root) or not isinstance(data.get("entries"), dict)):
         raise ValueError("baseline format or target path does not match")
     before = data["entries"]
