@@ -72,6 +72,8 @@ no installable package.
 
 Each workstream is an epic issue whose sub-issues hold the concrete work.
 
+- A **development-only** `improve-readme` skill proposes scoped diff previews with an explicit approval gate; it is not part of the pinned `v0.2.0` plugin and is not validated by a real model run (#70, #74).
+
 - **Agent skills** ([#86](https://github.com/drevendev/BeautifulRepo/issues/86)):
   release the plugin as v0.2.0
   ([#101](https://github.com/drevendev/BeautifulRepo/issues/101)), validate the
