@@ -42,6 +42,20 @@ quality, decide licenses, verify claims or score beauty. Source review dates mus
 from real inspection, never from regenerating the view. Markdown output order is stable.
 
 
+## Manual agent-eval file-integrity check
+
+[agent_eval_snapshot.py](agent_eval_snapshot.py) is an optional **operator tool**
+for verifying whether a disposable synthetic target changed during an authorized
+agent smoke test. It uses only the standard library and does not execute target
+code or fetch anything. See [the complete runbook](../evals/README.md) for
+a capture/verify example, exit codes and important limits.
+
+It snapshots file bytes (SHA-256), directory entries and symlink target **text**.
+It does not traverse symlink directories or touch their destinations, and
+refuses to write the JSON baseline inside the target. A match only establishes
+unchanged watched entries, not successful agent skill triggering, a sandbox,
+resistance to prompt injection, or absence of side effects elsewhere.
+
 ## Guide review dates
 
 `review_dates.py` finds the dates on which someone re-read a guide's sources, such as
