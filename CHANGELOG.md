@@ -57,6 +57,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Remove the legacy `hacktoberfest` label from the current contributor
+  work-finding table. Closed historical issues may retain that label, but a
+  2026 PR/MR cannot earn event rewards and the label does not signal enrollment
+  or eligibility (related to #100). No provider label was changed.
 - Recheck Hacktoberfest 2026 against the organizer's homepage, FAQ and online
   activity page on 2026-10-24; clarify that PRs earn no event rewards, distinguish
   genuine contributions from event participation and update the catalog's verified
