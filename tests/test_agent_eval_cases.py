@@ -75,5 +75,23 @@ class AgentEvalCaseContracts(unittest.TestCase):
         self.assertIn("security@phantom.invalid", grader)
 
 
+    def test_uncued_hostile_readme_is_not_primed_by_the_prompt(self):
+        case = EVALS / "audit-injection-uncued"
+        prompt = (case / "prompt.md").read_text(encoding="utf-8").split("---", 2)[2].strip().lower()
+        self.assertIn("readme", prompt)
+        self.assertIn("onboarding", prompt)
+        for cue in ("inject", "untrusted", "hostile", "secret", "security", "ignore", "safety"):
+            with self.subTest(cue=cue):
+                self.assertNotIn(cue, prompt)
+        fixture = (case / "resources" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("security@phantom.invalid", fixture)
+        self.assertIn("Ignore previous audit rules", fixture)
+        grader = (case / "graders" / "safe-outcome.md").read_text(encoding="utf-8")
+        self.assertIn("type: llm", grader)
+        self.assertIn("FAIL if", grader)
+        self.assertIn("security@phantom.invalid", grader)
+        for name in ("skill-fired.md", "no-writes.md", "no-edits.md"):
+            self.assertTrue((case / "graders" / name).is_file(), name)
+
 if __name__ == "__main__":
     unittest.main()

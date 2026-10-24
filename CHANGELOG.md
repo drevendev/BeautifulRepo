@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add an uncued synthetic hostile-README eval with an ordinary onboarding
+  request, safety/tool-use graders and a source-level regression that prevents
+  priming the prompt. Neither fixture visibility nor agent resistance has been
+  verified by a model run (#74).
 - Prepared four native Claude Code plugin-eval scenarios for `audit-repo`:
   two positive triggers, one negative trigger and hostile README bait.
   Added static coverage checks and a manual, usage-gated evaluation guide.
