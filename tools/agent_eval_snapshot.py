@@ -33,7 +33,14 @@ def baseline_path(path: Path, root: Path) -> Path:
 def inventory(root: Path) -> dict[str, dict[str, str]]:
     """Walk entries without traversing directory symlinks or running target code."""
     found = {}
-    for parent, dirs, files in os.walk(root, topdown=True, followlinks=False):
+
+    def fail_on_unreadable_directory(exc: OSError) -> None:
+        # os.walk otherwise silently skips unreadable directories: false green.
+        raise exc
+
+    for parent, dirs, files in os.walk(
+            root, topdown=True, followlinks=False,
+            onerror=fail_on_unreadable_directory):
         dirs.sort()
         files.sort()
         for name in sorted([*dirs, *files]):
