@@ -6,6 +6,13 @@ maintain it. It is a public, testable map of what works, who may decide, and
 what is still unknown. This recipe is for a small, volunteer-maintained GitHub
 repository; it is not a substitute for organization access or incident response.
 
+**In a private or internal repository:** give the handoff only to authorized
+readers and document the real internal access, escalation and usage terms,
+not a public repo URL or fictional contact. The [private-repositories guide](private-repositories.md)
+and [confidentiality checklist](../checklists/confidentiality.md) explain
+plan-specific gates and what cannot be shared externally. A private README
+is not evidence that a successor was granted permissions.
+
 ## The next 30 minutes: reproduce the public baseline
 
 Use BeautifulRepo itself as the concrete, checked-in example. In a checkout of
