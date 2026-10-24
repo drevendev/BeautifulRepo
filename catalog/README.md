@@ -121,7 +121,7 @@ a tool was installed, a workflow was tested or a program accepted this project.
 
 <https://hacktoberfest.com/>
 
-**program · reviewed 2026-10-03 · source-reviewed**
+**program · reviewed 2026-10-24 · source-reviewed**
 
 **Why:** Provides current event rules rather than inherited contribution folklore.
 
@@ -129,7 +129,7 @@ a tool was installed, a workflow was tested or a program accepted this project.
 
 **Caveat:** 2026 PRs and MRs do not count toward rewards; listing does not imply enrollment.
 
-**Coverage:** 2026 homepage and on-page FAQs inspected.
+**Coverage:** 2026 homepage, FAQ and online participation page re-read; no event registration or contest validation.
 
 ## Devostasis
 
