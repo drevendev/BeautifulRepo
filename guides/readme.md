@@ -29,7 +29,11 @@ superlatives. Follow it with representative input and output, not another slogan
 ## Make evidence visible
 
 Distinguish current capabilities, experiments and planned work. Link a build badge to
-its workflow; name what a test actually covers. Avoid unsupported “production-ready”,
+its workflow; name what a test actually covers. **In a private or internal
+repository,** a GitHub Actions workflow badge is not accessible on an
+external site: show authorized readers the private run instead of adding
+a misleading public status image. Use the [private-repository guide](private-repositories.md)
+to check plan and visibility constraints. Avoid unsupported “production-ready”,
 “secure” and “always green” promises. State missing evidence without treating it as failure
 or success. Example commands must match the documented revision and environment.
 
