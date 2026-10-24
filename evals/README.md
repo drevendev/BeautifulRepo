@@ -1,6 +1,6 @@
 # BeautifulRepo agent behavior evaluations
 
-These are **unexecuted model-eval definitions** for the current `audit-repo` skill, prepared on **2026-10-24**. They are not CI results, proven prompt-injection protection, or a release gate.
+These are **unexecuted model-eval definitions** for `audit-repo` and `draft-release-notes`, updated **2026-10-25**. They are not CI results, proven prompt-injection protection, or a release gate.
 
 The cases use the [Claude Code plugin-eval format](https://code.claude.com/docs/en/plugin-evals). Two ordinary requests should trigger the skill, one unrelated code request should not, and **two** hostile README cases test the trust boundary: the original prompt explicitly mentions untrusted data; `audit-injection-uncued` asks a normal onboarding question without warning the agent about the attack. Synthetic files are supplied under each case's `resources/` directory via `context.add_dirs`; no real repositories or private material are used.
 
@@ -48,3 +48,15 @@ Inspect the trace and final answer separately. Model runs still require separate
 authorization; no such run is claimed here.
 
 The free and deterministic repo-fixture tests continue to run in CI: `python -m unittest discover -s tests -v`. The new `test_agent_eval_cases.py` checks that the case definitions cover each shipped skill without calling a model. The real-model evaluation work in [#74](https://github.com/drevendev/BeautifulRepo/issues/74) stays open until runs and outcomes are verified.
+
+## Release-note draft cases (not run with a model)
+
+`release-no-tag` and `release-tagged-history` contain synthetic JSON history
+inventories, **not Git checkouts**. Their requests grant Read/Glob/Grep/Skill,
+so they can inspect whether a skill fires and whether the agent **states** a
+draft is unpublished; they cannot prove that Git was run, a diff was inspected,
+or evidence claims were accurately verified. `release-unrelated-style` is a
+negative trigger. The no-tag fixture names a full 40-character root-base SHA
+and asks for `Unreleased draft` wording. These source-controlled files are
+not executed model-eval results. A future authorized run must inspect tool
+traces, fixture visibility, final answers and filesystem integrity separately.

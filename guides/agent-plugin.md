@@ -1,7 +1,7 @@
 # Use BeautifulRepo from Claude Code or Codex
 
-BeautifulRepo ships as **one plugin** for Claude Code and Codex. Its first skill,
-`audit-repo`, audits a local repository the way this handbook does:
+BeautifulRepo ships as **one plugin** for Claude Code and Codex. The
+`audit-repo` skill audits a local repository the way this handbook does:
 
 - It runs `repo_audit.py`, `docs_links.py` and `html_navigation.py` from the installed
   plugin against the target.
@@ -49,6 +49,27 @@ invoke the skill directly:
 The skill audits the current repository unless you name another path. Before running
 anything, it states which repository it will audit. If most link findings come from
 vendored or archived Markdown, it asks before excluding them.
+
+## Draft release notes (development version only)
+
+The `draft-release-notes` skill is being developed on `master`; it is **not**
+part of the pinned `v0.2.0` plugin release above. To try it, install from
+unpinned `master` or a local checkout rather than expecting it from
+`v0.2.0`. Review the source and the agent's model-provider data controls first.
+
+Ask "draft unreleased release notes from the local Git history", or use
+`/beautifulrepo:draft-release-notes` in Claude Code and
+`$draft-release-notes` in Codex. It calls the installed
+`scripts/release_inventory.py` with an explicit target and isolated Python,
+inspects local Git evidence and returns a **chat-only draft**. It does not
+write a changelog, create tags or releases, contact remotes, run target
+code or assert that commits shipped. Without tags it names the full
+root-base SHA and says **Unreleased draft**. A version tag alone does
+not verify a published release. See the [release-notes guide](release-notes.md).
+
+Deterministic inventory tests run in CI; synthetic eval definitions check
+intended triggers and no-tag language structurally. **No model-driven
+release-note drafting or runtime skill activation has yet been verified.**
 
 ## Update or remove
 

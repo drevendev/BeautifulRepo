@@ -1,7 +1,7 @@
 {
   "name": "beautifulrepo",
   "version": "0.3.0-dev.0",
-  "description": "Audit a repository with BeautifulRepo's local, read-only Python checks and agent-guided documentation checklists.",
+  "description": "Audit repository onboarding and draft clearly unpublished, evidence-linked release notes using local checks.",
   "author": {
     "name": "Dreven",
     "url": "https://github.com/drevendev"
