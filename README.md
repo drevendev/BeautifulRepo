@@ -170,6 +170,7 @@ not a second copy of the first-screen chooser.
   [from Claude Code and Codex](guides/agent-plugin.md) under the
   [agent ground rules](guides/agent-safety.md),
   [confidentiality checklist for private repositories](checklists/confidentiality.md),
+  [plan-aware private repository guide](guides/private-repositories.md),
   [internal/private README template](templates/INTERNAL_README.template.md) and
   [filled fictional internal example](examples/internal-repository/README.md),
   [Community safety readiness](guides/community-safety.md).
