@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a portable offline agent-eval file-integrity snapshot tool with
+  an outside-target baseline, byte hashes, symlink-safe traversal, black-box
+  tests and a Codex/Claude manual smoke recipe. This verifies target-file
+  changes, **not** agent triggering or prompt-injection resistance (related to #74).
 - Add a dated, source-linked GitHub.com plan matrix for private/internal
   repositories, plus explicit callouts for disclosure, Pages, CI enforcement,
   reporting and public-only checklist items (related to #76).

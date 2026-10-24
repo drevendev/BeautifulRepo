@@ -105,6 +105,13 @@ confirm no file writes or invented reporting channel. Run against synthetic
 repositories only unless the model provider is approved for the target data.
 These are operator observations, not automated passing evals.
 
+For stronger evidence of **no target-file writes**, first copy the synthetic
+fixture into a disposable directory, then capture and verify it with the
+[offline snapshot tool](../tools/agent_eval_snapshot.py) as documented in the
+[eval runbook](../evals/README.md). It flags added, changed and deleted entries,
+not just the agent's choice of tool. This is not a sandbox, proof of fixture
+visibility, or an actual model-eval result.
+
 Source-controlled [Claude Code eval scenarios](../evals/README.md) now cover
 two ordinary positive `audit-repo` requests, a negative trigger and both cued
 and **uncued** hostile-README cases. The case files are validated structurally

@@ -18,4 +18,33 @@ The example deliberately grants only `Read`, `Glob`, `Grep`, and `Skill` (and no
 
 The `tool_used: Skill` grader in a two-arm evaluation is an indicator, not automatically part of the score. The negative trigger uses `arm: both`, `min: 0`, `max: 0`. Do not treat a favorable summary score as proof the skill was called or that an injection failed: inspect the tool trace, generated files and final answer. Do not publish reports containing private context. Result artifacts under `evals/results/` are ignored.
 
+## Verify target-file integrity during manual evaluations
+
+An operator can record a **byte-level before/after snapshot** around an approved
+agent session. The [agent eval snapshot tool](../tools/agent_eval_snapshot.py)
+does not run any target code or access the network. It records files, directories
+and symbolic-link destinations; it never follows links inside the target.
+
+On Linux or WSL2, from the BeautifulRepo checkout, make a **disposable copy**
+of a synthetic fixture (not the actual source directory):
+
+~~~sh
+WORK=$(mktemp -d)
+cp -R evals/audit-injection-uncued/resources "$WORK/target"
+python -I tools/agent_eval_snapshot.py capture "$WORK/target" --baseline "$WORK/before.json"
+# Run an explicitly authorized agent smoke test against "$WORK/target".
+python -I tools/agent_eval_snapshot.py verify "$WORK/target" --baseline "$WORK/before.json"
+~~~
+
+Exit **0** from verify means the watched entries are unchanged; **1** reports
+added, removed or changed entries; **2** means invalid input or an I/O error.
+The baseline must be outside the target and is never overwritten. It stores
+absolute local paths, so keep it private and do not commit agent transcripts
+or captured repository content. This is only a file-integrity check: it cannot
+prove that the agent saw the fixture, called the skill, ignored malicious text,
+made no changes **outside** the watched directory, or refrained from external
+actions. The snapshot is not a sandbox or a race-resistant filesystem monitor.
+Inspect the trace and final answer separately. Model runs still require separate
+authorization; no such run is claimed here.
+
 The free and deterministic repo-fixture tests continue to run in CI: `python -m unittest discover -s tests -v`. The new `test_agent_eval_cases.py` checks that the case definitions cover each shipped skill without calling a model. The real-model evaluation work in [#74](https://github.com/drevendev/BeautifulRepo/issues/74) stays open until runs and outcomes are verified.
