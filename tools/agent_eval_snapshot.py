@@ -17,6 +17,16 @@ import sys
 VERSION = 1
 
 
+def reject_duplicate_json_members(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject ambiguous baseline objects instead of silently keeping the last key."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key!r}")
+        result[key] = value
+    return result
+
+
 def target_root(path: Path) -> Path:
     if path.is_symlink() or not path.is_dir():
         raise ValueError("target must be a real directory, not a symlink")
@@ -76,8 +86,8 @@ def capture(root: Path, baseline: Path) -> int:
 def verify(root: Path, baseline: Path) -> int:
     if baseline.stat().st_size > 10_000_000:
         raise ValueError("baseline is too large")
-    data = json.loads(baseline.read_text(encoding="utf-8"))
-    if (not isinstance(data, dict) or data.get("format") != VERSION
+    data = json.loads(baseline.read_text(encoding="utf-8"),\n                      object_pairs_hook=reject_duplicate_json_members)
+    if (not isinstance(data, dict) or type(data.get("format")) is not int\n            or data.get("format") != VERSION
             or data.get("root") != str(root) or not isinstance(data.get("entries"), dict)):
         raise ValueError("baseline format or target path does not match")
     before = data["entries"]
