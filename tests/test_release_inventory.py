@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-TOOL = ROOT / "tools" / "release_inventory.py"
+TOOL = ROOT / "scripts" / "release_inventory.py"
 
 
 @unittest.skipUnless(shutil.which("git"), "Git not available")

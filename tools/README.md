@@ -58,12 +58,12 @@ resistance to prompt injection, or absence of side effects elsewhere.
 
 ## Local release-history inventory
 
-[release_inventory.py](release_inventory.py) produces a **read-only JSON inventory** of
+[release_inventory.py](../scripts/release_inventory.py) produces a **read-only JSON inventory** of
 commits for drafting release notes from a local Git checkout:
 
 ```bash
-python -I tools/release_inventory.py .
-python -I tools/release_inventory.py ../another-checkout --base 0123456789abcdef
+python -I scripts/release_inventory.py .
+python -I scripts/release_inventory.py ../another-checkout --base 0123456789abcdef
 ```
 
 Replace the illustrative base SHA with an actual ancestor commit. By default the
@@ -73,6 +73,10 @@ boundary kind and each commit SHA/subject. The initial root commit itself is
 excluded from a root-based comparison. More than 200 commits (configurable up
 to 500) fails instead of silently truncating; the tool requires a unique root
 or an explicit base on unusual histories.
+
+Unlike BeautifulRepo's `tools/*.py` checkers, this separate script invokes the
+installed `git` executable; it is therefore deliberately outside the tools
+collection's no-subprocess contract. It only runs local history-read commands.
 
 This inventory **is not a release and does not prove anything shipped**.
 Tag presence does not establish a GitHub Release, downloadable asset or test pass.
