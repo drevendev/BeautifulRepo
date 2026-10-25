@@ -1021,7 +1021,7 @@ def iter_markdown_files(root: Path, exclude=()) -> list[Path]:
             if stat.S_ISDIR(info.st_mode) and not _is_redirect(info):
                 if name not in SKIPPED_DIRECTORIES and not excluded(prefix + name):
                     pending.append(directory / name)
-            elif name.endswith((".md", ".markdown")) and not excluded(prefix + name):
+            elif (fnmatch.fnmatch(name, "*.md") or fnmatch.fnmatch(name, "*.markdown")) and not excluded(prefix + name):
                 found.append(directory / name)
     return sorted(found)
 
