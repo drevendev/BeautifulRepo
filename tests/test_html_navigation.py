@@ -62,12 +62,12 @@ class HtmlNavigationTests(unittest.TestCase):
 
     def test_duplicate_html_attributes_cannot_hide_broken_targets(self):
         errors, checked, documents = self.check(
-            '# Intro\\n'
-            '<a href="missing.md" href="#intro">Bad link</a>\\n'
-            '<img src="missing.svg" src="present.svg" alt="Diagram">\\n'
-            '<img src="present.svg" alt="" alt="Description">\\n'
-            '<span id="original" id="alias"></span>\\n'
-            '<a href="#alias">Bad anchor</a>\\n',
+            '# Intro\n'
+            '<a href="missing.md" href="#intro">Bad link</a>\n'
+            '<img src="missing.svg" src="present.svg" alt="Diagram">\n'
+            '<img src="present.svg" alt="" alt="Description">\n'
+            '<span id="original" id="alias"></span>\n'
+            '<a href="#alias">Bad anchor</a>\n',
             {"present.svg": "svg"},
         )
         self.assertEqual(checked, 4)
@@ -86,10 +86,10 @@ class HtmlNavigationTests(unittest.TestCase):
 
     def test_duplicate_html_attributes_ignore_inactive_code(self):
         errors, checked, documents = self.check(
-            '`<a href="missing.md" href="#real">example</a>`\\n'
-            '```html\\n<img src="missing.svg" src="present.svg">\\n```\\n'
-            '## Real\\n'
-            '<a href="#real">Active</a>\\n',
+            '`<a href="missing.md" href="#real">example</a>`\n'
+            '```html\n<img src="missing.svg" src="present.svg">\n```\n'
+            '## Real\n'
+            '<a href="#real">Active</a>\n',
         )
         self.assertEqual(errors, [])
         self.assertEqual(checked, 1)
