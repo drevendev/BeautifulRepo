@@ -66,6 +66,17 @@ For README visuals:
 An automated source check can catch missing assets and markup regressions. It cannot certify
 contrast, screen-reader behavior or whether a screenshot is genuinely understandable.
 
+The offline `python tools/html_navigation.py` check also flags **raw HTML
+`<img>` elements missing an `alt` attribute** in active Markdown content.
+Use meaningful text for informative images; `alt=""` is correct when an
+image is genuinely decorative or its information is fully supplied nearby.
+The check deliberately permits an empty attribute: deciding the image's
+purpose and checking the quality of an alternative require human judgement.
+Markdown `![alt](path)` syntax already contains an alt-text slot; the
+checker does not grade its content, and it does not inspect a browser's
+rendered accessibility tree. For complex diagrams, preserve a full textual
+equivalent near the image.
+
 ## Patterns observed in current repositories
 
 ### uv — evidence before expansion
@@ -135,3 +146,8 @@ Sources and repository examples rechecked 2026-10-05.
 
 Source inspection records markup and information architecture, not runtime behavior,
 visual-quality certification or permission to reuse third-party media.
+
+**Alt-text semantics rechecked 2026-10-25:** [W3C WAI Images Tutorial](https://www.w3.org/WAI/tutorials/images/)
+and [Decorative Images](https://www.w3.org/WAI/tutorials/images/decorative/).
+The distinction between an absent `alt` attribute and an intentional
+`alt=""` is from WAI guidance; the checker's static scope is our own.

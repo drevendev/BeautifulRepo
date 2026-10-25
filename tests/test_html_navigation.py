@@ -37,6 +37,28 @@ class HtmlNavigationTests(unittest.TestCase):
         self.assertEqual(checked, 5)
         self.assertEqual(documents, 2)
 
+    def test_html_img_requires_explicit_alt_but_empty_can_be_decorative(self):
+        errors, checked, documents = self.check(
+            '<img src="missing-alt.svg">\n'
+            '<img src="decorative.svg" alt="">\n'
+            '<img src="informative.svg" alt="Inputs and output">\n'
+            '<picture><source srcset="dark.svg"><img src="fallback.svg"></picture>\n',
+            {
+                "missing-alt.svg": "svg",
+                "decorative.svg": "svg",
+                "informative.svg": "svg",
+                "dark.svg": "svg",
+                "fallback.svg": "svg",
+            },
+        )
+        self.assertEqual(checked, 5)
+        self.assertEqual(documents, 1)
+        self.assertEqual(len(errors), 2, errors)
+        self.assertTrue(any("README.md:1: HTML img missing alt attribute" in e
+                            for e in errors))
+        self.assertTrue(any("README.md:4: HTML img missing alt attribute" in e
+                            for e in errors))
+
     def test_inline_code_heading_text_is_part_of_github_anchor(self):
         errors, checked, _ = self.check(
             '## Run `python -m unittest`\n'
@@ -77,7 +99,7 @@ class HtmlNavigationTests(unittest.TestCase):
         ])
 
     def test_missing_asset_and_section_are_reported(self):
-        errors, _, _ = self.check('<a href="#missing">Bad</a>\n<img src="no.png">\n## Present\n')
+        errors, _, _ = self.check('<a href="#missing">Bad</a>\n<img src="no.png" alt="Broken demo">\n## Present\n')
         self.assertEqual(len(errors), 2)
         self.assertTrue(any("missing section anchor" in msg for msg in errors))
         self.assertTrue(any("missing HTML img destination" in msg for msg in errors))
@@ -97,7 +119,7 @@ class HtmlNavigationTests(unittest.TestCase):
         errors, checked, _ = self.check(
             '\\<img src="missing.png">\n'
             '\\<a href="#missing">not active</a>\n'
-            '<img src="real.svg">\n',
+            '<img src="real.svg" alt="Real">\n',
             {"real.svg": "svg"},
         )
         self.assertEqual(errors, [])
@@ -137,7 +159,7 @@ class HtmlNavigationTests(unittest.TestCase):
 
     def test_remote_and_data_sources_are_outside_offline_scope(self):
         errors, checked, _ = self.check(
-            '<img src="data:image/svg+xml,%3Csvg%3E">\n'
+            '<img src="data:image/svg+xml,%3Csvg%3E" alt="">\n'
             '<source srcset="data:image/png;base64,AAAA">\n'
             '<a href="mailto:team@example.org">Email</a>\n'
         )

@@ -91,9 +91,12 @@ class MarkupReferences(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.refs: list[tuple[int, str, str]] = []
         self.ids: set[str] = set()
+        self.images_without_alt: list[int] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
+        if tag == "img" and "alt" not in attributes:
+            self.images_without_alt.append(self.getpos()[0])
         identifier = attributes.get("id")
         if identifier:
             self.ids.add(identifier)
@@ -249,16 +252,17 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
     errors: list[str] = []
     checked = 0
     inspected = 0
-    parsed_files: dict[Path, tuple[set[str], list[tuple[int, str, str]]]] = {}
+    parsed_files: dict[Path, tuple[set[str], list[tuple[int, str, str]], list[int]]] = {}
     names: dict = {}  # directory listings shared by every resolution in this scan
 
-    def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]]]:
+    def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]], list[int]]:
         if path not in parsed_files:
             content = path.read_text(encoding="utf-8")
             masked = mask_escaped_html_openers(docs_links._mask_markdown_code(content))
             markup = MarkupReferences()
             markup.feed(masked)
-            parsed_files[path] = (heading_ids(masked, markup.ids, content), markup.refs)
+            parsed_files[path] = (heading_ids(masked, markup.ids, content), markup.refs,
+                                  markup.images_without_alt)
         return parsed_files[path]
 
     for source in docs_links.iter_markdown_files(root, exclude):
@@ -269,10 +273,16 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
             continue
         inspected += 1
         try:
-            _, refs = parse_document(resolved_source)
+            _, refs, images_without_alt = parse_document(resolved_source)
         except (OSError, UnicodeError):
             errors.append(f"{name}: cannot decode Markdown source")
             continue
+
+        # Unlike alt="", omitting alt leaves a raw HTML image without a text
+        # alternative. An empty alt is valid for purely decorative images;
+        # semantic suitability still needs human review.
+        for line in images_without_alt:
+            errors.append(f'{name}:{line}: HTML img missing alt attribute')
 
         # HTML attributes and Markdown inline links share fragment validation.
         destinations = [(line, f"HTML {tag}", value) for line, tag, value in refs]
@@ -301,7 +311,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
                 continue
             if parsed.fragment and target.suffix.lower() == ".md":
                 try:
-                    anchors, _ = parse_document(target)
+                    anchors, _, _ = parse_document(target)
                 except (OSError, UnicodeError):
                     errors.append(f"{name}:{line}: cannot read anchor target: {value!r}")
                     continue
