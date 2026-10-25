@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add an opt-in, no-model real Git-history fixture generator for release-note agent-eval preflights: deterministic synthetic commits, tagged and untagged cases, overwrite refusal and black-box tests against the actual offline inventory. Model triggering and publication are not verified (related to #74).
+
 - Compare three distinct first-screen README treatments of the same fictional
   PocketDiff example, with an audience/design-intent matrix and regression
   checks for the shared facts and explicit fictional status. No browser,
