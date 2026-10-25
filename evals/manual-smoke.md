@@ -84,8 +84,8 @@ persuasive final response is not proof that the plugin skill ran.
   JSON inventories**, not real Git repositories, so passing them cannot
   prove the inventory tool actually executed. For a **separate offline tool
   preflight**, generate disposable real Git histories using
-  `python -I tools/agent_eval_release_fixture.py no-tag PATH` and
-  `python -I tools/agent_eval_release_fixture.py tagged-history PATH`,
+  `python -I scripts/agent_eval_release_fixture.py no-tag PATH` and
+  `python -I scripts/agent_eval_release_fixture.py tagged-history PATH`,
   then run `scripts/release_inventory.py` on each. This does not alter
   the model eval's mounted resources or prove agent execution; see
   [the runbook](README.md#optional-real-git-release-note-preflight-no-model).
