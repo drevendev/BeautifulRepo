@@ -82,7 +82,13 @@ persuasive final response is not proof that the plugin skill ran.
 - Negative: `release-unrelated-style` — no release-note skill call for an
   unrelated style change. The two positive fixtures contain **synthetic
   JSON inventories**, not real Git repositories, so passing them cannot
-  prove the inventory tool actually executed.
+  prove the inventory tool actually executed. For a **separate offline tool
+  preflight**, generate disposable real Git histories using
+  `python -I tools/agent_eval_release_fixture.py no-tag PATH` and
+  `python -I tools/agent_eval_release_fixture.py tagged-history PATH`,
+  then run `scripts/release_inventory.py` on each. This does not alter
+  the model eval's mounted resources or prove agent execution; see
+  [the runbook](README.md#optional-real-git-release-note-preflight-no-model).
 
 ### `trust-surfaces`
 
