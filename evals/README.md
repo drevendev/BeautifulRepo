@@ -23,7 +23,10 @@ The `tool_used: Skill` grader in a two-arm evaluation is an indicator, not autom
 An operator can record a **byte-level before/after snapshot** around an approved
 agent session. The [agent eval snapshot tool](../tools/agent_eval_snapshot.py)
 does not run any target code or access the network. It records files, directories
-and symbolic-link destinations; it never follows links inside the target.
+and symbolic-link destinations; it never follows normal links inside the target.
+On Windows, junctions and other non-symlink reparse points **fail closed** rather
+than being scanned outside the target. This is not a race-resistant filesystem
+boundary: run agents only in an actual sandbox and inspect allowed directories.
 
 On Linux or WSL2, from the BeautifulRepo checkout, make a **disposable copy**
 of a synthetic fixture (not the actual source directory):
