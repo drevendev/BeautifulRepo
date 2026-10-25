@@ -20,7 +20,7 @@ class TrustSurfacesContract(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, body)
         self.assertNotIn("--write", body)
-        self.assertIn('R/tools/repo_audit.py" "T" --format json --fail-on never', body)
+        self.assertIn('r/tools/repo_audit.py" "t" --format json --fail-on never', body)
 
     def test_evals_use_restricted_tools(self):
         for name, kind in [
