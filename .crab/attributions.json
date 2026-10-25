@@ -1,0 +1,44 @@
+{
+  "schema": "hungry-crab.attributions/1",
+  "receipts": [
+    {
+      "nutrient_id": "crab:ci:ci.cache",
+      "source": {
+        "label": "vale-cli/vale",
+        "url": "https://github.com/vale-cli/vale",
+        "sha": "8b9bfb97700a707140fff9f444048439df5bc9b1",
+        "license": "MIT"
+      },
+      "taken": [
+        {
+          "maw_path": ".github/workflows/quality.yml",
+          "prey_path": ".github/workflows/bench.yml",
+          "verbatim": false
+        }
+      ],
+      "mode": "COPY",
+      "obligation": {
+        "kind": "copyright-notice",
+        "text": "the source's copyright and permission notice travel with the material; its licence file is reproduced below"
+      },
+      "summary": "Adapted the donor workflow's explicit dependency-cache opt-in to pip in the existing lint job. The cache key uses the exact hash-pinned requirements file; the installation still enforces hashes.",
+      "branch": "crab/ci-ci.cache-bd1dbe93",
+      "recorded_at": "2026-10-25T15:23:52+00:00",
+      "texts": [
+        {
+          "path": "LICENSE",
+          "text": "MIT License\n\nCopyright (c) 2016 Joseph Kato\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+          "sha256": "8a58c633c258e7a805454917e2126d0c3c67513b2322683554f4890b92d12a7a"
+        }
+      ],
+      "checks": [
+        "python tools/catalog.py: PASS (11 resources)",
+        "python tools/docs_links.py: PASS (294 destinations)",
+        "python tools/html_navigation.py: PASS (305 destinations)",
+        "python -m unittest discover -s tests -v: PASS (364 tests, 9 skipped)",
+        "python tools/repo_audit.py .: PASS (0 errors, 0 warnings)",
+        "Verified cache and cache-dependency-path against actions/setup-python README at the existing pinned revision 5fda3b95a4ea91299a34e894583c3862153e4b97. Workflow execution and cache reuse are pending PR CI."
+      ]
+    }
+  ]
+}
