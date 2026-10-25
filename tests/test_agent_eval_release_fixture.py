@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = ROOT / "tools" / "agent_eval_release_fixture.py"
+FIXTURE = ROOT / "scripts" / "agent_eval_release_fixture.py"
 INVENTORY = ROOT / "scripts" / "release_inventory.py"
 
 
