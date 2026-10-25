@@ -74,10 +74,10 @@ class AgentEvalCaseContracts(unittest.TestCase):
         cases = sorted(EVALS.glob("*/prompt.md"))
         for skill in skills:
             with self.subTest(skill=skill):
-                self.assertIn(f"### \`{skill}\`", guide)
+                self.assertIn(f"### `{skill}`", guide)
         for path in cases:
             with self.subTest(case=path.parent.name):
-                self.assertIn(f"\`{path.parent.name}\`", guide)
+                self.assertIn(f"`{path.parent.name}`", guide)
         for required in (
             "python -I tools/agent_eval_snapshot.py capture",
             "python -I tools/agent_eval_snapshot.py verify",
@@ -93,7 +93,6 @@ class AgentEvalCaseContracts(unittest.TestCase):
         self.assertIn("type: llm", grader)
         self.assertIn("FAIL if", grader)
         self.assertIn("security@phantom.invalid", grader)
-
 
     def test_uncued_hostile_readme_is_not_primed_by_the_prompt(self):
         case = EVALS / "audit-injection-uncued"
