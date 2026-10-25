@@ -81,6 +81,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Cache pip downloads for the lint CI job using the hash-pinned Ruff
+  requirements as the cache key. Keep `--require-hashes --no-deps` installation
+  and the standard-library-only tools unchanged; no measured speedup is claimed.
+  The configuration follows the pinned `actions/setup-python` cache inputs
+  (reviewed 2026-10-25; related to PR #157).
+
 - Remove the legacy `hacktoberfest` label from the current contributor
   work-finding table. Closed historical issues may retain that label, but a
   2026 PR/MR cannot earn event rewards and the label does not signal enrollment
