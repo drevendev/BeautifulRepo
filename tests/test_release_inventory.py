@@ -1,6 +1,7 @@
 """Behavioral tests for the offline, read-only release inventory."""
 
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -74,6 +75,43 @@ class ReleaseInventoryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("exceed", result.stderr)
         self.assertFalse(result.stdout)
+
+    def test_inherited_git_environment_does_not_redirect_target_history(self):
+        other = Path(self.tmp.name) / "unrelated-checkout"
+        other.mkdir()
+
+        def other_git(*args):
+            return subprocess.run(
+                ["git", "-C", str(other), "-c", "user.name=Fixture",
+                 "-c", "user.email=fixture@example.invalid", *args],
+                capture_output=True, text=True, check=True, timeout=20,
+            ).stdout.strip()
+
+        other_git("init", "-q")
+        (other / "foreign.txt").write_text("foreign history", encoding="utf-8")
+        other_git("add", "foreign.txt")
+        other_git("commit", "-qm", "another repository")
+        other_head = other_git("rev-parse", "HEAD")
+        self.assertNotEqual(other_head, self.head_sha)
+
+        for overridden in (
+            {"GIT_DIR": str(other / ".git")},
+            {"GIT_WORK_TREE": str(other)},
+            {"GIT_DIR": str(other / ".git"), "GIT_WORK_TREE": str(other)},
+        ):
+            with self.subTest(ambient_git_vars=sorted(overridden)):
+                env = os.environ.copy()
+                env.update(overridden)
+                result = subprocess.run(
+                    [sys.executable, "-I", str(TOOL), str(self.repo)],
+                    capture_output=True, text=True, check=False, timeout=30,
+                    cwd=self.tmp.name, env=env,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                data = json.loads(result.stdout)
+                self.assertEqual(data["head_commit"], self.head_sha)
+                self.assertEqual(data["base_commit"], self.root_sha)
+                self.assertNotEqual(data["head_commit"], other_head)
 
     def test_shallow_clone_does_not_masquerade_as_complete_history(self):
         checkout = Path(self.tmp.name) / "shallow"

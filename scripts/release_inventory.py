@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -14,11 +15,16 @@ class InventoryError(ValueError):
 
 
 def git(target: Path, *args: str, allow_missing: bool = False) -> str | None:
+    # Git -C does not override inherited GIT_DIR/GIT_WORK_TREE. Without isolation,
+    # an inventory for one checkout can silently report another checkout's SHAs.
+    env = {key: value for key, value in os.environ.items()
+           if not key.startswith("GIT_")}
+    env.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"})
     try:
         result = subprocess.run(
             ["git", "-C", str(target), "--no-pager", *args],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
-            timeout=20, check=False,
+            timeout=20, check=False, env=env,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise InventoryError(f"could not read local Git history: {exc}") from exc
