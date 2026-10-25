@@ -151,7 +151,11 @@ reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
 `a href`, `img src` and `source srcset` destinations in active Markdown
 HTML, plus local section fragments in HTML and inline Markdown links.
 It ignores code examples using the same GFM literal-region masking as the
-existing checker. Explicit HTML `id` and `a name` anchors and ordinary
+existing checker. It also flags live raw HTML `<img>` elements with no `alt`
+attribute. An explicit `alt=""` is allowed for decorative images; the tool
+cannot judge whether the alternative is appropriate or certify accessibility.
+Markdown image syntax is not graded for descriptive quality.
+Explicit HTML `id` and `a name` anchors and ordinary
 Markdown ATX headings (including duplicate suffixes) are supported.
 
 Heading anchors follow GitHub's rules. The rendered text is lowercased. Every
