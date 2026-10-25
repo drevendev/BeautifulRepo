@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Compare three distinct first-screen README treatments of the same fictional
+  PocketDiff example, with an audience/design-intent matrix and regression
+  checks for the shared facts and explicit fictional status. No browser,
+  assistive-technology or model-design trial is claimed (related to #16).
+
 - The offline HTML navigation checker now reports raw HTML `<img>` tags that
   omit the `alt` attribute in active Markdown. `alt=""` remains valid for
   decorative images; source checks do not judge alternative-text meaning or
