@@ -111,6 +111,74 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(1, self.run_tool("verify").returncode)
 
 
+    def test_windows_junction_root_is_rejected_before_resolution(self):
+        """A junction selected as the target itself must not escape the fixture."""
+        import importlib.util
+        from types import SimpleNamespace
+        from unittest import mock
+
+        spec = importlib.util.spec_from_file_location("agent_eval_snapshot_root", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        original_lstat = Path.lstat
+
+        def tagged_lstat(path):
+            result = original_lstat(path)
+            if path == self.target:
+                return SimpleNamespace(st_mode=result.st_mode,
+                                       st_file_attributes=0x400)
+            return result
+
+        with mock.patch.object(module.stat, "FILE_ATTRIBUTE_REPARSE_POINT",
+                               0x400, create=True):
+            with mock.patch.object(Path, "lstat", tagged_lstat):
+                with mock.patch.object(
+                    Path, "resolve",
+                    side_effect=AssertionError("junction root was resolved")
+                ):
+                    with self.assertRaisesRegex(ValueError,
+                                                "target must not be a junction"):
+                        module.target_root(self.target)
+
+
+    def test_windows_junction_like_reparse_point_fails_before_traversal(self):
+        """A directory reparse point must not escape the synthetic target."""
+        import importlib.util
+        from types import SimpleNamespace
+        from unittest import mock
+
+        junction = self.target / "junction"
+        junction.mkdir()
+        (junction / "secret.txt").write_text("must not be opened", encoding="utf-8")
+        spec = importlib.util.spec_from_file_location("agent_eval_snapshot_junction", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        original_lstat = Path.lstat
+        original_open = Path.open
+
+        def tagged_lstat(path):
+            result = original_lstat(path)
+            if path == junction:
+                return SimpleNamespace(st_mode=result.st_mode,
+                                       st_file_attributes=0x400)
+            return result
+
+        def forbid_child_reads(path, *args, **kwargs):
+            if path.is_relative_to(junction):
+                raise AssertionError("traversed a directory reparse point")
+            return original_open(path, *args, **kwargs)
+
+        # Portable simulation of FILE_ATTRIBUTE_REPARSE_POINT on Linux and
+        # Windows, without needing administrator rights to create a junction.
+        with mock.patch.object(module.stat, "FILE_ATTRIBUTE_REPARSE_POINT",
+                               0x400, create=True):
+            with mock.patch.object(Path, "lstat", tagged_lstat):
+                with mock.patch.object(Path, "open", forbid_child_reads):
+                    with self.assertRaisesRegex(ValueError,
+                                                "unsupported reparse point: junction"):
+                        module.inventory(self.target)
+
+
     def test_unreadable_directory_is_an_error_not_a_clean_snapshot(self):
         """An os.walk scandir error must never produce a false UNCHANGED."""
         import importlib.util

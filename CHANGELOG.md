@@ -91,6 +91,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject Windows directory junctions and other non-symlink reparse points in
+  the agent-eval snapshot tool before traversal, so a supposed synthetic target
+  cannot silently lead the snapshot outside its directory. Add a portable
+  simulated-junction regression; this is still not a sandbox or race-proof
+  filesystem monitor (related to #74).
 - Reject ambiguous duplicate JSON members and boolean format versions in
   agent-evaluation snapshot baselines. Verification now fails closed instead of
   potentially reporting `UNCHANGED` for an edited or malformed baseline (#74).
