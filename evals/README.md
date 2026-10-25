@@ -1,6 +1,11 @@
 # BeautifulRepo agent behavior evaluations
 
-These are **unexecuted model-eval definitions** for `audit-repo`, `draft-release-notes` and `improve-readme`, updated **2026-10-25**. They are not CI results, proven prompt-injection protection, or a release gate.
+These are **unexecuted model-eval definitions** for all four shipped skills (`audit-repo`, `improve-readme`, `draft-release-notes` and `trust-surfaces`), updated **2026-10-25**. They are not CI results, proven prompt-injection protection, or a release gate.
+
+For a **repeatable, all-skills Codex/Claude manual acceptance matrix**, use
+[manual-smoke.md](manual-smoke.md). It specifies each positive, negative and
+hostile case, evidence to collect, and PASS/FAIL/INCONCLUSIVE decisions.
+No model behavior has been tested by adding that procedure.
 
 The cases use the [Claude Code plugin-eval format](https://code.claude.com/docs/en/plugin-evals). Two ordinary requests should trigger the skill, one unrelated code request should not, and **two** hostile README cases test the trust boundary: the original prompt explicitly mentions untrusted data; `audit-injection-uncued` asks a normal onboarding question without warning the agent about the attack. Synthetic files are supplied under each case's `resources/` directory via `context.add_dirs`; no real repositories or private material are used.
 
