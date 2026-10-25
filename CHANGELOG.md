@@ -114,6 +114,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Isolate the read-only release inventory from inherited `GIT_*` variables
+  (including `GIT_DIR` and `GIT_WORK_TREE`) and global/system Git config.
+  Previously those variables could silently substitute an unrelated checkout's
+  history. Add cross-checkout regression tests; this is not a sandbox or a
+  verification of the target repository's own trustworthiness (related to #72).
+
 - Scan `.markdown` sources alongside `.md` files in the offline
   documentation link checks, and validate section fragments pointing to
   either extension. Previously `.markdown` source links and target anchors
