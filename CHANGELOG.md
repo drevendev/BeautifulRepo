@@ -112,6 +112,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Scan `.markdown` sources alongside `.md` files in the offline
+  documentation link checks, and validate section fragments pointing to
+  either extension. Previously `.markdown` source links and target anchors
+  could pass unchecked. Add synthetic missing-link and good/bad-fragment
+  regressions; no network access or new dependencies.
+
 - Handle repeated HTML navigation/image/anchor attributes with browser-compatible
   first-value precedence, and report malformed duplicates instead of letting a later
   `href`, `src` or `alt` hide an invalid first value (related to #16).

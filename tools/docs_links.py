@@ -993,7 +993,7 @@ def iter_markdown_files(root: Path, exclude=()) -> list[Path]:
     Excluded files can still be link destinations.
 
     Symbolic links and junctions are never followed here, not even to ask whether
-    they point at a directory. A link named ``*.md`` is listed, and
+    they point at a directory. A link named ``*.md`` or ``*.markdown`` is listed, and
     ``resolve_markdown_source`` decides where it leads.
     """
     patterns = [pattern for pattern in map(normalize_exclude, exclude) if pattern]
@@ -1021,7 +1021,9 @@ def iter_markdown_files(root: Path, exclude=()) -> list[Path]:
             if stat.S_ISDIR(info.st_mode) and not _is_redirect(info):
                 if name not in SKIPPED_DIRECTORIES and not excluded(prefix + name):
                     pending.append(directory / name)
-            elif fnmatch.fnmatch(name, "*.md") and not excluded(prefix + name):
+            elif (not excluded(prefix + name)
+                  and (fnmatch.fnmatch(name, "*.md")
+                       or fnmatch.fnmatch(name, "*.markdown"))):
                 found.append(directory / name)
     return sorted(found)
 
