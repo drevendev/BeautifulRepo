@@ -91,6 +91,19 @@ class AgentEvalReleaseFixtureTests(unittest.TestCase):
         self.assertIn("parent must already exist", result.stderr)
         self.assertFalse((self.parent / "missing").exists())
 
+    def test_parent_symlink_is_rejected_without_tenant_writes(self):
+        destination = self.parent / "real-directory"
+        destination.mkdir()
+        link = self.parent / "alias-directory"
+        try:
+            link.symlink_to(destination, target_is_directory=True)
+        except (NotImplementedError, OSError) as exc:
+            self.skipTest(f"symlink creation unavailable: {exc}")
+        result = self.invoke("no-tag", "alias-directory/fixture")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("symlink or junction", result.stderr)
+        self.assertFalse((destination / "fixture").exists())
+
     def test_a_repeated_invocation_rejects_its_existing_output(self):
         first = self.invoke("no-tag", "fixture")
         self.assertEqual(first.returncode, 0, first.stderr)
