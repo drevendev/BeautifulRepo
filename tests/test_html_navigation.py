@@ -59,6 +59,42 @@ class HtmlNavigationTests(unittest.TestCase):
         self.assertTrue(any("README.md:4: HTML img missing alt attribute" in e
                             for e in errors))
 
+
+    def test_duplicate_html_attributes_cannot_hide_broken_targets(self):
+        errors, checked, documents = self.check(
+            '# Intro\n'
+            '<a href="missing.md" href="#intro">Bad link</a>\n'
+            '<img src="missing.svg" src="present.svg" alt="Diagram">\n'
+            '<img src="present.svg" alt="" alt="Description">\n'
+            '<span id="original" id="alias"></span>\n'
+            '<a href="#alias">Bad anchor</a>\n',
+            {"present.svg": "svg"},
+        )
+        self.assertEqual(checked, 4)
+        self.assertEqual(documents, 1)
+        for expected in (
+            "README.md:2: HTML a duplicate href attribute",
+            "README.md:3: HTML img duplicate src attribute",
+            "README.md:4: HTML img duplicate alt attribute",
+            "README.md:5: HTML span duplicate id attribute",
+            "missing HTML a destination: 'missing.md'",
+            "missing HTML img destination: 'missing.svg'",
+            "missing section anchor: '#alias'",
+        ):
+            with self.subTest(expected=expected):
+                self.assertTrue(any(expected in error for error in errors), errors)
+
+    def test_duplicate_html_attributes_ignore_inactive_code(self):
+        errors, checked, documents = self.check(
+            '`<a href="missing.md" href="#real">example</a>`\n'
+            '```html\n<img src="missing.svg" src="present.svg">\n```\n'
+            '## Real\n'
+            '<a href="#real">Active</a>\n',
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+
     def test_inline_code_heading_text_is_part_of_github_anchor(self):
         errors, checked, _ = self.check(
             '## Run `python -m unittest`\n'

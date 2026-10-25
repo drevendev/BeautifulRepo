@@ -155,6 +155,9 @@ existing checker. It also flags live raw HTML `<img>` elements with no `alt`
 attribute. An explicit `alt=""` is allowed for decorative images; the tool
 cannot judge whether the alternative is appropriate or certify accessibility.
 Markdown image syntax is not graded for descriptive quality.
+Duplicate HTML `href`, `src`, `srcset`, `alt`, `id` or `name` attributes
+are reported; the first value is used for destination and alt checks, matching
+HTML parsing rather than silently trusting the last value.
 Explicit HTML `id` and `a name` anchors and ordinary
 Markdown ATX headings (including duplicate suffixes) are supported.
 

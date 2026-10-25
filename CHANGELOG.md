@@ -101,6 +101,9 @@ keep their original themed headings.
 
 ### Fixed
 
+- Handle repeated HTML navigation/image/anchor attributes with browser-compatible
+  first-value precedence, and report malformed duplicates instead of letting a later
+  `href`, `src` or `alt` hide an invalid first value (related to #16).
 - Reject Windows directory junctions and other non-symlink reparse points in
   the agent-eval snapshot tool before traversal, so a supposed synthetic target
   cannot silently lead the snapshot outside its directory. Add a portable
