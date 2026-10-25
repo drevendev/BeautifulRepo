@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add an all-skills manual Codex/Claude smoke-test matrix: fixture visibility,
+  positive/negative triggers, hostile README checks, before/after snapshots,
+  evidence fields and explicit PASS/FAIL/INCONCLUSIVE grading. This is a
+  procedure and static regression, **not a model-run result** (related to #74).
+
 - Add the development-only `trust-surfaces` Agent Skill for licence-neutral,
   evidence-based review of CONTRIBUTING, SECURITY and conduct promises, with
   explicit preview/approval before any edits. Unverified reporting routes
