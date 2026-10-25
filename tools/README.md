@@ -100,7 +100,7 @@ the scheduled run, and `--today YYYY-MM-DD` fixes the date for tests. A warning 
 
 ## Relative documentation link checker
 
-`docs_links.py` scans Markdown files under the repository root and verifies that inline,
+`docs_links.py` scans `.md` and `.markdown` files under the repository root and verifies that inline,
 repository-owned link and image destinations resolve to existing files or directories. It
 supports paths relative to the current document, repository-root paths beginning with `/`,
 URL-encoded path characters, and ordinary query/fragment suffixes on an otherwise local path.
@@ -149,7 +149,8 @@ reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
 
 `html_navigation.py` complements `docs_links.py`: it checks repository-local
 `a href`, `img src` and `source srcset` destinations in active Markdown
-HTML, plus local section fragments in HTML and inline Markdown links.
+HTML, plus local section fragments in HTML and inline Markdown links to `.md` and
+`.markdown` targets.
 It ignores code examples using the same GFM literal-region masking as the
 existing checker. It also flags live raw HTML `<img>` elements with no `alt`
 attribute. An explicit `alt=""` is allowed for decorative images; the tool
