@@ -88,6 +88,22 @@ Deterministic inventory tests run in CI; synthetic eval definitions check
 intended triggers and no-tag language structurally. **No model-driven
 release-note drafting or runtime skill activation has yet been verified.**
 
+## Review trust surfaces (development version only)
+
+The `trust-surfaces` skill on `master` is **not in the pinned `v0.2.0` release**.
+Use `/beautifulrepo:trust-surfaces` (Claude Code) or `$trust-surfaces`
+(Codex) from a reviewed development checkout. It checks licence decisions,
+CONTRIBUTING, SECURITY and conduct against the actual source and known
+reporting routes. It never picks a licence or claims a GitHub private inbox
+is enabled merely because SECURITY.md exists. An unavailable reporting
+route stays a **private draft**, not a publishable policy. The skill proposes
+an exact diff and requires a later explicit approval before any edits.
+
+Two positive and one negative synthetic eval definitions are present;
+their structure is tested, but **no model-run behavior was verified**.
+See [evals](../evals/README.md) and
+[issue #71](https://github.com/drevendev/BeautifulRepo/issues/71).
+
 ## Update or remove
 
 | | Claude Code | Codex |
