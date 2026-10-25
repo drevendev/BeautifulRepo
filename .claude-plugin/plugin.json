@@ -1,7 +1,7 @@
 {
   "name": "beautifulrepo",
   "version": "0.3.0-dev.0",
-  "description": "Audit repository onboarding and draft clearly unpublished, evidence-linked release notes using local checks.",
+  "description": "Audit repository onboarding, preview gated README improvements, or draft unpublished release notes from local evidence.",
   "author": {
     "name": "Dreven",
     "url": "https://github.com/drevendev"
@@ -9,5 +9,10 @@
   "homepage": "https://github.com/drevendev/BeautifulRepo",
   "repository": "https://github.com/drevendev/BeautifulRepo",
   "license": "MIT",
-  "keywords": ["readme", "documentation", "repository-audit", "agent-skills"]
+  "keywords": [
+    "readme",
+    "documentation",
+    "repository-audit",
+    "agent-skills"
+  ]
 }

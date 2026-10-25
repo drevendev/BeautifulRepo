@@ -13,6 +13,7 @@ keep their original themed headings.
 
 ### Added
 
+- Add a development-only `improve-readme` agent skill that proposes an exact file/diff preview, demands explicit approval before edits, rejects unverified CI badges and separates edit permission from execution. Include two synthetic positive evals, a negative trigger and structural safety contracts. No real model evaluation or released plugin version is claimed (related to #70 and #74).
 - Add a development-only `draft-release-notes` agent skill using the offline Git inventory, exact SHA evidence and explicitly unpublished no-tag fallback. Include synthetic positive/negative eval definitions and structural safety tests; **no model-run result or released plugin version is claimed** (related to #72 and #74).
 - Add a read-only offline Git commit inventory tool for release-note drafting with exact base/head SHAs, no-tag/root fallback, bounded history and synthetic Git regression tests. It does not publish a release or verify commit claims (related to #72).
 - Add a portable offline agent-eval file-integrity snapshot tool with

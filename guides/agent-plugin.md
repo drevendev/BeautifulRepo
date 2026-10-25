@@ -50,6 +50,23 @@ The skill audits the current repository unless you name another path. Before run
 anything, it states which repository it will audit. If most link findings come from
 vendored or archived Markdown, it asks before excluding them.
 
+## Improve a README (development version only)
+
+The `improve-readme` skill on `master` is **not included in the pinned
+`v0.2.0` release**. Install from a reviewed checkout or `master` to try it.
+Ask to improve a README or invoke `/beautifulrepo:improve-readme` (Claude Code)
+or `$improve-readme` (Codex). It selects a first-success template, gathers
+read-only local evidence and proposes an **exact file list and unified diff**.
+It makes **no edits** until an explicit later approval of that diff. Approval
+to edit is not permission to execute the target's code, install packages, push
+or publish. Unsupported CI badges and unverified first-run output are omitted.
+For private repositories, approve the model provider's data controls first.
+
+Two positive and one negative synthetic model-eval definitions are provided;
+CI validates their structure but **no model-run behavior has been verified**.
+See the [agent-eval runbook](../evals/README.md) and
+[issue #70](https://github.com/drevendev/BeautifulRepo/issues/70).
+
 ## Draft release notes (development version only)
 
 The `draft-release-notes` skill is being developed on `master`; it is **not**

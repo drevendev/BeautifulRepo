@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "beautifulrepo",
   "version": "0.3.0-dev.0",
-  "description": "Audit repository onboarding and draft clearly unpublished, evidence-linked release notes using local checks.",
+  "description": "Audit repository onboarding, preview gated README improvements, or draft unpublished release notes from local evidence.",
   "author": {
     "name": "Dreven",
     "url": "https://github.com/drevendev"
@@ -10,16 +10,24 @@
   "homepage": "https://github.com/drevendev/BeautifulRepo",
   "repository": "https://github.com/drevendev/BeautifulRepo",
   "license": "MIT",
-  "keywords": ["readme", "documentation", "repository-audit", "agent-skills"],
+  "keywords": [
+    "readme",
+    "documentation",
+    "repository-audit",
+    "agent-skills"
+  ],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "BeautifulRepo",
-        "shortDescription": "Audit a repository or draft notes from local Git history.",
-        "longDescription": "Audit README, links and onboarding with local read-only tools, or prepare an unpublished release-notes draft from a local Git commit inventory. The standalone checks and inventory make no network requests; the agent session may send repository context to its configured model provider. Neither workflow publishes changes or proves a release shipped.",
+        "shortDescription": "Audit onboarding, plan README fixes or draft Git release notes.",
+        "longDescription": "Audit README, links and onboarding with local read-only tools, preview a scoped README diff with explicit approval before edits, or draft unpublished release notes from local Git history. Standalone tools do not make network requests; agent sessions may send repository context to the configured model provider. No workflow publishes changes, and unverified output or badges are not asserted.",
         "developerName": "Dreven",
         "category": "Developer Tools",
-        "capabilities": ["Interactive", "Read"],
+        "capabilities": [
+          "Interactive",
+          "Read"
+        ],
         "websiteURL": "https://github.com/drevendev/BeautifulRepo",
         "defaultPrompt": [
           "Audit this repository with BeautifulRepo."
