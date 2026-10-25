@@ -52,6 +52,11 @@ observations, without assigning a beauty score. The
 [PocketDiff visual example](readme-visuals/README.md) illustrates evidence-first
 presentation and text alternatives, not a released PocketDiff application.
 
+For an intentionally controlled editorial comparison, the
+[three PocketDiff first-screen variants](readme-visuals/variants/README.md)
+rearrange the *same fictional* facts for distinct audiences. They do not
+represent three installable products or evidence of a model's design quality.
+
 Before adapting a starter, use the [first-success checklist](../checklists/first-success.md).
 For commands, reproducible evidence and review handoff, use the
 [maintenance workflow](../guides/maintenance-workflow.md).
