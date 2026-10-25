@@ -1,20 +1,18 @@
 # Third-party notices
 
-Written by `crab attribution` from `.crab/attributions.json`, the receipts of
-material Hungry Crab carried into this repository. Edit the receipts, not this
-file; rerunning the command reproduces it byte for byte. It is headings and
-paragraphs on purpose: a Markdown formatter has nothing to rewrite here.
+BeautifulRepo is MIT-licensed (see [LICENSE](LICENSE)). This page documents
+external examples adapted into its public recipes and preserves applicable
+source notices. It is ordinary contributor-maintained Markdown; no internal
+agent ledger or separate attribution generator is required.
 
 ## vale-cli/vale @ 8b9bfb9 — MIT
 
 Source:
 <https://github.com/vale-cli/vale/tree/8b9bfb97700a707140fff9f444048439df5bc9b1>
 
-Obligation (copyright-notice): the source's copyright and permission notice
-travel with the material; its licence file is reproduced below.
-
-`.github/workflows/quality.yml`: adapted from `.github/workflows/bench.yml`;
-COPY, `crab:ci:ci.cache`.
+An explicit dependency-cache setting in `.github/workflows/quality.yml` was
+adapted from the donor CI pattern in `.github/workflows/bench.yml` (MIT).
+The source copyright and permission notice is reproduced below.
 
 `LICENSE` of the source at 8b9bfb9:
 
