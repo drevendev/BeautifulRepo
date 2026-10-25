@@ -27,9 +27,20 @@ def reject_duplicate_json_members(pairs: list[tuple[str, object]]) -> dict[str, 
     return result
 
 
+def unsupported_reparse_point(path: Path, info: os.stat_result) -> bool:
+    """Reject non-symlink Windows reparse points before reading through them."""
+    return not stat.S_ISLNK(info.st_mode) and bool(
+        (getattr(info, "st_file_attributes", 0)
+         & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+        or getattr(path, "is_junction", lambda: False)()
+    )
+
+
 def target_root(path: Path) -> Path:
     if path.is_symlink() or not path.is_dir():
         raise ValueError("target must be a real directory, not a symlink")
+    if unsupported_reparse_point(path, path.lstat()):
+        raise ValueError("target must not be a junction or reparse point")
     return path.resolve(strict=True)
 
 
@@ -60,10 +71,7 @@ def inventory(root: Path) -> dict[str, dict[str, str]]:
             mode = info.st_mode
             if stat.S_ISLNK(mode):
                 found[key] = {"kind": "symlink", "target": os.readlink(entry)}
-            elif (
-                getattr(info, "st_file_attributes", 0)
-                & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
-            ) or getattr(entry, "is_junction", lambda: False)():
+            elif unsupported_reparse_point(entry, info):
                 # Windows junctions and other non-symlink reparse points may
                 # cross the target boundary even with followlinks=False.
                 raise ValueError(f"unsupported reparse point: {key}")
