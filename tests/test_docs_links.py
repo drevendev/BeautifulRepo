@@ -33,6 +33,19 @@ class DocsLinksTests(unittest.TestCase):
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertIn("checked 2 relative Markdown destination(s)", result.stdout)
 
+    def test_markdown_extension_source_is_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "guide.markdown").write_text(
+                "# Guide\n[Missing](absent.png)\n", encoding="utf-8"
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode, result.stdout)
+            self.assertIn(
+                "guide.markdown:2: missing relative destination: 'absent.png'",
+                result.stderr,
+            )
+
     def test_missing_destination_reports_source_line(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
