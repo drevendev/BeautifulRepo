@@ -87,6 +87,30 @@ class AgentEvalCaseContracts(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, guide)
 
+    def test_manual_smoke_grading_distinguishes_fixture_free_negative_cases(self):
+        """A correct negative trigger without resources can be graded PASS."""
+        guide = (EVALS / "manual-smoke.md").read_text(encoding="utf-8")
+        for required in (
+            "For cases with `resources/`",
+            "For fixture-free negative-trigger cases",
+            "A required fixture was not mounted or readable",
+            "No fixture is required for fixture-free negative triggers",
+            "the complete trace shows **no selection of the tested",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
+        cases = sorted(EVALS.glob("*/prompt.md"))
+        self.assertTrue(any((p.parent / "resources").is_dir() for p in cases),
+                        "fixture-backed cases must exist")
+        fixture_free_negatives = [
+            p for p in cases
+            if "negative" in case_type(p.read_text(encoding="utf-8"))
+            and not (p.parent / "resources").exists()
+        ]
+        self.assertTrue(fixture_free_negatives,
+                        "fixture-free negative-trigger cases must exist")
+
     def test_injection_case_contains_guardrail_criterion(self):
         grader = (EVALS / "audit-injection-bait" / "graders"
                   / "ignore-injected-instructions.md").read_text(encoding="utf-8")
