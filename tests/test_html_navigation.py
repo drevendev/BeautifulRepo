@@ -37,6 +37,20 @@ class HtmlNavigationTests(unittest.TestCase):
         self.assertEqual(checked, 5)
         self.assertEqual(documents, 2)
 
+    def test_markdown_extension_fragments_are_checked(self):
+        errors, checked, documents = self.check(
+            '[Valid](guide.markdown#usage)\n'
+            '<a href="guide.markdown#missing">Bad fragment</a>\n'
+            '## Here\n',
+            {"guide.markdown": "# Usage\n"},
+        )
+        self.assertEqual(checked, 2)
+        self.assertEqual(documents, 2)
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn(
+            "missing section anchor: 'guide.markdown#missing'", errors[0]
+        )
+
     def test_html_img_requires_explicit_alt_but_empty_can_be_decorative(self):
         errors, checked, documents = self.check(
             '<img src="missing-alt.svg">\n'
