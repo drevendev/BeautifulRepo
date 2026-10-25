@@ -114,7 +114,6 @@ class SnapshotTests(unittest.TestCase):
     def test_windows_junction_like_reparse_point_fails_before_traversal(self):
         """A directory reparse point must not escape the synthetic target."""
         import importlib.util
-        import stat
         from types import SimpleNamespace
         from unittest import mock
 
