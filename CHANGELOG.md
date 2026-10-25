@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- The offline HTML navigation checker now reports raw HTML `<img>` tags that
+  omit the `alt` attribute in active Markdown. `alt=""` remains valid for
+  decorative images; source checks do not judge alternative-text meaning or
+  certify accessibility. Added regression coverage (related to #16).
+
 - Add an all-skills manual Codex/Claude smoke-test matrix: fixture visibility,
   positive/negative triggers, hostile README checks, before/after snapshots,
   evidence fields and explicit PASS/FAIL/INCONCLUSIVE grading. This is a
