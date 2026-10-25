@@ -56,8 +56,9 @@ The tool ignores inherited `GIT_*` environment variables so that an ambient
 `GIT_DIR` or `GIT_WORK_TREE` cannot silently select another checkout. This
 is not a sandbox or a verification of the target's own contents; confirm its
 reported head/base against the selected repository. It fails closed on
-shallow history, unrelated bases and oversized ranges. On any error, stop the draft and describe the missing history or
-boundary; never substitute an incomplete or imaginary comparison.
+shallow history, unrelated bases and oversized ranges. On any error,
+stop the draft and describe the missing history or boundary; never
+substitute an incomplete or imaginary comparison.
 
 The JSON includes `base_commit`, `head_commit`, `base_kind`,
 `base_tag`, `commit_count` and commit SHA/subject pairs. Its
