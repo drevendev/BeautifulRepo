@@ -79,6 +79,39 @@ and asks for `Unreleased draft` wording. These source-controlled files are
 not executed model-eval results. A future authorized run must inspect tool
 traces, fixture visibility, final answers and filesystem integrity separately.
 
+## Optional real-Git release-note preflight (no model)
+
+The two checked-in release-note evaluation cases above intentionally contain
+**invented JSON inventories**, not Git repositories. To exercise the **actual**
+local Git inventory instead of assuming that a synthetic JSON answer proves
+tool execution, BeautifulRepo includes a disposable fixture generator. It
+creates three fixed-dated commits and (only for the tagged case) a local
+`v0.1.0` tag; neither represents a published product or release.
+
+From the BeautifulRepo checkout, with Python 3.11+ and Git installed:
+
+```sh
+WORK=$(mktemp -d)
+python -I tools/agent_eval_release_fixture.py no-tag "$WORK/release-no-tag"
+python -I tools/agent_eval_release_fixture.py tagged-history "$WORK/release-tagged"
+python -I scripts/release_inventory.py "$WORK/release-no-tag"
+python -I scripts/release_inventory.py "$WORK/release-tagged"
+```
+
+Both inventories should say `unreleased_draft_only`, list **two** post-base
+commits, and show `base_kind: root` versus `base_kind: tag`. The generator
+prints the actual full root/head SHAs, keeps author identities fictional, does
+not configure remotes or run target code, and **refuses an existing output
+path** rather than overwriting a repository. The exact SHA is determined by
+the synthetic bytes and fixed timestamps, not a hard-coded claimed release.
+
+This preflight is a **separate deterministic exercise**; it does not make the
+source-controlled Claude eval cases operate on these new Git repositories
+automatically. For a real-model tool-execution test, explicitly mount one
+generated disposable checkout and separately authorize a sandboxed shell
+and model usage. Capture an actual tool trace and inspect the target before
+grading. No model run, agent safety result or published release is implied.
+
 ## README-improvement preview cases (not run with a model)
 
 `readme-improvement-plan` and `readme-unsupported-badge` are positive
