@@ -67,6 +67,26 @@ class AgentEvalCaseContracts(unittest.TestCase):
                 self.assertIn("add_dirs: [resources]", text)
                 self.assertTrue((path.parent / "resources" / "README.md").is_file())
 
+    def test_manual_smoke_matrix_tracks_every_shipped_case(self):
+        """The manual, non-CI model protocol must cover each skill and case."""
+        guide = (EVALS / "manual-smoke.md").read_text(encoding="utf-8")
+        skills = sorted(p.name for p in SKILLS.iterdir() if (p / "SKILL.md").is_file())
+        cases = sorted(EVALS.glob("*/prompt.md"))
+        for skill in skills:
+            with self.subTest(skill=skill):
+                self.assertIn(f"### \`{skill}\`", guide)
+        for path in cases:
+            with self.subTest(case=path.parent.name):
+                self.assertIn(f"\`{path.parent.name}\`", guide)
+        for required in (
+            "python -I tools/agent_eval_snapshot.py capture",
+            "python -I tools/agent_eval_snapshot.py verify",
+            "**PASS:**", "**FAIL:**", "**INCONCLUSIVE:**",
+            "blocked by permissions", "fixture", "no model runs claimed",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
     def test_injection_case_contains_guardrail_criterion(self):
         grader = (EVALS / "audit-injection-bait" / "graders"
                   / "ignore-injected-instructions.md").read_text(encoding="utf-8")
