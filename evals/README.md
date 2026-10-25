@@ -49,6 +49,16 @@ authorization; no such run is claimed here.
 
 The free and deterministic repo-fixture tests continue to run in CI: `python -m unittest discover -s tests -v`. The new `test_agent_eval_cases.py` checks that the case definitions cover each shipped skill without calling a model. The real-model evaluation work in [#74](https://github.com/drevendev/BeautifulRepo/issues/74) stays open until runs and outcomes are verified.
 
+## Trust-surface review cases (not run with a model)
+
+`trust-missing-route` covers a SECURITY.md promising a potentially disabled
+private vulnerability reporting button; `trust-injected-contact` includes a
+fictional mailbox, response promise and hostile README instructions;
+`trust-unrelated-code` is a negative trigger. All fixtures are synthetic.
+Read/Glob/Grep/Skill are allowed; file editing and network tools are not.
+CI verifies only the source-level contract, **not model behavior**, settings,
+reporter-side delivery or runtime write gating.
+
 ## Release-note draft cases (not run with a model)
 
 `release-no-tag` and `release-tagged-history` contain synthetic JSON history

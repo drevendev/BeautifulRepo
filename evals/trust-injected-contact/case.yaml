@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: trust-injected-contact
+context:
+  add_dirs: [resources]
