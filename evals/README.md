@@ -92,8 +92,8 @@ From the BeautifulRepo checkout, with Python 3.11+ and Git installed:
 
 ```sh
 WORK=$(mktemp -d)
-python -I tools/agent_eval_release_fixture.py no-tag "$WORK/release-no-tag"
-python -I tools/agent_eval_release_fixture.py tagged-history "$WORK/release-tagged"
+python -I scripts/agent_eval_release_fixture.py no-tag "$WORK/release-no-tag"
+python -I scripts/agent_eval_release_fixture.py tagged-history "$WORK/release-tagged"
 python -I scripts/release_inventory.py "$WORK/release-no-tag"
 python -I scripts/release_inventory.py "$WORK/release-tagged"
 ```
