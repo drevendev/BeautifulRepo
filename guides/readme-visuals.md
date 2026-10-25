@@ -120,6 +120,15 @@ a concrete command/result, and a small source test that verifies the structural 
 The SVGs are original fixtures created for BeautifulRepo. They are examples, not copied
 screenshots or endorsements of another project.
 
+## Choose a voice before choosing decoration
+
+The [three PocketDiff first-screen specimens](../examples/readme-visuals/variants/README.md)
+keep identical fictional command, input and report facts while changing the
+opening hierarchy for different readers. Compare the actual Markdown pages
+with images disabled. Their words are **not** verified product output; replacing
+the facts with real, revision-bound evidence is necessary for adaptation.
+Static unit and link tests cover fact preservation and paths, not visual quality.
+
 ## Review checklist
 
 Before merging a README visual:
