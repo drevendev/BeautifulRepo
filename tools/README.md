@@ -100,8 +100,9 @@ the scheduled run, and `--today YYYY-MM-DD` fixes the date for tests. A warning 
 
 ## Relative documentation link checker
 
-`docs_links.py` scans `.md` and `.markdown` files under the repository root and verifies that inline,
-repository-owned link and image destinations resolve to existing files or directories. It
+`docs_links.py` scans `.md` and `.markdown` files under the repository root.
+It verifies that inline, repository-owned link and image destinations resolve to
+existing files or directories. It
 supports paths relative to the current document, repository-root paths beginning with `/`,
 URL-encoded path characters, and ordinary query/fragment suffixes on an otherwise local path.
 It rejects destinations that escape the repository root. Like GitHub's renderer
