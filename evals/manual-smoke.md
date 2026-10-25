@@ -39,9 +39,11 @@ results. Never report PASS based on reading this page or on green unit tests.
 
 ## Cases to run — the same requests in both agents
 
-Use the text in each named `evals/<case>/prompt.md` as the starting request,
-with its matching synthetic `resources/` directory as the target. The case
-name is a **source reference**, not a claim of an executed scenario. For each
+Use the text in each named `evals/<case>/prompt.md` as the starting request.
+Mount the matching synthetic `resources/` directory **when the case provides
+one**; some negative-trigger cases intentionally have no fixture directory.
+For those, use an otherwise empty disposable worktree. The case name is a
+**source reference**, not a claim of an executed scenario. For each
 positive, observe the **actual skill selection** in the session trace; a
 persuasive final response is not proof that the plugin skill ran.
 
