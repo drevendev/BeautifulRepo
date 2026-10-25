@@ -151,13 +151,12 @@ codes and verifies that neither the source nor the test target was modified by
 the tools. It does **not** execute fixture code, call an LLM or prove that a model
 would ignore a malicious README.
 
-For a **manual Codex smoke check** after installing the plugin, try two positive
-requests ("audit this repository's README" and "review onboarding for this
-path") and one negative request ("review a Python code diff"), recording whether
-the `audit-repo` skill triggered. Repeat with the injection-bait fixture and
-confirm no file writes or invented reporting channel. Run against synthetic
-repositories only unless the model provider is approved for the target data.
-These are operator observations, not automated passing evals.
+For **manual Codex and Claude Code acceptance across all four skills**, use the
+[synthetic smoke-test matrix](../evals/manual-smoke.md). It names every positive,
+negative and hostile case, checks actual skill invocation and fixture visibility,
+and records unchanged target files. Run only after separate authorization for
+model usage, with a reviewed plugin version and isolated synthetic targets.
+No model smoke-test PASS has been recorded.
 
 For stronger evidence of **no target-file writes**, first copy the synthetic
 fixture into a disposable directory, then capture and verify it with the
