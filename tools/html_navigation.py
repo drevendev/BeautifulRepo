@@ -324,7 +324,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
             if not target.is_file() and not target.is_dir():
                 errors.append(f"{name}:{line}: missing {kind} destination: {value!r}")
                 continue
-            if parsed.fragment and target.suffix.lower() == ".md":
+            if parsed.fragment and target.suffix.lower() in {".md", ".markdown"}:
                 try:
                     anchors, _, _, _ = parse_document(target)
                 except (OSError, UnicodeError):
