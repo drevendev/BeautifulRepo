@@ -53,8 +53,9 @@ def create_fixture(scenario: str, target: Path) -> dict[str, str | int | None]:
     if not target.parent.is_dir():
         raise FixtureError("destination parent must already exist")
     # A symlinked parent would quietly put the generated repository elsewhere.
-    if target.parent.resolve() != target.parent:
-        raise FixtureError("destination parent must not be a symlinked path")
+    for ancestor in (target.parent, *target.parent.parents):
+        if ancestor.is_symlink() or (hasattr(ancestor, "is_junction") and ancestor.is_junction()):
+            raise FixtureError("destination parent must not include a symlink or junction")
     try:
         target.mkdir()
         try:
