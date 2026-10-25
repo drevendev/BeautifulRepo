@@ -56,9 +56,17 @@ def inventory(root: Path) -> dict[str, dict[str, str]]:
         for name in sorted([*dirs, *files]):
             entry = Path(parent) / name
             key = entry.relative_to(root).as_posix()
-            mode = entry.lstat().st_mode
+            info = entry.lstat()
+            mode = info.st_mode
             if stat.S_ISLNK(mode):
                 found[key] = {"kind": "symlink", "target": os.readlink(entry)}
+            elif (
+                getattr(info, "st_file_attributes", 0)
+                & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+            ) or getattr(entry, "is_junction", lambda: False)():
+                # Windows junctions and other non-symlink reparse points may
+                # cross the target boundary even with followlinks=False.
+                raise ValueError(f"unsupported reparse point: {key}")
             elif stat.S_ISDIR(mode):
                 found[key] = {"kind": "directory"}
             elif stat.S_ISREG(mode):
