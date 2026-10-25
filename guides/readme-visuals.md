@@ -74,7 +74,9 @@ The check deliberately permits an empty attribute: deciding the image's
 purpose and checking the quality of an alternative require human judgement.
 Markdown `![alt](path)` syntax already contains an alt-text slot; the
 checker does not grade its content, and it does not inspect a browser's
-rendered accessibility tree. For complex diagrams, preserve a full textual
+rendered accessibility tree. Duplicate HTML `href`, `src`, `srcset`, `alt`,
+`id` and `name` attributes are reported: the first value is used for offline
+checks, as in HTML parsing, so a later duplicate cannot conceal a broken link. For complex diagrams, preserve a full textual
 equivalent near the image.
 
 ## Patterns observed in current repositories
