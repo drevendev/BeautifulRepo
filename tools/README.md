@@ -88,6 +88,30 @@ the underlying diffs and [release-note guidance](../guides/release-notes.md)
 before writing public claims. The tool needs Python 3.11+ and Git, makes no
 network requests, doesn't execute project code and writes no files. Exit 0
 prints JSON; invalid inputs or Git read errors exit 2 without partial JSON.
+## Synthetic local Git histories for agent-eval preflight
+
+[agent_eval_release_fixture.py](../scripts/agent_eval_release_fixture.py)
+creates a disposable **real Git checkout** to test the release inventory on
+actual commits and an optional tag, instead of treating invented JSON output
+as evidence that Git ran. It requires Python 3.11+ and the locally installed
+Git executable. It is an **opt-in fixture generator**, not one of the
+read-only repository checkers above.
+
+```sh
+WORK=$(mktemp -d)
+python -I scripts/agent_eval_release_fixture.py no-tag "$WORK/no-tag"
+python -I scripts/agent_eval_release_fixture.py tagged-history "$WORK/tagged"
+python -I scripts/release_inventory.py "$WORK/no-tag"
+python -I scripts/release_inventory.py "$WORK/tagged"
+```
+
+The output path must not exist and its parent must already exist; the script
+refuses to overwrite existing content. It writes exactly three fictional
+local commits, adds `v0.1.0` only in the tagged scenario, configures no
+remotes, and prints the full root/head SHAs. It never invokes a model, runs
+target code or publishes a release. The [agent-eval runbook](../evals/README.md#optional-real-git-release-note-preflight-no-model)
+explains how to use these local histories and what they **do not** prove.
+
 ## Guide review dates
 
 `review_dates.py` finds the dates on which someone re-read a guide's sources, such as
