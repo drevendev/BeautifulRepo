@@ -92,9 +92,19 @@ class MarkupReferences(HTMLParser):
         self.refs: list[tuple[int, str, str]] = []
         self.ids: set[str] = set()
         self.images_without_alt: list[int] = []
+        self.duplicate_attributes: list[tuple[int, str, str]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        attributes = dict(attrs)
+        # HTML's parser retains the first attribute of a repeated name, whereas
+        # dict(attrs) retains the last. Follow the browser and report relevant
+        # malformed duplicates so they cannot disguise a broken link or alt.
+        attributes: dict[str, str | None] = {}
+        for attribute, value in attrs:
+            if attribute in attributes:
+                if attribute in {"href", "src", "srcset", "alt", "id", "name"}:
+                    self.duplicate_attributes.append((self.getpos()[0], tag, attribute))
+                continue
+            attributes[attribute] = value
         if tag == "img" and "alt" not in attributes:
             self.images_without_alt.append(self.getpos()[0])
         identifier = attributes.get("id")
@@ -252,17 +262,19 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
     errors: list[str] = []
     checked = 0
     inspected = 0
-    parsed_files: dict[Path, tuple[set[str], list[tuple[int, str, str]], list[int]]] = {}
+    parsed_files: dict[Path, tuple[set[str], list[tuple[int, str, str]],
+                                   list[int], list[tuple[int, str, str]]]] = {}
     names: dict = {}  # directory listings shared by every resolution in this scan
 
-    def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]], list[int]]:
+    def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]],
+                                             list[int], list[tuple[int, str, str]]]:
         if path not in parsed_files:
             content = path.read_text(encoding="utf-8")
             masked = mask_escaped_html_openers(docs_links._mask_markdown_code(content))
             markup = MarkupReferences()
             markup.feed(masked)
             parsed_files[path] = (heading_ids(masked, markup.ids, content), markup.refs,
-                                  markup.images_without_alt)
+                                  markup.images_without_alt, markup.duplicate_attributes)
         return parsed_files[path]
 
     for source in docs_links.iter_markdown_files(root, exclude):
@@ -273,10 +285,13 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
             continue
         inspected += 1
         try:
-            _, refs, images_without_alt = parse_document(resolved_source)
+            _, refs, images_without_alt, duplicate_attributes = parse_document(resolved_source)
         except (OSError, UnicodeError):
             errors.append(f"{name}: cannot decode Markdown source")
             continue
+
+        for line, tag, attribute in duplicate_attributes:
+            errors.append(f"{name}:{line}: HTML {tag} duplicate {attribute} attribute")
 
         # Unlike alt="", omitting alt leaves a raw HTML image without a text
         # alternative. An empty alt is valid for purely decorative images;
@@ -311,7 +326,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
                 continue
             if parsed.fragment and target.suffix.lower() == ".md":
                 try:
-                    anchors, _, _ = parse_document(target)
+                    anchors, _, _, _ = parse_document(target)
                 except (OSError, UnicodeError):
                     errors.append(f"{name}:{line}: cannot read anchor target: {value!r}")
                     continue
