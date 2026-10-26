@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a reusable, evidence-bound design-intent brief with a filled Rowcount
+  application: fixed source/result, two contrasting README entrances,
+  meaningful image-alternative choices, rejected layouts and honest manual
+  verification limits. Static tests check its navigation and key evidence;
+  no new browser or screen-reader certification is claimed (related to #16).
+
 - Add two distinct first-screen designs for the **working** Rowcount CSV CLI,
   with verified local output, original light/dark transcript illustrations,
   accessible text alternatives and regression checks binding the presentation
