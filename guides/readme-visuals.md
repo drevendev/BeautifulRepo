@@ -129,7 +129,7 @@ with images disabled. Their words are **not** verified product output; replacing
 the facts with real, revision-bound evidence is necessary for adaptation.
 Static unit and link tests cover fact preservation and paths, not visual quality.
 
-## Review checklist## Two presentations backed by a real command
+## Two presentations backed by a real command
 
 The [Rowcount editorial and terminal-led first screens](../examples/readme-visuals/rowcount/README.md)
 show two layouts for the **same working, checkout-only CLI**, not a fictional
@@ -143,7 +143,7 @@ The SVG is a *drawing of a verified transcript*, not a screenshot of a running
 terminal. No GitHub renderer, browser accessibility, or manual narrow-width
 inspection is claimed by the source-only tests.
 
-
+## Review checklist
 
 Before merging a README visual:
 
