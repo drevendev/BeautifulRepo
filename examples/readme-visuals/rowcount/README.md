@@ -1,6 +1,6 @@
-# Rowcount: two truthful first screens
+# Rowcount: three truthful first screens
 
-**Design exercise on working code, not a released package.** Both presentations refer to
+**Design exercise on working code, not a released package.** All three presentations refer to
 the same [Rowcount CLI](../../cli-starter/README.md), sample input and observed output.
 Choose a first-screen hierarchy for the reader; do not change the facts to fit the layout.
 
@@ -9,13 +9,15 @@ The source was inspected at BeautifulRepo commit
 The checked-in sample contains a header and three data records. This example
 uses Python 3.11+ and no third-party dependencies.
 
-## Two distinct presentations
+## Three distinct presentations
 
 - [Editorial](editorial.md): purpose and local-data boundary first, then the runnable command.
 - [Terminal-led](terminal-led.md): a labelled illustration of the verified result first,
   followed immediately by the actual checkout command and limitations.
+- [Contract-first](contract-first.md): a scannable input/output and validation
+  boundary card before the same reproducible command.
 
-Both preserve this exact reproducible first success, run **from the repository root**:
+All three preserve this exact reproducible first success, run **from the repository root**:
 
 ```bash
 python examples/cli-starter/rowcount.py examples/cli-starter/sample.csv
@@ -34,20 +36,22 @@ or a shipped product. They show no simulated metrics other than this observed re
 
 ## Design intent and trade-offs
 
-| Choice | Editorial | Terminal-led |
-| --- | --- | --- |
-| Reader | Someone deciding whether the command addresses their CSV task | Someone looking for a quick verification signal |
-| First question | What problem does this solve? | What happens when I run it? |
-| Visual device | Text hierarchy with no hero artwork | Small original theme-aware transcript illustration |
-| Risk | Feels too quiet without a product demo | A terminal graphic could obscure prerequisites |
-| Mitigation | Copyable command and precise output remain above the fold | Complete text command, stdout and limitations remain outside the SVG |
+- **Editorial — task fit:** asks what the local command solves before showing a
+  runnable result. Risk: may feel too quiet; mitigation: early copyable command.
+- **Terminal-led — verification:** shows the same observed result through a small,
+  original theme-aware illustration. Risk: artwork hides the real command;
+  mitigation: the complete text command and output sit outside the image.
+- **Contract-first — technical boundaries:** leads with a compact behavior table
+  for readers checking assumptions about headers, blanks and malformed widths.
+  Risk: feels too much like reference documentation; mitigation: the actual
+  checkout command and observed output immediately follow the table.
 
-The artwork has separate light/dark palettes, embedded `title` and `desc`,
-a meaningful HTML `alt`, and nearby plain-text equivalents.
+Only terminal-led uses light/dark SVGs with embedded `title` and `desc`,
+meaningful HTML `alt` text, and nearby selectable equivalents.
 Review the GitHub-rendered Markdown manually at narrow widths and in both themes;
 the source tests do not certify renderer behavior, contrast or screen-reader output.
 The [filled Rowcount design-intent brief](DESIGN_INTENT.md) records the
-trade-offs and verification limits for these two actual variants. Use the
+trade-offs and verification limits for all three variants. Use the
 [blank design-intent template](../../../templates/DESIGN_INTENT.template.md)
 for your own product rather than copying this visual identity.
 The original [PocketDiff design-intent exercise](../DESIGN_INTENT.md) uses

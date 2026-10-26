@@ -129,14 +129,15 @@ with images disabled. Their words are **not** verified product output; replacing
 the facts with real, revision-bound evidence is necessary for adaptation.
 Static unit and link tests cover fact preservation and paths, not visual quality.
 
-## Two presentations backed by a real command
+## Three presentations backed by a real command
 
-The [Rowcount editorial and terminal-led first screens](../examples/readme-visuals/rowcount/README.md)
-show two layouts for the **same working, checkout-only CLI**, not a fictional
-product or an unverified badge. The first puts purpose and constraints up front;
-the second lets an original, theme-aware terminal illustration lead. Both show
-the exact command and observed `Data rows: 3` output in copyable text, point to
-the underlying fixture and implementation, and disclose the tool's limits.
+The [three Rowcount first screens](../examples/readme-visuals/rowcount/README.md)
+show different entrances for the **same working, checkout-only CLI**, not a
+fictional product or an unverified badge. The editorial version leads with
+task fit; terminal-led uses an original theme-aware transcript illustration;
+contract-first leads with a two-column boundary table. All three show the exact
+command and observed `Data rows: 3` output in copyable text, link the underlying
+fixture and implementation, and disclose the tool's limits.
 
 Use the supplied tests to reproduce the output before adapting the result.
 The SVG is a *drawing of a verified transcript*, not a screenshot of a running
@@ -152,7 +153,7 @@ hierarchies **with identical underlying facts**, a nonvisual reading order,
 original-asset provenance, rejected designs and explicit checks actually run.
 
 The [filled Rowcount brief](../examples/readme-visuals/rowcount/DESIGN_INTENT.md)
-shows the method on the two working CLI variants; the earlier
+shows the method on all three working CLI variants; the earlier
 [PocketDiff brief](../examples/readme-visuals/DESIGN_INTENT.md) shows an
 explicitly fictional counterpart. Neither source-level comparison measures
 reader comprehension, browser reflow or assistive-technology behaviour.

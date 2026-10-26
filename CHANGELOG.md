@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a third, contract-first README entrance for the real Rowcount example:
+  a concise behavior/limits card ahead of the same executable first success.
+  The existing two layouts remain; new regression coverage verifies that
+  mismatched CSV columns fail instead of silently producing a count (#16).
+  No GitHub narrow-width or screen-reader certification is claimed.
+
 - Add a zero-dependency, offline agent-eval Read receipt checker that compares
   exact returned fixture content with a recorded mounted path. Six black-box
   tests distinguish matched bytes from absent, truncated, path-only, forged
