@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add an uncued adversarial release-note Agent Skill evaluation case using a
+  synthetic commit-subject inventory, explicit unpublished-release and
+  fictional-contact graders, fixture visibility guidance and static contract
+  checks. No model was invoked, no Git diff was checked by this case, and no
+  prompt-injection protection is claimed (related to #74).
+
 - Add a disposable adversarial Git-history fixture with a deceptive commit
   subject, black-box inventory assertions and an offline preflight recipe.
   The subject is untrusted data; no model prompt-injection defense is claimed
