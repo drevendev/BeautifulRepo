@@ -191,8 +191,18 @@ def check(root: Path, repository: str) -> tuple[int, list[str]]:
             parents = (resolved / ".github", resolved / ".github" / "workflows")
             if not all(_normal_dir(p) for p in parents):
                 raise OSError("redirect or missing directory")
-            if not stat.S_ISREG(path.lstat().st_mode):
-                raise OSError("not an ordinary file")
+            # Windows path lookup is case-insensitive, but GitHub/Linux paths are not.
+            # Verify the actual directory entry rather than accepting a case alias.
+            with os.scandir(parents[1]) as entries:
+                found_exact = False
+                for count, entry in enumerate(entries):
+                    if count >= 4096:
+                        raise OSError("too many workflow directory entries")
+                    if entry.name == filename:
+                        found_exact = True
+                        break
+            if not found_exact or not stat.S_ISREG(path.lstat().st_mode):
+                raise OSError("missing, case-mismatched or redirected workflow")
         except OSError:
             errors.append(f"README.md:{line}: missing or redirected workflow: "
                           f".github/workflows/{filename}")
