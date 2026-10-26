@@ -5,6 +5,9 @@ Each template is an **editable starting point**, not a completed project
 or a verification of its placeholder commands.
 
 - [General repository README](README.template.md) — public-facing first result.
+- [Design-intent brief](DESIGN_INTENT.template.md) — audience, fixed evidence, two
+  honest first-screen alternatives and explicit manual review limits; see the
+  [filled Rowcount case](../examples/readme-visuals/rowcount/DESIGN_INTENT.md).
 - [Internal/private repository README](INTERNAL_README.template.md) —
   verified ownership and support, access, private setup, data classification,
   runbooks and approved usage terms **without presuming an open-source license**.

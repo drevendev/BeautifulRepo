@@ -143,6 +143,25 @@ The SVG is a *drawing of a verified transcript*, not a screenshot of a running
 terminal. No GitHub renderer, browser accessibility, or manual narrow-width
 inspection is claimed by the source-only tests.
 
+## Record design intent before drawing
+
+Use the [reusable design-intent template](../templates/DESIGN_INTENT.template.md)
+to pin the reader task, first-success command, source revision and claims that
+are merely illustrative. It asks for two genuinely different first-screen
+hierarchies **with identical underlying facts**, a nonvisual reading order,
+original-asset provenance, rejected designs and explicit checks actually run.
+
+The [filled Rowcount brief](../examples/readme-visuals/rowcount/DESIGN_INTENT.md)
+shows the method on the two working CLI variants; the earlier
+[PocketDiff brief](../examples/readme-visuals/DESIGN_INTENT.md) shows an
+explicitly fictional counterpart. Neither source-level comparison measures
+reader comprehension, browser reflow or assistive-technology behaviour.
+
+W3C WAI guidance distinguishes informative from decorative images: the former
+need the relevant text equivalent; a truly redundant or decorative image can
+use `alt=""`. Decide from the image's purpose and surrounding text, not a
+blind rule that every image needs a long alt description.
+
 ## Review checklist
 
 Before merging a README visual:
