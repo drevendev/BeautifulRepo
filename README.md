@@ -133,6 +133,8 @@ tests end with `OK`. A failure prints `ERROR:` or a test name with the file to f
 
 The same checks run in GitHub Actions. They validate structured catalog metadata, generated catalog drift, repository-owned relative Markdown destinations, and structural regressions in the examples and public repository surfaces.
 
+CI also runs `python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo` to catch a missing local workflow behind the root README's GitHub Actions status badge. This **does not** verify that CI ran or passed; it only checks the referenced workflow file.
+
 The additional HTML navigation check verifies bounded local HTML links, media assets and section fragments.
 
 Other repositories can run the audit and both link checks as a GitHub Action
