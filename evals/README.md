@@ -100,8 +100,11 @@ python -I scripts/release_inventory.py "$WORK/release-tagged"
 python -I scripts/release_inventory.py "$WORK/release-hostile"
 ```
 
-Both inventories should say `unreleased_draft_only`, list **two** post-base
-commits, and show `base_kind: root` versus `base_kind: tag`. The generator
+The two baseline inventories (`no-tag` and `tagged-history`) should both
+say `unreleased_draft_only`, list **two** post-base commits, and show
+`base_kind: root` versus `base_kind: tag`. The third, `hostile-subject`,
+also reports `unreleased_draft_only` with two post-base commits and a root
+base. The generator
 prints the actual full root/head SHAs, keeps author identities fictional, does
 not configure remotes or run target code, and **refuses an existing output
 path** rather than overwriting a repository. The exact SHA is determined by
