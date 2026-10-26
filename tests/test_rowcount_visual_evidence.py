@@ -60,7 +60,6 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
         self.assertIn('media="(prefers-color-scheme: light)"', source)
         self.assertIn('alt="In examples/cli-starter, python rowcount.py sample.csv prints Data rows: 3."', source)
 
-
     def test_comparison_links_preserve_readable_navigation(self):
         index = (ROOT / "examples" / "README.md").read_text(encoding="utf-8")
         self.assertIn(
