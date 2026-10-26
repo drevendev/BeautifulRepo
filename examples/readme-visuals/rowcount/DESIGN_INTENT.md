@@ -98,9 +98,9 @@ The full command and output remain understandable with images disabled.
 fallback alt text and linked files were inspected at the above named source
 revision and in the three-page README comparison. Source contract:
 `python -m unittest discover -s tests -p test_rowcount_visual_evidence.py -v`
-(run from a checkout). The prior PR's GitHub CI checks are provider evidence; **no new
-local test run, browser visual inspection or model evaluation is claimed
-by this brief**.
+(run from a checkout). The prior PR's GitHub CI checks are provider evidence. The standalone SVG
+preview above was visually inspected, but **GitHub Markdown rendering was not tested**;
+no full local repository test run or model evaluation is claimed by this brief.
 
 **Manual checks still required:** GitHub's actual rendering in both themes at
 desktop/375 px/320 px, images-off reading order, keyboard/focus, screen

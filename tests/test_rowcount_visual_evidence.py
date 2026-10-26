@@ -83,7 +83,7 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
             linear = [v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
                       for v in rgb]
             return sum(v * w for v, w in
-                       zip(linear, (0.2126, 0.7152, 0.0722)))
+                       zip(linear, (0.2126, 0.7152, 0.0722), strict=True))
 
         namespace = "{http://www.w3.org/2000/svg}"
         pair = []
