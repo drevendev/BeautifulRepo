@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 720 204">
+  <title id="title">Rowcount local CSV command and result</title>
+  <desc id="desc">A drawn terminal excerpt, not a screenshot: from the examples/cli-starter directory, python rowcount.py sample.csv prints Data rows: 3.</desc>
+  <rect x="0" y="0" width="720" height="204" rx="16" fill="#142232"/>
+  <rect x="16" y="16" width="688" height="172" rx="11" fill="#1c3046" stroke="#6c8aa5" stroke-width="1.5"/>
+  <text x="36" y="47" fill="#ecf3ff" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Local command · Python 3.11+</text>
+  <path d="M36 60 H684" stroke="#6c8aa5" stroke-width="1"/>
+  <text x="36" y="90" fill="#ecf3ff" font-family="monospace" font-size="15">$ cd examples/cli-starter</text>
+  <text x="36" y="119" fill="#ecf3ff" font-family="monospace" font-size="15">$ python rowcount.py sample.csv</text>
+  <text x="36" y="151" fill="#c1e9d4" font-family="monospace" font-size="20" font-weight="700">Data rows: 3</text>
+  <text x="36" y="176" fill="#ecf3ff" font-family="system-ui,sans-serif" font-size="11">Original illustration of a verified local result · not a screenshot</text>
+</svg>
