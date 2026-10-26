@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Resolve single-line Markdown reference-style GitHub Actions badge images
+  as well as inline/HTML forms in the offline checker. Normalize reference
+  labels, report failures at the image use line, use the first definition and
+  add five regressions. Full GFM rendering and live CI remain unverified.
+
 - Run the existing offline GitHub Actions badge-target checker in BeautifulRepo's
   own quality CI, with a checked-in workflow/README contract test. A badge that
   points to a missing local workflow now fails the PR job, but a present file
