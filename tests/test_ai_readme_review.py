@@ -36,6 +36,7 @@ class AiReadmeReviewTests(unittest.TestCase):
         self.assertIn("```text\nData rows: 3\n```", self.guide)
 
     def test_invented_claims_are_clearly_marked_as_negative_example(self):
+        prose = " ".join(self.guide.split())
         for required in (
             "Candidate first screen — deliberately invented bad copy",
             "fabricated negative example, not a product description",
@@ -46,7 +47,7 @@ class AiReadmeReviewTests(unittest.TestCase):
             "Source check",
         ):
             with self.subTest(required=required):
-                self.assertIn(required, self.guide)
+                self.assertIn(required, prose)
 
     def test_receipt_separates_source_checks_from_manual_testing(self):
         for required in (
