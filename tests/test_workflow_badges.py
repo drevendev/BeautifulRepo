@@ -5,7 +5,8 @@ import sys
 import tempfile
 import unittest
 
-SCRIPT = Path(__file__).parents[1] / "tools" / "workflow_badges.py"
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "tools" / "workflow_badges.py"
 REPO = "drevendev/BeautifulRepo"
 BADGE = "https://github.com/drevendev/BeautifulRepo/actions/workflows/quality.yml/badge.svg"
 
@@ -26,6 +27,20 @@ class WorkflowBadgeTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("name: Quality\n", encoding="utf-8")
         return path
+
+    def test_beautifulrepo_automatically_checks_its_own_workflow_badge(self):
+        command = "python -I tools/workflow_badges.py --root . --repo " + REPO
+        workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+        self.assertIn("run: " + command, workflow)
+        for page in ("README.md", "CONTRIBUTING.md"):
+            with self.subTest(page=page):
+                self.assertIn(command, (ROOT / page).read_text(encoding="utf-8"))
+        result = subprocess.run(
+            [sys.executable, "-I", str(SCRIPT), "--root", str(ROOT), "--repo", REPO],
+            cwd=ROOT, capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("checked 1 same-repository workflow badge(s)", result.stdout)
 
     def test_present_workflow_markdown_badge_succeeds(self):
         self.workflow()
