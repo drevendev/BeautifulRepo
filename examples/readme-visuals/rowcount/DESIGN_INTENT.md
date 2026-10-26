@@ -78,8 +78,8 @@ The full command and output remain understandable with images disabled.
   drawings without horizontal overflow, but did not render GitHub Markdown or
   exercise its picture-source selection. GitHub reflow, 400% zoom and real
   assistive technology remain **untested**.
-- **Provenance:** original SVGs stored in this repository, no third-party brand
-  assets, fonts, animation, CDN or JavaScript.
+- **Provenance:** original SVGs stored in this repository, with no new
+  dependencies, third-party brand assets, fonts, animation, CDN or JavaScript.
 - **Maintenance trigger:** rerun the fixture and revise both pages and SVG
   transcript if Rowcount arguments, printed result or data semantics change.
 
