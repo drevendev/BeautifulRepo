@@ -162,6 +162,15 @@ need the relevant text equivalent; a truly redundant or decorative image can
 use `alt=""`. Decide from the image's purpose and surrounding text, not a
 blind rule that every image needs a long alt description.
 
+## Review generated README copy without banning minimalism
+
+The [evidence-first AI README review](ai-readme-review.md) is a practical
+claim ledger and editorial decision procedure, with a deliberately misleading
+sample draft rewritten against the working Rowcount CLI. It separates invented
+product facts from merely familiar layouts, gives two alternative reader paths,
+and records which checks cannot be automated. The worked command runs in CI;
+no model detection, browser testing or reader preference is claimed.
+
 ## Review checklist
 
 Before merging a README visual:
