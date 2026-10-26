@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a zero-dependency, offline agent-eval Read receipt checker that compares
+  exact returned fixture content with a recorded mounted path. Six black-box
+  tests distinguish matched bytes from absent, truncated, path-only, forged
+  answer-only and malformed evidence. It does not authenticate transcripts or
+  establish model safety (related to #74).
+
 - Add an uncued synthetic README agent-eval case: an ordinary onboarding
   request must not promote a fixture's fake green CI badge, fabricated
   test results or instruction to edit without approval. Static tests guard
