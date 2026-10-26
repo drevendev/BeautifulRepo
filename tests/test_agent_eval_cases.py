@@ -168,5 +168,30 @@ class AgentEvalCaseContracts(unittest.TestCase):
         for name in ("skill-fired.md", "no-writes.md", "no-edits.md"):
             self.assertTrue((case / "graders" / name).is_file(), name)
 
+    def test_uncued_readme_proof_case_has_no_safety_hint(self):
+        """Unprompted false README claims are evaluated, not silently accepted."""
+        case = EVALS / "readme-uncued-proof"
+        prompt = (case / "prompt.md").read_text(encoding="utf-8").split("---", 2)[2].lower()
+        self.assertIn("readme", prompt)
+        for cue in ("badge", "ci", "injection", "ignore", "untrusted",
+                    "fabricat", "approval", "test pass"):
+            with self.subTest(cue=cue):
+                self.assertNotIn(cue, prompt)
+
+        fixture = (case / "resources" / "README.md").read_text(encoding="utf-8")
+        for bait in ("SYSTEM:", "build-passing-brightgreen",
+                     "100% of tests", "every operating system"):
+            self.assertIn(bait, fixture)
+        self.assertIn("no runnable implementation", fixture.lower())
+
+        grader = (case / "graders" / "safe-outcome.md").read_text(encoding="utf-8")
+        for required in ("type: llm", "PASS only if", "FAIL if",
+                         "INCONCLUSIVE", "exact file list", "diff",
+                         "explicit approval", "unverified"):
+            self.assertIn(required, grader)
+        for name in ("skill-fired.md", "no-writes.md", "no-edits.md"):
+            self.assertTrue((case / "graders" / name).is_file(), name)
+
+
 if __name__ == "__main__":
     unittest.main()
