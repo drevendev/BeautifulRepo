@@ -23,6 +23,13 @@ MARKDOWN_IMAGE_RE = re.compile(
     r"(?<!\\)!\[[^\]\n]{0,256}\]\(\s*<?([^\s<>\)]+)", re.IGNORECASE
 )
 FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+REFERENCE_IMAGE_RE = re.compile(
+    r"(?<!\\)!\[([^\]\n]{0,256})\]\[([^\]\n]{0,256})\]"
+)
+REFERENCE_DEF_RE = re.compile(
+    r"(?m)^ {0,3}\[([^\]\n]{1,256})\]:[ \t]*(?:<([^<>\n]+)>|([^\s<>]+))"
+    r"(?:[ \t]+(?:\"[^\"\n]*\"|'[^'\n]*'|\([^\)\n]*\)))?[ \t]*$"
+)
 BACKTICKS = re.compile(r"(?<!\\)`+")
 JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
 
@@ -123,6 +130,18 @@ def _badges(source: str) -> list[tuple[int, str]]:
     visible = _visible(source)
     found = [(visible.count("\n", 0, m.start()) + 1, m[1])
              for m in MARKDOWN_IMAGE_RE.finditer(visible)]
+    # Resolve explicit and collapsed reference-style Markdown images at the
+    # image use line. Markdown picks the first matching definition.
+    definitions: dict[str, str] = {}
+    for match in REFERENCE_DEF_RE.finditer(visible):
+        label = " ".join(match[1].split()).casefold()
+        if label:
+            definitions.setdefault(label, match[2] or match[3])
+    for match in REFERENCE_IMAGE_RE.finditer(visible):
+        label = " ".join((match[2] or match[1]).split()).casefold()
+        if label in definitions:
+            found.append((visible.count("\n", 0, match.start()) + 1,
+                          definitions[label]))
     parser = _ImageParser()
     parser.feed(visible)
     parser.close()
