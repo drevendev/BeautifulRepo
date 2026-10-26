@@ -13,6 +13,15 @@ keep their original themed headings.
 
 ### Added
 
+- Add an offline, zero-dependency checker for **same-repository GitHub
+  Actions status badges** in a root README. It verifies that each recognized
+  badge references an ordinary checked-in workflow file, reports bad targets
+  by line, ignores code examples and never fetches workflow results or claims
+  green CI. Fourteen black-box regressions cover good/missing targets,
+  quoted examples, malformed names, symlinks and input errors (related to
+  #16 and #70). Other badge providers and full Markdown rendering are
+  deliberately out of scope.
+
 - Add compact original dark/light Rowcount transcript SVGs for narrow
   READMEs (up to 480 px), keeping the verified command/result at readable
   scale. Tests check both assets' facts and text contrast; an isolated
