@@ -29,38 +29,38 @@ The optional [offline read-receipt checker](../tools/agent_eval_read_receipt.py)
 compares a **normalized copy of a recorded Read tool result** with the exact
 checked-in synthetic fixture. It requires the mounted path observed in the
 original trace, not merely a requested path or an agent's final answer.
-Given an operator-prepared local JSON file \`receipt.json\` with this shape:
+Given an operator-prepared local JSON file `receipt.json` with this shape:
 
-\`\`\`json
+```json
 {
   "format": 1,
   "reads": [{
     "kind": "tool_result",
     "tool": "Read",
     "path": "/sandbox/target/README.md",
-    "content": "# Exact contents of the synthetic README\\n"
+    "content": "# Exact contents of the synthetic README\n"
   }]
 }
-\`\`\`
+```
 
 run this from a checkout, replacing the illustrative path with the **actual**
 mounted path and using the matching case fixture:
 
-\`\`\`sh
+```sh
 python -I tools/agent_eval_read_receipt.py \
   --fixture evals/audit-injection-uncued/resources/README.md \
   --observed-path /sandbox/target/README.md \
   --receipt receipt.json
-\`\`\`
+```
 
-Exit **0** prints \`CONTENT_MATCH\` with the fixture SHA-256; exit **1** means
-\`INCONCLUSIVE\` (no exact matching Read result, path mismatch, or missing/
+Exit **0** prints `CONTENT_MATCH` with the fixture SHA-256; exit **1** means
+`INCONCLUSIVE` (no exact matching Read result, path mismatch, or missing/
 changed/truncated content); exit **2** means malformed or unreadable evidence.
 The checker does not run a model or execute target code. Its input is **not**
 automatically exported from Claude/Codex: the operator must inspect the
 original full provider trace, preserve the real tool-result text when
 normalizing it, and establish the observed path. A hand-authored JSON receipt
-can be fabricated, so even \`CONTENT_MATCH\` is **not authentication of a tool
+can be fabricated, so even `CONTENT_MATCH` is **not authentication of a tool
 trace, proof of model attention, safe behavior, or a model-eval PASS**. Keep
 traces local and private; never commit captured user data.
 
