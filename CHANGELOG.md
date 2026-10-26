@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add two distinct first-screen designs for the **working** Rowcount CSV CLI,
+  with verified local output, original light/dark transcript illustrations,
+  accessible text alternatives and regression checks binding the presentation
+  to the actual checked-in command (related to #16). This is not a terminal
+  screenshot, packaged release or renderer accessibility test.
+
 - Add an uncued adversarial release-note Agent Skill evaluation case using a
   synthetic commit-subject inventory, explicit unpublished-release and
   fictional-contact graders, fixture visibility guidance and static contract
