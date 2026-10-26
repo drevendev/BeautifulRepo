@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Run the existing offline GitHub Actions badge-target checker in BeautifulRepo's
+  own quality CI, with a checked-in workflow/README contract test. A badge that
+  points to a missing local workflow now fails the PR job, but a present file
+  still does not prove a successful or required CI run (related to #85).
+
 - Add an offline, zero-dependency checker for **same-repository GitHub
   Actions status badges** in a root README. It verifies that each recognized
   badge references an ordinary checked-in workflow file, reports bad targets
