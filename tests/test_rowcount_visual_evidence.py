@@ -52,7 +52,7 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
     def test_invalid_row_width_fails_instead_of_silently_counting(self):
         with tempfile.TemporaryDirectory() as tempdir:
             malformed = Path(tempdir) / "bad.csv"
-            malformed.write_text("name,amount\\nA,1\\nB\\n", encoding="utf-8")
+            malformed.write_text("name,amount\nA,1\nB\n", encoding="utf-8")
             result = subprocess.run(
                 [sys.executable, str(CLI / "rowcount.py"), str(malformed)],
                 cwd=ROOT, capture_output=True, text=True, check=False, timeout=15,
