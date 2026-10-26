@@ -4,11 +4,17 @@
 real output of the checked-in Rowcount example, not a screenshot or a release.
 
 <picture>
+  <source media="(max-width: 480px) and (prefers-color-scheme: dark)" srcset="rowcount-mobile-dark.svg">
+  <source media="(max-width: 480px)" srcset="rowcount-mobile-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="rowcount-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="rowcount-light.svg">
   <img src="rowcount-light.svg"
        alt="In examples/cli-starter, python rowcount.py sample.csv prints Data rows: 3.">
 </picture>
+
+At widths up to 480 px, a compact drawing keeps the command legible instead of
+shrinking the desktop artwork. The same command and result remain selectable
+below, independently of either illustration.
 
 The same result without the image: run `python rowcount.py sample.csv` inside
 `examples/cli-starter`; stdout is **`Data rows: 3`**.

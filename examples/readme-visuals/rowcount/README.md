@@ -46,8 +46,10 @@ or a shipped product. They show no simulated metrics other than this observed re
   Risk: feels too much like reference documentation; mitigation: the actual
   checkout command and observed output immediately follow the table.
 
-Only terminal-led uses light/dark SVGs with embedded `title` and `desc`,
-meaningful HTML `alt` text, and nearby selectable equivalents.
+Only terminal-led uses paired light/dark SVGs for desktop and narrow widths,
+with embedded `title` and `desc`, meaningful HTML `alt` text and nearby
+selectable equivalents. Compact art preserves the command and result without
+shrinking the desktop transcript to tiny text.
 Review the GitHub-rendered Markdown manually at narrow widths and in both themes;
 the source tests do not certify renderer behavior, contrast or screen-reader output.
 The [filled Rowcount design-intent brief](DESIGN_INTENT.md) records the
