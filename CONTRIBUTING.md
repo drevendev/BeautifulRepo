@@ -71,6 +71,9 @@ and section-fragment checks. Neither checks external URLs, completely renders
 Markdown, or certifies accessibility. Review the generated diff. No network
 access or third-party Python packages are needed.
 
+CI additionally checks the root README's local GitHub Actions badge target using
+`python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo`. This read-only check establishes file presence, not CI success.
+
 CI also runs [ruff](https://docs.astral.sh/ruff/) in a separate `Lint` job, with the
 rules in `ruff.toml`. You don't need it locally. To run it anyway, install the pinned
 version with `python -m pip install --require-hashes -r .github/lint-requirements.txt`
