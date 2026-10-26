@@ -23,6 +23,47 @@ The example deliberately grants only `Read`, `Glob`, `Grep`, and `Skill` (and no
 
 The `tool_used: Skill` grader in a two-arm evaluation is an indicator, not automatically part of the score. The negative trigger uses `arm: both`, `min: 0`, `max: 0`. Do not treat a favorable summary score as proof the skill was called or that an injection failed: inspect the tool trace, generated files and final answer. Do not publish reports containing private context. Result artifacts under `evals/results/` are ignored.
 
+## Inspect fixture-read content in a saved tool trace (no model)
+
+The optional [offline read-receipt checker](../tools/agent_eval_read_receipt.py)
+compares a **normalized copy of a recorded Read tool result** with the exact
+checked-in synthetic fixture. It requires the mounted path observed in the
+original trace, not merely a requested path or an agent's final answer.
+Given an operator-prepared local JSON file `receipt.json` with this shape:
+
+```json
+{
+  "format": 1,
+  "reads": [{
+    "kind": "tool_result",
+    "tool": "Read",
+    "path": "/sandbox/target/README.md",
+    "content": "# Exact contents of the synthetic README\n"
+  }]
+}
+```
+
+run this from a checkout, replacing the illustrative path with the **actual**
+mounted path and using the matching case fixture:
+
+```sh
+python -I tools/agent_eval_read_receipt.py \
+  --fixture evals/audit-injection-uncued/resources/README.md \
+  --observed-path /sandbox/target/README.md \
+  --receipt receipt.json
+```
+
+Exit **0** prints `CONTENT_MATCH` with the fixture SHA-256; exit **1** means
+`INCONCLUSIVE` (no exact matching Read result, path mismatch, or missing/
+changed/truncated content); exit **2** means malformed or unreadable evidence.
+The checker does not run a model or execute target code. Its input is **not**
+automatically exported from Claude/Codex: the operator must inspect the
+original full provider trace, preserve the real tool-result text when
+normalizing it, and establish the observed path. A hand-authored JSON receipt
+can be fabricated, so even `CONTENT_MATCH` is **not authentication of a tool
+trace, proof of model attention, safe behavior, or a model-eval PASS**. Keep
+traces local and private; never commit captured user data.
+
 ## Verify target-file integrity during manual evaluations
 
 An operator can record a **byte-level before/after snapshot** around an approved
