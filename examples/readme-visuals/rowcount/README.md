@@ -46,7 +46,11 @@ The artwork has separate light/dark palettes, embedded `title` and `desc`,
 a meaningful HTML `alt`, and nearby plain-text equivalents.
 Review the GitHub-rendered Markdown manually at narrow widths and in both themes;
 the source tests do not certify renderer behavior, contrast or screen-reader output.
-The original [design-intent method](../DESIGN_INTENT.md) is reusable; these
-Rowcount source/output facts, not PocketDiff's fictional numbers, are the evidence.
+The [filled Rowcount design-intent brief](DESIGN_INTENT.md) records the
+trade-offs and verification limits for these two actual variants. Use the
+[blank design-intent template](../../../templates/DESIGN_INTENT.template.md)
+for your own product rather than copying this visual identity.
+The original [PocketDiff design-intent exercise](../DESIGN_INTENT.md) uses
+fictional numbers, whereas this Rowcount comparison uses actual CLI output.
 
 Related: [visual README guide](../../../guides/readme-visuals.md).
