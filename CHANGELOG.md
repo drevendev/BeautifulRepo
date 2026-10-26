@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a disposable adversarial Git-history fixture with a deceptive commit
+  subject, black-box inventory assertions and an offline preflight recipe.
+  The subject is untrusted data; no model prompt-injection defense is claimed
+  (related to #74).
+
 - Add an opt-in, no-model real Git-history fixture generator for release-note agent-eval preflights: deterministic synthetic commits, tagged and untagged cases, overwrite refusal and black-box tests against the actual offline inventory. Model triggering and publication are not verified (related to #74).
 
 - Compare three distinct first-screen README treatments of the same fictional
