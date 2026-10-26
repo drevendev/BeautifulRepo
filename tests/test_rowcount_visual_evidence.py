@@ -61,5 +61,21 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
         self.assertIn('alt="In examples/cli-starter, python rowcount.py sample.csv prints Data rows: 3."', source)
 
 
+    def test_comparison_links_preserve_readable_navigation(self):
+        index = (ROOT / "examples" / "README.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "The [working Rowcount first-screen comparison]"
+            "(readme-visuals/rowcount/README.md)", index,
+        )
+        self.assertIn("Before adapting a starter, use the [first-success checklist]", index)
+        guide = (ROOT / "guides" / "readme-visuals.md").read_text(encoding="utf-8")
+        self.assertIn("\n## Two presentations backed by a real command\n", guide)
+        self.assertIn("\n## Review checklist\n", guide)
+        self.assertLess(
+            guide.index("## Two presentations backed by a real command"),
+            guide.index("## Review checklist"),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
