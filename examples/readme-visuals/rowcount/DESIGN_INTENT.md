@@ -85,8 +85,8 @@ The full command and output remain understandable with images disabled.
 **Source-verified, 2026-10-26:** the documented command, output, theme labels,
 fallback alt text and linked files were inspected at the above named source
 revision and in the current README comparison. Source contract:
-`python -m unittest tests.test_rowcount_visual_evidence -v` (run from a
-checkout). The prior PR's GitHub CI checks are provider evidence; **no new
+`python -m unittest discover -s tests -p test_rowcount_visual_evidence.py -v`
+(run from a checkout). The prior PR's GitHub CI checks are provider evidence; **no new
 local test run, browser visual inspection or model evaluation is claimed
 by this brief**.
 
