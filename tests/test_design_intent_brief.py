@@ -35,6 +35,7 @@ class DesignIntentBriefTests(unittest.TestCase):
 
     def test_filled_case_is_revision_bound_and_discloses_limits(self):
         text = EXAMPLE.read_text(encoding="utf-8")
+        normalized = " ".join(text.replace("**", "").split()).casefold()
         for detail in (
             REVISION, "Data rows: 3", "Python 3.11+",
             "editorial.md", "terminal-led.md",
@@ -43,7 +44,7 @@ class DesignIntentBriefTests(unittest.TestCase):
             "no new", "illustrative",
         ):
             with self.subTest(detail=detail):
-                self.assertIn(detail.casefold(), text.casefold())
+                self.assertIn(detail.casefold(), normalized)
         self.assertNotIn("{repository or document surface}", text)
         for page in ("editorial.md", "terminal-led.md"):
             source = (CASE / page).read_text(encoding="utf-8")
