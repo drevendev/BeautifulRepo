@@ -2,6 +2,7 @@
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
@@ -27,8 +28,8 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
             self.assertEqual(process.stdout, RESULT + "\n")
             self.assertEqual(process.stderr, "")
 
-    def test_both_variants_preserve_exact_command_output_and_limit(self):
-        for name in ("editorial.md", "terminal-led.md"):
+    def test_all_three_variants_preserve_command_output_and_limit(self):
+        for name in ("editorial.md", "terminal-led.md", "contract-first.md"):
             with self.subTest(name=name):
                 source = (CASE / name).read_text(encoding="utf-8")
                 self.assertIn(COMMAND, source)
@@ -36,6 +37,29 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
                 self.assertIn("Python 3.11+", source)
                 self.assertIn("not", source.lower())
                 self.assertIn("cli-starter/sample.csv", source)
+
+    def test_contract_first_is_an_actual_boundary_card(self):
+        source = (CASE / "contract-first.md").read_text(encoding="utf-8")
+        for fact in (
+            "## Contract at a glance", "header", "blank", "column",
+            "schema", "nonzero exit", "## Reproduce the result",
+        ):
+            self.assertIn(fact, source)
+        self.assertIn("[Compare all three entrances](README.md)", source)
+        index = (CASE / "README.md").read_text(encoding="utf-8")
+        self.assertIn("[Contract-first](contract-first.md)", index)
+
+    def test_invalid_row_width_fails_instead_of_silently_counting(self):
+        with tempfile.TemporaryDirectory() as tempdir:
+            malformed = Path(tempdir) / "bad.csv"
+            malformed.write_text("name,amount\\nA,1\\nB\\n", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(CLI / "rowcount.py"), str(malformed)],
+                cwd=ROOT, capture_output=True, text=True, check=False, timeout=15,
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("expected 2 columns, got 1", result.stderr)
 
     def test_dark_and_light_art_have_the_same_information(self):
         records = []
@@ -68,10 +92,10 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
         )
         self.assertIn("Before adapting a starter, use the [first-success checklist]", index)
         guide = (ROOT / "guides" / "readme-visuals.md").read_text(encoding="utf-8")
-        self.assertIn("\n## Two presentations backed by a real command\n", guide)
+        self.assertIn("\n## Three presentations backed by a real command\n", guide)
         self.assertIn("\n## Review checklist\n", guide)
         self.assertLess(
-            guide.index("## Two presentations backed by a real command"),
+            guide.index("## Three presentations backed by a real command"),
             guide.index("## Review checklist"),
         )
 

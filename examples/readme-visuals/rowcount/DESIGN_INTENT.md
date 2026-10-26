@@ -1,7 +1,8 @@
 # Rowcount: a design-intent decision from actual code
 
-**Scope:** the two alternative Rowcount README first screens:
-[editorial](editorial.md) and [terminal-led](terminal-led.md).
+**Scope:** three alternative Rowcount README first screens:
+[editorial](editorial.md), [terminal-led](terminal-led.md) and
+[contract-first](contract-first.md).
 Both describe a checkout-only example, **not** a released Python package.
 This is a filled application of the
 [reusable design-intent template](../../../templates/DESIGN_INTENT.template.md),
@@ -11,8 +12,9 @@ not an endorsement of a single visual style.
 
 The editorial reader wants to know whether a local CLI solves the right CSV
 counting task and what it will *not* validate. The terminal-led reader wants
-to see a concrete output before reading implementation details. Both need a
-copyable first success and a truthful local-data boundary.
+to see a concrete output before reading implementation details. The
+contract-first reader checks input assumptions and failure behavior first.
+All three need a copyable first success and a truthful local-data boundary.
 
 **One-sentence promise:** count nonblank data records after a CSV header,
 locally, and print a single number.
@@ -49,22 +51,28 @@ service; illustrative media must not replace the executable command.
    stdout in selectable text → prerequisites → limits. Best when quickly
    checking what the command produces. Cost: a decorative-looking graphic could
    delay discovery of the actual command unless the text stays adjacent.
+3. **Contract-first:** count/validation boundary table → identical real
+   command → observed result → source and errors. Best when evaluating whether
+   a small tool's assumptions fit existing data. Cost: a table can feel dense
+   and reflow poorly; keep it to two short columns and inspect narrow widths.
 
-Neither is a universally superior design. Keep the same facts, limitations
-and navigation in both; test with actual users before claiming a preference.
+No variant is universally superior. Keep the same facts, limitations
+and navigation in all three; test with actual users before claiming a preference.
 The full command and output remain understandable with images disabled.
 
 ## Visual and interaction decisions
 
 - **Hierarchy:** one headline, a compact specific promise, and an early
   first-success path instead of a badge wall or abstract gradient.
+- **Contract-first:** compact semantic Markdown table, no extra graphic or
+  third-party visual library. Input and output facts remain selectable text.
 - **Theme:** two local SVG colour variants selected with HTML `picture`;
   labels and values stay identical, with a default `img` fallback.
 - **Alternative text:** the HTML image describes the command and result.
   Nearby selectable text repeats them, rather than relying on SVG colours.
   Embedded SVG `title` and `desc` provide additional source metadata.
 - **Width and zoom:** the example uses normal Markdown flow and a local image.
-  Narrow-width GitHub rendering and 400% zoom were **not tested** for these two
+  Narrow-width GitHub rendering and 400% zoom were **not tested** for these three
   variant pages; source-level assertions cannot establish reflow.
 - **Provenance:** original SVGs stored in this repository, no third-party brand
   assets, fonts, animation, CDN or JavaScript.
@@ -84,7 +92,7 @@ The full command and output remain understandable with images disabled.
 
 **Source-verified, 2026-10-26:** the documented command, output, theme labels,
 fallback alt text and linked files were inspected at the above named source
-revision and in the current README comparison. Source contract:
+revision and in the three-page README comparison. Source contract:
 `python -m unittest discover -s tests -p test_rowcount_visual_evidence.py -v`
 (run from a checkout). The prior PR's GitHub CI checks are provider evidence; **no new
 local test run, browser visual inspection or model evaluation is claimed
@@ -93,7 +101,7 @@ by this brief**.
 **Manual checks still required:** GitHub's actual rendering in both themes at
 desktop/375 px/320 px, images-off reading order, keyboard/focus, screen
 reader, real 400% zoom and contrast. Until those are performed, the safe
-decision is to **publish as two inspectable source-backed alternatives**, not
+decision is to **publish as three inspectable source-backed alternatives**, not
 to recommend a winning visual design or certify either presentation.
 
 Method: [README visual guidance](../../../guides/readme-visuals.md) and
