@@ -34,7 +34,7 @@ class ReceiptTests(unittest.TestCase):
 
     def item(self, **changes):
         return dict({"kind": "tool_result", "tool": "Read", "path": self.path,
-                     "content": self.fixture.read_text(encoding="utf-8")}, **changes)
+                     "content": self.fixture.read_bytes().decode("utf-8")}, **changes)
 
     def test_exact_read_result_is_a_match_not_model_pass(self):
         result = self.run_checker({"format": 1, "reads": [self.item()]})
