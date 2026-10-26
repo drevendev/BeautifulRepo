@@ -34,10 +34,11 @@ service; illustrative media must not replace the executable command.
   `Data rows: 3`. The existing
   [black-box test](../../../tests/test_rowcount_visual_evidence.py)
   checks both documented invocations on the installed Python interpreter.
-- **Illustrative assets:** [light](rowcount-light.svg) and
-  [dark](rowcount-dark.svg) are original **SVG drawings of a transcript**,
-  not screenshots of GitHub, a terminal, a deployed app or a measured user
-  session. Both show the shorter invocation from `examples/cli-starter`.
+- **Illustrative assets:** paired [desktop light](rowcount-light.svg) /
+  [dark](rowcount-dark.svg) and [compact light](rowcount-mobile-light.svg) /
+  [dark](rowcount-mobile-dark.svg) SVG drawings of the same verified transcript.
+  They are not screenshots of GitHub, a terminal, a deployed app or a measured
+  user session. All show the shorter invocation from `examples/cli-starter`.
 - **Limits:** the CLI is not a CSV schema, dialect or type validator. These
   tests do not demonstrate screenshot fidelity, a package install,
   browser rendering, user preference or accessibility certification.
@@ -66,16 +67,19 @@ The full command and output remain understandable with images disabled.
   first-success path instead of a badge wall or abstract gradient.
 - **Contract-first:** compact semantic Markdown table, no extra graphic or
   third-party visual library. Input and output facts remain selectable text.
-- **Theme:** terminal-led alone uses two local SVG colour variants with HTML `picture`;
-  labels and values stay identical, with a default `img` fallback.
+- **Theme and width:** terminal-led uses dark/light desktop and compact SVGs,
+  selected by ordered HTML `picture` sources. Fact labels and values match,
+  with a default `img` fallback. Compact art uses a 320-unit canvas.
 - **Alternative text:** terminal-led's HTML image describes the command and result.
   Nearby selectable text repeats them, rather than relying on SVG colours.
   Embedded SVG `title` and `desc` provide additional source metadata.
 - **Width and zoom:** all three use normal Markdown flow; only terminal-led has an image.
-  Narrow-width GitHub rendering and 400% zoom were **not tested** for these three
-  variant pages; source-level assertions cannot establish reflow.
-- **Provenance:** original SVGs stored in this repository, no third-party brand
-  assets, fonts, animation, CDN or JavaScript.
+  An isolated-SVG Chromium preview (320 CSS px, 2026-10-26) showed both compact
+  drawings without horizontal overflow, but did not render GitHub Markdown or
+  exercise its picture-source selection. GitHub reflow, 400% zoom and real
+  assistive technology remain **untested**.
+- **Provenance:** original SVGs stored in this repository, with no new
+  dependencies, third-party brand assets, fonts, animation, CDN or JavaScript.
 - **Maintenance trigger:** rerun the fixture and revise both pages and SVG
   transcript if Rowcount arguments, printed result or data semantics change.
 
@@ -94,9 +98,9 @@ The full command and output remain understandable with images disabled.
 fallback alt text and linked files were inspected at the above named source
 revision and in the three-page README comparison. Source contract:
 `python -m unittest discover -s tests -p test_rowcount_visual_evidence.py -v`
-(run from a checkout). The prior PR's GitHub CI checks are provider evidence; **no new
-local test run, browser visual inspection or model evaluation is claimed
-by this brief**.
+(run from a checkout). The prior PR's GitHub CI checks are provider evidence. The standalone SVG
+preview above was visually inspected, but **GitHub Markdown rendering was not tested**;
+no full local repository test run or model evaluation is claimed by this brief.
 
 **Manual checks still required:** GitHub's actual rendering in both themes at
 desktop/375 px/320 px, images-off reading order, keyboard/focus, screen

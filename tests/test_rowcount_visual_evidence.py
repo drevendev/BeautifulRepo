@@ -77,10 +77,46 @@ class RowcountVisualEvidenceTests(unittest.TestCase):
             records.append(content)
         self.assertEqual(records[0], records[1])
 
+    def test_mobile_art_facts_and_contrast(self):
+        def brightness(color):
+            rgb = [int(color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+            linear = [v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+                      for v in rgb]
+            return sum(v * w for v, w in
+                       zip(linear, (0.2126, 0.7152, 0.0722), strict=True))
+
+        namespace = "{http://www.w3.org/2000/svg}"
+        pair = []
+        for name in ("rowcount-mobile-light.svg", "rowcount-mobile-dark.svg"):
+            root = ET.parse(CASE / name).getroot()
+            self.assertEqual(root.get("viewBox"), "0 0 320 216")
+            self.assertIn("Rowcount", root.find(namespace + "title").text)
+            self.assertIn("not a screenshot", root.find(namespace + "desc").text)
+            bg = brightness(root.findall(namespace + "rect")[1].get("fill"))
+            texts = root.findall(namespace + "text")
+            labels = [node.text for node in texts]
+            self.assertIn("$ python rowcount.py sample.csv", labels)
+            self.assertIn(RESULT, labels)
+            for node in texts:
+                fg = brightness(node.get("fill"))
+                high, low = sorted((fg, bg), reverse=True)
+                with self.subTest(name=name, label=node.text):
+                    self.assertGreaterEqual((high + 0.05) / (low + 0.05), 4.5)
+                if node.text.startswith("$ python"):
+                    self.assertGreaterEqual(float(node.get("font-size")), 13)
+            pair.append(labels)
+        self.assertEqual(pair[0], pair[1])
+
     def test_visual_fallback_is_textual_and_descriptive(self):
         source = (CASE / "terminal-led.md").read_text(encoding="utf-8")
         self.assertIn("<picture>", source)
         self.assertIn('media="(prefers-color-scheme: dark)"', source)
+        self.assertIn('media="(max-width: 480px)"', source)
+        self.assertIn('media="(max-width: 480px) and (prefers-color-scheme: dark)"', source)
+        self.assertIn('srcset="rowcount-mobile-light.svg"', source)
+        self.assertIn('srcset="rowcount-mobile-dark.svg"', source)
+        self.assertLess(source.index('srcset="rowcount-mobile-dark.svg"'),
+                        source.index('srcset="rowcount-dark.svg"'))
         self.assertIn('media="(prefers-color-scheme: light)"', source)
         self.assertIn('alt="In examples/cli-starter, python rowcount.py sample.csv prints Data rows: 3."', source)
 

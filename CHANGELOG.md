@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add compact original dark/light Rowcount transcript SVGs for narrow
+  READMEs (up to 480 px), keeping the verified command/result at readable
+  scale. Tests check both assets' facts and text contrast; an isolated
+  Chromium preview at 320 px is not a GitHub renderer or screen-reader
+  certification (related to #16).
+
 - Add a third, contract-first README entrance for the real Rowcount example:
   a concise behavior/limits card ahead of the same executable first success.
   The existing two layouts remain; new regression coverage verifies that

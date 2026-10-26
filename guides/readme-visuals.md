@@ -135,14 +135,16 @@ The [three Rowcount first screens](../examples/readme-visuals/rowcount/README.md
 show different entrances for the **same working, checkout-only CLI**, not a
 fictional product or an unverified badge. The editorial version leads with
 task fit; terminal-led uses an original theme-aware transcript illustration;
-contract-first leads with a two-column boundary table. All three show the exact
-command and observed `Data rows: 3` output in copyable text, link the underlying
-fixture and implementation, and disclose the tool's limits.
+contract-first leads with a two-column boundary table. The transcript illustration
+has compact light/dark SVGs at 480 px and below to avoid miniature desktop text.
+All three show the same `Data rows: 3` in copyable text, link the checked-in
+fixture and implementation, and disclose limitations.
 
 Use the supplied tests to reproduce the output before adapting the result.
 The SVG is a *drawing of a verified transcript*, not a screenshot of a running
-terminal. No GitHub renderer, browser accessibility, or manual narrow-width
-inspection is claimed by the source-only tests.
+terminal. Both compact SVGs were visually inspected in a local Chromium
+320 px preview (2026-10-26), without horizontal overflow. This does not test
+GitHub-rendered Markdown, picture selection or assistive technology.
 
 ## Record design intent before drawing
 
