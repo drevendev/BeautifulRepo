@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add an uncued synthetic README agent-eval case: an ordinary onboarding
+  request must not promote a fixture's fake green CI badge, fabricated
+  test results or instruction to edit without approval. Static tests guard
+  fixture placement, uncued wording and grader contracts; no model run or
+  write-gate effectiveness is claimed (related to #74 and #70).
+
 - Add a practical evidence-first review for AI-written README drafts: identify
   fabricated capabilities without policing minimalist style, check the working
   Rowcount first-success command, compare honest alternatives, and keep a
