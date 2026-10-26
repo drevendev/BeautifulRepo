@@ -10,7 +10,7 @@ Use this with the [design-intent brief](../templates/DESIGN_INTENT.template.md)
 and [visual README guidance](readme-visuals.md). You need only a text editor,
 a local checkout and the project's normal test commands.
 
-## A ten-minute evidence-first review
+## An evidence-first review
 
 1. **Name the reader's job.** Write one question the first screen must answer
    and one command or link that gets the visitor to a useful result.
@@ -136,8 +136,7 @@ If the result requires a complex diagram, retain a full textual equivalent
 near it. Informative images require a meaningful alternative; a purely
 decorative or fully redundant image may use `alt=""`.
 
-**Sources inspected 2026-10-26:** [GitHub Markdown relative links and image
-alternatives](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax),
+**Sources inspected 2026-10-26:** [GitHub Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax),
 [W3C WAI Images Tutorial](https://www.w3.org/WAI/tutorials/images/),
 [WAI Informative Images](https://www.w3.org/WAI/tutorials/images/informative/)
 and [WAI Decorative Images](https://www.w3.org/WAI/tutorials/images/decorative/).
