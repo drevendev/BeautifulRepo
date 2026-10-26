@@ -57,10 +57,10 @@ For an intentionally controlled editorial comparison, the
 rearrange the *same fictional* facts for distinct audiences. They do not
 represent three installable products or evidence of a model's design quality.
 
-Before adapting a starter,A [working Rowcount first-screen comparison](readme-visuals/rowcount/README.md)
+The [working Rowcount first-screen comparison](readme-visuals/rowcount/README.md)
 offers two different entrances for an actual tested CLI with the same input and
 output facts. The SVGs are original illustrations, not captured terminal screenshots.
 
- use the [first-success checklist](../checklists/first-success.md).
+Before adapting a starter, use the [first-success checklist](../checklists/first-success.md).
 For commands, reproducible evidence and review handoff, use the
 [maintenance workflow](../guides/maintenance-workflow.md).
