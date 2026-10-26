@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a practical evidence-first review for AI-written README drafts: identify
+  fabricated capabilities without policing minimalist style, check the working
+  Rowcount first-success command, compare honest alternatives, and keep a
+  manual-verification receipt. A regression test runs the documented command;
+  no model-origin detection or browser accessibility is asserted (related to #16).
+
 - Add a reusable, evidence-bound design-intent brief with a filled Rowcount
   application: fixed source/result, two contrasting README entrances,
   meaningful image-alternative choices, rejected layouts and honest manual

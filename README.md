@@ -150,6 +150,7 @@ not a second copy of the first-screen chooser.
 - **Explain and present:** [README design](guides/readme.md),
   [visual README patterns](guides/readme-visuals.md),
   [editorial evidence kit](guides/editorial-evidence.md),
+  [AI-written README evidence review](guides/ai-readme-review.md),
   [repository discoverability](guides/discoverability.md).
 - **Adapt an actual starter:** [CLI guide](guides/cli-repositories.md) and
   [example](examples/cli-starter/README.md);
