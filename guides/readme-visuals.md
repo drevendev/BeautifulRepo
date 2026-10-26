@@ -129,7 +129,21 @@ with images disabled. Their words are **not** verified product output; replacing
 the facts with real, revision-bound evidence is necessary for adaptation.
 Static unit and link tests cover fact preservation and paths, not visual quality.
 
-## Review checklist
+## Review checklist## Two presentations backed by a real command
+
+The [Rowcount editorial and terminal-led first screens](../examples/readme-visuals/rowcount/README.md)
+show two layouts for the **same working, checkout-only CLI**, not a fictional
+product or an unverified badge. The first puts purpose and constraints up front;
+the second lets an original, theme-aware terminal illustration lead. Both show
+the exact command and observed `Data rows: 3` output in copyable text, point to
+the underlying fixture and implementation, and disclose the tool's limits.
+
+Use the supplied tests to reproduce the output before adapting the result.
+The SVG is a *drawing of a verified transcript*, not a screenshot of a running
+terminal. No GitHub renderer, browser accessibility, or manual narrow-width
+inspection is claimed by the source-only tests.
+
+
 
 Before merging a README visual:
 
