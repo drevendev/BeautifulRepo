@@ -47,6 +47,30 @@ or essential information available only inside an image.
 a symmetrical layout, repeated cards, restrained color, emoji, or a familiar
 heading pattern. Request a revision only when you can explain the reader cost.
 
+## Check a workflow badge against the checkout
+
+A CI badge is an *assertion about a workflow*, not a substitute for reading
+the workflow and its latest check results. For one reproducible, offline test
+of the reference itself, run this from a BeautifulRepo checkout:
+
+```bash
+python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo
+```
+
+This checks whether the root README's same-repository GitHub Actions status
+badge points to a regular `.github/workflows/quality.yml` file. It reports
+missing, redirected and unsupported file targets with source line numbers.
+If no matching badges exist, that is **zero checked**, not a passing CI claim.
+The tool never contacts GitHub or executes a workflow. It cannot tell whether
+tests actually ran, passed, were required, or match the badge's implication.
+Review current GitHub checks and any badge text separately. Other badge hosts,
+reference-style image links and full Markdown rendering are out of scope.
+
+See the [tool contract](../tools/README.md#github-actions-readme-badge-file-presence-check)
+and [GitHub's status-badge URL format](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge)
+(reviewed 2026-10-26). This is a small mechanical check in the larger
+evidence-ledger review, not proof of overall README honesty or accessibility.
+
 ## Worked example: Rowcount, not a hypothetical product
 
 The checked-in [Rowcount implementation](../examples/cli-starter/rowcount.py)
@@ -103,10 +127,10 @@ Data rows: 3
 
 The script reports malformed row widths but does **not** validate column
 types, arbitrary dialects or schemas. It is a checkout-only example, not a
-published Python package or hosted product. The real README variants are
-[editorial](../examples/readme-visuals/rowcount/editorial.md) and
-[terminal-led](../examples/readme-visuals/rowcount/terminal-led.md); neither
-needs the fabricated copy above to sound distinctive.
+published Python package or hosted product. The real README treatments—[editorial](../examples/readme-visuals/rowcount/editorial.md),
+[terminal-led](../examples/readme-visuals/rowcount/terminal-led.md) and
+[contract-first](../examples/readme-visuals/rowcount/contract-first.md)—all
+use the same verified facts rather than the fabricated copy above.
 
 The test `tests/test_ai_readme_review.py` executes the documented command
 against the repository's actual fixture. It does not simulate a fresh clone,

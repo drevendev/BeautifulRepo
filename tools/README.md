@@ -112,6 +112,37 @@ remotes, and prints the full root/head SHAs. It never invokes a model, runs
 target code or publishes a release. The [agent-eval runbook](../evals/README.md#optional-real-git-release-note-preflight-no-model)
 explains how to use these local histories and what they **do not** prove.
 
+## GitHub Actions README badge file-presence check
+
+`workflow_badges.py` checks **one narrow, verifiable part** of a CI badge:
+whether a same-repository GitHub Actions status badge in the root `README.md`
+points to an ordinary, checked-in `.github/workflows/*.yml` or `*.yaml` file.
+It accepts the usual Markdown image syntax and HTML `<img>` tags.
+
+```bash
+python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo
+```
+
+Use your own GitHub `owner/repo` when checking another checkout. The tool is
+offline, read-only, Python 3.11+ and standard-library-only. It does not run
+workflows, target project code, `git` or network requests. Common fenced/inline
+code samples and HTML comments are excluded, but this is not a complete GFM
+renderer. It reads only the root README (up to 256 KiB), checks literal local
+workflow filenames without following symlinks or Windows junctions, and prints
+file/line diagnostics when the workflow is missing. Exit 0 means the checked
+references exist, **even if zero were found**; exit 1 means a missing or
+unsupported same-repository target; exit 2 means an input error.
+
+**Not verified:** whether the workflow triggers, passed, is enabled, has
+permissions, belongs to a release, or honestly supports a badge label.
+Shields.io, external badges, GitHub Enterprise domains, reference-style
+Markdown, unusual filenames and browser rendering are outside this bounded
+check. Review those manually. GitHub's
+[workflow-status badge documentation](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge)
+defines the supported URL form and branch/event parameters (reviewed
+2026-10-26). See the [evidence-first README review](../guides/ai-readme-review.md)
+for the other claims a maintainer still needs to verify.
+
 ## Guide review dates
 
 `review_dates.py` finds the dates on which someone re-read a guide's sources, such as
