@@ -3,7 +3,7 @@
 **Scope:** three alternative Rowcount README first screens:
 [editorial](editorial.md), [terminal-led](terminal-led.md) and
 [contract-first](contract-first.md).
-Both describe a checkout-only example, **not** a released Python package.
+All three describe a checkout-only example, **not** a released Python package.
 This is a filled application of the
 [reusable design-intent template](../../../templates/DESIGN_INTENT.template.md),
 not an endorsement of a single visual style.
@@ -66,12 +66,12 @@ The full command and output remain understandable with images disabled.
   first-success path instead of a badge wall or abstract gradient.
 - **Contract-first:** compact semantic Markdown table, no extra graphic or
   third-party visual library. Input and output facts remain selectable text.
-- **Theme:** two local SVG colour variants selected with HTML `picture`;
+- **Theme:** terminal-led alone uses two local SVG colour variants with HTML `picture`;
   labels and values stay identical, with a default `img` fallback.
-- **Alternative text:** the HTML image describes the command and result.
+- **Alternative text:** terminal-led's HTML image describes the command and result.
   Nearby selectable text repeats them, rather than relying on SVG colours.
   Embedded SVG `title` and `desc` provide additional source metadata.
-- **Width and zoom:** the example uses normal Markdown flow and a local image.
+- **Width and zoom:** all three use normal Markdown flow; only terminal-led has an image.
   Narrow-width GitHub rendering and 400% zoom were **not tested** for these three
   variant pages; source-level assertions cannot establish reflow.
 - **Provenance:** original SVGs stored in this repository, no third-party brand
@@ -102,7 +102,7 @@ by this brief**.
 desktop/375 px/320 px, images-off reading order, keyboard/focus, screen
 reader, real 400% zoom and contrast. Until those are performed, the safe
 decision is to **publish as three inspectable source-backed alternatives**, not
-to recommend a winning visual design or certify either presentation.
+to recommend a winning visual design or certify any of the three presentations.
 
 Method: [README visual guidance](../../../guides/readme-visuals.md) and
 [W3C image alternatives](https://www.w3.org/WAI/tutorials/images/).
