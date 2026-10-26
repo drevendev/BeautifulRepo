@@ -117,7 +117,9 @@ explains how to use these local histories and what they **do not** prove.
 `workflow_badges.py` checks **one narrow, verifiable part** of a CI badge:
 whether a same-repository GitHub Actions status badge in the root `README.md`
 points to an ordinary, checked-in `.github/workflows/*.yml` or `*.yaml` file.
-It accepts the usual Markdown image syntax and HTML `<img>` tags.
+It accepts inline Markdown images, single-line reference-style images
+(`![CI][build]` with `[build]: URL`, including collapsed `![CI][]`), and HTML
+`<img>` tags. Reference labels are case-insensitive; the first definition wins.
 
 ```bash
 python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo
@@ -135,9 +137,9 @@ unsupported same-repository target; exit 2 means an input error.
 
 **Not verified:** whether the workflow triggers, passed, is enabled, has
 permissions, belongs to a release, or honestly supports a badge label.
-Shields.io, external badges, GitHub Enterprise domains, reference-style
-Markdown, unusual filenames and browser rendering are outside this bounded
-check. Review those manually. GitHub's
+Shields.io, external badges, GitHub Enterprise domains, shortcut
+reference images (`![CI]`), multiline reference definitions, unusual filenames
+and browser rendering remain outside this bounded check. Review those manually. GitHub's
 [workflow-status badge documentation](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge)
 defines the supported URL form and branch/event parameters (reviewed
 2026-10-26). See the [evidence-first README review](../guides/ai-readme-review.md)
