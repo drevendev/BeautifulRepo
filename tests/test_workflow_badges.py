@@ -204,7 +204,7 @@ class WorkflowBadgeTests(unittest.TestCase):
     def test_shortcut_reference_inside_code_is_not_evidence(self):
         (self.root / "README.md").write_text(
             "~~~md\n![CI]\n~~~\n"
-            "\`![CI]\`\n"
+            "`![CI]`\n"
             f"[CI]: {BADGE}\n", encoding="utf-8")
         out = self.run_tool(require_badge=True)
         self.assertEqual(out.returncode, 1)
