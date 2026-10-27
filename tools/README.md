@@ -153,6 +153,12 @@ for the other claims a maintainer still needs to verify.
 
 ## Guide review dates
 
+The scanner ignores date-like text inside ordinary inline code and Markdown
+fenced-code examples, including valid longer closing fences and blocks
+left unclosed through the end of the document. This follows the bounded
+[GitHub Flavored Markdown fence rules](https://github.github.com/gfm/#fenced-code-blocks)
+(reviewed 2026-10-27); it is not a complete Markdown renderer.
+
 `review_dates.py` finds the dates on which someone re-read a guide's sources, such as
 `Reviewed **2026-10-22**` or `Checked: 2026-10-03`, in `guides/`, `checklists/`,
 `CONTRIBUTING.md`, `SECURITY.md` and this file. It warns when a date is older than
