@@ -76,6 +76,27 @@ class ReviewDateTests(unittest.TestCase):
         self.assertEqual(["2026-10-22"],
                          [raw for _, _, _, raw in review_dates.find_review_dates(unfinished)])
 
+    def test_html_comments_do_not_count_as_source_reviews(self):
+        source = ("<!-- Reviewed 1999-01-01 --> Reviewed 2026-10-27\n"
+                  "<!--\n"
+                  "Checked: 1999-01-02 and ` unmatched\n"
+                  "--> Checked: 2026-10-26\n"
+                  "`<!--` Reviewed 2026-10-25\n"
+                  "``<!-- Reviewed 1999-01-03 -->`` Reviewed 2026-10-24\n"
+                  "<!-- Reviewed 1999-01-04\n"
+                  "Checked: 1999-01-05\n")
+        root = self.repo({"guides/a.md": source})
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(1, "2026-10-27"), (4, "2026-10-26"),
+                          (5, "2026-10-25"), (6, "2026-10-24")], found)
+
+    def test_unmatched_backtick_width_does_not_hide_real_review_date(self):
+        source = ("` Reviewed 2026-10-21 ``\n"
+                  "`` Reviewed 1999-01-01 ` still code `` Reviewed 2026-10-20\n")
+        root = self.repo({"guides/a.md": source})
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(1, "2026-10-21"), (2, "2026-10-20")], found)
+
     def test_thresholds_programs_30_days_everything_else_180(self):
         root = self.repo({"guides/programs.md": "Checked: 2026-10-03\n",
                           "guides/a.md": "Reviewed **2026-10-03**\n"})

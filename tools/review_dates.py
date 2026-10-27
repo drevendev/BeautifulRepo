@@ -28,11 +28,55 @@ REVIEW_DATE = re.compile(
 # Examples of the format in code are not reviews; blank them, keeping line numbers.
 OPEN_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 CLOSE_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})[ \t]*$")
-CODE_SPAN = re.compile(r"(`+)[^\n]*?\1")
+BACKTICK_RUN = re.compile(r"`+")
 
 
-def _blank(match: re.Match) -> str:
-    return re.sub(r"[^\n]", " ", match.group())
+def mask_inline_inert(text: str) -> str:
+    """Ignore same-line code spans and HTML comments; keep prose and line numbers.
+
+    Markdown backtick runs close only at an equal-width run. Track comments
+    across lines without interpreting backticks inside comments as code.
+    This is a bounded source-date filter, not a complete GFM parser.
+    """
+    in_comment = False
+    result: list[str] = []
+    for line in text.splitlines(keepends=True):
+        runs = list(BACKTICK_RUN.finditer(line))
+        run_at = {match.start(): i for i, match in enumerate(runs)}
+        following: dict[int, int] = {}
+        next_by_width: dict[int, int] = {}
+        for i in range(len(runs) - 1, -1, -1):
+            width = len(runs[i].group())
+            if width in next_by_width:
+                following[i] = next_by_width[width]
+            next_by_width[width] = i
+
+        chars = list(line)
+        offset = 0
+        while offset < len(line):
+            if in_comment:
+                close = line.find("-->", offset)
+                end = len(line) if close == -1 else close + 3
+                chars[offset:end] = ["\n" if c == "\n" else " " for c in chars[offset:end]]
+                offset = end
+                in_comment = close == -1
+                continue
+            if line.startswith("<!--", offset):
+                in_comment = True
+                continue
+            run_id = run_at.get(offset)
+            if run_id is not None:
+                closing_id = following.get(run_id)
+                if closing_id is not None:
+                    end = runs[closing_id].end()
+                    chars[offset:end] = ["\n" if c == "\n" else " " for c in chars[offset:end]]
+                    offset = end
+                else:
+                    offset = runs[run_id].end()
+                continue
+            offset += 1
+        result.append("".join(chars))
+    return "".join(result)
 
 
 def mask_fenced_blocks(text: str) -> str:
@@ -64,7 +108,7 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
     found = []
     paths = sorted({path for pattern in SOURCES for path in root.glob(pattern)})
     for path in paths:
-        text = CODE_SPAN.sub(_blank, mask_fenced_blocks(path.read_text(encoding="utf-8")))
+        text = mask_inline_inert(mask_fenced_blocks(path.read_text(encoding="utf-8")))
         relative = path.relative_to(root).as_posix()
         for match in REVIEW_DATE.finditer(text):
             line = text.count("\n", 0, match.start(1)) + 1
