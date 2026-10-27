@@ -19,7 +19,9 @@ def git(target: Path, *args: str, allow_missing: bool = False) -> str | None:
     # an inventory for one checkout can silently report another checkout's SHAs.
     env = {key: value for key, value in os.environ.items()
            if not key.startswith("GIT_")}
-    env.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"})
+    # Status inspection must not take optional index locks or refresh index data.
+    env.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1",
+                "GIT_OPTIONAL_LOCKS": "0"})
     try:
         result = subprocess.run(
             ["git", "-C", str(target), "--no-pager", *args],
@@ -82,10 +84,15 @@ def inventory(target: Path, base: str | None = None, limit: int = 200) -> dict:
         commits.append({"sha": sha, "subject": subject})
     if len(commits) != count:
         raise InventoryError("commit inventory does not match the selected history count")
+    # Commit history is not the current worktree. Report only a boolean: local
+    # paths can be sensitive, and no uncommitted content belongs in this report.
+    # Disable a configured fsmonitor hook; `status` remains a local read.
+    dirty = bool(git(target, "-c", "core.fsmonitor=false", "status",
+                     "--porcelain=v1", "--untracked-files=normal"))
     return {
         "status": "unreleased_draft_only", "head_commit": head, "base_commit": base_sha,
         "base_kind": base_kind, "base_tag": tag, "commit_count": count,
-        "commits": commits,
+        "worktree_dirty": dirty, "commits": commits,
     }
 
 
