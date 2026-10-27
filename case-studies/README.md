@@ -76,8 +76,10 @@ was **not** tested. Link it from the table above.
 - Before v0.2.0, `docs_links.py` and `html_navigation.py` without `--root` checked
   BeautifulRepo's own checkout, and `html_navigation.py` failed under `python -I`
   ([#68](https://github.com/drevendev/BeautifulRepo/issues/68)). Always pass `--root`.
-- The link checkers don't fetch external URLs, parse reference-style links or scan
-  setext headings. The audit's findings are heuristics with stated limits
+- The link checkers don't fetch external URLs or scan setext headings. The Markdown
+  destination checker handles bounded one-line reference-style links, but the HTML
+  fragment checker does not resolve reference definitions. The audit's findings
+  are heuristics with stated limits
   ([tools README](../tools/README.md)).
 - Counts in tool output, such as destinations or tests, belong to one commit. Record
   them with the SHA, not as lasting facts.

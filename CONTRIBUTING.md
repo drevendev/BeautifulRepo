@@ -65,8 +65,9 @@ python tools/repo_audit.py .
 The first command explicitly regenerates `catalog/README.md`; the others are the five
 checks CI runs. `repo_audit.py` audits BeautifulRepo's own README, licence and
 contribution entry points.
-The original documentation-link check covers repository-owned inline Markdown
-link and image paths. The HTML navigation checker adds bounded local HTML/media
+The documentation-link check covers repository-owned inline Markdown and bounded
+one-line reference-style link and image paths. The HTML navigation checker adds
+bounded local HTML/media
 and section-fragment checks. Neither checks external URLs, completely renders
 Markdown, or certifies accessibility. Review the generated diff. No network
 access or third-party Python packages are needed.
