@@ -78,6 +78,7 @@ def mask_inline_inert(text: str) -> str:
         result.append("".join(chars))
     return "".join(result)
 
+
 def mask_fenced_blocks(text: str) -> str:
     """Mask GFM-style fenced code while retaining source line numbers.
 
