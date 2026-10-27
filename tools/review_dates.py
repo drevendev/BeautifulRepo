@@ -58,6 +58,7 @@ def mask_fenced_blocks(text: str) -> str:
         result.append(re.sub(r"[^\n]", " ", line))
     return "".join(result)
 
+
 def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
     """Return (relative path, line, date or None if invalid, raw text) for each review date."""
     found = []
