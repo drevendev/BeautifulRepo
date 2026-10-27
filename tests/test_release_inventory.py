@@ -76,6 +76,40 @@ class ReleaseInventoryTests(unittest.TestCase):
         self.assertIn("exceed", result.stderr)
         self.assertFalse(result.stdout)
 
+    def test_dirty_checkout_is_disclosed_without_exposing_file_names(self):
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIs(json.loads(result.stdout)["worktree_dirty"], False)
+
+        draft = self.repo / "private-draft-name.txt"
+        draft.write_text("untracked work", encoding="utf-8")
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIs(json.loads(result.stdout)["worktree_dirty"], True)
+        self.assertNotIn(draft.name, result.stdout)
+
+        self.git("add", draft.name)
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIs(json.loads(result.stdout)["worktree_dirty"], True)
+        self.assertNotIn(draft.name, result.stdout)
+
+        self.git("reset", "--", draft.name)
+        draft.unlink()
+        (self.repo / "demo.txt").write_text("unstaged local edit", encoding="utf-8")
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIs(json.loads(result.stdout)["worktree_dirty"], True)
+        self.assertEqual(json.loads(result.stdout)["commit_count"], 1)
+
+    def test_ignored_untracked_files_do_not_change_clean_signal(self):
+        (self.repo / ".git" / "info" / "exclude").write_text("*.secret\\n", encoding="utf-8")
+        (self.repo / "not-in-history.secret").write_text("ignored", encoding="utf-8")
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIs(json.loads(result.stdout)["worktree_dirty"], False)
+        self.assertNotIn("not-in-history.secret", result.stdout)
+
     def test_inherited_git_environment_does_not_redirect_target_history(self):
         other = Path(self.tmp.name) / "unrelated-checkout"
         other.mkdir()
