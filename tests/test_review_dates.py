@@ -75,6 +75,7 @@ class ReviewDateTests(unittest.TestCase):
                                                 "Checked: 1999-01-05\n"})
         self.assertEqual(["2026-10-22"],
                          [raw for _, _, _, raw in review_dates.find_review_dates(unfinished)])
+
     def test_thresholds_programs_30_days_everything_else_180(self):
         root = self.repo({"guides/programs.md": "Checked: 2026-10-03\n",
                           "guides/a.md": "Reviewed **2026-10-03**\n"})
