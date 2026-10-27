@@ -18,9 +18,12 @@ class WorkflowBadgeTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         (self.root / "README.md").write_text("# Example\n", encoding="utf-8")
 
-    def run_tool(self, repo=REPO):
-        return subprocess.run([sys.executable, "-I", str(SCRIPT), "--root", str(self.root),
-                               "--repo", repo], capture_output=True, text=True, check=False)
+    def run_tool(self, repo=REPO, *, require_badge=False):
+        command = [sys.executable, "-I", str(SCRIPT), "--root", str(self.root),
+                   "--repo", repo]
+        if require_badge:
+            command.append("--require-badge")
+        return subprocess.run(command, capture_output=True, text=True, check=False)
 
     def workflow(self, name="quality.yml"):
         path = self.root / ".github/workflows" / name
@@ -29,14 +32,15 @@ class WorkflowBadgeTests(unittest.TestCase):
         return path
 
     def test_beautifulrepo_automatically_checks_its_own_workflow_badge(self):
-        command = "python -I tools/workflow_badges.py --root . --repo " + REPO
+        command = "python -I tools/workflow_badges.py --root . --repo " + REPO + " --require-badge"
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         self.assertIn("run: " + command, workflow)
         for page in ("README.md", "CONTRIBUTING.md"):
             with self.subTest(page=page):
                 self.assertIn(command, (ROOT / page).read_text(encoding="utf-8"))
         result = subprocess.run(
-            [sys.executable, "-I", str(SCRIPT), "--root", str(ROOT), "--repo", REPO],
+            [sys.executable, "-I", str(SCRIPT), "--root", str(ROOT), "--repo", REPO,
+             "--require-badge"],
             cwd=ROOT, capture_output=True, text=True, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -144,6 +148,28 @@ class WorkflowBadgeTests(unittest.TestCase):
         out = self.run_tool()
         self.assertEqual(out.returncode, 0, out.stderr)
         self.assertIn("checked 0", out.stdout)
+
+    def test_required_badge_rejects_zero_matches_without_changing_default(self):
+        self.workflow()
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 1)
+        self.assertIn("no same-repository GitHub Actions workflow badge", out.stderr)
+        self.assertIn("--require-badge", out.stderr)
+        self.assertIn("0 same-repository workflow badge(s)", out.stderr)
+        (self.root / "README.md").write_text(
+            "![Badge](https://img.shields.io/badge/build-green-green.svg)\n",
+            encoding="utf-8")
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 1)
+        self.assertIn("--require-badge", out.stderr)
+
+    def test_required_badge_accepts_reference_style_target(self):
+        self.workflow()
+        (self.root / "README.md").write_text(
+            f"![Build][status]\n[status]: {BADGE}\n", encoding="utf-8")
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("checked 1", out.stdout)
 
     def test_reference_style_badge_checks_workflow_at_image_line(self):
         (self.root / "README.md").write_text(

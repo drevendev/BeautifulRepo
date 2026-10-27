@@ -233,9 +233,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=Path("."),
                         help="repository checkout to inspect (default: current directory)")
     parser.add_argument("--repo", required=True, help="expected GitHub owner/repository slug")
+    parser.add_argument("--require-badge", action="store_true",
+                        help="fail if the README has no same-repository workflow badge")
     args = parser.parse_args(argv)
     try:
         checked, errors = check(args.root, args.repo)
+        if args.require_badge and checked == 0:
+            errors.append("README.md: no same-repository GitHub Actions workflow badge "
+                          "found (--require-badge).")
     except InputError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2

@@ -49,6 +49,12 @@ class AiReadmeReviewTests(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, prose)
 
+    def test_badge_review_describes_enforced_presence_and_supported_syntax(self):
+        self.assertIn("--require-badge", self.guide)
+        self.assertIn("single-line explicit/collapsed reference-style", self.guide)
+        self.assertIn("zero recognized badges", self.guide)
+        self.assertIn("does not", self.guide.lower())
+
     def test_receipt_separates_source_checks_from_manual_testing(self):
         for required in (
             "Claims: verified | illustrative | unverified | false",

@@ -122,18 +122,23 @@ It accepts inline Markdown images, single-line reference-style images
 `<img>` tags. Reference labels are case-insensitive; the first definition wins.
 
 ```bash
-python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo
+python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo --require-badge
 ```
 
+The example opts into `--require-badge`: absence of a recognizable same-repository
+badge then fails, so a missing README badge cannot silently pass BeautifulRepo CI.
+Omit the flag for repositories that deliberately do not display a workflow badge.
 Use your own GitHub `owner/repo` when checking another checkout. The tool is
 offline, read-only, Python 3.11+ and standard-library-only. It does not run
 workflows, target project code, `git` or network requests. Common fenced/inline
 code samples and HTML comments are excluded, but this is not a complete GFM
 renderer. It reads only the root README (up to 256 KiB), checks literal local
 workflow filenames without following symlinks or Windows junctions, and prints
-file/line diagnostics when the workflow is missing. Exit 0 means the checked
-references exist, **even if zero were found**; exit 1 means a missing or
-unsupported same-repository target; exit 2 means an input error.
+file/line diagnostics when the workflow is missing. By default, exit 0 means the
+checked references exist, **even if zero were found**. With `--require-badge`,
+zero recognized same-repository workflow badges exit 1 instead. Missing or
+unsupported targets also exit 1; malformed inputs exit 2. Neither mode verifies
+whether a workflow was run or passed.
 
 **Not verified:** whether the workflow triggers, passed, is enabled, has
 permissions, belongs to a release, or honestly supports a badge label.
