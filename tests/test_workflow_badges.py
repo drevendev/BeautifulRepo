@@ -171,6 +171,45 @@ class WorkflowBadgeTests(unittest.TestCase):
         self.assertEqual(out.returncode, 0, out.stderr)
         self.assertIn("checked 1", out.stdout)
 
+    def test_shortcut_reference_image_uses_definition_and_accepts_real_workflow(self):
+        self.workflow()
+        (self.root / "README.md").write_text(
+            f"![Build]\n[build]: {BADGE}\n", encoding="utf-8")
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("checked 1 same-repository workflow badge(s)", out.stdout)
+
+    def test_shortcut_reference_missing_workflow_reports_image_line(self):
+        (self.root / "README.md").write_text(
+            "# Title\n\n![Build]\n"
+            f"[BUILD]: {BADGE.replace('quality.yml', 'missing.yml')}\n",
+            encoding="utf-8")
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 1)
+        self.assertIn("README.md:3: missing or redirected workflow", out.stderr)
+        self.assertIn("missing.yml", out.stderr)
+
+    def test_shortcut_is_not_double_counted_with_inline_or_explicit_references(self):
+        self.workflow()
+        (self.root / "README.md").write_text(
+            f"![Inline]({BADGE})\n"
+            "![Explicit][ci]\n"
+            f"[ci]: {BADGE}\n"
+            "![Undefined]\n",
+            encoding="utf-8")
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("checked 2 same-repository workflow badge(s)", out.stdout)
+
+    def test_shortcut_reference_inside_code_is_not_evidence(self):
+        (self.root / "README.md").write_text(
+            "~~~md\n![CI]\n~~~\n"
+            "`![CI]`\n"
+            f"[CI]: {BADGE}\n", encoding="utf-8")
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 1)
+        self.assertIn("no same-repository GitHub Actions workflow badge", out.stderr)
+
     def test_reference_style_badge_checks_workflow_at_image_line(self):
         (self.root / "README.md").write_text(
             "# Demo\n\n![Build][ci]\n\n"

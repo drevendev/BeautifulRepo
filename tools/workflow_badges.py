@@ -26,6 +26,9 @@ FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 REFERENCE_IMAGE_RE = re.compile(
     r"(?<!\\)!\[([^\]\n]{0,256})\]\[([^\]\n]{0,256})\]"
 )
+SHORTCUT_REFERENCE_IMAGE_RE = re.compile(
+    r"(?<!\\)!\[([^\]\n]{1,256})\](?![\[(])"
+)
 REFERENCE_DEF_RE = re.compile(
     r"(?m)^ {0,3}\[([^\]\n]{1,256})\]:[ \t]*(?:<([^<>\n]+)>|([^\s<>]+))"
     r"(?:[ \t]+(?:\"[^\"\n]*\"|'[^'\n]*'|\([^\)\n]*\)))?[ \t]*$"
@@ -139,6 +142,14 @@ def _badges(source: str) -> list[tuple[int, str]]:
             definitions.setdefault(label, match[2] or match[3])
     for match in REFERENCE_IMAGE_RE.finditer(visible):
         label = " ".join((match[2] or match[1]).split()).casefold()
+        if label in definitions:
+            found.append((visible.count("\n", 0, match.start()) + 1,
+                          definitions[label]))
+    # A shortcut reference image uses its alt text as the lookup label:
+    # ![CI] with [CI]: URL. Do not double-count explicit references or
+    # inline images (their next character is '[' or '(' respectively).
+    for match in SHORTCUT_REFERENCE_IMAGE_RE.finditer(visible):
+        label = " ".join(match[1].split()).casefold()
         if label in definitions:
             found.append((visible.count("\n", 0, match.start()) + 1,
                           definitions[label]))

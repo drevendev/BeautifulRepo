@@ -118,7 +118,8 @@ explains how to use these local histories and what they **do not** prove.
 whether a same-repository GitHub Actions status badge in the root `README.md`
 points to an ordinary, checked-in `.github/workflows/*.yml` or `*.yaml` file.
 It accepts inline Markdown images, single-line reference-style images
-(`![CI][build]` with `[build]: URL`, including collapsed `![CI][]`), and HTML
+(`![CI][build]` with `[build]: URL`, collapsed `![CI][]`, and shortcut
+`![CI]` using `[CI]: URL`), and HTML
 `<img>` tags. Reference labels are case-insensitive; the first definition wins.
 
 ```bash
@@ -142,8 +143,8 @@ whether a workflow was run or passed.
 
 **Not verified:** whether the workflow triggers, passed, is enabled, has
 permissions, belongs to a release, or honestly supports a badge label.
-Shields.io, external badges, GitHub Enterprise domains, shortcut
-reference images (`![CI]`), multiline reference definitions, unusual filenames
+Shields.io, external badges, GitHub Enterprise domains,
+multiline reference definitions, unusual filenames
 and browser rendering remain outside this bounded check. Review those manually. GitHub's
 [workflow-status badge documentation](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge)
 defines the supported URL form and branch/event parameters (reviewed
