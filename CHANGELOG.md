@@ -200,6 +200,8 @@ keep their original themed headings.
 
 ### Fixed
 
+- The scheduled review-date checker now ignores dates inside Markdown HTML comments (including multiline and unclosed comments), while preserving real dates after a comment closes. Inline backtick spans must have equal-width delimiters; mismatched runs no longer hide real source-review dates. This is a bounded source filter, not full GitHub Markdown rendering.
+
 - Recognize shortcut reference-style GitHub Actions badge images
   (`![CI]` paired with `[CI]: URL`) in the offline README checker.
   The workflow existence check now also covers this Markdown form,
