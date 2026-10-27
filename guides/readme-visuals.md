@@ -174,6 +174,14 @@ product facts from merely familiar layouts, gives two alternative reader paths,
 and records which checks cannot be automated. The worked command runs in CI;
 no model detection, browser testing or reader preference is claimed.
 
+## Release notes need deliberate information hierarchy too
+
+The [release-note presentation comparison](../examples/release-presentation/README.md)
+uses a *real merged change* in BeautifulRepo to contrast a concise changelog
+entry with an actionable **unpublished draft**. It keeps impact, source evidence,
+limitations and publication status consistent while changing what the reader
+sees first. It makes no fake screenshot, release or audience-impact claim.
+
 ## Review checklist
 
 For an actual GitHub-rendered page rather than a static source check, follow

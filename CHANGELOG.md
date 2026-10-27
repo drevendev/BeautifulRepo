@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add an evidence-bound release-note presentation comparison: two intentional
+  layouts (compact Unreleased history versus an unpublished reader-facing
+  draft) describe the same merged Markdown-link checker change, with pinned
+  PR/CI evidence and an actual checker regression. No release, tag or public
+  announcement is created (related to #16).
+
 - Validate repository-local destinations used by bounded one-line full,
   collapsed and shortcut Markdown reference links/images. Source masking keeps
   examples inert; first definitions and diagnostic use lines follow GFM rules.
