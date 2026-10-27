@@ -145,6 +145,53 @@ class WorkflowBadgeTests(unittest.TestCase):
         self.assertEqual(out.returncode, 0, out.stderr)
         self.assertIn("checked 0", out.stdout)
 
+    def test_reference_style_badge_checks_workflow_at_image_line(self):
+        (self.root / "README.md").write_text(
+            "# Demo\n\n![Build][ci]\n\n"
+            f'[ci]: <{BADGE}> "CI status"\n', encoding="utf-8")
+        out = self.run_tool()
+        self.assertEqual(out.returncode, 1)
+        self.assertIn("README.md:3: missing or redirected workflow", out.stderr)
+
+    def test_reference_style_label_is_casefolded_and_whitespace_collapsed(self):
+        self.workflow()
+        (self.root / "README.md").write_text(
+            "![Build][ BUILD  CHECK ]\n"
+            f"[build check]: {BADGE}\n", encoding="utf-8")
+        out = self.run_tool()
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("checked 1", out.stdout)
+
+    def test_reference_style_empty_label_uses_image_alt_text(self):
+        self.workflow()
+        (self.root / "README.md").write_text(
+            f"![CI][]\n[ci]: <{BADGE}>\n", encoding="utf-8")
+        out = self.run_tool()
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("checked 1", out.stdout)
+
+    def test_first_reference_definition_wins(self):
+        self.workflow()
+        missing_badge = BADGE.replace("quality.yml", "gone.yml")
+        (self.root / "README.md").write_text(
+            "![CI][build]\n"
+            f"[build]: {missing_badge}\n"
+            f"[build]: {BADGE}\n", encoding="utf-8")
+        out = self.run_tool()
+        self.assertEqual(out.returncode, 1)
+        self.assertIn("gone.yml", out.stderr)
+
+    def test_unreferenced_definition_and_quoted_example_are_not_badges(self):
+        (self.root / "README.md").write_text(
+            f"[unused]: {BADGE}\n"
+            "~~~markdown\n"
+            "![Build][ci]\n"
+            "~~~\n"
+            f"[ci]: {BADGE}\n", encoding="utf-8")
+        out = self.run_tool()
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("checked 0", out.stdout)
+
     def test_badges_in_html_and_markdown_both_checked(self):
         self.workflow()
         (self.root / "README.md").write_text(
