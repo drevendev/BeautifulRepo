@@ -84,6 +84,11 @@ code or assert that commits shipped. Without tags it names the full
 root-base SHA and says **Unreleased draft**. A version tag alone does
 not verify a published release. See the [release-notes guide](release-notes.md).
 
+The inventory reports `worktree_dirty` without local filenames. A dirty
+checkout means the commit-only draft **omits staged, unstaged or untracked
+work**, even if the history check otherwise succeeds; ignored files are not
+counted. The helper does not read those files into the release inventory.
+
 Deterministic inventory tests run in CI; synthetic eval definitions check
 intended triggers and no-tag language structurally. **No model-driven
 release-note drafting or runtime skill activation has yet been verified.**
