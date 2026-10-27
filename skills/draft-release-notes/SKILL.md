@@ -61,7 +61,13 @@ stop the draft and describe the missing history or boundary; never
 substitute an incomplete or imaginary comparison.
 
 The JSON includes `base_commit`, `head_commit`, `base_kind`,
-`base_tag`, `commit_count` and commit SHA/subject pairs. Its
+`base_tag`, `commit_count`, `worktree_dirty` and commit SHA/subject pairs.
+If `worktree_dirty` is true, **state that staged, unstaged or untracked work is
+not part of the commit inventory**. Do not describe the draft as covering
+current working files; ask the maintainer to resolve that boundary before
+publication. The tool intentionally exposes no local filenames. Ignored files,
+remote-only commits and the contents of uncommitted changes are not inventoried.
+Its
 `status: unreleased_draft_only` is deliberately **not** a release state.
 With `base_kind: root`, explicitly label the output **Unreleased draft**
 and show the full `base_commit` hash: the root commit itself is not in
