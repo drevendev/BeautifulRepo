@@ -54,17 +54,20 @@ the workflow and its latest check results. For one reproducible, offline test
 of the reference itself, run this from a BeautifulRepo checkout:
 
 ```bash
-python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo
+python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo --require-badge
 ```
 
 This checks whether the root README's same-repository GitHub Actions status
 badge points to a regular `.github/workflows/quality.yml` file. It reports
 missing, redirected and unsupported file targets with source line numbers.
-If no matching badges exist, that is **zero checked**, not a passing CI claim.
-The tool never contacts GitHub or executes a workflow. It cannot tell whether
-tests actually ran, passed, were required, or match the badge's implication.
-Review current GitHub checks and any badge text separately. Other badge hosts,
-reference-style image links and full Markdown rendering are out of scope.
+The optional `--require-badge` flag makes **zero recognized badges** a failure;
+without the flag, zero matches exits successfully but proves nothing about CI.
+The parser accepts inline Markdown, single-line explicit/collapsed reference-style
+Markdown images (`![CI][build]` and `![CI][]`), and HTML `<img>` images. Shortcut
+reference images (`![CI]`), multiline definitions, other badge hosts and full
+Markdown rendering are out of scope. The tool never contacts GitHub or executes
+a workflow. It cannot tell whether tests actually ran, passed, were required,
+or match the badge's implication. Review current GitHub checks separately.
 
 See the [tool contract](../tools/README.md#github-actions-readme-badge-file-presence-check)
 and [GitHub's status-badge URL format](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge)
