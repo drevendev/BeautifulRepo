@@ -81,7 +81,6 @@ The facts did not change; the wording and reader path did:
 A short announcement can prioritize the next action; the release note should
 carry the detailed migration, known limitations and verification references.
 
-## Generated notes are a starting inventory
 ## Two layouts using a real merged change
 
 The [evidence-bound release presentation](../examples/release-presentation/README.md)
@@ -91,6 +90,7 @@ checker change, pinned merge commit and PR-head CI evidence; neither implies
 a new tag, downloadable artifact or published release. The example shows how
 reader priority, not an invented version number, determines the layout.
 
+## Generated notes are a starting inventory
 
 GitHub-generated notes can list merged pull requests, contributors and comparisons.
 A `.github/release.yml` file can categorize changes by labels. These tools help
