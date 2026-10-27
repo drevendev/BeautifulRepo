@@ -200,6 +200,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- The offline release inventory now reports a `worktree_dirty` boolean for
+  staged, unstaged and non-ignored untracked changes, without exposing local
+  filenames or pretending those edits are included in commit-only notes.
+  Disable Git's optional index locking and fsmonitor hook for this read,
+  with synthetic checkout regressions. Ignored files and remote-only history
+  remain outside its coverage (related to #72).
+
 - The scheduled review-date checker now ignores dates inside Markdown HTML comments (including multiline and unclosed comments), while preserving real dates after a comment closes. Inline backtick spans must have equal-width delimiters; mismatched runs no longer hide real source-review dates. This is a bounded source filter, not full GitHub Markdown rendering.
 
 - Recognize shortcut reference-style GitHub Actions badge images
