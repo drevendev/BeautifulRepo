@@ -114,6 +114,22 @@ class ReferenceLinksTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("checked 1 relative Markdown destination(s)", result.stdout)
 
+    def test_thematic_break_starts_a_reference_definition_block(self):
+        result = self.check("---\n[doc]: missing.md\n[doc]\n")
+        self.assertEqual(1, result.returncode)
+        self.assertIn(
+            "README.md:3: missing relative destination: 'missing.md'",
+            result.stderr,
+        )
+
+    def test_setext_heading_underline_starts_a_reference_definition_block(self):
+        result = self.check("Heading\n=======\n[doc]: missing.md\n[doc]\n")
+        self.assertEqual(1, result.returncode)
+        self.assertIn(
+            "README.md:4: missing relative destination: 'missing.md'",
+            result.stderr,
+        )
+
     def test_traversal_in_used_reference_is_rejected_by_existing_boundary(self):
         result = self.check(
             "[Outside][ref]\n\n[ref]: ../outside.md\n"
