@@ -62,6 +62,11 @@ repeats them.
 
 ## Verification and decision
 
+For GitHub-rendered README work, copy the
+[manual visual acceptance receipt](../checklists/visual-accessibility-acceptance.md)
+and record actual light/dark, reflow, 400% zoom and assistive-technology results.
+Leave unchecked environments as NOT RUN; do not infer them from source tests.
+
 - **Source check:** {named revision, fixture/command, actual observed output}.
 - **Automated checks:** {exact commands and results, or NOT RUN}.
 - **Manual rendering:** {GitHub/browser, date, light/dark, widths, images off}.
