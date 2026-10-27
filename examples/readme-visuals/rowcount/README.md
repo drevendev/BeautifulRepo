@@ -59,4 +59,8 @@ for your own product rather than copying this visual identity.
 The original [PocketDiff design-intent exercise](../DESIGN_INTENT.md) uses
 fictional numbers, whereas this Rowcount comparison uses actual CLI output.
 
+A [manual GitHub visual acceptance worksheet](../../../checklists/visual-accessibility-acceptance.md)
+can be applied to these variants. No such full GitHub/400%-zoom/screen-reader
+acceptance has been completed for this example; the worksheet starts at NOT RUN.
+
 Related: [visual README guide](../../../guides/readme-visuals.md).
