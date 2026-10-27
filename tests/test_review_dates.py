@@ -50,6 +50,32 @@ class ReviewDateTests(unittest.TestCase):
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
         self.assertEqual([(7, "2026-10-20")], found)
 
+    def test_gfm_fences_with_longer_closers_and_unclosed_blocks(self):
+        source = "\n".join((
+            "```text",
+            "Reviewed 1999-01-01",
+            "````",
+            "Reviewed 2026-10-26",
+            "~~~~ markdown",
+            "Checked: 1999-01-02",
+            "~~~~~",
+            "Checked: 2026-10-25",
+            "`````",
+            "Reviewed 1999-01-03",
+            "```",  # too short to close the five-backtick fence
+            "Reviewed 1999-01-04",
+            "``````",
+            "Reviewed 2026-10-24",
+        )) + "\n"
+        root = self.repo({"guides/a.md": source})
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(4, "2026-10-26"), (8, "2026-10-25"),
+                          (14, "2026-10-24")], found)
+        unfinished = self.repo({"guides/a.md": "Reviewed 2026-10-22\n~~~\n"
+                                                "Checked: 1999-01-05\n"})
+        self.assertEqual(["2026-10-22"],
+                         [raw for _, _, _, raw in review_dates.find_review_dates(unfinished)])
+
     def test_thresholds_programs_30_days_everything_else_180(self):
         root = self.repo({"guides/programs.md": "Checked: 2026-10-03\n",
                           "guides/a.md": "Reviewed **2026-10-03**\n"})
