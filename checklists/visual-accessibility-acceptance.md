@@ -1,0 +1,125 @@
+# GitHub README visual acceptance: a reproducible field check
+
+**Purpose:** check a real, GitHub-rendered README or visual example before
+calling its layout accessible or its screenshots useful. This is a manual
+verification recipe with a reusable evidence record, **not** a WCAG certificate.
+It complements [design intent](../templates/DESIGN_INTENT.template.md) and
+[source-only visual guidance](../guides/readme-visuals.md).
+
+## 1. Freeze what is actually being tested
+
+Use the **rendered** GitHub `blob/<full-commit-SHA>/...` page, not Raw,
+a local Markdown preview, a mutable branch URL, or an SVG viewed alone.
+Record whether you are signed in; GitHub navigation and overlays can vary.
+
+- Repository, full commit SHA, README path and rendered URL:
+- Browser version / operating system / sign-in state:
+- Date, tester, display scaling and baseline window width:
+- Image assets and the expected text-equivalent location:
+- Source evidence for any command or screenshot (fixture, command, observed output):
+
+An image that looks correct in a standalone browser tab can still fail when
+GitHub wraps, sanitizes or theme-switches the Markdown. If you cannot open
+the GitHub-rendered page, mark those checks **NOT RUN**, even if local HTML
+or screenshots looked good.
+
+## 2. Verify claims before evaluating decoration
+
+Read from top to bottom without viewing the images. Can the visitor identify
+the task, outcome, limitations and first useful action? Run a documented
+first-success command **only in an authorized disposable environment** and
+record its actual output. Never silently run third-party install scripts,
+start services or publish anything as part of a visual review.
+
+Then compare each informative image with the command/result and the text
+alternative beside it. A drawing of a verified transcript is not a terminal
+screenshot; a fictional mockup is not product output. Record any inconsistency
+as a **FAIL**, not a visual preference.
+
+## 3. GitHub rendering matrix
+
+Repeat the same page at the same full commit SHA. Capture actual viewport
+measurements and an annotated screenshot only when safe to share.
+
+| Check | Procedure | What to record |
+| --- | --- | --- |
+| Light and dark | Render with each effective colour scheme; inspect the actual `picture` source/fallback and images | Selected asset, text/background visibility, clipped or absent meaning |
+| Narrow reflow | Set the browser's **CSS viewport** to 320 px where supported, at 100% zoom; scroll the document | Unwanted page-level two-dimensional scrolling, overlap, truncated prose or controls |
+| Real zoom | In a desktop browser, use **400% browser zoom** from a 1280 px-wide starting window; confirm the effective CSS viewport rather than assuming it | Whether content reflows, what stays readable and any necessary two-dimensional exceptions |
+| Images unavailable | Disable image loading or block the checked-in images, then reload | Whether headings, meaningful alt text, results and copyable first-success steps remain available |
+| Keyboard | Without a pointer, Tab and Shift+Tab through README links, activate a representative link with Enter and return | Focus visibility, logical order, unreachable links, traps; distinguish GitHub chrome from authored content |
+| Assistive technology | If available, use an identified screen reader/browser pair to navigate headings, links and informative image alternatives | Spoken content/announced names, missing or duplicated meaning, tester and software version |
+| Motion, if present | Exercise reduced-motion preference and default motion | Autoplay, flashing, essential information tied to animation |
+
+**Reflow interpretation:** WCAG 2.2 Success Criterion 1.4.10 describes
+content presentation without loss of information/functionality at the
+equivalent of 320 CSS pixels wide for vertically scrolling content. Some
+content *requiring* two-dimensional layout, such as data tables or detailed
+diagrams, has a scoped exception. Do not call any horizontal scrollbar a
+failure without identifying the element and reader impact. Conversely, do not
+accept page-wide horizontal scrolling merely because a code block is long.
+For vertical writing modes the corresponding height criterion differs.
+
+**Zoom is not viewport simulation:** an emulated 320 px viewport and actual
+400% browser zoom exercise different behaviours. Record both. At a 1280
+physical/CSS-pixel baseline, 400% zoom is often approximately 320 CSS pixels
+of layout width, but browser chrome, device scale and display settings can
+change the effective viewport. Measure rather than infer.
+
+**Image semantics:** informative and functional images need relevant
+alternatives. Genuinely decorative images may use `alt=""`. For a complex
+diagram, provide a nearby full textual explanation. A present `alt` attribute
+is not evidence that the wording is useful.
+
+## 4. Evidence receipt — copy and complete
+
+Use `PASS`, `FAIL`, `NOT RUN` or `N/A` (with a reason). **Blank cells are
+not passes.** Do not turn one tested browser or zoom setting into a claim of
+platform-wide accessibility.
+
+| Case | Status | Observation / evidence file | Follow-up |
+| --- | --- | --- | --- |
+| Exact source and first-success output | NOT RUN | | |
+| GitHub rendered, light | NOT RUN | | |
+| GitHub rendered, dark | NOT RUN | | |
+| Narrow CSS viewport | NOT RUN | | |
+| Actual 400% zoom | NOT RUN | | |
+| Images blocked / nonvisual meaning | NOT RUN | | |
+| Keyboard and focus | NOT RUN | | |
+| Screen reader (name combination) | NOT RUN | | |
+| Reduced motion (or N/A reason) | NOT RUN | | |
+
+**Decision:** SHIP / REVISE / DEFER / INCONCLUSIVE — _reason and responsible
+follow-up_. List materially different environments not tested. Link any
+public evidence only after checking it contains no secrets, private data,
+unpublished product screenshots or personal information.
+
+A fully completed receipt supports a **bounded observation on one page and
+environment**. It is not a substitute for broad accessibility testing, a
+user study or a formal conformance claim.
+
+## 5. Apply this to BeautifulRepo itself
+
+Start with the working [Rowcount first screens](../examples/readme-visuals/rowcount/README.md):
+its terminal-led image is original art based on real `Data rows: 3` output,
+and the command/result remain selectable text. Compare the rendered
+[terminal-led presentation](../examples/readme-visuals/rowcount/terminal-led.md)
+with the [contract-first presentation](../examples/readme-visuals/rowcount/contract-first.md)
+without changing the facts. The original isolated Chromium preview recorded
+in the [visual guide](../guides/readme-visuals.md) **does not** fill in this
+GitHub acceptance receipt. Until the checks above are performed, the result
+remains **NOT RUN**.
+
+## Primary references
+
+The method below was reviewed against primary guidance **2026-10-27**;
+that date does not mean a browser or screen-reader test happened.
+
+- [W3C WAI — Understanding Reflow (WCAG 2.2)](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html):
+  CSS-pixel threshold, zoom relationship, exceptions and rationale.
+- [W3C WAI — Images Tutorial](https://www.w3.org/WAI/tutorials/images/):
+  informative, functional, decorative and complex-image alternatives.
+- [W3C WAI — Decorative Images](https://www.w3.org/WAI/tutorials/images/decorative/):
+  when empty alternative text is appropriate.
+- [GitHub Docs — Basic writing and formatting syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax):
+  rendering context; actual behaviour must still be inspected.
