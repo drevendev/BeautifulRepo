@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- A reproducible **GitHub-rendered README visual acceptance protocol** with
+  source-bound first-success evidence, light/dark, 320 CSS px reflow,
+  actual 400% browser zoom, image-off, keyboard and screen-reader steps.
+  Its fillable receipt defaults to NOT RUN, not fabricated accessibility
+  passes. Linked from the visual guide, design-intent template and real
+  Rowcount variants (related to #16).
+
 - Resolve single-line Markdown reference-style GitHub Actions badge images
   as well as inline/HTML forms in the offline checker. Normalize reference
   labels, report failures at the image use line, use the first definition and
