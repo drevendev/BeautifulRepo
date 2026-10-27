@@ -62,10 +62,12 @@ badge points to a regular `.github/workflows/quality.yml` file. It reports
 missing, redirected and unsupported file targets with source line numbers.
 The optional `--require-badge` flag makes **zero recognized badges** a failure;
 without the flag, zero matches exits successfully but proves nothing about CI.
-The parser accepts inline Markdown, single-line explicit/collapsed reference-style
-Markdown images (`![CI][build]` and `![CI][]`), and HTML `<img>` images. Shortcut
-reference images (`![CI]`), multiline definitions, other badge hosts and full
-Markdown rendering are out of scope. The tool never contacts GitHub or executes
+The parser accepts complete one-line inline Markdown images (including
+angle-wrapped URLs and optional titles), single-line explicit/collapsed/shortcut
+reference-style images (`![CI][build]`, `![CI][]`, `![CI]`) and HTML `<img>`
+images. An unclosed `![CI](url` is not a rendered badge, so it cannot satisfy
+`--require-badge`. Multiline definitions, other badge hosts and full Markdown
+rendering remain out of scope. The tool never contacts GitHub or executes
 a workflow. It cannot tell whether tests actually ran, passed, were required,
 or match the badge's implication. Review current GitHub checks separately.
 

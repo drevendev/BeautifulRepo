@@ -20,7 +20,8 @@ MAX_README_BYTES = 256 * 1024
 REPOSITORY_RE = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
 WORKFLOW_RE = re.compile(r"[A-Za-z0-9_.-]+\.ya?ml\Z", re.IGNORECASE)
 MARKDOWN_IMAGE_RE = re.compile(
-    r"(?<!\\)!\[[^\]\n]{0,256}\]\(\s*<?([^\s<>\)]+)", re.IGNORECASE
+    r"(?<!\\)!\[[^\]\n]{0,256}\]\([ \t]*(?:<(?P<angle>[^<>\n]+)>|(?P<plain>[^\s<>\)\n]+))"
+    r"(?:[ \t]+(?:\"[^\"\n]*\"|'[^'\n]*'|\([^()\n]*\)))?[ \t]*\)"
 )
 FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 REFERENCE_IMAGE_RE = re.compile(
@@ -131,8 +132,12 @@ class _ImageParser(HTMLParser):
 
 def _badges(source: str) -> list[tuple[int, str]]:
     visible = _visible(source)
-    found = [(visible.count("\n", 0, m.start()) + 1, m[1])
-             for m in MARKDOWN_IMAGE_RE.finditer(visible)]
+    found = [
+        (visible.count("\n", 0, match.start()) + 1,
+         match.group("angle") if match.group("angle") is not None
+         else match.group("plain"))
+        for match in MARKDOWN_IMAGE_RE.finditer(visible)
+    ]
     # Resolve explicit and collapsed reference-style Markdown images at the
     # image use line. Markdown picks the first matching definition.
     definitions: dict[str, str] = {}
