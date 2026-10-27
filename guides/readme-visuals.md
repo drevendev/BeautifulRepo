@@ -176,6 +176,11 @@ no model detection, browser testing or reader preference is claimed.
 
 ## Review checklist
 
+For an actual GitHub-rendered page rather than a static source check, follow
+[the manual reflow, theme, keyboard and screen-reader acceptance protocol](../checklists/visual-accessibility-acceptance.md).
+It includes a fillable evidence receipt and explicitly distinguishes checks
+not run from tests that passed. A standalone 320 px preview does not fulfill it.
+
 Before merging a README visual:
 
 - [ ] The one-sentence outcome still makes sense with images disabled.
