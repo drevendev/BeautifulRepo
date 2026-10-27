@@ -200,6 +200,14 @@ keep their original themed headings.
 
 ### Fixed
 
+- Recognize shortcut reference-style GitHub Actions badge images
+  (\`![CI]\` paired with \`[CI]: URL\`) in the offline README checker.
+  The workflow existence check now also covers this Markdown form,
+  while ignoring inline and explicit-reference duplicates and code examples.
+  Four black-box regressions preserve line diagnostics and opt-in
+  \`--require-badge\` behavior. Full Markdown rendering and live CI status
+  remain outside the check.
+
 - Isolate the read-only release inventory from inherited `GIT_*` variables
   (including `GIT_DIR` and `GIT_WORK_TREE`) and global/system Git config.
   Previously those variables could silently substitute an unrelated checkout's
