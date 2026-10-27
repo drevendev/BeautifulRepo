@@ -11,15 +11,6 @@ keep their original themed headings.
 
 ## [Unreleased]
 
-### Changed
-
-- Add opt-in `--require-badge` mode to the offline Actions-badge checker and
-  enable it in BeautifulRepo CI. A missing badge now fails the self-check even
-  when no dangling workflow references remain; default zero-match behavior
-  stays non-blocking for adopters. Document supported reference-style syntax
-  accurately in the evidence review, with regression tests. This checks
-  presence of evidence, **not** CI execution or success.
-
 ### Added
 
 - Resolve single-line Markdown reference-style GitHub Actions badge images
@@ -168,6 +159,13 @@ keep their original themed headings.
   for ideas only, and the known tool caveats (#80).
 
 ### Changed
+
+- Add opt-in `--require-badge` mode to the offline Actions-badge checker and
+  enable it in BeautifulRepo CI. A missing badge now fails the self-check even
+  when no dangling workflow references remain; default zero-match behavior
+  stays non-blocking for adopters. Document supported reference-style syntax
+  accurately in the evidence review, with regression tests. This checks
+  presence of evidence, **not** CI execution or success.
 
 - Cache pip downloads for the lint CI job using the hash-pinned Ruff
   requirements as the cache key. Keep `--require-hashes --no-deps` installation
