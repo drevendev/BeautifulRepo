@@ -51,7 +51,9 @@ class AiReadmeReviewTests(unittest.TestCase):
 
     def test_badge_review_describes_enforced_presence_and_supported_syntax(self):
         self.assertIn("--require-badge", self.guide)
-        self.assertIn("single-line explicit/collapsed reference-style", self.guide)
+        self.assertIn("complete one-line inline Markdown images", self.guide)
+        self.assertIn("single-line explicit/collapsed/shortcut", self.guide)
+        self.assertIn("An unclosed `![CI](url` is not a rendered badge", self.guide)
         self.assertIn("zero recognized badges", self.guide)
         self.assertIn("does not", self.guide.lower())
 
