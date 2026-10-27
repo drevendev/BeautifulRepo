@@ -26,7 +26,8 @@ REVIEW_DATE = re.compile(
     r"\b(?:[Rr]e)?(?:[Rr]eviewed|[Cc]hecked)\b(?: on)?:?[ \t\n*]*(\d{4}-\d{2}-\d{2})\b"
 )
 # Examples of the format in code are not reviews; blank them, keeping line numbers.
-FENCED_BLOCK = re.compile(r"^ {0,3}(`{3,}|~{3,}).*?^ {0,3}\1[ \t]*$", re.MULTILINE | re.DOTALL)
+OPEN_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
+CLOSE_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})[ \t]*$")
 CODE_SPAN = re.compile(r"(`+)[^\n]*?\1")
 
 
@@ -34,12 +35,35 @@ def _blank(match: re.Match) -> str:
     return re.sub(r"[^\n]", " ", match.group())
 
 
+def mask_fenced_blocks(text: str) -> str:
+    """Mask GFM-style fenced code while retaining source line numbers.
+
+    A valid closer uses the same character and at least the opener width.
+    An unclosed block lasts to EOF; neither case is a reviewed source.
+    """
+    active: tuple[str, int] | None = None
+    result: list[str] = []
+    for line in text.splitlines(keepends=True):
+        content = line.rstrip("\r\n")
+        if active is None:
+            match = OPEN_FENCE.match(content)
+            if match is None or (match[1][0] == "`" and "`" in match[2]):
+                result.append(line)
+                continue
+            active = (match[1][0], len(match[1]))
+        else:
+            close = CLOSE_FENCE.fullmatch(content)
+            if close and close[1][0] == active[0] and len(close[1]) >= active[1]:
+                active = None
+        result.append(re.sub(r"[^\n]", " ", line))
+    return "".join(result)
+
 def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
     """Return (relative path, line, date or None if invalid, raw text) for each review date."""
     found = []
     paths = sorted({path for pattern in SOURCES for path in root.glob(pattern)})
     for path in paths:
-        text = CODE_SPAN.sub(_blank, FENCED_BLOCK.sub(_blank, path.read_text(encoding="utf-8")))
+        text = CODE_SPAN.sub(_blank, mask_fenced_blocks(path.read_text(encoding="utf-8")))
         relative = path.relative_to(root).as_posix()
         for match in REVIEW_DATE.finditer(text):
             line = text.count("\n", 0, match.start(1)) + 1
