@@ -103,7 +103,7 @@ class ReleaseInventoryTests(unittest.TestCase):
         self.assertEqual(json.loads(result.stdout)["commit_count"], 1)
 
     def test_ignored_untracked_files_do_not_change_clean_signal(self):
-        (self.repo / ".git" / "info" / "exclude").write_text("*.secret\\n", encoding="utf-8")
+        (self.repo / ".git" / "info" / "exclude").write_text("*.secret\n", encoding="utf-8")
         (self.repo / "not-in-history.secret").write_text("ignored", encoding="utf-8")
         result = self.invoke()
         self.assertEqual(result.returncode, 0, result.stderr)
