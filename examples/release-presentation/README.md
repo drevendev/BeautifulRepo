@@ -5,9 +5,9 @@ announcement is created by this page.** Both specimens describe a *real merged
 change* in BeautifulRepo, not a fictional product or an unverified launch.
 
 The evidence is [PR #179](https://github.com/drevendev/BeautifulRepo/pull/179),
-merged as [\`9468525\`](https://github.com/drevendev/BeautifulRepo/commit/9468525f5c38c245bd6ccdcc9476dcdc467933e9).
+merged as [`9468525`](https://github.com/drevendev/BeautifulRepo/commit/9468525f5c38c245bd6ccdcc9476dcdc467933e9).
 Its [PR-head CI run](https://github.com/drevendev/BeautifulRepo/actions/runs/40550896841)
-completed successfully for \`79ae4c7\`; **that run is evidence for the PR
+completed successfully for `79ae4c7`; **that run is evidence for the PR
 head, not a new release or a fresh post-merge test**. The implementation is
 [tools/docs_links.py](../../tools/docs_links.py), with
 [regressions](../../tests/test_docs_links_references.py).
@@ -22,7 +22,7 @@ head, not a new release or a fresh post-merge test**. The implementation is
   images have their repository-local destinations checked. The diagnostic is
   attached to the *use* line, not only the definition.
 - **What to do:** from a checkout with Python 3.11+, run
-  \`python tools/docs_links.py\`. A broken destination is reported with a
+  `python tools/docs_links.py`. A broken destination is reported with a
   nonzero result.
 - **Limits:** this is not a full GitHub Flavored Markdown renderer.
   Multiline definitions, nested container definitions and external live links
@@ -34,7 +34,7 @@ study or claims about how many repositories it helped.
 ## Treatment A — changelog entry
 
 **Reader:** someone scanning durable history for the change they need.
-Place the behavior under \`[Unreleased]\` until it belongs to an actual
+Place the behavior under `[Unreleased]` until it belongs to an actual
 published version. Here is a compact **illustrative entry**, *not a newly
 published CHANGELOG update*:
 
@@ -42,7 +42,7 @@ published CHANGELOG update*:
 >
 > - Check repository-local destinations used by one-line full, collapsed and
 >   shortcut Markdown reference links and images. Broken destinations now
->   appear at the link-use line. Run \`python tools/docs_links.py\` from a
+>   appear at the link-use line. Run `python tools/docs_links.py` from a
 >   Python 3.11+ checkout. Multiline and nested-container definitions and
 >   external links are not checked by this feature. See
 >   [PR #179](https://github.com/drevendev/BeautifulRepo/pull/179).
@@ -59,14 +59,14 @@ GitHub Release*.
 > ### Local documentation links: reference forms are now checked
 >
 > **Who is affected.** Maintainers who use the offline Markdown link checker
-> with \`[Guide][docs]\`, \`[Guide][]\` or \`[Guide]\` references.
+> with `[Guide][docs]`, `[Guide][]` or `[Guide]` references.
 >
 > **What changed.** Missing relative targets behind supported one-line
 > definitions now produce a diagnostic at the link-use line instead of
 > silently escaping this check.
 >
 > **Try it.** From a Python 3.11+ checkout, run
-> \`python tools/docs_links.py\`. Review any reported paths and fix the
+> `python tools/docs_links.py`. Review any reported paths and fix the
 > references or their targets.
 >
 > **Known boundaries.** This is not a complete Markdown renderer. It does
@@ -89,7 +89,7 @@ paragraph in a changelog would make routine history hard to scan.
 | First line | Behavior | Reader impact |
 | Proof | One source PR | Change, test evidence and limits |
 | Length | Short, easy to scan | Enough detail to act |
-| Publication status | \`[Unreleased]\` | Clearly marked **draft** |
+| Publication status | `[Unreleased]` | Clearly marked **draft** |
 
 The factual change and its limitations are identical. Neither variant
 claims the PR introduced a tagged version, measured adoption, published
