@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Validate repository-local destinations used by bounded one-line full,
+  collapsed and shortcut Markdown reference links/images. Source masking keeps
+  examples inert; first definitions and diagnostic use lines follow GFM rules.
+  This is not a full Markdown renderer or a live external-link checker.
+
 - A reproducible **GitHub-rendered README visual acceptance protocol** with
   source-bound first-success evidence, light/dark, 320 CSS px reflow,
   actual 400% browser zoom, image-off, keyboard and screen-reader steps.
