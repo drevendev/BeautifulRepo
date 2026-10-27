@@ -810,8 +810,9 @@ def _extract_reference_definitions(masked: str):
             continue
 
         remaining.append(raw_line)
-        at_block_start = (not line.strip() or
-                          bool(re.match(r"^ {0,3}#{1,6}(?:[ \t]|$)", line)))
+        # Headings, thematic breaks and setext underlines close the previous
+        # block, so a one-line reference definition may begin immediately after.
+        at_block_start = not line.strip() or _starts_nonparagraph_block(line)
 
     return definitions, "".join(remaining)
 
