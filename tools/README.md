@@ -170,7 +170,7 @@ the scheduled run, and `--today YYYY-MM-DD` fixes the date for tests. A warning 
 ## Relative documentation link checker
 
 `docs_links.py` scans `.md` and `.markdown` files under the repository root.
-It verifies that inline, repository-owned link and image destinations resolve to
+It verifies that inline and bounded reference-style repository-owned link and image destinations resolve to
 existing files or directories. It
 supports paths relative to the current document, repository-root paths beginning with `/`,
 URL-encoded path characters, and ordinary query/fragment suffixes on an otherwise local path.
@@ -209,7 +209,7 @@ python -I /path/to/BeautifulRepo/tools/repo_audit.py .
 The checker deliberately does **not** fetch external URLs, validate redirect targets, certify
 rendered HTML, or validate section fragments/heading anchors. It ignores links inside fenced
 and single-backtick inline code because documentation examples should not become dependencies.
-Reference-style Markdown links and raw HTML links are not parsed in this first bounded version.
+One-line full (`[text][id]`), collapsed (`[text][]`) and shortcut (`[id]`) reference-style links and images are checked when the matching single-line definition starts a Markdown block. Definitions may follow the links that use them. Labels use case folding and collapsed whitespace, the first definition wins, and unused definitions are not checked. Multiline definitions, definitions inside list/quote containers and complex nested labels are not parsed by this bounded scanner. Raw HTML destinations are checked separately by `html_navigation.py`. See the [GFM reference definition rules](https://github.github.com/gfm/#link-reference-definitions), reviewed 2026-10-27.
 
 GitHub recommends relative links for repository-owned files because they follow the branch a
 reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
