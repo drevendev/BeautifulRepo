@@ -752,28 +752,123 @@ def _mask_markdown_code(text: str) -> str:
     return _mask_inline_html_comments(_mask_inline_code_blocks(quote_masked))
 
 
+# Bounded, one-line GFM reference definitions. Multiline definitions and
+# definitions nested in lists/quotes are intentionally not interpreted here.
+REFERENCE_DEFINITION_RE = re.compile(
+    r"^ {0,3}\[(?P<label>(?:\\.|[^\[\]\\\r\n])+)\]:[ \t]*"
+    r"(?P<target><(?:\\.|[^<>\r\n])*>|(?:\\.|[^\s\r\n])+)"
+    r"(?:[ \t]+(?:\"(?:\\.|[^\"\\\r\n])*\"|'(?:\\.|[^'\\\r\n])*'|\((?:\\.|[^()\\\r\n])*\)))?[ \t]*$"
+)
+REFERENCE_USE_RE = re.compile(
+    r"!?\[(?P<text>(?:\\.|[^\[\]\\\r\n])+)\]"
+    r"(?:\[(?P<label>(?:\\.|[^\[\]\\\r\n])*)\])?"
+)
+
+
+def _normalize_reference_label(label: str) -> str:
+    """GFM label matching folds case and collapses whitespace."""
+    return " ".join(label.split()).casefold()
+
+
+def _unescape_reference_destination(value: str) -> str:
+    """Decode GFM backslash punctuation escapes (entities resolve later)."""
+    if value.startswith("<") and value.endswith(">"):
+        value = value[1:-1]
+    unescaped = []
+    position = 0
+    while position < len(value):
+        if (value[position] == "\\" and position + 1 < len(value)
+                and value[position + 1] in string.punctuation):
+            unescaped.append(value[position + 1])
+            position += 2
+        else:
+            unescaped.append(value[position])
+            position += 1
+    return "".join(unescaped)
+
+
+def _extract_reference_definitions(masked: str):
+    """Return definitions and a same-size source with definitions blanked.
+
+    Recognize single-line definitions only at a block start; paragraph text
+    must not create a link definition. Earlier definitions take precedence.
+    """
+    definitions = {}
+    remaining = []
+    at_block_start = True
+    for raw_line in split_markdown_lines(masked):
+        line = raw_line.rstrip("\r\n")
+        ending = raw_line[len(line):]
+        match = REFERENCE_DEFINITION_RE.fullmatch(line) if at_block_start else None
+        if match is not None and _normalize_reference_label(match.group("label")):
+            label = _normalize_reference_label(match.group("label"))
+            definitions.setdefault(
+                label, _unescape_reference_destination(match.group("target"))
+            )
+            remaining.append(" " * len(line) + ending)
+            at_block_start = True
+            continue
+
+        remaining.append(raw_line)
+        at_block_start = (not line.strip() or
+                          bool(re.match(r"^ {0,3}#{1,6}(?:[ \t]|$)", line)))
+
+    return definitions, "".join(remaining)
+
+
+def _iter_reference_uses(masked: str, definitions: dict[str, str]):
+    """Yield (source line, destination) for used local or remote references."""
+    for lineno, raw_line in enumerate(split_markdown_lines(masked), 1):
+        line = raw_line.rstrip("\r\n")
+        # An inline destination can itself contain brackets. Avoid treating
+        # those as shortcut references to a separate definition.
+        active = list(line)
+        for start in _iter_inline_link_starts(line):
+            parsed = _parse_destination(line, start)
+            if parsed is not None:
+                _, end = parsed
+                for index in range(start, min(end, len(active))):
+                    active[index] = " "
+        visible = "".join(active)
+        for match in REFERENCE_USE_RE.finditer(visible):
+            if (_is_backslash_escaped(visible, match.start())
+                    or (match.start() > 0 and visible[match.start() - 1] == "[")):
+                continue
+            if (match.group("label") is None and match.end() < len(visible)
+                    and visible[match.end()] in "(["):
+                # Inline link or nested bracket syntax, not a shortcut.
+                continue
+            label = match.group("label") or match.group("text")
+            destination = definitions.get(_normalize_reference_label(label))
+            if destination is not None:
+                yield lineno, destination
+
+
 def iter_markdown_destinations(path: Path):
-    """Yield (line_number, destination) for inline Markdown links outside code."""
+    """Yield local and remote destinations from inline and bounded reference links."""
     text = path.read_text(encoding="utf-8")
     masked = _mask_markdown_code(text)
+    definitions, visible = _extract_reference_definitions(masked)
 
     block_start = 0
-    separators = list(BLANK_LINE_RE.finditer(masked))
+    separators = list(BLANK_LINE_RE.finditer(visible))
     for separator in separators + [None]:
-        block_end = separator.start() if separator is not None else len(masked)
-        block = masked[block_start:block_end]
+        block_end = separator.start() if separator is not None else len(visible)
+        block = visible[block_start:block_end]
 
         for position in _iter_inline_link_starts(block):
             parsed = _parse_destination(block, position)
             if parsed is not None:
                 destination, _ = parsed
                 absolute_position = block_start + position
-                lineno = masked.count("\n", 0, absolute_position) + 1
+                lineno = visible.count("\n", 0, absolute_position) + 1
                 yield lineno, destination
 
         if separator is None:
             break
         block_start = separator.end()
+
+    yield from _iter_reference_uses(visible, definitions)
 
 
 def _is_redirect(info: os.stat_result) -> bool:
