@@ -156,6 +156,15 @@ class ReviewDateTests(unittest.TestCase):
                     ):
                         review_dates.find_review_dates(root)
 
+    def test_source_limit_counts_root_level_documents(self):
+        root = self.repo({"guides/a.md": "Reviewed 2026-10-22\n",
+                          "CONTRIBUTING.md": "Reviewed 2026-10-22\n",
+                          "SECURITY.md": "Reviewed 2026-10-22\n"})
+        with mock.patch.object(review_dates, "MAX_SOURCE_FILES", 2):
+            with self.assertRaisesRegex(review_dates.ReviewInputError,
+                                        "too many source files"):
+                review_dates.find_review_dates(root)
+
     def test_oversized_invalid_and_nul_sources_fail_closed(self):
         cases = (
             ("oversized", b"Reviewed 2026-10-20\n" + b"x" * review_dates.MAX_SOURCE_BYTES),
