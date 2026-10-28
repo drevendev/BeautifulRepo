@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOL = ROOT / "tools/review_dates.py"
@@ -135,6 +136,25 @@ class ReviewDateTests(unittest.TestCase):
             self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
             self.assertIn("guides: redirected or non-directory source", out.stderr)
             self.assertNotIn("1999-01-01", out.stderr)
+
+    def test_unreadable_selected_directory_is_not_silently_skipped(self):
+        root = self.repo({"guides/a.md": "Reviewed 2026-10-22\n",
+                          "checklists/a.md": "Reviewed 2026-10-22\n",
+                          "tools/README.md": "Reviewed 2026-10-22\n"})
+        original_scandir = review_dates.os.scandir
+        for directory in ("guides", "checklists", "tools"):
+            with self.subTest(directory=directory):
+                def denied(path):
+                    if Path(path) == root / directory:
+                        raise PermissionError("injected enumeration failure")
+                    return original_scandir(path)
+
+                with mock.patch.object(review_dates.os, "scandir", side_effect=denied):
+                    with self.assertRaisesRegex(
+                        review_dates.ReviewInputError,
+                        f"{directory}: cannot enumerate source directory"
+                    ):
+                        review_dates.find_review_dates(root)
 
     def test_oversized_invalid_and_nul_sources_fail_closed(self):
         cases = (
