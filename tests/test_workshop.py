@@ -72,6 +72,14 @@ class WorkshopNavigationTests(unittest.TestCase):
             self.assertIn(path, available)
         self.assertNotIn("Expand project-type starter kits", upcoming)
 
+    def test_root_status_does_not_reopen_completed_roadmap_work(self):
+        readme = self.read("README.md")
+        status = readme.split("## Status and contribution", 1)[1].split("## License", 1)[0]
+        self.assertIn("Private-repository guidance and the repository self-check are already", status)
+        self.assertIn("real-agent evaluations", status)
+        self.assertIn("visual", status)
+        self.assertNotIn("open workstreams: agent skills, real before/after cases and private repositories", status)
+
     def test_first_success_checks_behavior_not_only_process_exit(self):
         checklist = self.read("checklists/first-success.md")
         self.assertGreaterEqual(len(re.findall(r"^- \[ \]", checklist, re.MULTILINE)), 5)
