@@ -55,8 +55,9 @@ CI runs the examples and checks on Ubuntu (Python 3.11 and 3.14) and Windows
 
 For a real application of this approach to BeautifulRepo itself, see the
 [README before/after case](case-studies/readme-first-success-case.md): fixed
-revisions, a clean-clone run, GitHub's rendering checked at three widths in both
-themes, and what was not checked.
+revisions, a clean-clone run, horizontal reflow observations at three emulated
+widths, and contrast measured only for light at 1280 px and dark at 375 px.
+Keyboard navigation, real 400% zoom and screen readers remain untested.
 
 For an actual **before/after documentation diagnostic**, run
 `python examples/repository-audit/demo.py` from the same root. Its
