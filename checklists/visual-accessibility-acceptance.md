@@ -63,10 +63,21 @@ have not personally reviewed.
 
 Repeat for light and dark themes, the 320 CSS px viewport, and **actual**
 400% browser zoom. The object records the measured CSS viewport, document
-and Markdown scroll widths, overflow in pixels, effective theme, image-load
-counts and selected `picture` image paths; it deliberately omits URL query
+and Markdown scroll widths, overflow in pixels, browser scheme preference,
+GitHub appearance attributes when present, image-load counts and selected `picture` image paths; it deliberately omits URL query
 strings. Save each observation with its browser/version, real zoom setting
 and screenshot **only if the material is safe to share**.
+
+GitHub can use a manually selected dark/light theme even when the operating
+system prefers the opposite scheme. The probe's `prefersDark` reports the
+**browser media preference**, while `githubAppearance` reads optional page
+`data-color-mode`, `data-light-theme` and `data-dark-theme` attributes;
+these are observations, **not a stable GitHub API or proof of the visible
+theme**. They can disagree or be absent. Judge the actual rendered colours,
+image selection and text contrast in each screenshot instead of treating the
+media query as a GitHub theme verdict. GitHub's
+[theme-setting documentation](https://docs.github.com/en/get-started/accessibility/managing-your-theme-settings)
+was reviewed **2026-10-28**.
 
 The numbers are **diagnostics, not PASS/FAIL labels**. GitHub's own navigation
 can affect page overflow; code blocks or tables can have permitted local
