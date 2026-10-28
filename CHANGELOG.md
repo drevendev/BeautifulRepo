@@ -184,6 +184,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Reconcile the roadmap with completed v0.2.0 plugin, private-repository,
+  self-check and readiness work. Separate pending model-evaluation, real case
+  studies and GitHub-rendered accessibility evidence from already shipped
+  guides and from owner-only event-label decisions (issue states checked
+  2026-10-28). No release, model run or external repository change is implied.
+
 - Add opt-in `--require-badge` mode to the offline Actions-badge checker and
   enable it in BeautifulRepo CI. A missing badge now fails the self-check even
   when no dangling workflow references remain; default zero-match behavior

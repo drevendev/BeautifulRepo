@@ -71,38 +71,54 @@ These linked resources are repository source files. Tagged versions are listed o
 the [Releases page](https://github.com/drevendev/BeautifulRepo/releases). There is
 no installable package.
 
-## Next: agent skills, real cases and private repositories
+## Current work: verify agents, finish real cases and test visuals
 
-Each workstream is an epic issue whose sub-issues hold the concrete work.
+This section reflects issue states inspected **2026-10-28**. It is not a
+promise of a release date or evidence that unrun manual tests passed.
+For live status, follow the linked GitHub issues.
 
-- A **development-only** `improve-readme` skill proposes scoped diff previews with an explicit approval gate; it is not part of the pinned `v0.2.0` plugin and is not validated by a real model run (#70, #74).
-
-- **Agent skills** ([#86](https://github.com/drevendev/BeautifulRepo/issues/86)):
-  release the plugin as v0.2.0
-  ([#101](https://github.com/drevendev/BeautifulRepo/issues/101)), validate the
-  manifests and skills in CI, add `improve-readme`, `trust-surfaces` and
-  `release-notes` skills, and evaluate every skill against fixture repositories.
+- **Agent behavior** ([#86](https://github.com/drevendev/BeautifulRepo/issues/86)):
+  the pinned `v0.2.0` release includes `audit-repo`, while
+  `improve-readme` ([#70](https://github.com/drevendev/BeautifulRepo/issues/70))
+  and `draft-release-notes` ([#72](https://github.com/drevendev/BeautifulRepo/issues/72))
+  remain development-only skills. The `trust-surfaces` implementation issue
+  [#71](https://github.com/drevendev/BeautifulRepo/issues/71) is closed, but
+  that does **not** establish real-agent reliability. Synthetic
+  [fixture and model evaluations](https://github.com/drevendev/BeautifulRepo/issues/74)
+  still need authorized execution and evidence; static CI is not a model test.
 - **Real before/after cases**
-  ([#88](https://github.com/drevendev/BeautifulRepo/issues/88)): document the
-  repeatable case workflow, then apply it through normal pull requests to three of
-  the owner's public repositories, with fixed revisions and stated limits.
-- **Private and internal repositories**
-  ([#87](https://github.com/drevendev/BeautifulRepo/issues/87)): a visibility
-  profile for the audit and the Action, plan-aware guidance, an internal README
-  template, a confidentiality checklist for people and agents, and a tested
-  no-network promise for mirrored or enterprise use of the Action.
-- **Self-check** ([#85](https://github.com/drevendev/BeautifulRepo/issues/85),
-  readiness index [#33](https://github.com/drevendev/BeautifulRepo/issues/33)):
-  re-audit BeautifulRepo against its own checklists at a named commit and record
-  the result.
+  ([#88](https://github.com/drevendev/BeautifulRepo/issues/88)):
+  the [repeatable procedure](case-studies/README.md) and
+  [PatchPitch case](case-studies/patchpitch.md) are published. Remaining
+  candidates must keep before/after revisions, observed commands and actual
+  PR evidence; their separate target repositories are **not** writable as
+  part of BeautifulRepo maintenance.
+- **Visual accessibility evidence**
+  ([#16](https://github.com/drevendev/BeautifulRepo/issues/16)):
+  alternative README entrances, source-bound design briefs and the
+  [GitHub-rendered acceptance checklist](checklists/visual-accessibility-acceptance.md)
+  exist. Actual light/dark, 320 px reflow, 400% zoom, keyboard and screen-reader
+  results still require a completed manual evidence receipt; a passing source
+  check cannot supply one.
+- **Historical event labels**
+  ([#100](https://github.com/drevendev/BeautifulRepo/issues/100)):
+  the public Hacktoberfest 2026 guidance already disclaims PR reward credit.
+  The outdated native label description remains a separate owner decision,
+  with the requested post-event review **after 2026-11-01**.
+
+The [private/internal repository guidance](guides/private-repositories.md) and
+[confidentiality checklist](checklists/confidentiality.md) are already published
+([#87](https://github.com/drevendev/BeautifulRepo/issues/87) closed).
+The [repository self-check](https://github.com/drevendev/BeautifulRepo/issues/85)
+and [readiness review](https://github.com/drevendev/BeautifulRepo/issues/33)
+are likewise completed; do not list them as pending work.
 
 ## Later: evidence-backed extensions
 
-Explore cross-ecosystem case studies, distinctive presentation patterns backed by
-real visual evidence ([#16](https://github.com/drevendev/BeautifulRepo/issues/16)),
-practical examples drawn from Open Source Guides material on governance,
-sustainability and finding users, and a verified migration story in the
-release-note guide once real releases exist. Extend the local audit only where
+Explore cross-ecosystem case studies, practical examples drawn from Open
+Source Guides material on governance, sustainability and finding users, and a
+verified migration story in the release-note guide when a specific release
+provides suitable evidence. Extend the local audit only where
 observations are actionable and its limitations remain explicit. Spending, domains,
 releases, applications and external promotion require separate owner authority.
 
