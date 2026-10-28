@@ -237,6 +237,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Correct overstated accessibility evidence in the real README case study and
+  its entry-point summary: only two width/theme contrast combinations were
+  recorded, and static `tabindex` inspection cannot prove keyboard navigation.
+  No new browser, zoom, keyboard or screen-reader tests were run (related to #16).
+
 - Distinguish the browser's `prefers-color-scheme` from GitHub's optional
   page-level appearance attributes in the README measurement probe. A user-forced
   GitHub theme can differ from the OS preference; the probe now reports both
