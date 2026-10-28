@@ -97,6 +97,49 @@ class ReviewDateTests(unittest.TestCase):
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
         self.assertEqual([(1, "2026-10-21"), (2, "2026-10-20")], found)
 
+    def test_linked_source_file_is_rejected_before_reading_target(self):
+        with tempfile.TemporaryDirectory() as foreign:
+            outside = Path(foreign) / "confidential.md"
+            outside.write_text("Reviewed 1999-01-01\n", encoding="utf-8")
+            root = self.repo({"guides/ordinary.md": "Reviewed 2026-10-22\n"})
+            link = root / "guides" / "redirect.md"
+            try:
+                link.symlink_to(outside)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"file links unavailable: {type(exc).__name__}")
+            out = self.run_tool(root, "--today", "2026-10-28")
+            self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
+            self.assertIn("guides/redirect.md: source is not an ordinary file", out.stderr)
+            self.assertNotIn("1999-01-01", out.stderr)
+
+    def test_redirected_directory_is_rejected(self):
+        with tempfile.TemporaryDirectory() as foreign:
+            (Path(foreign) / "source.md").write_text(
+                "Reviewed 1999-01-01\n", encoding="utf-8")
+            root = self.repo({"CONTRIBUTING.md": "Reviewed 2026-10-22\n"})
+            try:
+                (root / "guides").symlink_to(foreign, target_is_directory=True)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"directory links unavailable: {type(exc).__name__}")
+            out = self.run_tool(root, "--today", "2026-10-28")
+            self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
+            self.assertIn("guides: redirected or non-directory source", out.stderr)
+            self.assertNotIn("1999-01-01", out.stderr)
+
+    def test_oversized_invalid_and_nul_sources_fail_closed(self):
+        cases = (
+            ("oversized", b"Reviewed 2026-10-20\n" + b"x" * review_dates.MAX_SOURCE_BYTES),
+            ("invalid-utf8", b"Reviewed 2026-10-20\n\xff"),
+            ("nul", b"Reviewed 2026-10-20\n\x00"),
+        )
+        for label, raw in cases:
+            with self.subTest(label=label):
+                root = self.repo({"guides/a.md": "Reviewed 2026-10-20\n"})
+                (root / "guides/a.md").write_bytes(raw)
+                out = self.run_tool(root, "--today", "2026-10-28")
+                self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
+                self.assertIn("ERROR: guides/a.md:", out.stderr)
+
     def test_thresholds_programs_30_days_everything_else_180(self):
         root = self.repo({"guides/programs.md": "Checked: 2026-10-03\n",
                           "guides/a.md": "Reviewed **2026-10-03**\n"})
