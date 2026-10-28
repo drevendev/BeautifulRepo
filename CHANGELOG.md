@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Diagnose bounded, text-free candidate elements extending outside the
+  rendered GitHub README Markdown container. The browser-console probe
+  reports descendant indexes, tags and pixel excess (up to eight samples,
+  2,000 nodes) alongside its existing measurements. Geometry candidates
+  are not accessibility failures or proof of manual zoom/assistive testing
+  (related to #16).
+
 - Add an optional, inspectable browser-console measurement probe for real
   GitHub-rendered READMEs. It reports CSS viewport/document/Markdown overflow,
   selected theme-aware images and missing images, without network requests or
