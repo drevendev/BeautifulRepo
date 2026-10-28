@@ -12,7 +12,7 @@ NODE = shutil.which("node")
 
 @unittest.skipUnless(NODE, "Node is optional; browser-console probe needs no Node install")
 class BrowserProbeTests(unittest.TestCase):
-    def run_probe(self, present=True):
+    def run_probe(self, present=True, pinned=True):
         harness = r'''
 const fs = require("node:fs");
 const vm = require("node:vm");
@@ -31,13 +31,14 @@ const sandbox = {
     documentElement: { clientWidth: 320, scrollWidth: 344 },
   },
   window: { innerWidth: 320 },
-  location: { origin: "https://github.com", pathname: "/a/b/blob/" + "a".repeat(40) + "/README.md", href: "https://github.com/a/b/README.md" },
+  location: { origin: "https://github.com", hostname: process.argv[3] === "yes" ? "github.com" : "localhost", pathname: "/a/b/blob/" + "a".repeat(40) + "/README.md", href: "https://github.com/a/b/README.md" },
   matchMedia(query) { return { matches: query.includes("color-scheme") }; },
   URL, Date, Math,
 };
 console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})));
 '''
-        output = subprocess.run([NODE, "-e", harness, str(PROBE), "yes" if present else "no"],
+        output = subprocess.run([NODE, "-e", harness, str(PROBE), "yes" if present else "no",
+                                 "yes" if pinned else "no"],
                                 text=True, capture_output=True, check=True)
         return json.loads(output.stdout)
 
@@ -59,6 +60,11 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
         data = self.run_probe(False)
         self.assertEqual(data["status"], "NOT RUN")
         self.assertIn("No rendered Markdown body", data["reason"])
+
+    def test_non_github_page_is_not_accepted_as_rendered_evidence(self):
+        data = self.run_probe(pinned=False)
+        self.assertEqual(data["status"], "NOT RUN")
+        self.assertIn("full commit SHA", data["reason"])
 
     def test_helper_is_linked_from_manual_acceptance_protocol(self):
         doc = (ROOT / "checklists/visual-accessibility-acceptance.md").read_text("utf-8")
