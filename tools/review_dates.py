@@ -12,14 +12,20 @@ from __future__ import annotations
 import argparse
 from datetime import date, datetime, timezone
 from pathlib import Path
+import os
 import re
+import stat
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 # Maintained prose with dated source reviews. The generated catalog view and the
 # changelog's history are excluded; catalog.py checks the catalog's own dates.
-SOURCES = ("guides/*.md", "checklists/*.md", "CONTRIBUTING.md", "SECURITY.md", "tools/README.md")
+SOURCE_DIRS = ("guides", "checklists", "tools")
+ROOT_SOURCES = ("CONTRIBUTING.md", "SECURITY.md")
 DEFAULT_DAYS = 180
+MAX_SOURCE_BYTES = 256 * 1024
+MAX_SOURCE_FILES = 4096
+JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
 # Program rules change every season, like catalog entries in the "program" category.
 DAYS_BY_FILE = {"guides/programs.md": 30}
 REVIEW_DATE = re.compile(
@@ -103,13 +109,97 @@ def mask_fenced_blocks(text: str) -> str:
     return "".join(result)
 
 
+class ReviewInputError(ValueError):
+    """The selected source cannot be scanned within the offline file bounds."""
+
+
+def _source_text(path: Path, relative: str) -> str:
+    """Read an ordinary bounded UTF-8 file; never intentionally follow a file link."""
+    try:
+        if not stat.S_ISREG(path.lstat().st_mode):
+            raise ReviewInputError(f"{relative}: source is not an ordinary file.")
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+        fd = os.open(path, flags)
+        with os.fdopen(fd, "rb") as handle:
+            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+                raise ReviewInputError(f"{relative}: source is not an ordinary file.")
+            raw = handle.read(MAX_SOURCE_BYTES + 1)
+        if len(raw) > MAX_SOURCE_BYTES:
+            raise ReviewInputError(f"{relative}: source exceeds the 256 KiB scan limit.")
+        # Match text-mode universal newline handling on Windows and Unix.
+        # Byte reads are needed for bounds and file identity, but date matching
+        # and line numbers expect normalized line endings.
+        text = raw.decode("utf-8-sig").replace("\r\n", "\n").replace("\r", "\n")
+        if "\x00" in text:
+            raise ReviewInputError(f"{relative}: NUL in source text.")
+        return text
+    except ReviewInputError:
+        raise
+    except (OSError, UnicodeError):
+        raise ReviewInputError(f"{relative}: cannot read ordinary UTF-8 source.") from None
+
+
 def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
     """Return (relative path, line, date or None if invalid, raw text) for each review date."""
+    try:
+        root = root.resolve(strict=True)
+        if not root.is_dir():
+            raise ReviewInputError("--root must be an existing directory.")
+    except (OSError, RuntimeError):
+        raise ReviewInputError("--root must be an existing directory.") from None
+
+    # The selected paths live only at root or one level below these directories.
+    # Reject redirected directories, including NTFS junctions, before scanning.
+    directories = []
+    for directory in SOURCE_DIRS:
+        folder = root / directory
+        try:
+            info = folder.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError:
+            raise ReviewInputError(f"{directory}: cannot inspect source directory.") from None
+        if not stat.S_ISDIR(info.st_mode) or (
+            getattr(info, "st_reparse_tag", 0) == JUNCTION_REPARSE_TAG
+        ):
+            raise ReviewInputError(f"{directory}: redirected or non-directory source.")
+        directories.append((directory, folder))
+
+    # Path.glob may silently suppress permission errors during enumeration.
+    # os.scandir propagates them, so an unreadable source cannot look empty.
+    paths = []
+    for directory, folder in directories:
+        try:
+            with os.scandir(folder) as entries:
+                for entry in entries:
+                    selected = (entry.name == "README.md" if directory == "tools"
+                                else entry.name.endswith(".md"))
+                    if selected:
+                        paths.append(Path(entry.path))
+                        if len(paths) > MAX_SOURCE_FILES:
+                            raise ReviewInputError(
+                                f"too many source files (limit {MAX_SOURCE_FILES}).")
+        except OSError:
+            raise ReviewInputError(
+                f"{directory}: cannot enumerate source directory.") from None
+
+    for name in ROOT_SOURCES:
+        path = root / name
+        try:
+            path.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError:
+            raise ReviewInputError(f"{name}: cannot inspect source.") from None
+        paths.append(path)
+        if len(paths) > MAX_SOURCE_FILES:
+            raise ReviewInputError(f"too many source files (limit {MAX_SOURCE_FILES}).")
+    paths.sort()
+
     found = []
-    paths = sorted({path for pattern in SOURCES for path in root.glob(pattern)})
     for path in paths:
-        text = mask_inline_inert(mask_fenced_blocks(path.read_text(encoding="utf-8")))
         relative = path.relative_to(root).as_posix()
+        text = mask_inline_inert(mask_fenced_blocks(_source_text(path, relative)))
         for match in REVIEW_DATE.finditer(text):
             line = text.count("\n", 0, match.start(1)) + 1
             try:
@@ -149,7 +239,11 @@ def main(argv: list[str] | None = None) -> int:
                         help="exit 1 when a date is due for a recheck (for scheduled runs)")
     args = parser.parse_args(argv)
 
-    found = find_review_dates(args.root)
+    try:
+        found = find_review_dates(args.root)
+    except ReviewInputError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     errors, warnings = check(found, args.today)
     for warning in warnings:
         print(f"WARN: {warning}", file=sys.stderr)

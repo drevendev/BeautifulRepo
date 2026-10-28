@@ -217,6 +217,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Bound the guide review-date scanner to ordinary local UTF-8 files, reject
+  redirected sources and directories, oversized input and NUL bytes, and return
+  an explicit input error rather than following an external link or silently
+  omitting review evidence. This is not a race-proof filesystem security scanner.
+
 - Require a complete inline Markdown image before counting an Actions status
   badge as README evidence. Unterminated links, angle brackets or titles no
   longer satisfy `--require-badge`; valid URL/title forms remain supported.
