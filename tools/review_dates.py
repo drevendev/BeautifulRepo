@@ -20,7 +20,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 # Maintained prose with dated source reviews. The generated catalog view and the
 # changelog's history are excluded; catalog.py checks the catalog's own dates.
-SOURCES = ("guides/*.md", "checklists/*.md", "CONTRIBUTING.md", "SECURITY.md", "tools/README.md")
+SOURCE_DIRS = ("guides", "checklists", "tools")
+ROOT_SOURCES = ("CONTRIBUTING.md", "SECURITY.md")
 DEFAULT_DAYS = 180
 MAX_SOURCE_BYTES = 256 * 1024
 MAX_SOURCE_FILES = 4096
@@ -150,7 +151,7 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
     # The selected paths live only at root or one level below these directories.
     # Reject redirected directories, including NTFS junctions, before scanning.
     directories = []
-    for directory in ("guides", "checklists", "tools"):
+    for directory in SOURCE_DIRS:
         folder = root / directory
         try:
             info = folder.lstat()
@@ -182,7 +183,7 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
             raise ReviewInputError(
                 f"{directory}: cannot enumerate source directory.") from None
 
-    for name in ("CONTRIBUTING.md", "SECURITY.md"):
+    for name in ROOT_SOURCES:
         path = root / name
         try:
             path.lstat()
@@ -191,6 +192,8 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
         except OSError:
             raise ReviewInputError(f"{name}: cannot inspect source.") from None
         paths.append(path)
+        if len(paths) > MAX_SOURCE_FILES:
+            raise ReviewInputError(f"too many source files (limit {MAX_SOURCE_FILES}).")
     paths.sort()
 
     found = []
