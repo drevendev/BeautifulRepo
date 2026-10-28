@@ -44,6 +44,16 @@ class ReviewDateTests(unittest.TestCase):
                           ("guides/a.md", 5, "2026-10-23"), ("guides/b.md", 1, "2026-10-05"),
                           ("guides/programs.md", 1, "2026-10-03")], found)
 
+    def test_crlf_and_cr_line_endings_preserve_multiline_review_dates(self):
+        root = self.repo({"guides/a.md": "placeholder\n"})
+        # Binary source reads must retain the old text-mode universal-newline
+        # semantics. Windows fixtures written via write_text use CRLF.
+        (root / "guides/a.md").write_bytes(
+            b"Reviewed **2026-10-22**\r\nboth reviewed\r2026-10-23\r\n"
+        )
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(1, "2026-10-22"), (3, "2026-10-23")], found)
+
     def test_examples_in_code_are_not_reviews(self):
         root = self.repo({"guides/a.md": "Write `Reviewed **2026-01-01**` like this.\n\n"
                                          "```text\nChecked: 2026-01-02\n```\n\nReviewed 2026-10-20\n"})
