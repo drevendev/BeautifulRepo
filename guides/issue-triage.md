@@ -70,7 +70,7 @@ Next authorized action: [one bounded change; no invented owner or ETA]
 A good card can say **DEFER**. If a target repository is outside your write
 authority, identify that limit rather than quietly creating a PR there.
 
-## Two live BeautifulRepo examples, dated 2026-10-29
+## Two live BeautifulRepo examples, dated 2026-10-29 (Asia/Nicosia)
 
 - [Visual accessibility issue #16](https://github.com/drevendev/BeautifulRepo/issues/16)
   has published design briefs, first-screen alternatives and a read-only
@@ -91,7 +91,7 @@ issues for their current state; do not reuse the disposition blindly.
 
 ## Sources and limits
 
-Primary guidance reviewed **2026-10-29**:
+Primary guidance reviewed **2026-10-28 (UTC)** (2026-10-29 in Asia/Nicosia):
 
 - [Open Source Guides — Best Practices for Maintainers](https://opensource.guide/best-practices/):
   set honest expectations, communicate decisions, and say no to unsuitable
