@@ -125,7 +125,10 @@ def _source_text(path: Path, relative: str) -> str:
             raw = handle.read(MAX_SOURCE_BYTES + 1)
         if len(raw) > MAX_SOURCE_BYTES:
             raise ReviewInputError(f"{relative}: source exceeds the 256 KiB scan limit.")
-        text = raw.decode("utf-8-sig")
+        # Match text-mode universal newline handling on Windows and Unix.
+        # Byte reads are needed for bounds and file identity, but date matching
+        # and line numbers expect normalized line endings.
+        text = raw.decode("utf-8-sig").replace("\r\n", "\n").replace("\r", "\n")
         if "\x00" in text:
             raise ReviewInputError(f"{relative}: NUL in source text.")
         return text
