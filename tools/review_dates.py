@@ -148,7 +148,8 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
         raise ReviewInputError("--root must be an existing directory.") from None
 
     # The selected paths live only at root or one level below these directories.
-    # Reject redirected directories before globbing, including NTFS junctions.
+    # Reject redirected directories, including NTFS junctions, before scanning.
+    directories = []
     for directory in ("guides", "checklists", "tools"):
         folder = root / directory
         try:
@@ -161,11 +162,38 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
             getattr(info, "st_reparse_tag", 0) == JUNCTION_REPARSE_TAG
         ):
             raise ReviewInputError(f"{directory}: redirected or non-directory source.")
+        directories.append((directory, folder))
+
+    # Path.glob may silently suppress permission errors during enumeration.
+    # os.scandir propagates them, so an unreadable source cannot look empty.
+    paths = []
+    for directory, folder in directories:
+        try:
+            with os.scandir(folder) as entries:
+                for entry in entries:
+                    selected = (entry.name == "README.md" if directory == "tools"
+                                else entry.name.endswith(".md"))
+                    if selected:
+                        paths.append(Path(entry.path))
+                        if len(paths) > MAX_SOURCE_FILES:
+                            raise ReviewInputError(
+                                f"too many source files (limit {MAX_SOURCE_FILES}).")
+        except OSError:
+            raise ReviewInputError(
+                f"{directory}: cannot enumerate source directory.") from None
+
+    for name in ("CONTRIBUTING.md", "SECURITY.md"):
+        path = root / name
+        try:
+            path.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError:
+            raise ReviewInputError(f"{name}: cannot inspect source.") from None
+        paths.append(path)
+    paths.sort()
 
     found = []
-    paths = sorted({path for pattern in SOURCES for path in root.glob(pattern)})
-    if len(paths) > MAX_SOURCE_FILES:
-        raise ReviewInputError(f"too many source files (limit {MAX_SOURCE_FILES}).")
     for path in paths:
         relative = path.relative_to(root).as_posix()
         text = mask_inline_inert(mask_fenced_blocks(_source_text(path, relative)))
