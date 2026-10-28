@@ -64,7 +64,10 @@ class WorkshopNavigationTests(unittest.TestCase):
 
     def test_roadmap_does_not_leave_completed_starters_as_future_work(self):
         roadmap = self.read("ROADMAP.md")
-        available, upcoming = roadmap.split("## Next:", 1)
+        sections = re.split(r"^## (?:Next|Current work):", roadmap,
+                            maxsplit=1, flags=re.MULTILINE)
+        self.assertEqual(len(sections), 2, "Missing future-work roadmap section")
+        available, upcoming = sections
         for path in ("application-starter/README.md", "curated-starter/README.md"):
             self.assertIn(path, available)
         self.assertNotIn("Expand project-type starter kits", upcoming)
