@@ -29,6 +29,30 @@
     }
   };
 
+  // Diagnostic geometry leads only; local scrolling code/tables can be valid.
+  // Never report text, IDs, classes, attributes or linked URLs.
+  const descendants = article.querySelectorAll("*");
+  const edge = article.getBoundingClientRect();
+  const scannedNodes = Math.min(descendants.length, 2000);
+  const samples = [];
+  let candidateCount = 0;
+  if (Number.isFinite(edge.left) && Number.isFinite(edge.right)) {
+    for (let i = 0; i < scannedNodes; i++) {
+      const node = descendants[i];
+      const rect = node.getBoundingClientRect();
+      if (!Number.isFinite(rect.left) || !Number.isFinite(rect.right) ||
+          rect.width <= 0 || rect.height <= 0) continue;
+      const leftPx = Math.max(0, Math.ceil(edge.left - rect.left));
+      const rightPx = Math.max(0, Math.ceil(rect.right - edge.right));
+      if (!leftPx && !rightPx) continue;
+      candidateCount++;
+      if (samples.length < 8) samples.push({
+        elementIndex: i, tag: node.tagName.toLowerCase(),
+        leftOverflowPx: leftPx, rightOverflowPx: rightPx,
+      });
+    }
+  }
+
   return {
     status: "MEASURED (not an accessibility verdict)",
     observedAtUTC: new Date().toISOString(),
@@ -40,6 +64,12 @@
     markdownClientWidth: article.clientWidth,
     markdownScrollWidth: article.scrollWidth,
     markdownOverflowPx: Math.max(0, article.scrollWidth - article.clientWidth),
+    overflowInspection: {
+      scannedNodes,
+      truncated: descendants.length > scannedNodes,
+      candidateCount,
+      samples,
+    },
     // The browser media preference can differ from GitHub's selected site theme.
     prefersDark: matchMedia("(prefers-color-scheme: dark)").matches,
     githubAppearance: {
@@ -55,6 +85,6 @@
       selectedImagePath: localPath(img.currentSrc),
       rendered: img.complete && img.naturalWidth > 0,
     })),
-    caution: "Browser prefersDark is not necessarily GitHub's selected theme. Check rendered images and appearance manually; this cannot test keyboard order, screen-reader speech, zoom setting, or WCAG conformance.",
+    caution: "Overflow samples are geometry leads, not failures; code/tables can scroll locally and some CSS overflow may escape sampling. Browser prefersDark is not necessarily GitHub's selected theme. Check actual appearance, keyboard order, screen-reader speech, zoom, and WCAG conformance manually.",
   };
 })()
