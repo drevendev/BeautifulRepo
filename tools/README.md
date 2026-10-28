@@ -165,7 +165,10 @@ left unclosed through the end of the document. This follows the bounded
 180 days (30 for `guides/programs.md`, whose rules change every season) and reports
 impossible or future dates as errors. As with the catalog, `--fail-on-warning` is for
 the scheduled run, and `--today YYYY-MM-DD` fixes the date for tests. A warning means
-"re-read this source", not "this source changed".
+"re-read this source", not "this source changed". The scanner reads ordinary UTF-8
+files only (up to 256 KiB per file and 4096 selected files). It rejects linked
+or redirected source locations, invalid UTF-8 and NUL bytes with an input
+error; these should be fixed rather than silently skipped.
 
 ## Relative documentation link checker
 
