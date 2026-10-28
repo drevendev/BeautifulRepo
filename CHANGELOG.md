@@ -211,6 +211,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Require a complete inline Markdown image before counting an Actions status
+  badge as README evidence. Unterminated links, angle brackets or titles no
+  longer satisfy `--require-badge`; valid URL/title forms remain supported.
+  Also correct the guide's shortcut-reference capability description.
+
 - The offline release inventory now reports a `worktree_dirty` boolean for
   staged, unstaged and non-ignored untracked changes, without exposing local
   filenames or pretending those edits are included in commit-only notes.

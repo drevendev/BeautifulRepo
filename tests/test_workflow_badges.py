@@ -267,5 +267,37 @@ class WorkflowBadgeTests(unittest.TestCase):
         self.assertIn("checked 2", out.stdout)
 
 
+    def test_incomplete_inline_images_do_not_satisfy_required_badge(self):
+        self.workflow()
+        malformed = (
+            f"![CI]({BADGE}",
+            f"![CI](<{BADGE})",
+            f'![CI]({BADGE} "unclosed title)',
+            f"![CI]({BADGE} unexpected title)",
+        )
+        for markup in malformed:
+            with self.subTest(markup=markup):
+                (self.root / "README.md").write_text(markup + "\n", encoding="utf-8")
+                out = self.run_tool(require_badge=True)
+                self.assertEqual(out.returncode, 1, out.stdout + out.stderr)
+                self.assertIn("no same-repository GitHub Actions workflow badge", out.stderr)
+                self.assertIn("0 same-repository workflow badge(s)", out.stderr)
+
+    def test_complete_inline_images_with_angles_and_titles_are_checked(self):
+        self.workflow()
+        variants = (
+            f"![CI](<{BADGE}>)",
+            f'![CI]({BADGE} "Build status")',
+            f"![CI](<{BADGE}> 'Build status')",
+            f"![CI]({BADGE} (Build status))",
+        )
+        (self.root / "README.md").write_text(
+            "\n".join(variants) + "\n", encoding="utf-8"
+        )
+        out = self.run_tool(require_badge=True)
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("checked 4 same-repository workflow badge(s)", out.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()
