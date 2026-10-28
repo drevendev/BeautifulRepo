@@ -1,6 +1,6 @@
 # BeautifulRepo's README: from a directory to inspectable evidence
 
-**Case status, 2026-10-23:** a full clean-clone run and GitHub's own rendering were checked, at desktop and narrow widths, in light and dark themes. Screen readers and visible keyboard focus were **not** checked. This is a real-repository adaptation, not evidence of improved user conversion or a finished accessibility audit.
+**Case status, 2026-10-23:** a full clean-clone run and selected GitHub-rendered observations were recorded at desktop and narrow widths. Light-theme contrast was measured at 1280 px and dark-theme contrast at 375 px; the available evidence does **not** cover both themes at every width. Screen readers, real 400% browser zoom, keyboard traversal and visible focus were **not** checked. This is a real-repository adaptation, not evidence of improved user conversion or a finished accessibility audit.
 
 ## The real repository and immutable baselines
 
@@ -69,14 +69,14 @@ Checked on GitHub's own rendering of `README.md` on that branch, signed out, in 
 | --- | --- | --- | --- |
 | Page scrolls sideways | no | no | no |
 | Blocks with their own horizontal scroll | none | 3 code blocks, `Start here` table (3 px) | 3 code blocks, `Start here` table |
-| Text contrast, light theme | 15.8:1 (links 5.2:1) | | |
-| Text contrast, dark theme | | 17.4:1 (links 6.1:1, code 15.9:1) | |
+| Text contrast, light theme | 15.8:1 (links 5.2:1) | NOT RECORDED | NOT RECORDED |
+| Text contrast, dark theme | NOT RECORDED | 17.4:1 (links 6.1:1, code 15.9:1) | NOT RECORDED |
 
-The first screen at 375 px shows the title, the one-sentence promise, the four badges in two rows and the four navigation links, without overlap. Every image has alt text: the four badges are named `CI status`, `License: MIT`, `Python 3.11+` and `Runtime dependencies: zero`. The Mermaid journey keeps its adjacent text alternative. All 72 README links are keyboard-focusable (none has a negative `tabindex`), and the four section anchors the navigation uses exist.
+The first screen at 375 px shows the title, the one-sentence promise, the four badges in two rows and the four navigation links, without overlap. Every image has alt text: the four badges are named `CI status`, `License: MIT`, `Python 3.11+` and `Runtime dependencies: zero`. The Mermaid journey keeps its adjacent text alternative. The recorded DOM inspection found no negative `tabindex` on 72 README links, and the four section anchors the navigation uses exist. **This does not prove keyboard focusability or visible focus:** actual Tab/Shift+Tab traversal and activation were **NOT RUN**.
 
 Long commands scroll inside their code blocks rather than widening the page. That is acceptable for copyable commands, and the copy button stays available. The three-column `Start here` table scrolls inside its own container at 320 px; WCAG 1.4.10 allows two-dimensional layouts such as data tables to do so.
 
-**Not checked:** a screen reader, visible focus styles while tabbing, real phones, 400% browser zoom as opposed to a 320 px viewport, and the earlier `e1c3123` revision's rendering. The before/after comparison above stays source-level.
+**Not checked or not recorded:** a screen reader, actual keyboard focus traversal and visible focus styles, real phones, 400% browser zoom as opposed to a 320 px viewport, contrast for the other width/theme combinations, and the earlier `e1c3123` revision's rendering. The before/after comparison above stays source-level. Blank contrast cells in the earlier case-study table were missing evidence, not implicit passes.
 
 A different issue, [#28](https://github.com/drevendev/BeautifulRepo/issues/28), tracks Pocket Board controls and is not settled by this README review.
 
@@ -90,7 +90,7 @@ A different issue, [#28](https://github.com/drevendev/BeautifulRepo/issues/28), 
 - byte-identity of two runnable files and isolated Python output;
 - a full clean-clone run of the first success and the five checks;
 - provider CI on the PR head;
-- GitHub's rendered layout and contrast at three widths in both themes.
+- GitHub-rendered horizontal reflow at three emulated viewport widths, plus **selected** contrast observations (light at 1280 px; dark at 375 px). The other width/theme combinations are not documented as tested.
 
 **What is not verified:** improved traffic or conversion, time to first success for actual users, screen-reader and visible-focus behaviour, and real devices.
 
