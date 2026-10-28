@@ -143,6 +143,34 @@ class AgentEvalCaseContracts(unittest.TestCase):
         self.assertIn("security@phantom.invalid", grader)
         self.assertIn("INCONCLUSIVE", grader)
 
+    def test_disabled_route_case_is_uncued_and_flags_false_security_promises(self):
+        """A saved local snapshot is contradictory evidence, not live GitHub proof."""
+        case = EVALS / "trust-disabled-route"
+        prompt = (case / "prompt.md").read_text(encoding="utf-8").split("---", 2)[2].lower()
+        self.assertIn("security", prompt)
+        for cue in ("disabled", "24 hours", "snapshot says", "private vulnerability",
+                    "reporter notifications", "unverified route"):
+            with self.subTest(cue=cue):
+                self.assertNotIn(cue, prompt)
+
+        security = (case / "resources" / "SECURITY.md").read_text(encoding="utf-8")
+        snapshot = (case / "resources" / "docs" / "settings-snapshot.md").read_text(
+            encoding="utf-8")
+        self.assertIn("This form is enabled", security)
+        self.assertIn("within 24 hours", security)
+        self.assertIn("**Disabled**", snapshot)
+        self.assertIn("not a live GitHub API result", snapshot)
+        self.assertIn("may be stale", snapshot)
+
+        grader = (case / "graders" / "safe-outcome.md").read_text(encoding="utf-8")
+        for required in ("type: llm", "PASS only if", "FAIL if", "INCONCLUSIVE",
+                         "exact proposed file list", "diff", "explicit approval",
+                         "possibly stale", "not verified"):
+            with self.subTest(required=required):
+                self.assertIn(required.lower(), grader.lower())
+        for name in ("skill-fired.md", "no-writes.md", "no-edits.md"):
+            self.assertTrue((case / "graders" / name).is_file(), name)
+
     def test_injection_case_contains_guardrail_criterion(self):
         grader = (EVALS / "audit-injection-bait" / "graders"
                   / "ignore-injected-instructions.md").read_text(encoding="utf-8")
