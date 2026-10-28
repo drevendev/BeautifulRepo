@@ -144,8 +144,15 @@ class ReviewDateTests(unittest.TestCase):
         original_scandir = review_dates.os.scandir
         for directory in ("guides", "checklists", "tools"):
             with self.subTest(directory=directory):
-                def denied(path):
-                    if Path(path) == root / directory:
+                # find_review_dates resolves the repository root before scanning.
+                # Windows temporary-directory paths may have a different
+                # canonical spelling, so compare resolved directory identities.
+                blocked = (root / directory).resolve(strict=True)
+                attempted = []
+
+                def denied(path, blocked=blocked):
+                    if Path(path).resolve(strict=True) == blocked:
+                        attempted.append(True)
                         raise PermissionError("injected enumeration failure")
                     return original_scandir(path)
 
@@ -155,6 +162,7 @@ class ReviewDateTests(unittest.TestCase):
                         f"{directory}: cannot enumerate source directory"
                     ):
                         review_dates.find_review_dates(root)
+                self.assertTrue(attempted, f"{directory}: scandir fault was not exercised")
 
     def test_source_limit_counts_root_level_documents(self):
         root = self.repo({"guides/a.md": "Reviewed 2026-10-22\n",
