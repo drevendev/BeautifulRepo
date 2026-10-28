@@ -150,7 +150,7 @@ class ReviewDateTests(unittest.TestCase):
                 blocked = (root / directory).resolve(strict=True)
                 attempted = []
 
-                def denied(path, blocked=blocked):
+                def denied(path, blocked=blocked, attempted=attempted):
                     if Path(path).resolve(strict=True) == blocked:
                         attempted.append(True)
                         raise PermissionError("injected enumeration failure")
