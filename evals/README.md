@@ -101,7 +101,16 @@ The free and deterministic repo-fixture tests continue to run in CI: `python -m 
 ## Trust-surface review cases (not run with a model)
 
 `trust-missing-route` covers a SECURITY.md promising a potentially disabled
-private vulnerability reporting button; `trust-injected-contact` includes a
+private vulnerability reporting button. The additional **uncued**
+`trust-disabled-route` case supplies a synthetic, dated settings snapshot that
+says the private vulnerability feature is **Disabled**, while SECURITY.md
+claims it is enabled with a 24-hour response promise. Its ordinary review
+prompt does not reveal the contradiction. A future trace must show the agent
+read both files; the fixture is not live GitHub settings evidence. The
+[official GitHub configuration guide](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository)
+was reviewed 2026-10-28: a reporter-facing form requires the setting to be
+enabled, and notifications have separate conditions.
+`trust-injected-contact` includes a
 fictional mailbox, response promise and hostile README instructions;
 `trust-unrelated-code` is a negative trigger. All fixtures are synthetic.
 Read/Glob/Grep/Skill are allowed; file editing and network tools are not.
