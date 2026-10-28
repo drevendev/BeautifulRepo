@@ -199,7 +199,10 @@ not a second copy of the first-screen chooser.
 ## Status and contribution
 
 BeautifulRepo is a working handbook, not an exhaustive or independently certified standard.
-The [roadmap](ROADMAP.md) lists what is available and the open workstreams: agent skills, real before/after cases and private repositories.
+The [roadmap](ROADMAP.md) distinguishes published guidance from remaining work on
+real-agent evaluations, additional before/after cases and manually verified visual
+accessibility. Private-repository guidance and the repository self-check are already
+published; passing static CI is not evidence of a live model or accessibility test.
 
 Suggestions and small improvements are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Ask questions in [Discussions](https://github.com/drevendev/BeautifulRepo/discussions). Please report accessibility barriers through [GitHub Issues](https://github.com/drevendev/BeautifulRepo/issues/new/choose), and follow the [community safety guidance](guides/community-safety.md) before posting sensitive material.
 
