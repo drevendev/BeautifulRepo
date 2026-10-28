@@ -79,6 +79,23 @@ media query as a GitHub theme verdict. GitHub's
 [theme-setting documentation](https://docs.github.com/en/get-started/accessibility/managing-your-theme-settings)
 was reviewed **2026-10-28**.
 
+The probe also returns `overflowInspection`: up to **eight** element rectangles
+that extend beyond the rendered Markdown container. It scans at most **2,000**
+descendants and reports `truncated` if the limit is reached. The output
+includes only a zero-based descendant index, tag name and left/right pixel
+excess; no element text, class names, IDs, attributes or URLs are included.
+To inspect `elementIndex` in the **same** browser tab, evaluate
+`document.querySelector("article.markdown-body, .markdown-body").querySelectorAll("*")[INDEX]`
+with the integer substituted for `INDEX`. Do not share inspected nodes or
+page text without checking for private content.
+
+Rectangles are **candidates, not violations**: code and tables can require
+local horizontal scrolling. Hidden, transformed or CSS-generated content may
+escape the sample. Zero candidates do not cancel a positive
+`markdownOverflowPx`. Inspect actual reader impact before changing the
+layout. See [W3C WAI Reflow guidance](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html),
+reviewed 2026-10-28.
+
 The numbers are **diagnostics, not PASS/FAIL labels**. GitHub's own navigation
 can affect page overflow; code blocks or tables can have permitted local
 horizontal scrolling. An image that loads is not necessarily understandable.
