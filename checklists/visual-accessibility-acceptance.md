@@ -51,6 +51,31 @@ measurements and an annotated screenshot only when safe to share.
 | Assistive technology | If available, use an identified screen reader/browser pair to navigate headings, links and informative image alternatives | Spoken content/announced names, missing or duplicated meaning, tester and software version |
 | Motion, if present | Exercise reduced-motion preference and default motion | Autoplay, flashing, essential information tied to animation |
 
+### Optional local measurements in the browser console
+
+A small, **read-only** [README measurement probe](../examples/readme-visuals/github-readme-probe.js)
+can help fill in the numeric observations above without installing packages.
+First inspect its source: it reads the current DOM but does not fetch, edit,
+copy or transmit anything. On the rendered GitHub page at the **full pinned
+commit SHA**, open developer tools, execute that inspected JavaScript expression
+in the Console, and record its returned object. Do not run pasted code you
+have not personally reviewed.
+
+Repeat for light and dark themes, the 320 CSS px viewport, and **actual**
+400% browser zoom. The object records the measured CSS viewport, document
+and Markdown scroll widths, overflow in pixels, effective theme, image-load
+counts and selected `picture` image paths; it deliberately omits URL query
+strings. Save each observation with its browser/version, real zoom setting
+and screenshot **only if the material is safe to share**.
+
+The numbers are **diagnostics, not PASS/FAIL labels**. GitHub's own navigation
+can affect page overflow; code blocks or tables can have permitted local
+horizontal scrolling. An image that loads is not necessarily understandable.
+The probe cannot establish zoom percentage, keyboard behaviour, screen-reader
+speech, contrast or WCAG conformance. If no rendered Markdown container is
+found, it returns `NOT RUN` rather than a success. These manual checks and
+their evidence receipt still have to be completed by a tester.
+
 **Reflow interpretation:** WCAG 2.2 Success Criterion 1.4.10 describes
 content presentation without loss of information/functionality at the
 equivalent of 320 CSS pixels wide for vertically scrolling content. Some

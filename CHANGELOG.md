@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add an optional, inspectable browser-console measurement probe for real
+  GitHub-rendered READMEs. It reports CSS viewport/document/Markdown overflow,
+  selected theme-aware images and missing images, without network requests or
+  query-string leakage. Synthetic DOM and local Chromium smoke tests exercise
+  its measurements; real GitHub-rendered, zoom, keyboard and screen-reader
+  acceptance still requires a separate manual receipt (related to #16).
+
 - Add an uncued, synthetic trust-surface evaluation for an advertised GitHub
   private vulnerability form contradicted by a saved disabled-settings snapshot.
   Source contracts require the proposed diff to withhold an unverified route,
