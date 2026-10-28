@@ -40,7 +40,13 @@
     markdownClientWidth: article.clientWidth,
     markdownScrollWidth: article.scrollWidth,
     markdownOverflowPx: Math.max(0, article.scrollWidth - article.clientWidth),
+    // The browser media preference can differ from GitHub's selected site theme.
     prefersDark: matchMedia("(prefers-color-scheme: dark)").matches,
+    githubAppearance: {
+      colorMode: root.getAttribute("data-color-mode"),
+      lightTheme: root.getAttribute("data-light-theme"),
+      darkTheme: root.getAttribute("data-dark-theme"),
+    },
     prefersReducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
     images: images.length,
     unloadedImages: images.filter((img) => !img.complete || img.naturalWidth === 0).length,
@@ -49,6 +55,6 @@
       selectedImagePath: localPath(img.currentSrc),
       rendered: img.complete && img.naturalWidth > 0,
     })),
-    caution: "Check any overflow manually. This cannot test keyboard order, screen-reader speech, zoom setting, or WCAG conformance.",
+    caution: "Browser prefersDark is not necessarily GitHub's selected theme. Check rendered images and appearance manually; this cannot test keyboard order, screen-reader speech, zoom setting, or WCAG conformance.",
   };
 })()

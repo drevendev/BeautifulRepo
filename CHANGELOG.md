@@ -230,6 +230,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Distinguish the browser's `prefers-color-scheme` from GitHub's optional
+  page-level appearance attributes in the README measurement probe. A user-forced
+  GitHub theme can differ from the OS preference; the probe now reports both
+  without treating either as an accessibility verdict (related to #16).
+
 - Bound the guide review-date scanner to ordinary local UTF-8 files, reject
   redirected sources and directories, oversized input and NUL bytes, and return
   an explicit input error rather than following an external link or silently
