@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add an uncued, synthetic trust-surface evaluation for an advertised GitHub
+  private vulnerability form contradicted by a saved disabled-settings snapshot.
+  Source contracts require the proposed diff to withhold an unverified route,
+  an invented response promise and licence selection; no model run or live
+  provider-settings check is claimed (related to #71 and #74).
+
 - Add an evidence-bound release-note presentation comparison: two intentional
   layouts (compact Unreleased history versus an unpublished reader-facing
   draft) describe the same merged Markdown-link checker change, with pinned
