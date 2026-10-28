@@ -12,7 +12,7 @@ NODE = shutil.which("node")
 
 @unittest.skipUnless(NODE, "Node is optional; browser-console probe needs no Node install")
 class BrowserProbeTests(unittest.TestCase):
-    def run_probe(self, present=True, pinned=True, github_mode="dark", system_dark=True):
+    def run_probe(self, present=True, pinned=True, github_mode="dark", system_dark=True, overflowing=True):
         harness = r'''
 const fs = require("node:fs");
 const vm = require("node:vm");
@@ -21,9 +21,22 @@ const img = {
   complete: true, naturalWidth: 42, currentSrc: "https://github.com/a/b/image.svg?token=secret",
   getAttribute(key) { return key === "alt" ? "Measured sample" : null; },
 };
+const descendants = [
+  {tagName: "P", textContent: "PRIVATE NOTE",
+    getBoundingClientRect() { return {left: 12, right: 280, width: 268, height: 20}; }},
+  {tagName: "PRE", href: "https://example.invalid/?token=secret",
+    getBoundingClientRect() {
+      const right = process.argv[6] === "yes" ? 350 : 290;
+      return {left: 12, right, width: right - 12, height: 20};
+    }},
+];
 const article = {
   clientWidth: 300, scrollWidth: 330,
-  querySelectorAll(selector) { return selector === "picture img" || selector === "img" ? [img] : []; },
+  getBoundingClientRect() { return {left: 10, right: 310, width: 300, height: 400}; },
+  querySelectorAll(selector) {
+    return selector === "*" ? descendants :
+      selector === "picture img" || selector === "img" ? [img] : [];
+  },
 };
 const sandbox = {
   document: {
@@ -46,7 +59,7 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
 '''
         output = subprocess.run([NODE, "-e", harness, str(PROBE), "yes" if present else "no",
                                  "yes" if pinned else "no", github_mode,
-                                 "yes" if system_dark else "no"],
+                                 "yes" if system_dark else "no", "yes" if overflowing else "no"],
                                 text=True, capture_output=True, check=True)
         return json.loads(output.stdout)
 
@@ -60,6 +73,14 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
         self.assertEqual(data["githubAppearance"]["darkTheme"], "dark_dimmed")
         self.assertEqual(data["images"], 1)
         self.assertEqual(data["unloadedImages"], 0)
+        self.assertEqual(data["overflowInspection"]["scannedNodes"], 2)
+        self.assertFalse(data["overflowInspection"]["truncated"])
+        self.assertEqual(data["overflowInspection"]["candidateCount"], 1)
+        self.assertEqual(data["overflowInspection"]["samples"], [{
+            "elementIndex": 1, "tag": "pre", "leftOverflowPx": 0, "rightOverflowPx": 40,
+        }])
+        self.assertNotIn("PRIVATE NOTE", json.dumps(data))
+        self.assertNotIn("example.invalid", json.dumps(data))
         self.assertEqual(data["pictureSelections"][0]["alt"], "Measured sample")
         self.assertEqual(data["pictureSelections"][0]["selectedImagePath"],
                          "https://github.com/a/b/image.svg")
@@ -77,6 +98,12 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
         data = self.run_probe(github_mode="none")
         self.assertIsNone(data["githubAppearance"]["colorMode"])
         self.assertIsNone(data["githubAppearance"]["darkTheme"])
+
+    def test_missing_geometry_sample_does_not_cancel_scrollwidth_measurement(self):
+        data = self.run_probe(overflowing=False)
+        self.assertEqual(data["markdownOverflowPx"], 30)
+        self.assertEqual(data["overflowInspection"]["candidateCount"], 0)
+        self.assertEqual(data["overflowInspection"]["samples"], [])
 
     def test_missing_renderer_is_not_a_pass(self):
         data = self.run_probe(False)
