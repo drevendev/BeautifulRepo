@@ -56,7 +56,12 @@ checklist. The installed local checker may be run with an explicit target:
 Record actual exit status and findings. An audit report checks *files*,
 not whether a GitHub reporting setting is enabled or someone reads reports.
 Inherited organization policies and live settings are **Not verified** unless
-separately established by authorized evidence.
+separately established by authorized evidence. If a dated local snapshot
+contradicts a published route, report the source and age of both claims:
+treat the route as **possibly disabled**, not as working. A local snapshot
+is **not a live provider-settings check**. Do not propose publishing the
+route until the current reporter-facing form, responsible intake owner and
+actual notification handling have been established.
 
 Evaluate these four surfaces separately:
 
