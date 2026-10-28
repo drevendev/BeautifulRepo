@@ -2,6 +2,11 @@
   "use strict";
   // Run only after opening a reviewed, full-SHA GitHub-rendered Markdown page.
   // No network requests, clipboard access, DOM changes, or file writes.
+  const pinned = location.hostname === "github.com" &&
+    /^\\/[^/]+\\/[^/]+\\/blob\\/[0-9a-f]{40}\\/.+/i.test(location.pathname);
+  if (!pinned) {
+    return { status: "NOT RUN", reason: "Open a GitHub-rendered blob page pinned to a full commit SHA." };
+  }
   const article = document.querySelector("article.markdown-body, .markdown-body");
   if (!article) {
     return { status: "NOT RUN", reason: "No rendered Markdown body was found on this page." };
