@@ -124,7 +124,6 @@ From a checkout with **Python 3.11+**:
 python tools/catalog.py
 python tools/docs_links.py
 python tools/html_navigation.py
-python -I tools/action_pins.py --root .
 python -m unittest discover -s tests -v
 python tools/repo_audit.py .
 ```
@@ -138,8 +137,12 @@ The same checks run in GitHub Actions. They validate structured catalog metadata
 CI also runs `python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo --require-badge` to catch a missing local workflow behind the root README's GitHub Actions status badge. This **does not** verify that CI ran or passed; it only checks the referenced workflow file.
 
 The additional HTML navigation check verifies bounded local HTML links, media assets and section fragments.
-The action-pin check detects workflow SHA/annotation drift against a locally reviewed
-manifest; it does not verify upstream release signatures or CI success.
+The additional action-pin check detects workflow SHA/annotation drift against a locally
+reviewed manifest; it does not verify upstream release signatures or CI success:
+
+```bash
+python -I tools/action_pins.py --root .
+```
 
 Other repositories can run the audit and both link checks as a GitHub Action
 pinned to a reviewed commit. See [run the checks in your repository](guides/adopting-the-checks.md).
