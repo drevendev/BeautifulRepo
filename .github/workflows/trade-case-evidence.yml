@@ -39,9 +39,7 @@ jobs:
           for phase in before after; do
             if [ "$phase" = before ]; then sha="$BEFORE_SHA"; else sha="$AFTER_SHA"; fi
             target="$RUNNER_TEMP/trade-$phase"
-            mkdir -p "$target"
-            git -C "$target" init -q
-            git -C "$target" remote add origin https://github.com/drevendev/trade_simulation.git
+            git clone -q --no-checkout --filter=blob:none --depth 1 https://github.com/drevendev/trade_simulation.git "$target"
             git -C "$target" -c protocol.version=2 fetch --no-tags --depth 1 origin "$sha"
             git -C "$target" -c core.hooksPath=/dev/null checkout --detach --force FETCH_HEAD
             test "$(git -C "$target" rev-parse HEAD)" = "$sha"
