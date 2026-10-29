@@ -42,6 +42,8 @@ jobs:
         run: python tools/docs_links.py
       - name: Check HTML navigation and local anchors
         run: python tools/html_navigation.py
+      - name: Check reviewed GitHub Actions commit pins
+        run: python -I tools/action_pins.py --root .
       - name: Verify root README GitHub Actions badge target
         run: python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo --require-badge
       - name: Audit BeautifulRepo's own entry points
