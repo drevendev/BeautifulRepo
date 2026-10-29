@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Prepare an evidence-first, read-only Chromium workflow for the pinned
+  trade_simulation case: serve-site inspection at 320 CSS px in light/dark,
+  captured screenshots, pinned JSON byte comparison and explicit
+  non-claims for 400% zoom, keyboard and screen-reader testing.
+  Browser observations are pending until the workflow runs and its
+  artifacts are reviewed (#82).
+
+
 - Add a read-only GitHub Actions reproduction for the trade_simulation case:
   two SHA-pinned target source checkouts audited with BeautifulRepo tools pinned
   to commit `83cf280`, plus a saved-JSON first-success and missing-file path.
