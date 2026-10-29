@@ -67,8 +67,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   [release draft workflow](guides/maintenance-workflow.md), a hash-pinned linter in
   CI, [AGENTS.md](AGENTS.md) and [decision records](docs/decisions/README.md).
 - A [real README before/after case](case-studies/readme-first-success-case.md) for
-  BeautifulRepo itself, including a clean-clone run and GitHub's rendering at three
-  widths in both themes.
+  BeautifulRepo itself, including a clean-clone run and GitHub-rendered reflow
+  observations at three emulated widths. Contrast was recorded only in light
+  mode at 1280 px and dark mode at 375 px; real 400% zoom, keyboard and
+  screen-reader checks were not performed.
 
 These linked resources are repository source files. Tagged versions are listed on
 the [Releases page](https://github.com/drevendev/BeautifulRepo/releases). There is
