@@ -15,8 +15,12 @@
   const root = document.documentElement;
   const cssViewportWidth = root.clientWidth;
   const pageScrollWidth = root.scrollWidth;
-  const pictures = [...article.querySelectorAll("picture img")];
-  const images = [...article.querySelectorAll("img")];
+  // All counts are within the bounded descendant sample, never the whole page
+  // when overflowInspection.truncated is true.
+  let images = 0;
+  let unloadedImages = 0;
+  let pictureMatches = 0;
+  const pictureSelections = [];
   const localPath = (source) => {
     if (!source) return null;
     try {
@@ -42,6 +46,19 @@
     const node = walker.nextNode();
     if (!node) break;
     const elementIndex = scannedNodes++;
+    if (node.tagName.toLowerCase() === "img") {
+      images++;
+      const rendered = node.complete && node.naturalWidth > 0;
+      if (!rendered) unloadedImages++;
+      if (node.closest("picture")) {
+        pictureMatches++;
+        if (pictureSelections.length < 8) pictureSelections.push({
+          alt: node.getAttribute("alt"),
+          selectedImagePath: localPath(node.currentSrc),
+          rendered,
+        });
+      }
+    }
     const rect = node.getBoundingClientRect();
     if (!Number.isFinite(edge.left) || !Number.isFinite(edge.right) ||
         !Number.isFinite(rect.left) || !Number.isFinite(rect.right) ||
@@ -83,13 +100,11 @@
       darkTheme: root.getAttribute("data-dark-theme"),
     },
     prefersReducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
-    images: images.length,
-    unloadedImages: images.filter((img) => !img.complete || img.naturalWidth === 0).length,
-    pictureSelections: pictures.map((img) => ({
-      alt: img.getAttribute("alt"),
-      selectedImagePath: localPath(img.currentSrc),
-      rendered: img.complete && img.naturalWidth > 0,
-    })),
-    caution: "Overflow samples are geometry leads, not failures; code/tables can scroll locally and some CSS overflow may escape sampling. Browser prefersDark is not necessarily GitHub's selected theme. Check actual appearance, keyboard order, screen-reader speech, zoom, and WCAG conformance manually.",
+    images,
+    unloadedImages,
+    imageCountsPartial: truncated,
+    pictureSelectionsTruncated: pictureMatches > pictureSelections.length || truncated,
+    pictureSelections,
+    caution: "Overflow samples are geometry leads, not failures; code/tables can scroll locally and some CSS overflow may escape sampling. When imageCountsPartial is true, image counts are lower bounds and pictureSelections may omit images. Browser prefersDark is not necessarily GitHub's selected theme. Check actual appearance, keyboard order, screen-reader speech, zoom, and WCAG conformance manually.",
   };
 })()
