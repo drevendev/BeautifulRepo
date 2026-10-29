@@ -3,10 +3,11 @@
 **Case status, 2026-10-29: in progress.** This is a pinned, source-level before/after
 study of a real repository. The README correction happened in the target's own
 merged PR; BeautifulRepo documents rather than repeats that target change.
-Full before/after audits, fresh-clone first success and rendered accessibility
-checks remain unverified. A byte-identical local fixture success/failure and
-target-native CI at the correction's merge SHA are recorded below; neither
-completes the full case.
+Pinned before/after offline audits and a saved-data first success from fresh
+Git clones were exercised in GitHub Actions on 2026-10-29. The target's historical
+CI and a separate isolated fixture run are also recorded. None of this
+establishes live deployment freshness, visual accessibility, or a rerun of
+the actual simulation; the case remains incomplete.
 
 ## Repository and exact evidence
 
@@ -173,56 +174,82 @@ This source-only write-up does not close
 [#82](https://github.com/drevendev/BeautifulRepo/issues/82) or the
 [real-case epic #88](https://github.com/drevendev/BeautifulRepo/issues/88).
 
-## Reproducible pinned CI probe (introduced 2026-10-29)
+## Pinned before/after CI reproduction (observed 2026-10-29)
 
-The [source-only case evidence workflow](../.github/workflows/trade-case-evidence.yml)
-provides an opt-in, inspectable GitHub Actions runner for the remaining checkout
-and tool-check steps. It reads **two separate fresh source checkouts** at the
-before SHA `59801a2ab5a38a161d45cb67e8c4b449f2e0a8ec` and after SHA
-`36bd70ea399813accf21d350aa5a0067f059757e`, while checking out the
-BeautifulRepo tools at immutable SHA
+The [source-only workflow](../.github/workflows/trade-case-evidence.yml)
+completed successfully in
+[GitHub Actions run #40957829865](https://github.com/drevendev/BeautifulRepo/actions/runs/40957829865),
+[job #123742449748](https://github.com/drevendev/BeautifulRepo/actions/runs/40957829865/job/123742449748),
+on the workflow's exact commit
+[`acd04cab0993244c1c948137696ea9319ee49ed3`](https://github.com/drevendev/BeautifulRepo/commit/acd04cab0993244c1c948137696ea9319ee49ed3).
+The workflow checks out BeautifulRepo's audit tools at the **single immutable
+commit**
 [`83cf280c7242791c7b9601c8f8069ea72f4a5a13`](https://github.com/drevendev/BeautifulRepo/commit/83cf280c7242791c7b9601c8f8069ea72f4a5a13).
+The runner used two separate fresh, shallow Git clones of the target,
+fetched exact before/after commits and asserted the resulting HEAD values.
 
-It invokes `repo_audit.py --format json --fail-on never`, `docs_links.py`,
-and `html_navigation.py` on **both** source trees and records tool exit
-codes and bounded diagnostic excerpts in the job log/summary. A checker that
-reports broken documentation is a finding, not an automatically accepted
-clean result. The workflow also attempts the saved-JSON first success and a
-missing-file failure path from a separate empty working directory, using
-`python -I -c` to avoid importing target-project Python modules. It never
-runs target TypeScript/.NET code, installs target dependencies or modifies
-the target repository. Shallow fetches must succeed on GitHub's runner.
+Observed results from that job's logs:
 
-**A workflow file is not an execution receipt.** Until a completed run and
-its exact job/log URL are inspected and linked here, the original before/after
-audit and fresh-checkout first-success items below remain **NOT RUN**. Even
-a green job will not verify a live deployment, browser rendering, 320 px
-reflow, keyboard, 400% zoom, or screen-reader behavior.
+- **Before** `59801a2ab5a38a161d45cb67e8c4b449f2e0a8ec`:
+  `repo_audit.py --format json --fail-on never` found **0 errors,
+  0 warnings, 0 informational findings** (exit 0);
+  `docs_links.py` checked **37** relative Markdown destinations across
+  **49** Markdown files (exit 0);
+  `html_navigation.py` checked **39** local HTML/fragment destinations
+  across **49** Markdown files (exit 0).
+- **After** `36bd70ea399813accf21d350aa5a0067f059757e`:
+  the same audit found **0 errors, 0 warnings, 0 informational findings**
+  (exit 0); the link checker examined **38** relative destinations across
+  **49** files (exit 0); HTML navigation examined **40** local destinations
+  across **49** files (exit 0).
+- From the fresh **after** clone, the documented `python -c` saved-JSON
+  one-liner exited **0** and printed
+  `Seed: 42 Ticks: 60 Capital @ tick 59: 78.04`. The step used
+  `PYTHONSAFEPATH=1` to prevent importing modules from the inspected
+  working directory. From a separate empty working directory the same
+  one-liner exited **1**, produced no stdout, and raised
+  `FileNotFoundError`; all three assertions were checked by the job.
+
+**Interpretation:** the zero-finding audit results **did not detect the stale
+M4 release claim** in the original README. These tools inspect structural
+entry points and local destinations, not release truth. The extra destination
+counts after the correction are inventory differences, **not quality scores
+or an accessibility improvement**. Manual comparison with the actual
+release and target-native CI was necessary to find the editorial defect.
+
+The runner performed only Git source retrieval, BeautifulRepo's read-only
+tools and standard-library JSON inspection. No TypeScript/.NET target code
+or dependency installation was run. The workflow is PR-path-scoped or
+manually dispatched, not scheduled. Its successful result is valid for the
+specific workflow, tool and target SHAs above; it is not a live deployment,
+browser test or broader security certification.
 
 ## What remains unverified
 
-- The BeautifulRepo `repo_audit.py`, `docs_links.py` and
-  `html_navigation.py` **were not run** against before/after checkouts;
-  no pinned-tool audit totals are claimed.
-- The Python source-inspection one-liner and a missing-file failure path
-  **were run only against a hash-verified isolated fixture copy**, as documented
-  above. A clean Git clone, its checkout steps and other failure paths remain
-  **NOT RUN**.
+- The **offline source-only** auditors did run on both clean Git clones, but
+  their zero-finding reports do **not** validate milestone/release claims,
+  repository quality, source truth or rendered accessibility. No broader
+  semantic validation is implied by the PASS workflow.
+- The `python -c` saved-data command and missing-file path ran on Ubuntu
+  Python 3.11 under `PYTHONSAFEPATH=1`. It reads a static source artifact;
+  it does **not** execute a simulation or test Windows, macOS or published Pages.
 - No `npm ci`, TypeScript typecheck, Vitest, Vite build or legacy .NET
   build/test was run **locally for this case**. Target-native GitHub CI was
   checked at the correction's merge SHA as recorded above; the later
-  after-snapshot has not been independently re-tested here.
-- The live GitHub Pages deployment, narrow-width light/dark rendering,
-  400% zoom, keyboard and screen-reader behavior were **not observed**.
-- Repository description, topics, homepage and tracked security-policy presence
-  **were inspected** on 2026-10-29. Private reporting enablement, inherited
-  policies, current-release follow-on milestones and performance metrics remain
-  **unverified**; none of the target metadata or settings was changed.
+  after-snapshot has not been independently re-tested as a target runtime.
+- The current GitHub Pages deployment, narrow-width **320 px light/dark**
+  rendering, real 400% zoom, keyboard and screen-reader behavior were
+  **not observed**.
+- Description, topics, homepage and tracked security-policy presence were
+  inspected on 2026-10-29. Private reporting enablement, inherited policies,
+  current-release follow-on milestones and performance metrics remain
+  **unverified**; no target settings or files were changed.
 
-To mark this a **complete case**, follow the
-[five-step procedure](README.md): same pinned BeautifulRepo tool checks
-before and after, a fresh-clone first success and failure path, and a
-documented 320 px visual review with its limitations. The historical
-target-native CI evidence above covers only the original correction merge;
-it is not current-after-snapshot or browser acceptance. Until then this
-remains a useful partial, not a fully accepted case.
+The pinned-tool source audit and the fresh-clone saved-data command/failure
+path are now reproducible and observed. To mark this a **complete case**
+under the [five-step procedure](README.md), the remaining 320 px light/dark
+visual evidence and its limitations must be documented. Current Pages
+freshness and broader keyboard/zoom/screen-reader coverage must remain
+explicitly unknown unless actually tested. The historical target-native CI
+covers the correction merge, not the later after-snapshot runtime.
+This remains a useful partial case, not a fully accepted one.
