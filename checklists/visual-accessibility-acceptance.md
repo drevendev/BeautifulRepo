@@ -68,8 +68,7 @@ GitHub appearance attributes when present, **sampled** image-load counts and
 up to eight selected `picture` image paths; it deliberately omits URL query
 strings. The probe visits at most 2,000 DOM descendants plus one truncation
 check for **all** measurements. `imageCountsPartial: true` means `images`
-and `unloadedImages` are lower bounds, not totals; `pictureSelectionsTruncated:
-true` means additional `picture` choices may be missing. Never claim every
+and `unloadedImages` are lower bounds, not totals; `pictureSelectionsTruncated: true` means additional `picture` choices may be missing. Never claim every
 image rendered successfully when a sample was truncated. Save each observation with its browser/version, real zoom setting
 and screenshot **only if the material is safe to share**.
 
