@@ -226,6 +226,30 @@ manually dispatched, not scheduled. Its successful result is valid for the
 specific workflow, tool and target SHAs above; it is not a live deployment,
 browser test or broader security certification.
 
+## Live Pages browser check (candidate, 2026-10-30)
+
+The [read-only browser probe](trade-pages-probe.mjs) and its
+[GitHub Actions recipe](../.github/workflows/trade-pages-visual.yml) are
+prepared for a **separate live acceptance step**. The workflow pins this
+case's target source revision, installs Playwright using its committed npm
+lockfile without running target package scripts, visits the *served* public
+Pages URL in real Chromium at **320 CSS px**, and captures light/dark
+screenshots plus JSON observations in a short-lived Actions artifact.
+
+It compares fetched live `m4-preview.json` bytes against the checked-in
+pinned fixture, selects the last observed tick in the browser, records the
+rendered installed-capital value, theme-specific body backgrounds, client
+width and horizontal overflow. A byte-identical JSON artifact establishes
+only data agreement at observation time: it **does not** identify the
+deployed HTML/JS commit or prove the complete site is current.
+
+**Status:** implementation committed to the candidate branch; successful
+browser execution and screenshot review are **not yet accepted evidence**.
+Do not check the remaining visual acceptance box or call this case complete
+until the job's real results have been inspected. Viewport emulation is not
+a physical mobile device, real 400% zoom or screen-reader exercise; unknown
+results and diagnostics must be reported as such.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
