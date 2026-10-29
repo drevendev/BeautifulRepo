@@ -72,10 +72,17 @@ why such promises must match the project's actual capacity.
 ## 5. Keep pinned dependencies and published pins current
 
 - **Actions used by CI** are pinned to full commit SHAs with a dated comment, for
-  example `# v7.0.1 inspected 2026-10-05`. Dependabot (`.github/dependabot.yml`)
+  example `# v7.1.0 ref inspected 2026-10-29`. Dependabot (`.github/dependabot.yml`)
   proposes updates weekly for the `github-actions` ecosystem only. Before merging such
   a PR, look at the new release and refresh the inspected date by hand; Dependabot
   updates the SHA, not your review.
+  Before accepting an Action update, verify its upstream release/commit and
+  manually update `.github/action-pins.json` plus every matching workflow
+  annotation. Run `python -I tools/action_pins.py --root .`: it detects a
+  Dependabot SHA change without matching reviewed metadata, inconsistent
+  annotations, new unreviewed actions and tag-only references. **Passing is
+  consistency evidence, not an upstream authenticity check, CI result or
+  security approval.** The checker never fetches GitHub.
 - **Pins this repository publishes**, such as `drevendev/BeautifulRepo@<sha> # v0.2.0`
   in the adoption guide, are checked daily by `.github/workflows/pins.yml`: every
   tag must exist and point at the documented commit. Run it by hand from the Actions
