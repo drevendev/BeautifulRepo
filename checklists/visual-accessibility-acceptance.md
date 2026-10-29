@@ -80,14 +80,24 @@ media query as a GitHub theme verdict. GitHub's
 was reviewed **2026-10-28**.
 
 The probe also returns `overflowInspection`: up to **eight** element rectangles
-that extend beyond the rendered Markdown container. It scans at most **2,000**
-descendants and reports `truncated` if the limit is reached. The output
+that extend beyond the rendered Markdown container. It walks at most **2,000**
+descendants (plus one check for truncation) without building a full element
+list, and reports `truncated` if more descendants exist. The output
 includes only a zero-based descendant index, tag name and left/right pixel
 excess; no element text, class names, IDs, attributes or URLs are included.
 To inspect `elementIndex` in the **same** browser tab, evaluate
-`document.querySelector("article.markdown-body, .markdown-body").querySelectorAll("*")[INDEX]`
-with the integer substituted for `INDEX`. Do not share inspected nodes or
-page text without checking for private content.
+the following bounded traversal, substituting the returned integer for `INDEX`:
+
+```js
+const article = document.querySelector("article.markdown-body, .markdown-body");
+const walker = document.createTreeWalker(article, NodeFilter.SHOW_ELEMENT);
+let node;
+for (let n = 0; n <= INDEX; n++) node = walker.nextNode();
+node // Inspect locally; don't publish unreviewed content.
+```
+
+Only use an index returned by the probe (0–1,999). Do not share inspected
+nodes or page text without checking for private content.
 
 Rectangles are **candidates, not violations**: code and tables can require
 local horizontal scrolling. Hidden, transformed or CSS-generated content may
