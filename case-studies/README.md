@@ -9,7 +9,7 @@ procedure have not been executed; a source comparison alone is not a finished ca
 | --- | --- | --- |
 | [README before/after](readme-first-success-case.md) | BeautifulRepo | complete; written before this procedure, which it shaped |
 | [Offline first success](patchpitch.md) | PatchPitch | complete; change merged as PatchPitch#90 |
-| [Milestone-claim drift](trade_simulation.md) | trade_simulation | in progress; pinned source comparison, manual acceptance not run |
+| [Milestone-claim drift](trade_simulation.md) | trade_simulation | in progress; pinned clone audits and saved-data first success observed, visual acceptance not run |
 | [First pattern studies](first-patterns.md) | Devostasis, Hungry Crab, Gum | source observations only, no changes made |
 
 ## The procedure

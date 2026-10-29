@@ -1,0 +1,110 @@
+name: Pinned trade_simulation case evidence
+
+on:
+  pull_request:
+    paths:
+      - 'case-studies/trade_simulation.md'
+      - '.github/workflows/trade-case-evidence.yml'
+  workflow_dispatch:
+
+# This workflow reads pinned public source; it never executes target project code.
+permissions:
+  contents: read
+
+jobs:
+  case-evidence:
+    name: Pinned trade case source probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out the immutable BeautifulRepo tool revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          ref: 83cf280c7242791c7b9601c8f8069ea72f4a5a13
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 ref inspected 2026-10-29
+        with:
+          python-version: '3.11'
+      - name: Fetch exact before and after source trees
+        shell: bash
+        env:
+          BEFORE_SHA: 59801a2ab5a38a161d45cb67e8c4b449f2e0a8ec
+          AFTER_SHA: 36bd70ea399813accf21d350aa5a0067f059757e
+          TOOL_SHA: 83cf280c7242791c7b9601c8f8069ea72f4a5a13
+          GIT_LFS_SKIP_SMUDGE: '1'
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TOOL_SHA"
+          for phase in before after; do
+            if [ "$phase" = before ]; then sha="$BEFORE_SHA"; else sha="$AFTER_SHA"; fi
+            target="$RUNNER_TEMP/trade-$phase"
+            git clone -q --no-checkout --filter=blob:none --depth 1 https://github.com/drevendev/trade_simulation.git "$target"
+            git -C "$target" -c protocol.version=2 fetch --no-tags --depth 1 origin "$sha"
+            git -C "$target" -c core.hooksPath=/dev/null checkout --detach --force FETCH_HEAD
+            test "$(git -C "$target" rev-parse HEAD)" = "$sha"
+            printf '%s checkout: %s\n' "$phase" "$sha"
+          done
+      - name: Audit both checkouts without running target code
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo '## trade_simulation pinned source-only check'
+            echo
+            echo 'BeautifulRepo tools: `83cf280c7242791c7b9601c8f8069ea72f4a5a13`'
+            echo
+            echo 'The link-check exit codes are observations, not automatic evidence of a clean target.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          for phase in before after; do
+            target="$RUNNER_TEMP/trade-$phase"
+            echo "::group::$phase source diagnostics"
+            python -I tools/repo_audit.py "$target" --format json --fail-on never > "$RUNNER_TEMP/$phase-audit.json"
+            summary=$(python -I -c "import json,sys; d=json.load(open(sys.argv[1],encoding='utf-8')); print(d['summary'])" "$RUNNER_TEMP/$phase-audit.json")
+            echo "$phase entry audit: $summary"
+            echo "- $phase entry audit: $summary" >> "$GITHUB_STEP_SUMMARY"
+            for checker in docs_links html_navigation; do
+              output="$RUNNER_TEMP/$phase-$checker.log"
+              if python -I "tools/$checker.py" --root "$target" > "$output" 2>&1; then
+                status=0
+              else
+                status=$?
+              fi
+              echo "$phase $checker exit: $status"
+              # Diagnostic errors are valid observations. Exit 2 indicates a broken invocation.
+              if [ "$status" -gt 1 ]; then
+                cat "$output"
+                exit "$status"
+              fi
+              tail -n 20 "$output"
+              echo "- $phase $checker exit: $status; last 20 diagnostic lines in job log" >> "$GITHUB_STEP_SUMMARY"
+            done
+            echo "::endgroup::"
+          done
+      - name: Exercise the pinned saved JSON first success and missing-file path
+        env:
+          PYTHONSAFEPATH: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Keep the published python -c command while disabling cwd imports.
+          inspect="import json; d=json.load(open('docs/m4-preview.json', encoding='utf-8')); print('Seed:', d['scenario']['seed'], 'Ticks:', d['scenario']['ticksExecuted'], 'Capital @ tick 59:', round(d['samples'][-1]['installedCapital'], 2))"
+          (cd "$RUNNER_TEMP/trade-after" && python -c "$inspect") > "$RUNNER_TEMP/first-success.out"
+          test "$(cat "$RUNNER_TEMP/first-success.out")" = 'Seed: 42 Ticks: 60 Capital @ tick 59: 78.04'
+          cat "$RUNNER_TEMP/first-success.out"
+          mkdir -p "$RUNNER_TEMP/missing-data"
+          if (cd "$RUNNER_TEMP/missing-data" && python -c "$inspect") > "$RUNNER_TEMP/missing.out" 2> "$RUNNER_TEMP/missing.err"; then
+            echo 'Unexpected success without the fixture' >&2
+            exit 1
+          else
+            status=$?
+          fi
+          test "$status" -eq 1
+          test ! -s "$RUNNER_TEMP/missing.out"
+          grep -q FileNotFoundError "$RUNNER_TEMP/missing.err"
+          {
+            echo
+            echo '- After checkout saved-JSON inspection: exit 0; `Seed: 42 Ticks: 60 Capital @ tick 59: 78.04`.'
+            echo '- Missing-file working directory: exit 1; no stdout; `FileNotFoundError` observed.'
+            echo '- NOT RUN: TypeScript/.NET simulation, browser, deployment freshness, 320 px, keyboard, zoom and screen reader.'
+          } >> "$GITHUB_STEP_SUMMARY"
