@@ -132,6 +132,31 @@ after-snapshot `36bd70ea399813accf21d350aa5a0067f059757e`.
 No test totals, screenshots, browser observations or present-day deployment
 freshness are inferred from the green status.
 
+## Repository metadata and trust surfaces (observed 2026-10-29)
+
+This is a **dated, read-only inspection**, not a change to the target and not
+part of either pinned Git revision. Repository description, topics, homepage
+and security settings can change independently of a commit; the public
+[GitHub repository metadata](https://api.github.com/repos/drevendev/trade_simulation)
+was read on **2026-10-29**, while the tracked-file tree below is pinned to
+the after snapshot `36bd70ea399813accf21d350aa5a0067f059757e`.
+
+| Surface | Observed evidence | Reader impact / bounded decision |
+| --- | --- | --- |
+| About description | `null` in the public repository metadata | A GitHub search visitor lacks a one-line explanation there. Recommend a concise, factual TypeScript-economy description **for target maintainers to consider**, not a claim that one was applied. |
+| Topics | Empty `topics` array | No repository-specific topic navigation is advertised. Suggest only accurate, verified subjects rather than maximizing tags. |
+| Homepage | `https://drevendev.github.io/trade_simulation/` | The metadata **does** point to Pages. It does not establish the current deployment SHA or rendered viewer contents. |
+| License and contributor route | Public metadata reports MIT; the pinned tree includes `LICENSE` and `CONTRIBUTING.md` | Those discoverable trust surfaces exist; they do not independently certify build quality or response times. |
+| Target security-policy file | The pinned recursive Git tree completed without truncation (400 entries) and contains **no tracked `SECURITY.md`** | No target-tracked `SECURITY.md` was found; this does not rule out guidance elsewhere, an owner-level inherited policy, or private reporting configured outside the tree. |
+| Private vulnerability reporting | **Unknown**: the public metadata read does not expose a verified enabled/disabled result; the dedicated settings route was unavailable to this inspection | Do **not** send vulnerability details to public issues on the assumption that they are private, and do not invent an email or reporting form. GitHub distinguishes an optional `SECURITY.md` from its separately configured private reporting feature. |
+
+The relevant [GitHub security-policy documentation](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/add-security-policy)
+and [private-reporting documentation](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately)
+were checked on **2026-10-29**. These are recommendations and scope
+limitations for a future authorized target maintainer review. BeautifulRepo
+did **not** edit target files, description, topics, security settings,
+license or release. No confidential reporting capability is asserted.
+
 ## Editorial decision and trade-off
 
 **Adopt:** tie milestone status to a real release, describe a saved-run UI
@@ -141,8 +166,9 @@ inspection proves only artifact accessibility; it does not replace a full
 runtime demo, tests or production verification.
 
 The issue [#82](https://github.com/drevendev/BeautifulRepo/issues/82)
-also proposes metadata and security changes, but they were not executed
-or assessed in this case. No new changes were made in `trade_simulation`.
+also tracks target metadata and security reporting. These were **assessed
+read-only**, with unknown settings explicitly left unknown; no target
+repository changes were made.
 This source-only write-up does not close
 [#82](https://github.com/drevendev/BeautifulRepo/issues/82) or the
 [real-case epic #88](https://github.com/drevendev/BeautifulRepo/issues/88).
@@ -162,8 +188,10 @@ This source-only write-up does not close
   after-snapshot has not been independently re-tested here.
 - The live GitHub Pages deployment, narrow-width light/dark rendering,
   400% zoom, keyboard and screen-reader behavior were **not observed**.
-- No repository topics, description, reporting settings, current-release
-  follow-on milestones or performance metrics were audited.
+- Repository description, topics, homepage and tracked security-policy presence
+  **were inspected** on 2026-10-29. Private reporting enablement, inherited
+  policies, current-release follow-on milestones and performance metrics remain
+  **unverified**; none of the target metadata or settings was changed.
 
 To mark this a **complete case**, follow the
 [five-step procedure](README.md): same pinned BeautifulRepo tool checks
