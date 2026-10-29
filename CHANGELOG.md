@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a dated, read-only metadata and security-surface assessment to the
+  pinned trade_simulation case: empty About description/topics, existing Pages
+  homepage, and absence of a tracked target SECURITY.md, while explicitly
+  withholding claims about private reporting settings, inherited policies and
+  current deployment. No target settings or files changed (related to #82).
+
 - Add an offline, test-backed GitHub Actions pin consistency guard: track reviewed
   SHAs, versions and review dates for external actions, and fail CI when a
   Dependabot SHA bump leaves annotations or the local manifest out of sync.
