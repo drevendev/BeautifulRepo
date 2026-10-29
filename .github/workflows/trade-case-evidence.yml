@@ -82,16 +82,18 @@ jobs:
             echo "::endgroup::"
           done
       - name: Exercise the pinned saved JSON first success and missing-file path
+        env:
+          PYTHONSAFEPATH: '1'
         shell: bash
         run: |
           set -euo pipefail
-          # Isolated Python mode prevents imports from the inspected source tree.
+          # Keep the published python -c command while disabling cwd imports.
           inspect="import json; d=json.load(open('docs/m4-preview.json', encoding='utf-8')); print('Seed:', d['scenario']['seed'], 'Ticks:', d['scenario']['ticksExecuted'], 'Capital @ tick 59:', round(d['samples'][-1]['installedCapital'], 2))"
-          (cd "$RUNNER_TEMP/trade-after" && python -I -c "$inspect") > "$RUNNER_TEMP/first-success.out"
+          (cd "$RUNNER_TEMP/trade-after" && python -c "$inspect") > "$RUNNER_TEMP/first-success.out"
           test "$(cat "$RUNNER_TEMP/first-success.out")" = 'Seed: 42 Ticks: 60 Capital @ tick 59: 78.04'
           cat "$RUNNER_TEMP/first-success.out"
           mkdir -p "$RUNNER_TEMP/missing-data"
-          if (cd "$RUNNER_TEMP/missing-data" && python -I -c "$inspect") > "$RUNNER_TEMP/missing.out" 2> "$RUNNER_TEMP/missing.err"; then
+          if (cd "$RUNNER_TEMP/missing-data" && python -c "$inspect") > "$RUNNER_TEMP/missing.out" 2> "$RUNNER_TEMP/missing.err"; then
             echo 'Unexpected success without the fixture' >&2
             exit 1
           else
