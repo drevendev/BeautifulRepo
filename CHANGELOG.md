@@ -242,6 +242,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Correct two public documentation claims against their linked source examples:
+  the README case records three emulated viewport widths but not both themes
+  at every width, and Rowcount now has three (not two) first-screen treatments.
+  No new rendered, keyboard, zoom or screen-reader acceptance is asserted
+  (related to #16).
+
 - Bound the README visual probe to its first 2,000 DOM descendants with a
   TreeWalker (plus one truncation check), eliminating unbounded full-descendant
   **and image** queries. Return sampled image counts with explicit partial-result
