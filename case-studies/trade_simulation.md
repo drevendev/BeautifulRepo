@@ -64,8 +64,10 @@ of the pinned after revision, using only Python's standard library:
 python -c "import json; d=json.load(open('docs/m4-preview.json', encoding='utf-8')); print('Seed:', d['scenario']['seed'], 'Ticks:', d['scenario']['ticksExecuted'], 'Capital @ tick 59:', round(d['samples'][-1]['installedCapital'], 2))"
 ```
 
-Expected output from the pinned JSON source, **also observed from an isolated
-local byte-identical fixture copy** on 2026-10-29. A clean clone was not run:
+Expected output from the pinned JSON source, observed first from an
+**isolated byte-identical local fixture copy** and subsequently from a
+**fresh Git clone on a GitHub Actions runner** on 2026-10-29 (see the
+[pinned CI reproduction](#pinned-beforeafter-ci-reproduction-observed-2026-10-29)):
 
 ```text
 Seed: 42 Ticks: 60 Capital @ tick 59: 78.04
