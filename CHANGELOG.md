@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Document a pinned source-only trade_simulation before/after: a stale M4
+  release claim corrected through the target's own PR, an inspectable saved-run
+  JSON result, and explicit unrun audit, runtime and visual acceptance gates.
+  The real-repository case remains in progress (related to #82 and #88).
+
 - Add a source-backed, copyable issue-triage recipe with evidence, disposition
   and permission gates. Dated examples explain why unfinished accessibility
   checks and owner-gated label decisions remain open, without inventing
