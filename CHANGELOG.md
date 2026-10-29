@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add an offline, test-backed GitHub Actions pin consistency guard: track reviewed
+  SHAs, versions and review dates for external actions, and fail CI when a
+  Dependabot SHA bump leaves annotations or the local manifest out of sync.
+  Eleven black-box regressions cover drift, unpinned refs, malformed metadata,
+  symlinks and read-only behavior. Passing checks consistency only, not
+  upstream authenticity or actual workflow execution.
+
 - Document a pinned trade_simulation before/after: a stale M4 release
   claim corrected through the target's own PR, hash-verified local execution
   of saved-run JSON inspection and its missing-file failure path, and
