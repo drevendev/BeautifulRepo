@@ -217,5 +217,64 @@ class HtmlNavigationTests(unittest.TestCase):
         self.assertEqual(checked, 0)
 
 
+    def test_setext_headings_resolve_local_and_cross_file_fragments(self):
+        errors, checked, documents = self.check(
+            "Project overview\n"
+            "================\n"
+            "Install here\n"
+            "------------\n"
+            "[Local](#project-overview)\n"
+            '<a href="#install-here">Install</a>\n'
+            "[Guide](guide.md#install-guidelines)\n",
+            {"guide.md": "Install *guidelines*\n--------------------\n"},
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 3)
+        self.assertEqual(documents, 2)
+
+    def test_setext_multiline_text_shares_atx_duplicate_suffixes(self):
+        errors, checked, _ = self.check(
+            "# Intro\n"
+            "Intro\n"
+            "=====\n"
+            "Intro\n"
+            "-----\n"
+            "Long *heading*\n"
+            "with code\n"
+            "---------\n"
+            "[Second](#intro-1)\n"
+            "[Third](#intro-2)\n"
+            "[Multiline](#long-heading-with-code)\n"
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 3)
+
+    def test_setext_underline_does_not_invent_list_quote_or_code_anchors(self):
+        errors, checked, _ = self.check(
+            "~~~md\n"
+            "Hidden\n"
+            "------\n"
+            "~~~\n"
+            "- Listed\n"
+            "continued\n"
+            "---\n"
+            "> Quoted\n"
+            "---\n"
+            "# Actual\n"
+            "---\n"
+            "[Code](#hidden)\n"
+            "[List](#listed-continued)\n"
+            "[Quote](#quoted)\n"
+            "[Real](#actual)\n"
+        )
+        self.assertEqual(checked, 4)
+        self.assertEqual(len(errors), 3, errors)
+        self.assertTrue(all("missing section anchor" in error for error in errors))
+        self.assertTrue(any("'#hidden'" in error for error in errors))
+        self.assertTrue(any("'#listed-continued'" in error for error in errors))
+        self.assertTrue(any("'#quoted'" in error for error in errors))
+
+
+
 if __name__ == "__main__":
     unittest.main()
