@@ -15,8 +15,12 @@
   const root = document.documentElement;
   const cssViewportWidth = root.clientWidth;
   const pageScrollWidth = root.scrollWidth;
-  const pictures = [...article.querySelectorAll("picture img")];
-  const images = [...article.querySelectorAll("img")];
+  // All counts are within the bounded descendant sample, never the whole page
+  // when overflowInspection.truncated is true.
+  let images = 0;
+  let unloadedImages = 0;
+  let pictureMatches = 0;
+  const pictureSelections = [];
   const localPath = (source) => {
     if (!source) return null;
     try {
@@ -31,27 +35,45 @@
 
   // Diagnostic geometry leads only; local scrolling code/tables can be valid.
   // Never report text, IDs, classes, attributes or linked URLs.
-  const descendants = article.querySelectorAll("*");
+  // Walk only the bounded sample, never materialize every descendant.
+  // TreeWalker begins after article, preserving zero-based descendant indexes.
   const edge = article.getBoundingClientRect();
-  const scannedNodes = Math.min(descendants.length, 2000);
+  const walker = document.createTreeWalker(article, NodeFilter.SHOW_ELEMENT);
+  let scannedNodes = 0;
   const samples = [];
   let candidateCount = 0;
-  if (Number.isFinite(edge.left) && Number.isFinite(edge.right)) {
-    for (let i = 0; i < scannedNodes; i++) {
-      const node = descendants[i];
-      const rect = node.getBoundingClientRect();
-      if (!Number.isFinite(rect.left) || !Number.isFinite(rect.right) ||
-          rect.width <= 0 || rect.height <= 0) continue;
-      const leftPx = Math.max(0, Math.ceil(edge.left - rect.left));
-      const rightPx = Math.max(0, Math.ceil(rect.right - edge.right));
-      if (!leftPx && !rightPx) continue;
-      candidateCount++;
-      if (samples.length < 8) samples.push({
-        elementIndex: i, tag: node.tagName.toLowerCase(),
-        leftOverflowPx: leftPx, rightOverflowPx: rightPx,
-      });
+  while (scannedNodes < 2000) {
+    const node = walker.nextNode();
+    if (!node) break;
+    const elementIndex = scannedNodes++;
+    if (node.tagName.toLowerCase() === "img") {
+      images++;
+      const rendered = node.complete && node.naturalWidth > 0;
+      if (!rendered) unloadedImages++;
+      if (node.closest("picture")) {
+        pictureMatches++;
+        if (pictureSelections.length < 8) pictureSelections.push({
+          alt: node.getAttribute("alt"),
+          selectedImagePath: localPath(node.currentSrc),
+          rendered,
+        });
+      }
     }
+    const rect = node.getBoundingClientRect();
+    if (!Number.isFinite(edge.left) || !Number.isFinite(edge.right) ||
+        !Number.isFinite(rect.left) || !Number.isFinite(rect.right) ||
+        rect.width <= 0 || rect.height <= 0) continue;
+    const leftPx = Math.max(0, Math.ceil(edge.left - rect.left));
+    const rightPx = Math.max(0, Math.ceil(rect.right - edge.right));
+    if (!leftPx && !rightPx) continue;
+    candidateCount++;
+    if (samples.length < 8) samples.push({
+      elementIndex, tag: node.tagName.toLowerCase(),
+      leftOverflowPx: leftPx, rightOverflowPx: rightPx,
+    });
   }
+  // One extra step distinguishes exactly 2,000 nodes from a longer article.
+  const truncated = scannedNodes === 2000 && walker.nextNode() !== null;
 
   return {
     status: "MEASURED (not an accessibility verdict)",
@@ -66,7 +88,7 @@
     markdownOverflowPx: Math.max(0, article.scrollWidth - article.clientWidth),
     overflowInspection: {
       scannedNodes,
-      truncated: descendants.length > scannedNodes,
+      truncated,
       candidateCount,
       samples,
     },
@@ -78,13 +100,11 @@
       darkTheme: root.getAttribute("data-dark-theme"),
     },
     prefersReducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
-    images: images.length,
-    unloadedImages: images.filter((img) => !img.complete || img.naturalWidth === 0).length,
-    pictureSelections: pictures.map((img) => ({
-      alt: img.getAttribute("alt"),
-      selectedImagePath: localPath(img.currentSrc),
-      rendered: img.complete && img.naturalWidth > 0,
-    })),
-    caution: "Overflow samples are geometry leads, not failures; code/tables can scroll locally and some CSS overflow may escape sampling. Browser prefersDark is not necessarily GitHub's selected theme. Check actual appearance, keyboard order, screen-reader speech, zoom, and WCAG conformance manually.",
+    images,
+    unloadedImages,
+    imageCountsPartial: truncated,
+    pictureSelectionsTruncated: pictureMatches > pictureSelections.length || truncated,
+    pictureSelections,
+    caution: "Overflow samples are geometry leads, not failures; code/tables can scroll locally and some CSS overflow may escape sampling. When imageCountsPartial is true, image counts are lower bounds and pictureSelections may omit images. Browser prefersDark is not necessarily GitHub's selected theme. Check actual appearance, keyboard order, screen-reader speech, zoom, and WCAG conformance manually.",
   };
 })()

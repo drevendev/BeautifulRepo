@@ -242,6 +242,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Bound the README visual probe to its first 2,000 DOM descendants with a
+  TreeWalker (plus one truncation check), eliminating unbounded full-descendant
+  **and image** queries. Return sampled image counts with explicit partial-result
+  flags and at most eight picture selections. Synthetic huge-DOM and image-heavy
+  regressions guard these limits; real GitHub-rendered assistive testing
+  remains outstanding (related to #16).
+
 - Correct overstated accessibility evidence in the real README case study and
   its entry-point summary: only two width/theme contrast combinations were
   recorded, and static `tabindex` inspection cannot prove keyboard navigation.
