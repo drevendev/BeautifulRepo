@@ -8,5 +8,15 @@
     "sha": "6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
     "version": "v7.1.0",
     "reviewed": "2026-10-29"
+  },
+  "actions/setup-node": {
+    "sha": "949feb2413d6458794dcd2491c4babbbce0c15c1",
+    "version": "v7.1.0",
+    "reviewed": "2026-10-30"
+  },
+  "actions/upload-artifact": {
+    "sha": "cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+    "version": "v7.0.2",
+    "reviewed": "2026-10-30"
   }
 }
