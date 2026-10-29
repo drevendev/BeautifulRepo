@@ -250,6 +250,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Resolve simple top-level GFM setext heading fragments in the offline HTML
+  navigation checker (including shared ATX/setext duplicate suffixes), with
+  regressions for multiline text, cross-file links, and fenced/list/quote
+  false positives. Complex container headings remain outside this source
+  approximation; no browser or accessibility certification is claimed.
+
 - Correct two public documentation claims against their linked source examples:
   the README case records three emulated viewport widths but not both themes
   at every width, and Rowcount now has three (not two) first-screen treatments.

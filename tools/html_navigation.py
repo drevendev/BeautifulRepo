@@ -31,6 +31,8 @@ except ImportError:
         _spec.loader.exec_module(docs_links)
 
 HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$")
+SETEXT_UNDERLINE = re.compile(r"^ {0,3}(?:=+|-{2,})[ \t]*$")
+REFERENCE_DEFINITION = re.compile(r"^\[[^\]]+\]:")
 LINK = re.compile(r"\[([^\]]+)\]\([^)]*\)")
 IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 TAG = re.compile(r"<[^>]+>")
@@ -225,34 +227,86 @@ def _kept_in_slug(char: str) -> bool:
                    for start in (0x1F130, 0x1F150, 0x1F170)))
 
 
+def _plain_setext_line(line: str) -> bool:
+    """Conservatively identify a top-level paragraph line, not a block opener."""
+    columns, start = docs_links._leading_indent_columns(line)
+    if columns > 3:
+        return False
+    body = line[start:]
+    return bool(body.strip()) and not (
+        docs_links._starts_nonparagraph_block(line)
+        or docs_links._list_item_details(line) is not None
+        or body.startswith("<")
+        or REFERENCE_DEFINITION.match(body)
+    )
+
+
 def heading_ids(markdown_without_code: str, explicit_ids: set[str],
                 original_markdown: str | None = None) -> set[str]:
-    """Approximate GitHub's automatic ATX heading IDs with duplicate suffixes.
+    """Approximate GitHub ATX and simple top-level setext heading anchors.
 
-    We intentionally only claim ATX headings here, not every Markdown extension.
-    Explicit HTML IDs are additionally supported by the HTML parser. The masked
-    copy decides which lines are headings (none inside code blocks); the text
-    comes from the source line, so code spans and comments keep their effect.
+    The masked copy excludes fenced/indented code; the original supplies inline
+    Markdown for the slug. List/quote-lazy and HTML-block paragraphs are skipped
+    rather than inventing anchors for content the checker cannot parse fully.
     """
     found = set(explicit_ids)
     used_heading_ids: set[str] = set()
-    original_lines = _lines(original_markdown or markdown_without_code)
-    for line, original_line in zip(_lines(markdown_without_code), original_lines, strict=True):
-        match = HEADING.match(line)
-        if match is None:
-            continue
-        if original_markdown is not None:
-            match = HEADING.match(original_line) or match
-        label = CLOSING_HASHES.sub("", match.group(1).strip()).strip()
+    masked_lines = _lines(markdown_without_code)
+    source_lines = _lines(original_markdown if original_markdown is not None
+                          else markdown_without_code)
+    paragraph_start: int | None = None
+    lazy_container = False
+
+    def add_heading(label: str) -> None:
         slug = github_heading_slug(label)
-        if slug:
-            candidate = slug
-            suffix = 0
-            while candidate in used_heading_ids:
-                suffix += 1
-                candidate = f"{slug}-{suffix}"
-            used_heading_ids.add(candidate)
-            found.add(candidate)
+        if not slug:
+            return
+        candidate = slug
+        suffix = 0
+        while candidate in used_heading_ids:
+            suffix += 1
+            candidate = f"{slug}-{suffix}"
+        used_heading_ids.add(candidate)
+        found.add(candidate)
+
+    for index, (line, source_line) in enumerate(
+            zip(masked_lines, source_lines, strict=True)):
+        if not line.strip():
+            paragraph_start = None
+            lazy_container = False
+            continue
+
+        match = HEADING.match(line)
+        if match is not None:
+            source_match = HEADING.match(source_line) or match
+            label = CLOSING_HASHES.sub("", source_match.group(1).strip()).strip()
+            add_heading(label)
+            paragraph_start = None
+            lazy_container = False
+            continue
+
+        if SETEXT_UNDERLINE.match(line):
+            if paragraph_start is not None and not lazy_container:
+                label = " ".join(part.strip() for part in
+                                 source_lines[paragraph_start:index])
+                add_heading(label)
+            paragraph_start = None
+            lazy_container = False
+            continue
+
+        if _plain_setext_line(line):
+            if not lazy_container and paragraph_start is None:
+                paragraph_start = index
+            continue
+
+        paragraph_start = None
+        columns, start = docs_links._leading_indent_columns(line)
+        body = line[start:] if columns <= 3 else ""
+        lazy_container = bool(
+            docs_links._list_item_details(line) is not None
+            or docs_links.BLOCK_QUOTE_RE.match(body)
+            or body.startswith("<")
+        )
     return found
 
 

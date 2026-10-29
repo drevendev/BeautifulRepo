@@ -241,16 +241,21 @@ Duplicate HTML `href`, `src`, `srcset`, `alt`, `id` or `name` attributes
 are reported; the first value is used for destination and alt checks, matching
 HTML parsing rather than silently trusting the last value.
 Explicit HTML `id` and `a name` anchors and ordinary
-Markdown ATX headings (including duplicate suffixes) are supported.
+Markdown ATX headings and simple top-level setext headings (including shared
+duplicate suffixes) are supported. For setext, the underline uses `=` or at
+least two `-` characters; the preceding lines must form a plain paragraph.
 
 Heading anchors follow GitHub's rules. The rendered text is lowercased. Every
 character other than a letter, mark, digit, connector punctuation, hyphen or space
 is dropped, and each space becomes a hyphen, so `Terms & Conditions` becomes
 `terms--conditions`. Code-span text counts. Images, tags, comments and emphasis
 markers don't. The expected values in `tests/test_github_heading_slugs.py` were read
-back from GitHub's Markdown API. Known differences: setext headings aren't scanned,
-and characters newer than the Unicode version GitHub uses may be kept or dropped
-differently.
+back from GitHub's Markdown API. Simple setext heading syntax follows the
+[GitHub Flavored Markdown spec](https://github.github.io/gfm/#setext-headings)
+(reviewed 2026-10-29). Known differences: setext paragraphs inside list/quote
+containers, code-only headings, and HTML-block continuations are not fully
+parsed; characters newer than the Unicode version GitHub uses may be kept or
+dropped differently.
 
 This offline source check is not a complete GitHub-flavored Markdown renderer.
 It does not crawl external resources, support every Markdown extension or
