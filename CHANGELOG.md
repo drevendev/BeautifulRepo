@@ -14,10 +14,12 @@ keep their original themed headings.
 ### Added
 
 - Document a pinned trade_simulation before/after: a stale M4 release
-  claim corrected through the target's own PR, a hash-verified local execution
-  of the saved-run JSON inspection and its missing-file failure path. A fresh
-  clone, target audit/runtime and visual acceptance remain unrun; the case is
-  still in progress (related to #82 and #88).
+  claim corrected through the target's own PR, hash-verified local execution
+  of saved-run JSON inspection and its missing-file failure path, and
+  historical GitHub-native TypeScript/.NET CI plus Pages build/deploy results
+  at the correction merge SHA. A fresh clone, BeautifulRepo before/after
+  audits and live visual/accessibility acceptance remain unrun; the case
+  is still in progress (related to #82 and #88).
 
 - Add a source-backed, copyable issue-triage recipe with evidence, disposition
   and permission gates. Dated examples explain why unfinished accessibility
