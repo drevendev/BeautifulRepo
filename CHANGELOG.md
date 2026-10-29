@@ -13,12 +13,13 @@ keep their original themed headings.
 
 ### Added
 
-- Prepare an evidence-first, read-only Chromium workflow for the pinned
-  trade_simulation case: serve-site inspection at 320 CSS px in light/dark,
-  captured screenshots, pinned JSON byte comparison and explicit
-  non-claims for 400% zoom, keyboard and screen-reader testing.
-  Browser observations are pending until the workflow runs and its
-  artifacts are reviewed (#82).
+- Add a read-only Chromium workflow for the pinned trade_simulation case.
+  The **live** [browser run #40973430007](https://github.com/drevendev/BeautifulRepo/actions/runs/40973430007)
+  observed HTTP 200 and exact saved JSON byte agreement, correct rendered last
+  tick/capital, distinct light/dark body backgrounds and zero document-level
+  overflow at 320 CSS px. It captured a report and two screenshots, but pixel
+  inspection, current deployed HTML/JS provenance, 400% zoom, keyboard and
+  screen-reader acceptance remain unverified (#82).
 
 
 - Add a read-only GitHub Actions reproduction for the trade_simulation case:
