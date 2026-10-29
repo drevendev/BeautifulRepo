@@ -12,12 +12,15 @@ NODE = shutil.which("node")
 
 @unittest.skipUnless(NODE, "Node is optional; browser-console probe needs no Node install")
 class BrowserProbeTests(unittest.TestCase):
-    def run_probe(self, present=True, pinned=True, github_mode="dark", system_dark=True, overflowing=True, large=False):
+    def run_probe(self, present=True, pinned=True, github_mode="dark", system_dark=True, overflowing=True, large=False, large_images=False):
         harness = r'''
 const fs = require("node:fs");
 const vm = require("node:vm");
 const source = fs.readFileSync(process.argv[1], "utf8");
 const img = {
+  tagName: "IMG",
+  closest(selector) { return selector === "picture" ? {} : null; },
+  getBoundingClientRect() { return {left:12, right:280, width:268, height:20}; },
   complete: true, naturalWidth: 42, currentSrc: "https://github.com/a/b/image.svg?token=secret",
   getAttribute(key) { return key === "alt" ? "Measured sample" : null; },
 };
@@ -29,14 +32,12 @@ const descendants = [
       const right = process.argv[6] === "yes" ? 350 : 290;
       return {left: 12, right, width: right - 12, height: 20};
     }},
+  img,
 ];
 const article = {
   clientWidth: 300, scrollWidth: 330,
   getBoundingClientRect() { return {left: 10, right: 310, width: 300, height: 400}; },
-  querySelectorAll(selector) {
-    if (selector === "*") throw new Error("Unbounded querySelectorAll(*)");
-    return selector === "picture img" || selector === "img" ? [img] : [];
-  },
+  querySelectorAll(selector) { throw new Error("Unbounded querySelectorAll: " + selector); },
 };
 const sandbox = {
   NodeFilter: { SHOW_ELEMENT: 1 },
@@ -46,9 +47,9 @@ const sandbox = {
       if (root !== article || show !== 1) throw new Error("Unexpected walker");
       let next = 0;
       return { nextNode() {
-        if (process.argv[7] === "yes") {
+        if (process.argv[7] === "yes" || process.argv[8] === "yes") {
           if (++next > 2001) throw new Error("Unbounded descendant traversal");
-          return { tagName: "SPAN",
+          return process.argv[8] === "yes" ? img : { tagName: "SPAN",
             getBoundingClientRect() { return {left:12, right:280, width:268, height:20}; } };
         }
         return descendants[next++] ?? null;
@@ -73,7 +74,7 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
         output = subprocess.run([NODE, "-e", harness, str(PROBE), "yes" if present else "no",
                                  "yes" if pinned else "no", github_mode,
                                  "yes" if system_dark else "no", "yes" if overflowing else "no",
-                                 "yes" if large else "no"],
+                                 "yes" if large else "no", "yes" if large_images else "no"],
                                 text=True, capture_output=True, check=True)
         return json.loads(output.stdout)
 
@@ -87,7 +88,9 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
         self.assertEqual(data["githubAppearance"]["darkTheme"], "dark_dimmed")
         self.assertEqual(data["images"], 1)
         self.assertEqual(data["unloadedImages"], 0)
-        self.assertEqual(data["overflowInspection"]["scannedNodes"], 2)
+        self.assertEqual(data["overflowInspection"]["scannedNodes"], 3)
+        self.assertFalse(data["imageCountsPartial"])
+        self.assertFalse(data["pictureSelectionsTruncated"])
         self.assertFalse(data["overflowInspection"]["truncated"])
         self.assertEqual(data["overflowInspection"]["candidateCount"], 1)
         self.assertEqual(data["overflowInspection"]["samples"], [{
@@ -125,6 +128,17 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
         self.assertTrue(data["overflowInspection"]["truncated"])
         self.assertEqual(data["overflowInspection"]["candidateCount"], 0)
         self.assertEqual(data["overflowInspection"]["samples"], [])
+
+    def test_enormous_image_heavy_article_is_bounded_everywhere(self):
+        data = self.run_probe(large_images=True)
+        self.assertEqual(data["overflowInspection"]["scannedNodes"], 2000)
+        self.assertTrue(data["overflowInspection"]["truncated"])
+        self.assertEqual(data["images"], 2000)
+        self.assertEqual(data["unloadedImages"], 0)
+        self.assertTrue(data["imageCountsPartial"])
+        self.assertEqual(len(data["pictureSelections"]), 8)
+        self.assertTrue(data["pictureSelectionsTruncated"])
+        self.assertNotIn("secret", json.dumps(data))
 
     def test_missing_renderer_is_not_a_pass(self):
         data = self.run_probe(False)
