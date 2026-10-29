@@ -7,6 +7,7 @@ python tools/catalog.py                 # validate and check the generated view
 python tools/catalog.py --write         # explicitly regenerate catalog/README.md
 python tools/docs_links.py               # check repository-owned Markdown destinations
 python tools/html_navigation.py          # verify local HTML/media and Markdown section anchors
+python -I tools/action_pins.py --root .    # check reviewed GitHub Actions SHA annotations
 python -m unittest discover -s tests -v
 ```
 
@@ -150,6 +151,25 @@ and browser rendering remain outside this bounded check. Review those manually. 
 defines the supported URL form and branch/event parameters (reviewed
 2026-10-26). See the [evidence-first README review](../guides/ai-readme-review.md)
 for the other claims a maintainer still needs to verify.
+
+## Reviewed GitHub Actions commit pins
+
+Run `python -I tools/action_pins.py --root .` to compare external `uses:`
+references in `.github/workflows/*.yml` / `*.yaml` against the project's
+reviewed `.github/action-pins.json`. The manifest names each action, its full
+40-character lowercase commit SHA, upstream release label and actual manual
+inspection date. A Dependabot bump that only changes a SHA now fails until a
+maintainer verifies upstream and updates the manifest and workflow annotations.
+Local `./` and `docker://` actions are excluded. Duplicate manifest JSON keys,
+unpinned tags, missing annotations, unknown actions and unused manifest records
+fail closed. Files are bounded to 256 KiB (64 KiB manifest, 100 workflows);
+symlinked files are rejected. Exit 0 means locally consistent references;
+exit 1 means inconsistent pins; exit 2 means invalid input. It uses Python
+3.11+, the standard library only, and never writes, runs repository code,
+invokes Git, or makes a network request. It scans simple one-line `uses:`
+forms, **not full YAML**, and cannot prove that a release tag maps to that SHA,
+that remote code is safe, that a review date reflects a real inspection, or
+that any workflow ran. Manual source review remains mandatory.
 
 ## Guide review dates
 
