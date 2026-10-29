@@ -2,9 +2,11 @@
 
 **Case status, 2026-10-29: in progress.** This is a pinned, source-level before/after
 study of a real repository. The README correction happened in the target's own
-merged PR; this BeautifulRepo change only documents it. The full case procedure's
-fresh-clone tool runs, runtime first success, failure path and rendered checks
-have **not** been completed.
+merged PR; BeautifulRepo documents rather than repeats that target change.
+Full before/after audits, fresh-clone first success and rendered accessibility
+checks remain unverified. A byte-identical local fixture success/failure and
+target-native CI at the correction's merge SHA are recorded below; neither
+completes the full case.
 
 ## Repository and exact evidence
 
@@ -105,6 +107,31 @@ single-file command and its missing-file failure behavior against identical
 content. It does **not** prove a fresh Git clone, a live simulation, the
 browser viewer, or any target-native test suite.
 
+## Target-native CI evidence (verified 2026-10-29)
+
+The target's [GitHub Actions CI run #39926661147](https://github.com/drevendev/trade_simulation/actions/runs/39926661147)
+was a **push to `master`** on **2026-10-23**, at the exact README-correction
+merge commit `b6e1f8f602b8735aee63eab8514581486096d06e`.
+GitHub reports the run **completed successfully**. Its job/step records show:
+
+- `typescript` — success, including `npm ci`, `npm run typecheck`,
+  `npm test` and `npm run build`.
+- `build-and-test` — success, including `dotnet restore`,
+  `dotnet build --configuration Release --no-restore` and
+  `dotnet test --configuration Release --no-build`.
+- `policy-guard` — success, although some PR-only steps were skipped on
+  this push event. A green job does not mean every conditional step ran.
+
+The same SHA has a successful
+[GitHub Pages build/deploy run #39926660759](https://github.com/drevendev/trade_simulation/actions/runs/39926660759),
+with `build`, `deploy` and `report-build-status` jobs marked successful.
+These are **GitHub-native historical results**, not commands that BeautifulRepo
+executed locally. The Pages result does not prove what a visitor currently
+sees, and these specific runs are for the **merge commit**, not the later
+after-snapshot `36bd70ea399813accf21d350aa5a0067f059757e`.
+No test totals, screenshots, browser observations or present-day deployment
+freshness are inferred from the green status.
+
 ## Editorial decision and trade-off
 
 **Adopt:** tie milestone status to a real release, describe a saved-run UI
@@ -129,16 +156,19 @@ This source-only write-up does not close
   **were run only against a hash-verified isolated fixture copy**, as documented
   above. A clean Git clone, its checkout steps and other failure paths remain
   **NOT RUN**.
-- No `npm ci`, TypeScript typecheck, Vitest, Vite build or legacy
-  .NET build/test was run for this case; no target CI result is attributed
-  to this documentation work.
+- No `npm ci`, TypeScript typecheck, Vitest, Vite build or legacy .NET
+  build/test was run **locally for this case**. Target-native GitHub CI was
+  checked at the correction's merge SHA as recorded above; the later
+  after-snapshot has not been independently re-tested here.
 - The live GitHub Pages deployment, narrow-width light/dark rendering,
   400% zoom, keyboard and screen-reader behavior were **not observed**.
 - No repository topics, description, reporting settings, current-release
   follow-on milestones or performance metrics were audited.
 
 To mark this a **complete case**, follow the
-[five-step procedure](README.md): same pinned tool checks before and after,
-target-native CI evidence, a fresh-clone first-success and failure path,
-and a documented 320 px visual review with its limitations. Until then,
-its contribution is the exact-source reasoning, not a claimed full acceptance.
+[five-step procedure](README.md): same pinned BeautifulRepo tool checks
+before and after, a fresh-clone first success and failure path, and a
+documented 320 px visual review with its limitations. The historical
+target-native CI evidence above covers only the original correction merge;
+it is not current-after-snapshot or browser acceptance. Until then this
+remains a useful partial, not a fully accepted case.
