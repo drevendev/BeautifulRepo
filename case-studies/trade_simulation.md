@@ -233,11 +233,11 @@ The [read-only Chromium probe](trade-pages-probe.mjs) ran against the
 in [GitHub Actions #40973430007](https://github.com/drevendev/BeautifulRepo/actions/runs/40973430007).
 Its exact-head source is
 [PR #200](https://github.com/drevendev/BeautifulRepo/pull/200)
-(commit \`9d95f271700742edff2d9d932af1228efaa1388c\`).
+(commit `9d95f271700742edff2d9d932af1228efaa1388c`).
 The run completed **successfully** at 2026-10-29 23:29 UTC
 (2026-10-30 in Cyprus). The runner used Chromium
 **153.0.8010.12**, the target's pinned source
-\`36bd70ea399813accf21d350aa5a0067f059757e\`, its npm lockfile,
+`36bd70ea399813accf21d350aa5a0067f059757e`, its npm lockfile,
 a **320 CSS px** viewport, and separate emulated light/dark preferences.
 Target package scripts were disabled during dependency installation.
 Only browser rendering and saved artifact inspection were executed:
@@ -245,37 +245,53 @@ Only browser rendering and saved artifact inspection were executed:
 
 Observed in **both** color schemes:
 
-- The served HTML and \`m4-preview.json\` returned **HTTP 200**.
+- The served HTML and `m4-preview.json` returned **HTTP 200**.
 - The served saved JSON SHA-256 was
-  \`f10fc8b9f67c55ed17158346c46ad686c6f3409dd08f379bda7a96055a880980\`,
+  `f10fc8b9f67c55ed17158346c46ad686c6f3409dd08f379bda7a96055a880980`,
   **byte-identical** to the checked-in JSON from the pinned source snapshot.
-- The browser displayed \`tick 59 · sample 13 of 13\` and
-  \`78.04 capital units\`, matching the pinned saved sample
-  (\`78.03677092437883\` before rounding).
-- The page title was \`Trade simulation — M4 one-region closed economy\`;
+- The browser displayed `tick 59 · sample 13 of 13` and
+  `78.04 capital units`, matching the pinned saved sample
+  (`78.03677092437883` before rounding).
+- The page title was `Trade simulation — M4 one-region closed economy`;
   the lead heading read **Watch an economy find its rhythm.**
-- \`document.documentElement.scrollWidth\` was **320 CSS px** and its
-  \`clientWidth\` was **320 CSS px** (zero document-level horizontal overflow).
+- `document.documentElement.scrollWidth` was **320 CSS px** and its
+  `clientWidth` was **320 CSS px** (zero document-level horizontal overflow).
   This alone does not rule out clipping inside individual containers.
 - No uncaught page errors were logged. Computed body backgrounds differed:
-  light \`rgb(251, 250, 247)\`, dark \`rgb(20, 20, 15)\`.
+  light `rgb(251, 250, 247)`, dark `rgb(20, 20, 15)`.
 
 The job uploaded
 [the JSON observation record and two full-page screenshots](https://github.com/drevendev/BeautifulRepo/actions/runs/40973430007/artifacts/12941750856)
-(\`pages-light-320.png\`, \`pages-dark-320.png\`, \`observations.json\`;
+(`pages-light-320.png`, `pages-dark-320.png`, `observations.json`;
 artifact **12941750856**, retention through **2026-11-12 UTC**).
-The structured browser log and upload manifest were independently read.
-**The screenshot pixels have not yet been editorially inspected in this
-review**, so these observations are not a blanket claim of legibility or
-accessible layout.
+The browser log, saved observation JSON and both full-page **320 × 3534 px**
+PNG images were read and visually inspected after the run.
+
+**Screenshot text alternative and editorial assessment.** In both themes
+the viewer uses a single narrow column: a prominent three-line headline,
+a two-link milestone chooser, a saved-M4 summary and tick slider, five
+stacked metric cards, six collapsed milestone chapters, and a footer
+with the source/run command. The cards' final recorded sample shows
+zero current output, employment, needs coverage and wages but **78.04**
+installed capital. **The probe deliberately selected tick 59** to verify
+the saved data; these screenshots do *not* show the page's initial default
+working-tick selection. The dark version replaces the pale backgrounds
+with near-black panels and light text. No horizontally cut-off cards,
+chapters or footer text were apparent in the captured images. The
+secondary annotations, units and footer command use much smaller type
+than the headline; at 320 px they deserve a separate legibility and
+contrast assessment before making an accessibility claim. The collapsed
+chapter contents, mobile touch behavior and keyboard focus states are
+not evidenced by these static images.
 
 The matching served data establishes **saved JSON agreement at observation
 time**, not the deployed HTML/JavaScript commit SHA or a general guarantee
 that Pages is current. Theme emulation is not a physical phone. Real
 **400% browser zoom, keyboard/focus traversal, screen-reader behavior,
-contrast measurements and detailed image inspection remain NOT RUN**.
-This case is still **in progress** until its qualitative visual review
-and remaining acceptance boundaries are recorded.
+contrast measurements and expanded-chapter inspection remain NOT RUN**.
+The 320 px screenshot observations and text equivalent are now recorded,
+but the case is still **in progress** because deployed HTML/JS provenance
+and broader accessibility behavior remain unverified.
 
 ## What remains unverified
 
@@ -301,8 +317,8 @@ and remaining acceptance boundaries are recorded.
 
 The pinned-tool source audit and the fresh-clone saved-data command/failure
 path are now reproducible and observed. To mark this a **complete case**
-under the [five-step procedure](README.md), the captured 320 px light/dark
-screenshots still need editorial inspection and an evidence-based decision.
+under the [five-step procedure](README.md), the 320 px light/dark
+screenshots and editorial observations now exist with honest limits.
 The live JSON matches the source snapshot, but current Pages HTML/JS
 provenance and broader keyboard/zoom/screen-reader coverage remain
 explicitly unknown unless actually tested. The historical target-native CI
