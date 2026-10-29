@@ -242,6 +242,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Bound the README overflow diagnostic to its first 2,000 DOM descendants
+  with a TreeWalker (plus one truncation check), instead of allocating all
+  descendants before sampling. A virtual huge-DOM regression guards this;
+  real GitHub-rendered assistive testing remains outstanding (related to #16).
+
 - Correct overstated accessibility evidence in the real README case study and
   its entry-point summary: only two width/theme contrast combinations were
   recorded, and static `tabindex` inspection cannot prove keyboard navigation.
