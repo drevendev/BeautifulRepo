@@ -44,6 +44,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md),
   [maintenance workflow](guides/maintenance-workflow.md) and application/collection README templates.
 
+- [Evidence-led issue triage recipe](guides/issue-triage.md), with a copyable
+  decision card, real issue examples and explicit not-run/permission boundaries.
+
 - [Maintainer handoff recipe](guides/maintainer-handoff.md), with a fictional
   one-maintainer pause notice, responsibility checklist and real checkout commands.
 

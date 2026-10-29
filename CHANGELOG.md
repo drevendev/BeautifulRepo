@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed, copyable issue-triage recipe with evidence, disposition
+  and permission gates. Dated examples explain why unfinished accessibility
+  checks and owner-gated label decisions remain open, without inventing
+  a review SLA or mutating issue metadata.
+
 - Diagnose bounded, text-free candidate elements extending outside the
   rendered GitHub README Markdown container. The browser-console probe
   reports descendant indexes, tags and pixel excess (up to eight samples,
