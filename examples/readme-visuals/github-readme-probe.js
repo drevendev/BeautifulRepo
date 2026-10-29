@@ -31,27 +31,32 @@
 
   // Diagnostic geometry leads only; local scrolling code/tables can be valid.
   // Never report text, IDs, classes, attributes or linked URLs.
-  const descendants = article.querySelectorAll("*");
+  // Walk only the bounded sample, never materialize every descendant.
+  // TreeWalker begins after article, preserving zero-based descendant indexes.
   const edge = article.getBoundingClientRect();
-  const scannedNodes = Math.min(descendants.length, 2000);
+  const walker = document.createTreeWalker(article, NodeFilter.SHOW_ELEMENT);
+  let scannedNodes = 0;
   const samples = [];
   let candidateCount = 0;
-  if (Number.isFinite(edge.left) && Number.isFinite(edge.right)) {
-    for (let i = 0; i < scannedNodes; i++) {
-      const node = descendants[i];
-      const rect = node.getBoundingClientRect();
-      if (!Number.isFinite(rect.left) || !Number.isFinite(rect.right) ||
-          rect.width <= 0 || rect.height <= 0) continue;
-      const leftPx = Math.max(0, Math.ceil(edge.left - rect.left));
-      const rightPx = Math.max(0, Math.ceil(rect.right - edge.right));
-      if (!leftPx && !rightPx) continue;
-      candidateCount++;
-      if (samples.length < 8) samples.push({
-        elementIndex: i, tag: node.tagName.toLowerCase(),
-        leftOverflowPx: leftPx, rightOverflowPx: rightPx,
-      });
-    }
+  while (scannedNodes < 2000) {
+    const node = walker.nextNode();
+    if (!node) break;
+    const elementIndex = scannedNodes++;
+    const rect = node.getBoundingClientRect();
+    if (!Number.isFinite(edge.left) || !Number.isFinite(edge.right) ||
+        !Number.isFinite(rect.left) || !Number.isFinite(rect.right) ||
+        rect.width <= 0 || rect.height <= 0) continue;
+    const leftPx = Math.max(0, Math.ceil(edge.left - rect.left));
+    const rightPx = Math.max(0, Math.ceil(rect.right - edge.right));
+    if (!leftPx && !rightPx) continue;
+    candidateCount++;
+    if (samples.length < 8) samples.push({
+      elementIndex, tag: node.tagName.toLowerCase(),
+      leftOverflowPx: leftPx, rightOverflowPx: rightPx,
+    });
   }
+  // One extra step distinguishes exactly 2,000 nodes from a longer article.
+  const truncated = scannedNodes === 2000 && walker.nextNode() !== null;
 
   return {
     status: "MEASURED (not an accessibility verdict)",
@@ -66,7 +71,7 @@
     markdownOverflowPx: Math.max(0, article.scrollWidth - article.clientWidth),
     overflowInspection: {
       scannedNodes,
-      truncated: descendants.length > scannedNodes,
+      truncated,
       candidateCount,
       samples,
     },
