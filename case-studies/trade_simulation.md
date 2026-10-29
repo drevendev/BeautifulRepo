@@ -61,8 +61,8 @@ of the pinned after revision, using only Python's standard library:
 python -c "import json; d=json.load(open('docs/m4-preview.json', encoding='utf-8')); print('Seed:', d['scenario']['seed'], 'Ticks:', d['scenario']['ticksExecuted'], 'Capital @ tick 59:', round(d['samples'][-1]['installedCapital'], 2))"
 ```
 
-Expected output **derived by parsing the pinned JSON source**, not by running
-the command in a clean clone:
+Expected output from the pinned JSON source, **also observed from an isolated
+local byte-identical fixture copy** on 2026-10-29. A clean clone was not run:
 
 ```text
 Seed: 42 Ticks: 60 Capital @ tick 59: 78.04
@@ -84,6 +84,27 @@ Playwright Chromium (potentially a network download). Its private
 These are onboarding prerequisites worth disclosing before suggesting the
 full test suite.
 
+## Recorded local artifact run (2026-10-29)
+
+A copy of the GitHub-fetched `docs/m4-preview.json` was reconstructed in an
+**isolated local directory**, not a Git checkout. Before execution,
+`git hash-object docs/m4-preview.json` returned
+`4ec090eb19cc58ec63058f2a49f48c573a036674`, matching the exact pinned
+Git blob above. From that directory, the **exact** Python one-liner shown here
+exited 0 and printed:
+
+```text
+Seed: 42 Ticks: 60 Capital @ tick 59: 78.04
+```
+
+For a failure-path check, the fixture was temporarily renamed and the **same**
+one-liner run again. It exited **1**, produced no stdout, and raised
+`FileNotFoundError: [Errno 2] No such file or directory: 'docs/m4-preview.json'`.
+The fixture was restored and its blob hash matched again. This verifies the
+single-file command and its missing-file failure behavior against identical
+content. It does **not** prove a fresh Git clone, a live simulation, the
+browser viewer, or any target-native test suite.
+
 ## Editorial decision and trade-off
 
 **Adopt:** tie milestone status to a real release, describe a saved-run UI
@@ -104,9 +125,10 @@ This source-only write-up does not close
 - The BeautifulRepo `repo_audit.py`, `docs_links.py` and
   `html_navigation.py` **were not run** against before/after checkouts;
   no pinned-tool audit totals are claimed.
-- The Python source-inspection one-liner **was not run in a fresh clone**;
-  its displayed output is calculated from the inspected JSON.
-  No failure-path execution was recorded.
+- The Python source-inspection one-liner and a missing-file failure path
+  **were run only against a hash-verified isolated fixture copy**, as documented
+  above. A clean Git clone, its checkout steps and other failure paths remain
+  **NOT RUN**.
 - No `npm ci`, TypeScript typecheck, Vitest, Vite build or legacy
   .NET build/test was run for this case; no target CI result is attributed
   to this documentation work.
