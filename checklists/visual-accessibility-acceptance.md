@@ -64,8 +64,13 @@ have not personally reviewed.
 Repeat for light and dark themes, the 320 CSS px viewport, and **actual**
 400% browser zoom. The object records the measured CSS viewport, document
 and Markdown scroll widths, overflow in pixels, browser scheme preference,
-GitHub appearance attributes when present, image-load counts and selected `picture` image paths; it deliberately omits URL query
-strings. Save each observation with its browser/version, real zoom setting
+GitHub appearance attributes when present, **sampled** image-load counts and
+up to eight selected `picture` image paths; it deliberately omits URL query
+strings. The probe visits at most 2,000 DOM descendants plus one truncation
+check for **all** measurements. `imageCountsPartial: true` means `images`
+and `unloadedImages` are lower bounds, not totals; `pictureSelectionsTruncated:
+true` means additional `picture` choices may be missing. Never claim every
+image rendered successfully when a sample was truncated. Save each observation with its browser/version, real zoom setting
 and screenshot **only if the material is safe to share**.
 
 GitHub can use a manually selected dark/light theme even when the operating
@@ -82,7 +87,8 @@ was reviewed **2026-10-28**.
 The probe also returns `overflowInspection`: up to **eight** element rectangles
 that extend beyond the rendered Markdown container. It walks at most **2,000**
 descendants (plus one check for truncation) without building a full element
-list, and reports `truncated` if more descendants exist. The output
+list or allocating unbounded image query results, and reports `truncated` if
+more descendants exist. The output
 includes only a zero-based descendant index, tag name and left/right pixel
 excess; no element text, class names, IDs, attributes or URLs are included.
 To inspect `elementIndex` in the **same** browser tab, evaluate
