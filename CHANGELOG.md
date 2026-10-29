@@ -208,6 +208,8 @@ keep their original themed headings.
 
 ### Changed
 
+- Upgrade the SHA-pinned `actions/setup-python` from v7.0.0 to v7.1.0 in quality and scheduled checks. Recheck the upstream release ref on 2026-10-29; retain existing Python versions and CI steps. No performance or compatibility gain is claimed (related to PR #194).
+
 - Reconcile the roadmap with completed v0.2.0 plugin, private-repository,
   self-check and readiness work. Separate pending model-evaluation, real case
   studies and GitHub-rendered accessibility evidence from already shipped
