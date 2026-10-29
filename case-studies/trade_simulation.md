@@ -173,6 +173,32 @@ This source-only write-up does not close
 [#82](https://github.com/drevendev/BeautifulRepo/issues/82) or the
 [real-case epic #88](https://github.com/drevendev/BeautifulRepo/issues/88).
 
+## Reproducible pinned CI probe (introduced 2026-10-29)
+
+The [source-only case evidence workflow](../.github/workflows/trade-case-evidence.yml)
+provides an opt-in, inspectable GitHub Actions runner for the remaining checkout
+and tool-check steps. It reads **two separate fresh source checkouts** at the
+before SHA `59801a2ab5a38a161d45cb67e8c4b449f2e0a8ec` and after SHA
+`36bd70ea399813accf21d350aa5a0067f059757e`, while checking out the
+BeautifulRepo tools at immutable SHA
+[`83cf280c7242791c7b9601c8f8069ea72f4a5a13`](https://github.com/drevendev/BeautifulRepo/commit/83cf280c7242791c7b9601c8f8069ea72f4a5a13).
+
+It invokes `repo_audit.py --format json --fail-on never`, `docs_links.py`,
+and `html_navigation.py` on **both** source trees and records tool exit
+codes and bounded diagnostic excerpts in the job log/summary. A checker that
+reports broken documentation is a finding, not an automatically accepted
+clean result. The workflow also attempts the saved-JSON first success and a
+missing-file failure path from a separate empty working directory, using
+`python -I -c` to avoid importing target-project Python modules. It never
+runs target TypeScript/.NET code, installs target dependencies or modifies
+the target repository. Shallow fetches must succeed on GitHub's runner.
+
+**A workflow file is not an execution receipt.** Until a completed run and
+its exact job/log URL are inspected and linked here, the original before/after
+audit and fresh-checkout first-success items below remain **NOT RUN**. Even
+a green job will not verify a live deployment, browser rendering, 320 px
+reflow, keyboard, 400% zoom, or screen-reader behavior.
+
 ## What remains unverified
 
 - The BeautifulRepo `repo_audit.py`, `docs_links.py` and
