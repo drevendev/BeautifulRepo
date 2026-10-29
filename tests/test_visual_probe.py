@@ -12,7 +12,7 @@ NODE = shutil.which("node")
 
 @unittest.skipUnless(NODE, "Node is optional; browser-console probe needs no Node install")
 class BrowserProbeTests(unittest.TestCase):
-    def run_probe(self, present=True, pinned=True, github_mode="dark", system_dark=True, overflowing=True):
+    def run_probe(self, present=True, pinned=True, github_mode="dark", system_dark=True, overflowing=True, large=False):
         harness = r'''
 const fs = require("node:fs");
 const vm = require("node:vm");
@@ -34,13 +34,26 @@ const article = {
   clientWidth: 300, scrollWidth: 330,
   getBoundingClientRect() { return {left: 10, right: 310, width: 300, height: 400}; },
   querySelectorAll(selector) {
-    return selector === "*" ? descendants :
-      selector === "picture img" || selector === "img" ? [img] : [];
+    if (selector === "*") throw new Error("Unbounded querySelectorAll(*)");
+    return selector === "picture img" || selector === "img" ? [img] : [];
   },
 };
 const sandbox = {
+  NodeFilter: { SHOW_ELEMENT: 1 },
   document: {
     querySelector() { return process.argv[2] === "yes" ? article : null; },
+    createTreeWalker(root, show) {
+      if (root !== article || show !== 1) throw new Error("Unexpected walker");
+      let next = 0;
+      return { nextNode() {
+        if (process.argv[7] === "yes") {
+          if (++next > 2001) throw new Error("Unbounded descendant traversal");
+          return { tagName: "SPAN",
+            getBoundingClientRect() { return {left:12, right:280, width:268, height:20}; } };
+        }
+        return descendants[next++] ?? null;
+      } };
+    },
     documentElement: {
       clientWidth: 320, scrollWidth: 344,
       getAttribute(key) {
@@ -59,7 +72,8 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
 '''
         output = subprocess.run([NODE, "-e", harness, str(PROBE), "yes" if present else "no",
                                  "yes" if pinned else "no", github_mode,
-                                 "yes" if system_dark else "no", "yes" if overflowing else "no"],
+                                 "yes" if system_dark else "no", "yes" if overflowing else "no",
+                                 "yes" if large else "no"],
                                 text=True, capture_output=True, check=True)
         return json.loads(output.stdout)
 
@@ -102,6 +116,13 @@ console.log(JSON.stringify(vm.runInNewContext(source, sandbox, {timeout:1000})))
     def test_missing_geometry_sample_does_not_cancel_scrollwidth_measurement(self):
         data = self.run_probe(overflowing=False)
         self.assertEqual(data["markdownOverflowPx"], 30)
+        self.assertEqual(data["overflowInspection"]["candidateCount"], 0)
+        self.assertEqual(data["overflowInspection"]["samples"], [])
+
+    def test_enormous_article_stops_at_bounded_walker_limit(self):
+        data = self.run_probe(large=True)
+        self.assertEqual(data["overflowInspection"]["scannedNodes"], 2000)
+        self.assertTrue(data["overflowInspection"]["truncated"])
         self.assertEqual(data["overflowInspection"]["candidateCount"], 0)
         self.assertEqual(data["overflowInspection"]["samples"], [])
 
