@@ -16,8 +16,9 @@ keep their original themed headings.
 - Add a read-only GitHub Actions reproduction for the trade_simulation case:
   two SHA-pinned target source checkouts audited with BeautifulRepo tools pinned
   to commit `83cf280`, plus a saved-JSON first-success and missing-file path.
-  The workflow records diagnostics rather than assuming clean output; its
-  execution and visual/deployment checks need separate evidence (#82).
+  The SHA-pinned source-only runner completed successfully on 2026-10-29
+  (Actions #40957829865); its zero-finding structural checks do not detect
+  milestone truth. Visual/deployment checks remain unperformed (#82).
 
 - Add a dated, read-only metadata and security-surface assessment to the
   pinned trade_simulation case: empty About description/topics, existing Pages
