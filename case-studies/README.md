@@ -2,12 +2,14 @@
 
 Real applications of the handbook to real repositories. Each case follows the same
 procedure, so cases can be compared, and every claim can be traced to a revision, a
-command or an observation.
+command or an observation. An **in-progress** case documents which parts of that
+procedure have not been executed; a source comparison alone is not a finished case.
 
 | Case | Repository | Status |
 | --- | --- | --- |
 | [README before/after](readme-first-success-case.md) | BeautifulRepo | complete; written before this procedure, which it shaped |
 | [Offline first success](patchpitch.md) | PatchPitch | complete; change merged as PatchPitch#90 |
+| [Milestone-claim drift](trade_simulation.md) | trade_simulation | in progress; pinned source comparison, manual acceptance not run |
 | [First pattern studies](first-patterns.md) | Devostasis, Hungry Crab, Gum | source observations only, no changes made |
 
 ## The procedure
