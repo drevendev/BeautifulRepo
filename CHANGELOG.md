@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a bounded, read-only expanded-M4 keyboard/semantic probe for the pinned trade_simulation case: native Tab/Enter/Space disclosure, five named SVG charts, exact-value table and expanded-document overflow observations, plus nine offline regressions. This is not a screen-reader, chart-interaction or keyboard table-panning audit (#82).
+
 - Add a read-only 320px Chromium keyboard probe for all ten collapsed-page Tab stops and the keyboard-opened M3 tick control, with eleven offline assertions. This is bounded focus evidence, not screen-reader or WCAG certification (#82).
 
 - Add a native-400%-zoom **bottom-viewport capture** to the pinned trade_simulation case: [real Chromium #41047777163](https://github.com/drevendev/BeautifulRepo/actions/runs/41047777163) reached the page footer in both emulated themes, with 0 CSS px document-level horizontal overflow and a separate X11 image for each first/bottom viewport. All five new offline regressions passed; first/bottom screenshots in each theme do not establish middle-page, screen-reader or whole-page accessibility (related to #82).
