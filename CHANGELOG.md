@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a read-only, headful Chromium/Xvfb check of **native 400% browser page zoom** for the live trade_simulation saved-run viewer. Eight real `Ctrl+plus` shortcuts produced device-pixel ratio 1 → 4 and CSS viewport width 1280 → 320 px; sampled layout, saved-data readout and keyboard focus passed in both emulated themes. The X11 screenshots show only the **first physical viewport**, not the full page; screen-reader access, nested-chart accessibility and deployed HTML/JS provenance remain unverified (related to #82).
+
 - Add a bounded computed-style **text contrast diagnostic** to the live
   trade_simulation Pages probe: nine named rendered text roles in both
   emulated themes, conservative unknowns for unsupported compositing and
