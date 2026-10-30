@@ -509,6 +509,14 @@ those sections, physical phones or screen-reader behavior. Geometry
 alone is not whole-page WCAG conformance or a measurement of every
 focus indicator, SVG or text label.
 
+## Extended collapsed-chapter keyboard route (2026-10-30)
+
+The new [browser probe](trade-pages-probe.mjs) uses a separate headless Chromium tab at **320 CSS px** in both emulated color schemes. It sends ten native `Tab` presses across the two entrance links, saved-run controls and six collapsed chapter summaries, recording actual focus order, `:focus-visible`, computed outline, DOM label candidates and viewport intersection. Four `Shift+Tab` presses return to the M3 summary. `Enter` opens it; `Tab` reaches the dynamic M3 tick slider, and `ArrowLeft` / `ArrowRight` must change and restore both its value and rendered readout.
+
+[Eleven offline regressions](keyboard-path-metrics.test.mjs) validate that evidence cannot silently omit a stop, accept an out-of-order focus, overlook missing focus styling or pass on a slider readout that did not change. This checks **one bounded path**, not screen-reader output, computed accessible names, expanded M4 or Legacy behavior, other browsers or full WCAG conformance.
+
+**CI observation pending on the current branch.** Do not interpret the described implementation as a confirmed live PASS until the exact-head workflow and saved observations have been reviewed.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
