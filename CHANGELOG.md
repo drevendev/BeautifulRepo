@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a bounded computed-style **text contrast diagnostic** to the live
+  trade_simulation Pages probe: nine named rendered text roles in both
+  emulated themes, conservative unknowns for unsupported compositing and
+  offline Node regressions. Contrast findings are evidence, **not** a
+  full-page WCAG or focus-visibility certification (#82).
+
 - Extend the read-only trade_simulation Pages probe with real keyboard input:
   [Chromium #40985815887](https://github.com/drevendev/BeautifulRepo/actions/runs/40985815887)
   observed five sequential Tab focus stops (all with computed 2px outlines),
