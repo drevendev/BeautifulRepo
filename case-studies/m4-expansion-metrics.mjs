@@ -69,10 +69,15 @@ export function assessM4Expansion(observation, expected) {
     problems.push("sampled-row-or-header-count-mismatch");
   }
   if (observation.lastRowTick !== String(expected.lastTick)) problems.push("last-tick-mismatch");
+  // Check both complete values in the rendered cell, not substrings: 178.04
+  // must not pass for an expected rounded value of 78.04.
   const lastCapital = observation.lastCapitalCell;
-  if (typeof lastCapital !== "string" ||
-      !lastCapital.includes(expected.lastCapital.toFixed(2)) ||
-      !lastCapital.includes("exact " + String(expected.lastCapital))) {
+  const parsedCapital = typeof lastCapital === "string"
+    ? lastCapital.match(/^(-?\d+\.\d{2}) exact (-?\d+(?:\.\d+)?)$/)
+    : null;
+  if (!parsedCapital ||
+      parsedCapital[1] !== expected.lastCapital.toFixed(2) ||
+      parsedCapital[2] !== String(expected.lastCapital)) {
     problems.push("last-capital-not-readable-and-exact");
   }
   if (!Number.isFinite(observation.documentOverflowCssPx) ||
