@@ -59,6 +59,21 @@ def capture(filename):
                 header.green_mask != 0xFF00 or header.blue_mask != 0xFF):
             raise RuntimeError("Unsupported Xvfb pixel format")
         raw = ctypes.string_at(header.data, header.bytes_per_line * height)
+        # A valid-size screenshot can be a solid unpainted browser surface.
+        # Sample actual content pixels; fail closed rather than archive a
+        # blank capture as evidence of visible layout.
+        observed_colors = set()
+        for y in range(90, height - 80, 8):
+            row = y * header.bytes_per_line
+            for x in range(90, width - 80, 8):
+                i = row + 4 * x
+                observed_colors.add((raw[i + 2], raw[i + 1], raw[i]))
+                if len(observed_colors) > 32:
+                    break
+            if len(observed_colors) > 32:
+                break
+        if len(observed_colors) < 20:
+            raise RuntimeError("Xvfb capture appears unpainted; insufficient color variety")
         scan = bytearray()
         for y in range(height):
             scan.append(0)
