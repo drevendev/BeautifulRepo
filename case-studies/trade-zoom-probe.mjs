@@ -100,27 +100,33 @@ for (const theme of ["light", "dark"]) {
         after.capital.includes(expected.installedCapital.toFixed(2));
       const overflow = Math.max(0, after.documentWidth - after.viewportWidth);
       const screenshot = "pages-" + theme + "-native-400.png";
-      await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: true, scale: "css", animations: "disabled" });
+      await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: true, scale: "device", animations: "disabled" });
+      // At true browser zoom, a CSS-scaled screenshot clips the physical
+      // viewport. Preserve a device-scaled PNG and verify its pixel width.
+      const png = await fs.readFile(path.join(outputDir, screenshot));
+      const pngWidth = png.readUInt32BE(16);
+      const screenshotCoversViewport = pngWidth >= 1200 && pngWidth <= 1280;
+
       for (let index = 0; index < 4; index++) await page.keyboard.press("Tab");
       const keyboard = await page.evaluate(() => ({
         id: document.activeElement?.id || null,
         focusVisible: Boolean(document.activeElement?.matches(":focus-visible")),
       }));
       const keyboardPassed = keyboard.id === "spotlight-tick" && keyboard.focusVisible;
-      const passed = native400 && dataExact && lastDataVisible && overflow <= 1 &&
+      const passed = native400 && dataExact && lastDataVisible && overflow <= 1 && screenshotCoversViewport &&
         response?.status() === 200 && keyboardPassed && errors.length === 0;
       report.themes[theme] = {
         passed, before, after, zoomRatio, native400, shortcutLog,
         htmlHttpStatus: response?.status() ?? null, jsonHttpStatus: liveData.status(),
         dataExact, lastDataVisible, horizontalOverflowCssPx: overflow,
-        keyboard, keyboardPassed, screenshot, errors,
+        keyboard, keyboardPassed, screenshot, pngWidth, screenshotCoversViewport, errors,
       };
       if (!passed) failures++;
     } catch (error) {
       failures++;
       report.themes[theme] = { passed: false, error: String(error), errors };
       try {
-        await page.screenshot({ path: path.join(outputDir, "pages-" + theme + "-failure.png"), fullPage: true, scale: "css" });
+        await page.screenshot({ path: path.join(outputDir, "pages-" + theme + "-failure.png"), fullPage: true, scale: "device" });
       } catch { /* navigation or renderer failure may leave no screenshot */ }
     } finally {
       await context.close();
