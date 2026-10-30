@@ -85,3 +85,15 @@ test("rejects any blank intermediate column header", () => {
     assert.match(assessM4Expansion(run, expected).problems.join(" "), /column-headers/);
   }
 });
+
+test("rejects incorrect rounded value even when exact capital is correct", () => {
+  for (const cell of [
+    "178.04 exact 78.03677092437883",
+    "78.04 exact 178.03677092437883",
+    "78.04 exact 78.03677092437883 extra",
+  ]) {
+    const run = good();
+    run.lastCapitalCell = cell;
+    assert.match(assessM4Expansion(run, expected).problems.join(" "), /last-capital/);
+  }
+});
