@@ -18,12 +18,14 @@ const good = () => ({
   tableCaption: "Readable rounded values are paired with the exact artifact value.",
   headers: ["Tick", "Output (units/tick)", "Employment (worker-equivalents)", "Gross wages (ALP/tick)", "Essential coverage", "Food stock (units)", "Installed capital (capital units)"],
   rowCount: 13, rowHeaderCount: 13, lastRowTick: "59",
-  lastCapitalCell: "78.04 exact 78.03677092437883",
+  lastCapitalCell: "78.04exact 78.03677092437883",
   documentOverflowCssPx: 0,
 });
 
 test("accepts the bounded keyboard and table evidence", () => {
   assert.deepEqual(assessM4Expansion(good(), expected), { passed: true, problems: [] });
+  const spaced = good(); spaced.lastCapitalCell = "78.04 exact 78.03677092437883";
+  assert.equal(assessM4Expansion(spaced, expected).passed, true);
 });
 test("rejects no observation or invalid fixture", () => {
   assert.equal(assessM4Expansion(null, expected).passed, false);
@@ -89,6 +91,7 @@ test("rejects any blank intermediate column header", () => {
 test("rejects incorrect rounded value even when exact capital is correct", () => {
   for (const cell of [
     "178.04 exact 78.03677092437883",
+    "178.04exact 78.03677092437883",
     "78.04 exact 178.03677092437883",
     "78.04 exact 78.03677092437883 extra",
   ]) {
