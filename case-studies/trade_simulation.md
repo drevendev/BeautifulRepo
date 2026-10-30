@@ -517,6 +517,31 @@ The new [browser probe](trade-pages-probe.mjs) uses a separate headless Chromium
 
 **Observed 2026-10-30 (branch under review):** [Chromium run #41063071060](https://github.com/drevendev/BeautifulRepo/actions/runs/41063071060) passed on implementation HEAD [`ed6509e`](https://github.com/drevendev/BeautifulRepo/commit/ed6509e783c3c3d24ab236bcf40eaa52bb1278de). Both emulated themes traversed **10/10 collapsed Tab stops** with recorded `:focus-visible`, nonzero outlines, viewport intersection and DOM label candidates. M3 opened by Enter, then its range readout changed **tick 10 → 9 → 10** from ArrowLeft/Right. The workflow ran **11/11 offline Node regressions**, recorded no browser probe failures and retained the [JSON/screenshots artifact](https://github.com/drevendev/BeautifulRepo/actions/runs/41063071060/artifacts/12981790567) including the two M3-focus screenshots. These are bounded automated observations, not a human inspection or screen-reader assessment; integration is pending separate review.
 
+## Expanded M4 disclosure and exact-values alternatives (probe added, live run pending)
+
+The [read-only browser probe](trade-pages-probe.mjs) now opens the M4 chapter with
+five native Tab presses and Enter, waits for its rendered table, and verifies
+that Space closes the disclosure again. It records whether focus remains on
+the summary, five rendered SVG chart `role="img"` labels, the table caption,
+seven column headers, the number of sampled tick rows and row headers, and
+the last row's rounded **and exact** installed-capital value against the
+pinned saved JSON fixture. The observer also measures expanded-page
+horizontal overflow and reports the *inner* table scroller separately,
+because a wide data table and an overflowing document are not the same
+condition. It retains a screenshot for each emulated theme.
+
+The [nine offline metric regressions](m4-expansion-metrics.test.mjs)
+reject missing labels, incomplete rows, changed values, a broken native
+disclosure, lost keyboard focus and document-level overflow. The fixture
+and target remain pinned; this is a source-data visualization check, **not**
+a fresh simulation run. Browser observations require the live Pages workflow
+to finish on the exact candidate head before they can be claimed.
+
+**Limits:** this does not independently determine assistive-technology
+accessible names, read the table through a screen reader, prove horizontal
+table keyboard panning, explore SVG charts using keys, exercise expanded
+Legacy, or inspect the entire long page at genuine 400% zoom.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
