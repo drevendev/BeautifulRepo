@@ -6,6 +6,7 @@ on:
       - '.github/workflows/trade-pages-zoom.yml'
       - '.github/action-pins.json'
       - 'case-studies/native-page-zoom.py'
+      - 'case-studies/native-x11-capture.py'
       - 'case-studies/trade-zoom-probe.mjs'
       - 'case-studies/trade_simulation.md'
   workflow_dispatch:
@@ -32,7 +33,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check case-studies/trade-zoom-probe.mjs
-          python3 -m py_compile case-studies/native-page-zoom.py
+          python3 -m py_compile case-studies/native-page-zoom.py case-studies/native-x11-capture.py
           command -v xvfb-run
           ldconfig -p | grep -F libXtst.so
       - name: Fetch the immutable target revision
