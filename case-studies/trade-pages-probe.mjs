@@ -11,6 +11,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
+import { assessTextContrast } from "./contrast-metrics.mjs";
 
 const target = process.env.TARGET_ROOT;
 const output = process.env.OUTPUT_DIR;
@@ -34,7 +35,7 @@ const report = {
   sourceRevision: "36bd70ea399813accf21d350aa5a0067f059757e",
   targetUrl: site,
   viewportCssPx: { width: 320, height: 900 },
-  method: "Real headless Chromium at 320 CSS px; emulated light/dark preference and sampled real keyboard Tab/Arrow/Enter path",
+  method: "Headless Chromium at 320 CSS px; light/dark, sampled real keyboard path and bounded computed-style text contrast",
   expectedFixtureSha256: sha256(fixtureBytes),
   expectedLastTick: expected.tick,
   expectedLastCapital: expected.installedCapital,
@@ -43,6 +44,7 @@ const report = {
     "physical phone",
     "400% browser zoom",
     "screen reader",
+    "focus-indicator contrast, full WCAG conformance, alpha/image compositing and visually verified typography",
     "complete keyboard navigation beyond the five sampled entrance controls",
     "runtime TypeScript or .NET simulation",
     "entire deployed HTML/JS commit provenance",
@@ -108,6 +110,54 @@ async function observeKeyboardEntrance(page, samples) {
   return result;
 }
 
+
+/**
+ * Collect a few real rendered text/background pairs. This samples the saved
+ * viewer, not every text node, hidden chapter, SVG label or focus state.
+ * Complex layers are reported as not-measurable by the pure metric module.
+ */
+async function observeTextContrast(page) {
+  const samples = await page.evaluate(() => {
+    const targets = [
+      ["Eyebrow", ".showcase-eyebrow"],
+      ["Lead", ".showcase-lead"],
+      ["Primary entrance", ".showcase-cta"],
+      ["Provenance", ".showcase-provenance"],
+      ["Tick label", 'label[for="spotlight-tick"]'],
+      ["Metric label", "#spotlight-metrics dt"],
+      ["Metric unit", "#spotlight-metrics dd small"],
+      ["Chapter hint", "#chapter-m4 > summary small"],
+      ["Footer", "footer"],
+    ];
+    return targets.map(([label, selector]) => {
+      const node = document.querySelector(selector);
+      if (!node) return { label, selector, present: false };
+      const style = getComputedStyle(node);
+      const backgroundChain = [];
+      for (let current = node, depth = 0; current && depth < 24; current = current.parentElement, depth++) {
+        const css = getComputedStyle(current);
+        backgroundChain.push({
+          color: css.backgroundColor,
+          image: css.backgroundImage,
+          opacity: css.opacity,
+          blend: css.mixBlendMode,
+        });
+      }
+      return {
+        label, selector, present: true,
+        visible: node.getClientRects().length > 0 &&
+          style.visibility === "visible" && style.display !== "none",
+        text: (node.textContent || "").trim().slice(0, 140),
+        foreground: style.color,
+        fontSizePx: Number.parseFloat(style.fontSize),
+        fontWeight: style.fontWeight,
+        backgroundChain,
+      };
+    });
+  });
+  return samples.map(assessTextContrast);
+}
+
 let failures = 0;
 const browser = await chromium.launch({ headless: true });
 try {
@@ -158,8 +208,12 @@ try {
       const screenshot = "pages-" + theme + "-320.png";
       await page.screenshot({ path: path.join(output, screenshot), fullPage: true });
       const keyboard = await observeKeyboardEntrance(page, fixture.samples);
+      const textContrast = await observeTextContrast(page);
+      const measuredTextCount = textContrast.filter(row => row.outcome !== "not-measurable").length;
       report.themes[theme] = {
         keyboard,
+        textContrast,
+        measuredTextCount,
         htmlHttpStatus: response?.status() ?? null,
         jsonHttpStatus: liveData.status(),
         liveFixtureSha256: liveData.ok() ? sha256(liveBytes) : null,
@@ -171,7 +225,7 @@ try {
         ...observed,
         errors,
       };
-      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || response?.status() !== 200 || errors.length) {
+      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || measuredTextCount < 6 || response?.status() !== 200 || errors.length) {
         failures++;
       }
     } catch (error) {
@@ -207,7 +261,8 @@ if (process.env.GITHUB_STEP_SUMMARY) {
   const rows = ["## Live trade_simulation Pages: browser observations",
     "",
     "Observed Chromium at **320 CSS px** in both emulated color schemes.",
-    "This is not a phone, 400% zoom, screen-reader test, or proof of deployed HTML/JS revision.",
+    "Computed text contrast uses WCAG 2.2 SC 1.4.3 AA thresholds only for nine named rendered samples; complex layers remain NOT MEASURABLE.",
+    "This is not a phone, 400% zoom, screen-reader test, focus contrast audit, or proof of deployed HTML/JS revision.",
     "",
     "| Theme | Saved JSON exact | Last tick/capital | Overflow | Sampled keyboard entrance |",
     "| --- | --- | --- | --- | --- |"];
@@ -218,7 +273,19 @@ if (process.env.GITHUB_STEP_SUMMARY) {
       " | " + (data.horizontalOverflowCssPx ?? "NOT OBSERVED") + " CSS px" +
       " | " + (data.keyboard?.passed ?? "NOT OBSERVED") + " |");
   }
-  rows.push("", "Artifacts contain a JSON observation record and full-page screenshots when captured.",
+  rows.push("", "### Bounded rendered text contrast", "",
+    "| Theme | Sample | Contrast ratio | AA threshold | Observation |",
+    "| --- | --- | ---: | ---: | --- |");
+  for (const theme of ["light", "dark"]) {
+    for (const row of report.themes[theme]?.textContrast || []) {
+      rows.push("| " + theme + " | " + row.label +
+        " | " + (row.ratio ?? "NOT MEASURABLE") +
+        " | " + (row.threshold ?? "—") +
+        " | " + row.outcome + " |");
+    }
+  }
+  rows.push("", "These are selected computed-style values, not full-page WCAG conformance or observed visual focus contrast.",
+    "", "Artifacts contain a JSON observation record and full-page screenshots when captured.",
     "Different computed body backgrounds: " + themesDistinct + ".",
     "Failures (network/data/viewer/selected keyboard path): " + failures + ".",
     "");
