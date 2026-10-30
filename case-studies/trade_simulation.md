@@ -441,6 +441,28 @@ provenance, full keyboard or expanded-chart traversal, screen-reader
 usability, a physical phone, other browser engines, or whole-page WCAG
 conformance. This PR remains subject to separate later-run acceptance.
 
+## Served HTML/CSS/JS byte provenance (implementation pending live observation)
+
+The [read-only served-asset probe](trade-served-assets.mjs) is configured to
+compare the published `index.html`, `m4.css`, `showcase.js`, and `m4.js`
+**byte for byte** with the exact same four files under `docs/` in the
+pinned source checkout
+[`36bd70e`](https://github.com/drevendev/trade_simulation/tree/36bd70ea399813accf21d350aa5a0067f059757e).
+It uses SHA-256 hashes, refuses redirects, caps each response at 512 KiB,
+and records the HTTP status and actual byte count. Offline regression tests
+cover matching, different, missing and oversized content. The existing
+[Pages browser workflow](../.github/workflows/trade-pages-visual.yml) now
+produces `served-assets.json` in its read-only observation artifact.
+
+**No live outcome is asserted yet.** A difference is a reported observation,
+not a CI failure unless the asset cannot be inspected. A match demonstrates
+only **content agreement for these four selected resources at observation
+time**: identical files can appear in multiple commits, and these bytes do
+not establish the deployed Git SHA, Pages build settings, remaining assets,
+or correctness of the running simulation. The existing byte-exact JSON
+fixture check is separate. This narrows a previously unknown deployment
+question without claiming a full provenance attestation.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
