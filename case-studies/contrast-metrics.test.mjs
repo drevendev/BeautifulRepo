@@ -47,6 +47,12 @@ test("insufficient normal-size contrast is evidence, not a failing test harness"
   assert.ok(got.ratio < 4.5);
 });
 
+test("near-threshold decisions never round a failing value into a pass", () => {
+  const got = assessTextContrast(sample({ foreground: "rgb(118.7, 118.7, 118.7)" }));
+  assert.equal(got.ratio, 4.5); // Display rounds to 2 decimals.
+  assert.equal(got.outcome, "below-sampled-AA"); // Actual ratio is < 4.5.
+});
+
 test("large bold text uses the 3:1 threshold, regular text does not", () => {
   const foreground = "rgb(130, 130, 130)";
   const normal = assessTextContrast(sample({ foreground, fontSizePx: 18.67, fontWeight: 400 }));
