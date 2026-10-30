@@ -515,7 +515,7 @@ The new [browser probe](trade-pages-probe.mjs) uses a separate headless Chromium
 
 [Eleven offline regressions](keyboard-path-metrics.test.mjs) validate that evidence cannot silently omit a stop, accept an out-of-order focus, overlook missing focus styling or pass on a slider readout that did not change. This checks **one bounded path**, not screen-reader output, computed accessible names, expanded M4 or Legacy behavior, other browsers or full WCAG conformance.
 
-**CI observation pending on the current branch.** Do not interpret the described implementation as a confirmed live PASS until the exact-head workflow and saved observations have been reviewed.
+**Observed 2026-10-30 (branch under review):** [Chromium run #41063071060](https://github.com/drevendev/BeautifulRepo/actions/runs/41063071060) passed on implementation HEAD [`ed6509e`](https://github.com/drevendev/BeautifulRepo/commit/ed6509e783c3c3d24ab236bcf40eaa52bb1278de). Both emulated themes traversed **10/10 collapsed Tab stops** with recorded `:focus-visible`, nonzero outlines, viewport intersection and DOM label candidates. M3 opened by Enter, then its range readout changed **tick 10 → 9 → 10** from ArrowLeft/Right. The workflow ran **11/11 offline Node regressions**, recorded no browser probe failures and retained the [JSON/screenshots artifact](https://github.com/drevendev/BeautifulRepo/actions/runs/41063071060/artifacts/12981790567) including the two M3-focus screenshots. These are bounded automated observations, not a human inspection or screen-reader assessment; integration is pending separate review.
 
 ## What remains unverified
 
