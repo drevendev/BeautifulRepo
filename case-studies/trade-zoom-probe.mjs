@@ -18,6 +18,7 @@ if (!targetRoot || !outputDir) throw new Error("TARGET_ROOT and OUTPUT_DIR are r
 if (new URL(targetUrl).protocol !== "https:") throw new Error("TARGET_URL must be HTTPS");
 if (!process.env.DISPLAY) throw new Error("Run under an isolated Xvfb DISPLAY");
 const nativeZoom = path.join(path.dirname(fileURLToPath(import.meta.url)), "native-page-zoom.py");
+const x11Capture = path.join(path.dirname(fileURLToPath(import.meta.url)), "native-x11-capture.py");
 const requireFromTarget = createRequire(pathToFileURL(path.join(targetRoot, "package.json")));
 const { chromium } = requireFromTarget("playwright");
 const bytes = await fs.readFile(path.join(targetRoot, "docs/m4-preview.json"));
@@ -99,14 +100,17 @@ for (const theme of ["light", "dark"]) {
       const lastDataVisible = after.readout.includes("tick " + expected.tick) &&
         after.capital.includes(expected.installedCapital.toFixed(2));
       const overflow = Math.max(0, after.documentWidth - after.viewportWidth);
-      const screenshot = "pages-" + theme + "-native-400.png";
-      await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: true, scale: "device", animations: "disabled" });
-      // At true browser zoom, a CSS-scaled screenshot clips the physical
-      // viewport. Preserve a device-scaled PNG and verify its pixel width.
+      const screenshot = "pages-" + theme + "-native-400-viewport.png";
+      // Playwright's full-page screenshot at genuine browser zoom is
+      // cropped to the CSS viewport in this Chromium build. Capture the
+      // actual Xvfb physical framebuffer instead; this is viewport-only.
+      const captureLog = execFileSync("python3", [
+        x11Capture, path.join(outputDir, screenshot),
+      ], { encoding: "utf8", timeout: 20000, env: process.env }).trim();
       const png = await fs.readFile(path.join(outputDir, screenshot));
       const pngWidth = png.readUInt32BE(16);
-      const screenshotCoversViewport = pngWidth >= 1200 && pngWidth <= 1280;
-
+      const pngHeight = png.readUInt32BE(20);
+      const screenshotCoversViewport = pngWidth === 1440 && pngHeight === 1200;
       for (let index = 0; index < 4; index++) await page.keyboard.press("Tab");
       const keyboard = await page.evaluate(() => ({
         id: document.activeElement?.id || null,
@@ -119,7 +123,7 @@ for (const theme of ["light", "dark"]) {
         passed, before, after, zoomRatio, native400, shortcutLog,
         htmlHttpStatus: response?.status() ?? null, jsonHttpStatus: liveData.status(),
         dataExact, lastDataVisible, horizontalOverflowCssPx: overflow,
-        keyboard, keyboardPassed, screenshot, pngWidth, screenshotCoversViewport, errors,
+        keyboard, keyboardPassed, screenshot, captureLog, pngWidth, pngHeight, screenshotCoversViewport, errors,
       };
       if (!passed) failures++;
     } catch (error) {
