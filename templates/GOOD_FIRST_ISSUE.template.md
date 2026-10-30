@@ -45,7 +45,7 @@ A `good first issue` label may be appropriate after the maintainer verifies
 that the scope and prerequisites are newcomer-friendly; the label is not a
 reservation or merge guarantee.
 
-See the [first-contribution guide](../guides/first-contribution.md) for a
+See the [first-contribution guide](https://github.com/drevendev/BeautifulRepo/blob/master/guides/first-contribution.md) for a
 fictional filled example and the distinction between source checks and
 real outcomes. Security-sensitive material belongs in a verified private
 reporting route, never this public issue body.
