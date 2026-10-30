@@ -8,6 +8,8 @@ on:
       - 'case-studies/trade-pages-probe.mjs'
       - 'case-studies/contrast-metrics.mjs'
       - 'case-studies/contrast-metrics.test.mjs'
+      - 'case-studies/keyboard-path-metrics.mjs'
+      - 'case-studies/keyboard-path-metrics.test.mjs'
       - 'case-studies/trade-served-assets.mjs'
       - 'case-studies/trade-served-assets.test.mjs'
       - 'case-studies/trade_simulation.md'
@@ -33,6 +35,8 @@ jobs:
           node-version: '22'
       - name: Run offline contrast-metric regressions
         run: node --test case-studies/contrast-metrics.test.mjs
+      - name: Run offline keyboard-path regressions
+        run: node --test case-studies/keyboard-path-metrics.test.mjs
       - name: Run offline served-asset regressions
         run: node --test case-studies/trade-served-assets.test.mjs
       - name: Fetch the exact target source and lockfile
