@@ -7,8 +7,9 @@ Pinned before/after offline audits and a saved-data first success from fresh
 Git clones were exercised in GitHub Actions on 2026-10-29. The target's historical
 CI and a separate isolated fixture run are also recorded. Live 320 CSS px Chromium
 observations check served saved data, light/dark rendering and a bounded
-keyboard entrance path. They do not establish HTML/JS deployment provenance,
-whole-page accessibility or an actual simulation rerun; the case is incomplete.
+keyboard entrance path. A separate headful Chromium run also exercised actual
+400% browser zoom. Neither establishes HTML/JS deployment provenance,
+whole-page accessibility or a fresh economic simulation; the case is incomplete.
 
 ## Repository and exact evidence
 
@@ -379,6 +380,67 @@ real 400% zoom, screen reader and deployed HTML/JS provenance. A threshold
 pass is not a general legibility judgement; the small unit sizes remain
 an editorial concern.
 
+## Native 400% Chromium browser zoom (observed 2026-10-30)
+
+The [separate native-zoom workflow](../.github/workflows/trade-pages-zoom.yml)
+completed successfully on [GitHub Actions #41015344993](https://github.com/drevendev/BeautifulRepo/actions/runs/41015344993)
+using code HEAD
+[`7e5d81f`](https://github.com/drevendev/BeautifulRepo/commit/7e5d81fcf2c4073536f4a724fd71b68faba700ca).
+This test ran **headful Chromium inside an isolated 1440 × 1200 px Xvfb desktop**.
+The [native zoom helper](native-page-zoom.py) sent eight genuine
+`Ctrl+plus` keyboard shortcuts to the focused Chromium window after
+checking its X11 `WM_CLASS`. This is **browser page zoom**, not CSS
+`zoom`, a Playwright device scale override, a CSS-width-only viewport
+emulation or pinch simulation.
+
+The [live probe](trade-zoom-probe.mjs) independently measured the
+following in **both** emulated light/dark schemes:
+
+- `window.devicePixelRatio` increased **1 → 4** and
+  `window.innerWidth` contracted **1280 → 320 CSS px**.
+  `visualViewport.scale` remained **1**, and computed body
+  `zoom` remained **1**.
+- `document.documentElement.scrollWidth` and `clientWidth` were
+  both **316 CSS px** after zoom; observed document-level horizontal
+  overflow was **0 CSS px**. This does not prove that no nested chart
+  or hidden section can clip.
+- Served HTML and saved JSON returned **HTTP 200**. Served JSON was
+  byte-identical to the pinned `36bd70e` fixture, SHA-256
+  `f10fc8b9f67c55ed17158346c46ad686c6f3409dd08f379bda7a96055a880980`.
+  The saved-viewer readout remained `tick 59 · sample 13 of 13`
+  and `78.04 capital units`.
+- Four actual Tab presses reached the saved-tick slider, which matched
+  `:focus-visible`. Both themes showed distinct computed backgrounds,
+  no uncaught page errors, and **zero probe failures**.
+
+The job retained a [JSON observation report and physical Xvfb viewport
+screenshots](https://github.com/drevendev/BeautifulRepo/actions/runs/41015344993/artifacts/12959601046)
+(`pages-light-native-400-viewport.png`,
+`pages-dark-native-400-viewport.png`; **1440 × 1200 physical px**,
+retention through **2026-11-13 UTC**). Both captures were downloaded
+and visually inspected. They show the browser's **400%** zoom indicator,
+the light or dark first-screen hero and a headline wrapped to three
+lines without visible cut-off. Only the **first viewport** is visible;
+the enlarged page continues below the fold, so these images do not
+prove every later section is visually usable.
+
+**Instrumentation lesson:** Playwright's full-page screenshot API on
+this Chromium version produced a misleading **316 px clipped PNG**
+under native zoom even though browser DOM measurements showed no
+document overflow. The final workflow therefore captures the actual
+isolated desktop framebuffer through [Xlib](native-x11-capture.py),
+rejecting blank/unpainted frames rather than treating cropped
+screenshots as successful visual evidence. The first X11 capture
+itself exposed an unpainted frame; a paint-frame wait and nonblank
+pixel check resolved that false positive. This is a reusable distinction
+between **measured browser layout**, **actual screen pixels** and
+**screenshot-tool artifacts**.
+
+The case still does **not** establish deployed HTML/JS commit
+provenance, full keyboard or expanded-chart traversal, screen-reader
+usability, a physical phone, other browser engines, or whole-page WCAG
+conformance. This PR remains subject to separate later-run acceptance.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
@@ -393,8 +455,9 @@ an editorial concern.
   checked at the correction's merge SHA as recorded above; the later
   after-snapshot has not been independently re-tested as a target runtime.
 - The **served Pages viewer was actually observed** at 320 CSS px in emulated
-  light/dark Chromium, with matching saved JSON; qualitative screenshot review,
-  deployed HTML/JS revision, real 400% zoom, **full** keyboard traversal,
+  light/dark Chromium and under actual Chromium **400% page zoom**,
+  with matching saved JSON and reviewed first-viewport captures.
+  Deployed HTML/JS revision, **full** keyboard traversal,
   screen-reader behavior and **whole-page** contrast remain **unverified**.
   A limited first-screen keyboard path and nine-role computed-style
   light/dark contrast sampling were exercised on 2026-10-30 as above.
@@ -407,8 +470,9 @@ The pinned-tool source audit and the fresh-clone saved-data command/failure
 path are now reproducible and observed. To mark this a **complete case**
 under the [five-step procedure](README.md), the 320 px light/dark
 screenshots and editorial observations now exist with honest limits.
-The live JSON matches the source snapshot, but current Pages HTML/JS
-provenance and broader keyboard/zoom/screen-reader coverage remain
-explicitly unknown unless actually tested. The historical target-native CI
+The live JSON matches the source snapshot, and native Chromium 400%
+page zoom has been directly observed. Current Pages HTML/JS provenance,
+complete keyboard navigation, expanded charts, other browser engines and
+screen-reader coverage remain explicitly unknown unless actually tested. The historical target-native CI
 covers the correction merge, not the later after-snapshot runtime.
 This remains a useful partial case, not a fully accepted one.
