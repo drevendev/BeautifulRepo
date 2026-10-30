@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a native-400%-zoom **bottom-viewport capture** to the pinned trade_simulation case: [real Chromium #41047777163](https://github.com/drevendev/BeautifulRepo/actions/runs/41047777163) reached the page footer in both emulated themes, with 0 CSS px document-level horizontal overflow and a separate X11 image for each first/bottom viewport. All five new offline regressions passed; first/bottom screenshots in each theme do not establish middle-page, screen-reader or whole-page accessibility (related to #82).
+
 - Add a dependency-free, read-only **served HTML/CSS/JS byte comparison** for the pinned trade_simulation Pages case. The probe checks four explicitly named published assets against a Git checkout at an immutable source SHA, caps responses, refuses redirects, records SHA-256 evidence and exercises match/difference/error cases offline. This is a dated selected-file observation, not proof of the deployed commit, all website assets or accessibility (#82).
 
 - Add a read-only, headful Chromium/Xvfb check of **native 400% browser page zoom** for the live trade_simulation saved-run viewer. Eight real `Ctrl+plus` shortcuts produced device-pixel ratio 1 → 4 and CSS viewport width 1280 → 320 px; sampled layout, saved-data readout and keyboard focus passed in both emulated themes. The X11 screenshots show only the **first physical viewport**, not the full page; screen-reader access, nested-chart accessibility and deployed HTML/JS provenance remain unverified (related to #82).
