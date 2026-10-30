@@ -42,7 +42,7 @@ def zoom(steps):
         finally:
             x11.XFree(hint.name)
             x11.XFree(hint.klass)
-        if klass != "Chromium":
+        if klass not in ("Chromium", "Chromium-browser"):
             raise RuntimeError("Refusing to send keys outside focused Chromium: " + klass)
         ctrl = x11.XKeysymToKeycode(display, 0xFFE3)  # Control_L
         plus = x11.XKeysymToKeycode(display, 0x002B)  # plus
