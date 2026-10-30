@@ -1,4 +1,4 @@
-name: Live trade_simulation Pages visual and keyboard evidence
+name: Live trade_simulation Pages visual, keyboard and contrast evidence
 
 on:
   pull_request:
@@ -6,6 +6,8 @@ on:
       - '.github/workflows/trade-pages-visual.yml'
       - '.github/action-pins.json'
       - 'case-studies/trade-pages-probe.mjs'
+      - 'case-studies/contrast-metrics.mjs'
+      - 'case-studies/contrast-metrics.test.mjs'
       - 'case-studies/trade_simulation.md'
   workflow_dispatch:
 
@@ -15,7 +17,7 @@ permissions:
 
 jobs:
   observe-pages:
-    name: Live Pages 320px light/dark and sampled keyboard evidence
+    name: Live Pages 320px visual, keyboard and sampled text contrast
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
@@ -27,6 +29,8 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 ref inspected 2026-10-30
         with:
           node-version: '22'
+      - name: Run offline contrast-metric regressions
+        run: node --test case-studies/contrast-metrics.test.mjs
       - name: Fetch the exact target source and lockfile
         shell: bash
         env:
@@ -46,7 +50,7 @@ jobs:
           set -euo pipefail
           npm ci --ignore-scripts --no-audit --no-fund
           ./node_modules/.bin/playwright install --with-deps chromium
-      - name: Observe served data, 320px rendering and selected keyboard path
+      - name: Observe served data, rendering, keyboard and sampled text contrast
         shell: bash
         env:
           TARGET_ROOT: ${{ runner.temp }}/trade-after
@@ -57,7 +61,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 ref inspected 2026-10-30
         with:
-          name: trade-pages-320px-keyboard-observations
+          name: trade-pages-320px-keyboard-contrast-observations
           path: ${{ runner.temp }}/trade-pages-evidence/
           if-no-files-found: warn
           retention-days: 14
