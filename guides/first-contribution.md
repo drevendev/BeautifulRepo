@@ -107,7 +107,7 @@ than all CI and all supported platforms. For security reports, follow the
 
 ## Primary references
 
-Reviewed **2026-10-31** (source guidance, not a live contributor study):
+Reviewed **2026-10-30 (UTC)** (source guidance, not a live contributor study):
 
 - [GitHub: contributing to open source](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-open-source):
   read project rules, find current work, branch, test and submit reviewable PRs.
