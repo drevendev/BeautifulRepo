@@ -1,13 +1,13 @@
 # Trade simulation: a shipped milestone described as pending
 
-**Case status, 2026-10-29: in progress.** This is a pinned, source-level before/after
+**Case status, 2026-10-30: in progress.** This is a pinned, source-level before/after
 study of a real repository. The README correction happened in the target's own
 merged PR; BeautifulRepo documents rather than repeats that target change.
 Pinned before/after offline audits and a saved-data first success from fresh
 Git clones were exercised in GitHub Actions on 2026-10-29. The target's historical
-CI and a separate isolated fixture run are also recorded. None of this
-establishes live deployment freshness, visual accessibility, or a rerun of
-the actual simulation; the case remains incomplete.
+CI and a separate isolated fixture run are also recorded. A live 320 CSS px Chromium observation now also checks served saved data and
+light/dark rendering, but does not establish HTML/JS deployment provenance,
+visual accessibility, or a rerun of the actual simulation; the case remains incomplete.
 
 ## Repository and exact evidence
 
@@ -226,6 +226,73 @@ manually dispatched, not scheduled. Its successful result is valid for the
 specific workflow, tool and target SHAs above; it is not a live deployment,
 browser test or broader security certification.
 
+## Live Pages browser observations (2026-10-30 Cyprus time)
+
+The [read-only Chromium probe](trade-pages-probe.mjs) ran against the
+**served** [public Pages viewer](https://drevendev.github.io/trade_simulation/)
+in [GitHub Actions #40973430007](https://github.com/drevendev/BeautifulRepo/actions/runs/40973430007).
+Its exact-head source is
+[PR #200](https://github.com/drevendev/BeautifulRepo/pull/200)
+(commit `9d95f271700742edff2d9d932af1228efaa1388c`).
+The run completed **successfully** at 2026-10-29 23:29 UTC
+(2026-10-30 in Cyprus). The runner used Chromium
+**153.0.8010.12**, the target's pinned source
+`36bd70ea399813accf21d350aa5a0067f059757e`, its npm lockfile,
+a **320 CSS px** viewport, and separate emulated light/dark preferences.
+Target package scripts were disabled during dependency installation.
+Only browser rendering and saved artifact inspection were executed:
+**no target economic simulation was run**.
+
+Observed in **both** color schemes:
+
+- The served HTML and `m4-preview.json` returned **HTTP 200**.
+- The served saved JSON SHA-256 was
+  `f10fc8b9f67c55ed17158346c46ad686c6f3409dd08f379bda7a96055a880980`,
+  **byte-identical** to the checked-in JSON from the pinned source snapshot.
+- The browser displayed `tick 59 · sample 13 of 13` and
+  `78.04 capital units`, matching the pinned saved sample
+  (`78.03677092437883` before rounding).
+- The page title was `Trade simulation — M4 one-region closed economy`;
+  the lead heading read **Watch an economy find its rhythm.**
+- `document.documentElement.scrollWidth` was **320 CSS px** and its
+  `clientWidth` was **320 CSS px** (zero document-level horizontal overflow).
+  This alone does not rule out clipping inside individual containers.
+- No uncaught page errors were logged. Computed body backgrounds differed:
+  light `rgb(251, 250, 247)`, dark `rgb(20, 20, 15)`.
+
+The job uploaded
+[the JSON observation record and two full-page screenshots](https://github.com/drevendev/BeautifulRepo/actions/runs/40973430007/artifacts/12941750856)
+(`pages-light-320.png`, `pages-dark-320.png`, `observations.json`;
+artifact **12941750856**, retention through **2026-11-12 UTC**).
+The browser log, saved observation JSON and both full-page **320 × 3534 px**
+PNG images were read and visually inspected after the run.
+
+**Screenshot text alternative and editorial assessment.** In both themes
+the viewer uses a single narrow column: a prominent three-line headline,
+a two-link milestone chooser, a saved-M4 summary and tick slider, five
+stacked metric cards, six collapsed milestone chapters, and a footer
+with the source/run command. The cards' final recorded sample shows
+zero current output, employment, needs coverage and wages but **78.04**
+installed capital. **The probe deliberately selected tick 59** to verify
+the saved data; these screenshots do *not* show the page's initial default
+working-tick selection. The dark version replaces the pale backgrounds
+with near-black panels and light text. No horizontally cut-off cards,
+chapters or footer text were apparent in the captured images. The
+secondary annotations, units and footer command use much smaller type
+than the headline; at 320 px they deserve a separate legibility and
+contrast assessment before making an accessibility claim. The collapsed
+chapter contents, mobile touch behavior and keyboard focus states are
+not evidenced by these static images.
+
+The matching served data establishes **saved JSON agreement at observation
+time**, not the deployed HTML/JavaScript commit SHA or a general guarantee
+that Pages is current. Theme emulation is not a physical phone. Real
+**400% browser zoom, keyboard/focus traversal, screen-reader behavior,
+contrast measurements and expanded-chapter inspection remain NOT RUN**.
+The 320 px screenshot observations and text equivalent are now recorded,
+but the case is still **in progress** because deployed HTML/JS provenance
+and broader accessibility behavior remain unverified.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
@@ -239,9 +306,10 @@ browser test or broader security certification.
   build/test was run **locally for this case**. Target-native GitHub CI was
   checked at the correction's merge SHA as recorded above; the later
   after-snapshot has not been independently re-tested as a target runtime.
-- The current GitHub Pages deployment, narrow-width **320 px light/dark**
-  rendering, real 400% zoom, keyboard and screen-reader behavior were
-  **not observed**.
+- The **served Pages viewer was actually observed** at 320 CSS px in emulated
+  light/dark Chromium, with matching saved JSON; qualitative screenshot review,
+  deployed HTML/JS revision, real 400% zoom, keyboard and screen-reader
+  behavior remain **unverified**.
 - Description, topics, homepage and tracked security-policy presence were
   inspected on 2026-10-29. Private reporting enablement, inherited policies,
   current-release follow-on milestones and performance metrics remain
@@ -249,9 +317,10 @@ browser test or broader security certification.
 
 The pinned-tool source audit and the fresh-clone saved-data command/failure
 path are now reproducible and observed. To mark this a **complete case**
-under the [five-step procedure](README.md), the remaining 320 px light/dark
-visual evidence and its limitations must be documented. Current Pages
-freshness and broader keyboard/zoom/screen-reader coverage must remain
+under the [five-step procedure](README.md), the 320 px light/dark
+screenshots and editorial observations now exist with honest limits.
+The live JSON matches the source snapshot, but current Pages HTML/JS
+provenance and broader keyboard/zoom/screen-reader coverage remain
 explicitly unknown unless actually tested. The historical target-native CI
 covers the correction merge, not the later after-snapshot runtime.
 This remains a useful partial case, not a fully accepted one.
