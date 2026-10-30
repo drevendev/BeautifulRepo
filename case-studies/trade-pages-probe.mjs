@@ -12,6 +12,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { assessTextContrast } from "./contrast-metrics.mjs";
+import { COLLAPSED_TABS, assessCollapsedTabs, assessM3Keyboard } from "./keyboard-path-metrics.mjs";
 
 const target = process.env.TARGET_ROOT;
 const output = process.env.OUTPUT_DIR;
@@ -35,7 +36,7 @@ const report = {
   sourceRevision: "36bd70ea399813accf21d350aa5a0067f059757e",
   targetUrl: site,
   viewportCssPx: { width: 320, height: 900 },
-  method: "Headless Chromium at 320 CSS px; light/dark, sampled real keyboard path and bounded computed-style text contrast",
+  method: "Headless Chromium at 320 CSS px; light/dark, five-stop entrance, ten-stop collapsed Tab path, native M3 tick interaction and bounded text contrast",
   expectedFixtureSha256: sha256(fixtureBytes),
   expectedLastTick: expected.tick,
   expectedLastCapital: expected.installedCapital,
@@ -45,7 +46,7 @@ const report = {
     "400% browser zoom",
     "screen reader",
     "focus-indicator contrast, full WCAG conformance, alpha/image compositing and visually verified typography",
-    "complete keyboard navigation beyond the five sampled entrance controls",
+    "expanded M4 and legacy controls beyond the sampled collapsed-page/M3 route",
     "runtime TypeScript or .NET simulation",
     "entire deployed HTML/JS commit provenance",
   ],
@@ -158,6 +159,82 @@ async function observeTextContrast(page) {
   return samples.map(assessTextContrast);
 }
 
+/**
+ * Independently traverse the collapsed chapter surface via actual keyboard
+ * presses and Enter-opened M3 tick input. Name candidates are DOM evidence,
+ * not computed assistive-tech names or a screen-reader test.
+ */
+async function observeChapterKeyboard(context, theme) {
+  const tabPage = await context.newPage();
+  const result = { tabStops: [], passed: false };
+  try {
+    const response = await tabPage.goto(site, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await tabPage.waitForFunction(
+      () => document.querySelector("#spotlight-tick") && !document.querySelector("#spotlight-tick").disabled,
+      null, { timeout: 30000 },
+    );
+    const focus = wanted => tabPage.evaluate(selector => {
+      const node = document.activeElement;
+      const style = node ? getComputedStyle(node) : null;
+      const rect = node?.getBoundingClientRect();
+      const label = (node?.getAttribute("aria-label") ||
+        [...(node?.labels || [])].map(item => item.textContent || "").join(" ") ||
+        node?.textContent || "").trim();
+      return {
+        selector, matches: Boolean(node?.matches(selector)),
+        actualTag: node?.tagName || null, actualId: node?.id || null,
+        focusVisible: Boolean(node?.matches(":focus-visible")),
+        outlined: Boolean(style && style.outlineStyle !== "none" &&
+          parseFloat(style.outlineWidth) > 0),
+        hasNameCandidate: label.length > 0, nameCandidate: label.slice(0, 120),
+        descriptionTarget: node?.getAttribute("aria-describedby") || null,
+        inViewport: Boolean(rect && rect.width > 0 && rect.height > 0 &&
+          rect.top < innerHeight && rect.bottom > 0 &&
+          rect.left < innerWidth && rect.right > 0),
+      };
+    }, wanted);
+    for (const step of COLLAPSED_TABS) {
+      await tabPage.keyboard.press("Tab");
+      result.tabStops.push({ label: step.label, ...await focus(step.selector) });
+    }
+    result.collapsed = assessCollapsedTabs(result.tabStops);
+    // From the last (Legacy) summary, return to the fourth-from-last (M3).
+    for (let i = 0; i < 4; i++) await tabPage.keyboard.press("Shift+Tab");
+    const summaryFocus = await focus("#chapter-m3 > summary");
+    const openBefore = await tabPage.locator("#chapter-m3").evaluate(node => node.open);
+    await tabPage.keyboard.press("Enter");
+    const openAfterEnter = await tabPage.locator("#chapter-m3").evaluate(node => node.open);
+    await tabPage.waitForFunction(() => {
+      const input = document.querySelector("#m3-tick");
+      return input && Number(input.max) >= 2 && !input.disabled;
+    }, null, { timeout: 30000 });
+    await tabPage.keyboard.press("Tab");
+    const tickFocus = await focus("#m3-tick");
+    const sample = () => tabPage.evaluate(() => {
+      const input = document.querySelector("#m3-tick");
+      return {
+        value: Number(input?.value), max: Number(input?.max),
+        readout: (document.querySelector("#m3-tick-readout")?.textContent || "").trim(),
+      };
+    });
+    const before = await sample();
+    await tabPage.keyboard.press("ArrowLeft");
+    const left = await sample();
+    await tabPage.keyboard.press("ArrowRight");
+    const restored = await sample();
+    const observed = { summaryFocus, openBefore, openAfterEnter, tickFocus, before, left, restored };
+    result.m3 = { ...observed, ...assessM3Keyboard(observed) };
+    const screenshot = "pages-" + theme + "-m3-keyboard.png";
+    await tabPage.screenshot({ path: path.join(output, screenshot) });
+    result.screenshot = screenshot;
+    result.httpStatus = response?.status() ?? null;
+    result.passed = result.httpStatus === 200 && result.collapsed.passed && result.m3.passed;
+    return result;
+  } finally {
+    await tabPage.close();
+  }
+}
+
 let failures = 0;
 const browser = await chromium.launch({ headless: true });
 try {
@@ -209,9 +286,11 @@ try {
       await page.screenshot({ path: path.join(output, screenshot), fullPage: true });
       const keyboard = await observeKeyboardEntrance(page, fixture.samples);
       const textContrast = await observeTextContrast(page);
+      const chapterKeyboard = await observeChapterKeyboard(context, theme);
       const measuredTextCount = textContrast.filter(row => row.outcome !== "not-measurable").length;
       report.themes[theme] = {
         keyboard,
+        chapterKeyboard,
         textContrast,
         measuredTextCount,
         htmlHttpStatus: response?.status() ?? null,
@@ -225,7 +304,7 @@ try {
         ...observed,
         errors,
       };
-      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || measuredTextCount < 6 || response?.status() !== 200 || errors.length) {
+      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || !chapterKeyboard.passed || measuredTextCount < 6 || response?.status() !== 200 || errors.length) {
         failures++;
       }
     } catch (error) {
@@ -262,16 +341,18 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     "",
     "Observed Chromium at **320 CSS px** in both emulated color schemes.",
     "Computed text contrast uses WCAG 2.2 SC 1.4.3 AA thresholds only for nine named rendered samples; complex layers remain NOT MEASURABLE.",
-    "This is not a phone, 400% zoom, screen-reader test, focus contrast audit, or proof of deployed HTML/JS revision.",
+    "This is not a phone, 400% zoom, screen-reader test, focus contrast audit, exhaustive expanded-chart traversal or proof of deployed HTML/JS revision.",
     "",
-    "| Theme | Saved JSON exact | Last tick/capital | Overflow | Sampled keyboard entrance |",
-    "| --- | --- | --- | --- | --- |"];
+    "| Theme | Saved JSON exact | Last tick/capital | Overflow | Five-stop entrance | Collapsed chapters | M3 tick |",
+    "| --- | --- | --- | --- | --- | --- |"];
   for (const theme of ["light", "dark"]) {
     const data = report.themes[theme] || {};
     rows.push("| " + theme + " | " + (data.dataExact ?? "NOT OBSERVED") +
       " | " + ((data.tickCorrect && data.capitalCorrect) ?? "NOT OBSERVED") +
       " | " + (data.horizontalOverflowCssPx ?? "NOT OBSERVED") + " CSS px" +
-      " | " + (data.keyboard?.passed ?? "NOT OBSERVED") + " |");
+      " | " + (data.keyboard?.passed ?? "NOT OBSERVED") +
+      " | " + (data.chapterKeyboard?.collapsed?.passed ?? "NOT OBSERVED") +
+      " | " + (data.chapterKeyboard?.m3?.passed ?? "NOT OBSERVED") + " |");
   }
   rows.push("", "### Bounded rendered text contrast", "",
     "| Theme | Sample | Contrast ratio | AA threshold | Observation |",
