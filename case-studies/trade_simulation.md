@@ -334,6 +334,34 @@ physical mobile interaction and deployed HTML/JS revision provenance
 remain **unverified**. [Issue #82](https://github.com/drevendev/BeautifulRepo/issues/82)
 remains open; integration requires separate later-run acceptance.
 
+## Bounded text-contrast methodology (2026-10-30; live run pending)
+
+The [Chromium probe](trade-pages-probe.mjs) now samples nine named,
+visible text roles on the **served** saved-run viewer, separately in light and
+dark emulated color schemes: eyebrow, lead, primary entrance, provenance,
+tick label, metric label, metric unit, chapter hint and footer. The
+[standalone metric](contrast-metrics.mjs) computes relative luminance from
+computed RGB text and the first opaque, solid ancestor background. Its
+[offline regressions](contrast-metrics.test.mjs) cover known ratios,
+normal/large text thresholds, and conservative unknown states.
+
+This is a **diagnostic sample**, not a whole-page WCAG pass. It uses the
+[W3C WCAG 2.2 SC 1.4.3 text contrast thresholds](https://www.w3.org/TR/WCAG22/#contrast-minimum)
+of **4.5:1 for normal** and **3:1 for large** text. Decisions use the
+unrounded ratio. The report preserves exact foreground/background
+colors, font size/weight, threshold, measured ratio and classification.
+Unsupported gradients/images, alpha, blending, hidden or absent content
+are **NOT MEASURABLE**, not successes. A probe with fewer than six
+measurable roles fails its **instrumentation minimum**, but low measured
+contrast is recorded as a finding rather than silently failing the browser
+evidence workflow. Future inspection must decide actual reader impact.
+
+**Execution status:** NOT RUN on the new contrast implementation until its
+exact-head GitHub Actions run completes. A green older Chromium job is
+not evidence for this feature. Focus-ring contrast, SVG/chart labels,
+collapsed chapters, real 400% browser zoom, screen-reader behavior and
+deployed HTML/JS provenance remain outside this specific measurement.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
