@@ -14,6 +14,7 @@ import { pathToFileURL } from "node:url";
 import { assessTextContrast } from "./contrast-metrics.mjs";
 import { COLLAPSED_TABS, assessCollapsedTabs, assessM3Keyboard } from "./keyboard-path-metrics.mjs";
 import { assessM4Expansion } from "./m4-expansion-metrics.mjs";
+import { assessM4TableKeyboard } from "./m4-table-keyboard-metrics.mjs";
 
 const target = process.env.TARGET_ROOT;
 const output = process.env.OUTPUT_DIR;
@@ -37,7 +38,7 @@ const report = {
   sourceRevision: "36bd70ea399813accf21d350aa5a0067f059757e",
   targetUrl: site,
   viewportCssPx: { width: 320, height: 900 },
-  method: "Headless Chromium at 320 CSS px; light/dark, five-stop entrance, ten-stop collapsed Tab path, M3 tick, expanded M4 chart/table semantics and bounded text contrast",
+  method: "Headless Chromium at 320 CSS px; light/dark, five-stop entrance, ten-stop collapsed Tab path, M3 tick, expanded M4 chart/table semantics, native table-panning attempt and bounded text contrast",
   expectedFixtureSha256: sha256(fixtureBytes),
   expectedLastTick: expected.tick,
   expectedLastCapital: expected.installedCapital,
@@ -47,7 +48,7 @@ const report = {
     "400% browser zoom",
     "screen reader",
     "focus-indicator contrast, full WCAG conformance, alpha/image compositing and visually verified typography",
-    "expanded M4 chart keyboard exploration, wide table keyboard panning and Legacy interaction beyond the sampled M4 semantics",
+    "expanded M4 chart keyboard exploration, screen-reader table access, other-browser table panning and Legacy interaction beyond the sampled M4 semantics",
     "runtime TypeScript or .NET simulation",
     "entire deployed HTML/JS commit provenance",
   ],
@@ -309,6 +310,109 @@ async function observeM4Expansion(context, theme) {
   }
 }
 
+/**
+ * A separate native-keyboard attempt at the horizontally scrollable M4 table.
+ * No locator.focus(), DOM scrollLeft writes, synthetic keyboard events or
+ * mouse actions are used. A non-reachable table is recorded as a finding,
+ * not silently counted as accessibility success or a broken CI probe.
+ */
+async function observeM4TableKeyboard(context, theme) {
+  const probe = await context.newPage();
+  const errors = [];
+  probe.on("pageerror", error => errors.push(String(error.message)));
+  try {
+    const response = await probe.goto(site, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await probe.waitForFunction(
+      () => document.querySelector("#spotlight-tick") &&
+        !document.querySelector("#spotlight-tick").disabled,
+      null, { timeout: 30000 },
+    );
+    for (let i = 0; i < 5; i++) await probe.keyboard.press("Tab");
+    const summaryFocused = await probe.evaluate(
+      () => Boolean(document.activeElement?.matches("#chapter-m4 > summary")),
+    );
+    await probe.keyboard.press("Enter");
+    await probe.waitForFunction(
+      () => document.querySelectorAll("#m4-table tbody tr").length > 0,
+      null, { timeout: 30000 },
+    );
+    const openedWithEnter = await probe.locator("#chapter-m4").evaluate(node => node.open);
+    const geometry = await probe.evaluate(() => {
+      const box = document.querySelector("#m4-table");
+      const style = box ? getComputedStyle(box) : null;
+      const labelledBy = box?.getAttribute("aria-labelledby");
+      const labelledByText = labelledBy
+        ? labelledBy.split(/\\s+/).map(id => document.getElementById(id)?.textContent || "").join(" ").trim()
+        : "";
+      return {
+        region: box ? {
+          scrollWidth: box.scrollWidth, clientWidth: box.clientWidth,
+          overflowX: style.overflowX, tag: box.tagName,
+          hasExplicitName: Boolean((box.getAttribute("aria-label") || "").trim() || labelledByText),
+          declaredTabindex: box.getAttribute("tabindex"),
+        } : null,
+        documentOverflowCssPx: Math.max(0,
+          document.documentElement.scrollWidth - document.documentElement.clientWidth),
+      };
+    });
+    const tabTrace = [];
+    let focusReached = false;
+    let focusVisible = false, outlined = false;
+    for (let i = 0; i < 12; i++) {
+      await probe.keyboard.press("Tab");
+      const step = await probe.evaluate(() => {
+        const node = document.activeElement;
+        const style = node ? getComputedStyle(node) : null;
+        return {
+          matches: Boolean(node?.matches("#m4-table")),
+          nextChapter: Boolean(node?.matches("#chapter-m3 > summary")),
+          actualTag: node?.tagName || null, actualId: node?.id || null,
+          focusVisible: Boolean(node?.matches(":focus-visible")),
+          outlined: Boolean(style && style.outlineStyle !== "none" &&
+            parseFloat(style.outlineWidth) > 0),
+        };
+      });
+      tabTrace.push(step);
+      if (step.matches) {
+        focusReached = true;
+        focusVisible = step.focusVisible;
+        outlined = step.outlined;
+        break;
+      }
+      if (step.nextChapter) break;
+    }
+    let scrollBefore = null, scrollAfterRight = null, scrollAfterLeft = null;
+    let leftRegionWithTab = null;
+    if (focusReached) {
+      scrollBefore = await probe.locator("#m4-table").evaluate(node => node.scrollLeft);
+      for (let i = 0; i < 3; i++) await probe.keyboard.press("ArrowRight");
+      await probe.waitForTimeout(250);
+      scrollAfterRight = await probe.locator("#m4-table").evaluate(node => node.scrollLeft);
+    }
+    const screenshot = "pages-" + theme + "-m4-table-keyboard.png";
+    await probe.screenshot({ path: path.join(output, screenshot) });
+    if (focusReached) {
+      for (let i = 0; i < 3; i++) await probe.keyboard.press("ArrowLeft");
+      await probe.waitForTimeout(250);
+      scrollAfterLeft = await probe.locator("#m4-table").evaluate(node => node.scrollLeft);
+      await probe.keyboard.press("Tab");
+      leftRegionWithTab = await probe.evaluate(
+        () => Boolean(document.activeElement?.matches("#chapter-m3 > summary")),
+      );
+    }
+    const observation = {
+      httpStatus: response?.status() ?? null, summaryFocused, openedWithEnter,
+      ...geometry, tabTrace, focusReached, focusVisible, outlined,
+      scrollBefore, scrollAfterRight, scrollAfterLeft, leftRegionWithTab,
+      screenshot, errors,
+    };
+    const assessment = assessM4TableKeyboard(observation);
+    return { ...observation, ...assessment, passed: assessment.instrumentationPassed && errors.length === 0 };
+  } finally {
+    await probe.close();
+  }
+}
+
 let failures = 0;
 const browser = await chromium.launch({ headless: true });
 try {
@@ -362,11 +466,13 @@ try {
       const textContrast = await observeTextContrast(page);
       const chapterKeyboard = await observeChapterKeyboard(context, theme);
       const m4Expanded = await observeM4Expansion(context, theme);
+      const m4TableKeyboard = await observeM4TableKeyboard(context, theme);
       const measuredTextCount = textContrast.filter(row => row.outcome !== "not-measurable").length;
       report.themes[theme] = {
         keyboard,
         chapterKeyboard,
         m4Expanded,
+        m4TableKeyboard,
         textContrast,
         measuredTextCount,
         htmlHttpStatus: response?.status() ?? null,
@@ -380,7 +486,7 @@ try {
         ...observed,
         errors,
       };
-      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || !chapterKeyboard.passed || !m4Expanded.passed || measuredTextCount < 6 || response?.status() !== 200 || errors.length) {
+      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || !chapterKeyboard.passed || !m4Expanded.passed || !m4TableKeyboard.passed || measuredTextCount < 6 || response?.status() !== 200 || errors.length) {
         failures++;
       }
     } catch (error) {
