@@ -293,6 +293,24 @@ The 320 px screenshot observations and text equivalent are now recorded,
 but the case is still **in progress** because deployed HTML/JS provenance
 and broader accessibility behavior remain unverified.
 
+## Sampled keyboard path (2026-10-30 candidate — NOT YET VERIFIED)
+
+A [follow-up browser probe](trade-pages-probe.mjs) is prepared to exercise
+**actual Chromium keyboard input** at the same 320 CSS px width, in both
+emulated themes. It starts at the landing page and tests sequential Tab
+focus through the two milestone links, milestone selector, tick slider and
+first native chapter disclosure. It records computed focus-visible outlines,
+uses ArrowLeft/ArrowRight to test the saved-tick readout, then Enter to
+expand the M4 chapter. Each observation is written into the same
+`observations.json` artifact; a failed required interaction fails the job.
+
+**This is a proposed check, not an observed PASS.** The exact-head workflow
+and its artifact must be inspected before recording actual results or
+updating [#82](https://github.com/drevendev/BeautifulRepo/issues/82).
+Even a green run would not establish full keyboard navigation,
+screen-reader usability, real browser 400% zoom, contrast compliance,
+mobile touch behavior or the deployed HTML/JS commit SHA.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
