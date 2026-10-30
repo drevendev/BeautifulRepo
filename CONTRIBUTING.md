@@ -13,6 +13,11 @@ Coding agents follow the short contract in [AGENTS.md](AGENTS.md). The
 [decision records](docs/decisions/README.md) explain why the tools, the Action and
 `master` work the way they do.
 
+For your first contribution, use the [short contributor route](guides/first-contribution.md)
+with its deliberately fictional, fully scoped issue example. Maintainers can
+adapt the [good-first-issue template](templates/GOOD_FIRST_ISSUE.template.md)
+without pretending that a labelled issue, reviewer or completion date exists.
+
 ## Ask a question
 
 Questions, ideas and stories about using BeautifulRepo belong in
