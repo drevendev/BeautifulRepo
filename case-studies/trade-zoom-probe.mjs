@@ -10,6 +10,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { assessBottomScroll } from "./zoom-scroll-metrics.mjs";
 
 const targetRoot = process.env.TARGET_ROOT;
 const outputDir = process.env.OUTPUT_DIR;
@@ -40,6 +41,7 @@ const report = {
     "emulated color scheme, not a physical device",
     "Chromium desktop browser zoom only; other browser engines not tested",
     "saved JSON viewer, not an executed TypeScript or .NET simulation",
+    "first and bottom physical viewport observations only: middle and expanded chapters remain uninspected",
     "no screen-reader or whole-page WCAG conformance claim",
     "no deployed HTML/JS revision attestation",
   ],
@@ -124,13 +126,51 @@ for (const theme of ["light", "dark"]) {
         focusVisible: Boolean(document.activeElement?.matches(":focus-visible")),
       }));
       const keyboardPassed = keyboard.id === "spotlight-tick" && keyboard.focusVisible;
+      // A first-screen screenshot cannot establish the reachability of
+      // content below the fold. Scroll actual native-zoom Chromium to its
+      // document end, inspect footer geometry and capture a second X11 frame.
+      await page.evaluate(() => window.scrollTo({
+        top: document.documentElement.scrollHeight, left: 0, behavior: "instant",
+      }));
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(
+        () => requestAnimationFrame(resolve)
+      )));
+      await page.waitForTimeout(700);
+      const bottomMetrics = await page.evaluate(() => {
+        const footer = document.querySelector("footer");
+        const rect = footer?.getBoundingClientRect();
+        const style = footer ? getComputedStyle(footer) : null;
+        return {
+          scrollY: window.scrollY,
+          maxScrollY: Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
+          viewportHeight: window.innerHeight,
+          viewportWidth: document.documentElement.clientWidth,
+          documentWidth: document.documentElement.scrollWidth,
+          footerPresent: Boolean(footer),
+          footerVisible: Boolean(footer?.getClientRects().length && style &&
+            style.display !== "none" && style.visibility === "visible"),
+          footerTextLength: (footer?.textContent || "").trim().length,
+          footerTop: rect?.top ?? null,
+          footerBottom: rect?.bottom ?? null,
+        };
+      });
+      const bottom = assessBottomScroll(bottomMetrics);
+      const bottomScreenshot = "pages-" + theme + "-native-400-bottom.png";
+      const bottomCaptureLog = execFileSync("python3", [
+        x11Capture, path.join(outputDir, bottomScreenshot),
+      ], { encoding: "utf8", timeout: 20000, env: process.env }).trim();
+      const bottomPng = await fs.readFile(path.join(outputDir, bottomScreenshot));
+      const bottomScreenshotCoversViewport =
+        bottomPng.readUInt32BE(16) === 1440 && bottomPng.readUInt32BE(20) === 1200;
       const passed = native400 && dataExact && lastDataVisible && overflow <= 1 && screenshotCoversViewport &&
-        response?.status() === 200 && keyboardPassed && errors.length === 0;
+        response?.status() === 200 && keyboardPassed && bottom.passed &&
+        bottomScreenshotCoversViewport && errors.length === 0;
       report.themes[theme] = {
         passed, before, after, zoomRatio, native400, shortcutLog,
         htmlHttpStatus: response?.status() ?? null, jsonHttpStatus: liveData.status(),
         dataExact, lastDataVisible, horizontalOverflowCssPx: overflow,
-        keyboard, keyboardPassed, screenshot, captureLog, pngWidth, pngHeight, screenshotCoversViewport, errors,
+        keyboard, keyboardPassed, screenshot, captureLog, pngWidth, pngHeight, screenshotCoversViewport,
+        bottomMetrics, bottom, bottomScreenshot, bottomCaptureLog, bottomScreenshotCoversViewport, errors,
       };
       if (!passed) failures++;
     } catch (error) {
@@ -159,8 +199,8 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     "## Native Chromium 400% page-zoom observation", "",
     "Headful Chromium received OS-level browser zoom shortcuts on an isolated Xvfb screen.",
     "The asserted ratio checks actual devicePixelRatio and CSS viewport contraction, not pinch/device emulation.", "",
-    "| Theme | Native 400% verified | CSS viewport | Horizontal overflow | Saved JSON exact | Keyboard tick focus |",
-    "| --- | --- | ---: | ---: | --- | --- |",
+    "| Theme | Native 400% verified | CSS viewport | Horizontal overflow | Saved JSON exact | Keyboard tick focus | Footer reached |",
+    "| --- | --- | ---: | ---: | --- | --- | --- |",
   ];
   for (const theme of ["light", "dark"]) {
     const row = report.themes[theme] || {};
@@ -168,9 +208,11 @@ if (process.env.GITHUB_STEP_SUMMARY) {
       " | " + (row.after?.innerWidth ?? "NOT OBSERVED") +
       " | " + (row.horizontalOverflowCssPx ?? "NOT OBSERVED") +
       " | " + (row.dataExact ?? "NOT OBSERVED") +
-      " | " + (row.keyboardPassed ?? "NOT OBSERVED") + " |");
+      " | " + (row.keyboardPassed ?? "NOT OBSERVED") +
+      " | " + (row.bottom?.passed ?? "NOT OBSERVED") + " |");
   }
-  rows.push("", "No physical phone, screen-reader, whole-page WCAG or deployed-code provenance claim.",
+  rows.push("", "Only first and bottom physical viewports are sampled; middle and expanded chapters remain uninspected.",
+    "No physical phone, screen-reader, whole-page WCAG or deployed-code provenance claim.",
     "Failures: " + failures + ".", "");
   await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, rows.join("\n"));
 }

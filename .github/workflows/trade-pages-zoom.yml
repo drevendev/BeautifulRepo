@@ -8,6 +8,8 @@ on:
       - 'case-studies/native-page-zoom.py'
       - 'case-studies/native-x11-capture.py'
       - 'case-studies/trade-zoom-probe.mjs'
+      - 'case-studies/zoom-scroll-metrics.mjs'
+      - 'case-studies/zoom-scroll-metrics.test.mjs'
       - 'case-studies/trade_simulation.md'
   workflow_dispatch:
 
@@ -33,6 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check case-studies/trade-zoom-probe.mjs
+          node --test case-studies/zoom-scroll-metrics.test.mjs
           python3 -m py_compile case-studies/native-page-zoom.py case-studies/native-x11-capture.py
           command -v xvfb-run
           ldconfig -p | grep -F libXtst.so

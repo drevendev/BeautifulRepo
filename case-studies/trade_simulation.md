@@ -479,6 +479,20 @@ other website resources, present-day freshness after this observation,
 or simulation/accessibility conformance. The saved JSON byte agreement
 was checked separately. Issue #82 remains open for untested behavior.
 
+## Bottom-viewport native zoom check (implementation pending live evidence)
+
+The native 400% observer now has a second bounded viewpoint: after saving
+the first physical Xvfb frame, it scrolls the **actual zoomed Chromium**
+window to the document end, records real scroll and footer-intersection
+geometry, and saves a separate bottom-frame screenshot. Offline regressions
+reject a first-screen capture mislabeled as bottom, missing or off-screen
+footer, invalid geometry and horizontal overflow.
+
+A reviewed live result is **not yet available** for this new check. Even
+when exercised, two isolated X11 images cover only the first and bottom
+physical viewports, not the middle, expanded charts, physical phones or
+assistive technology.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
