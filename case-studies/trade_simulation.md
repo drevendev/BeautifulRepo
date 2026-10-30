@@ -561,6 +561,41 @@ accessible names, read the table through a screen reader, prove horizontal
 table keyboard panning, explore SVG charts using keys, exercise expanded
 Legacy, or inspect the entire long page at genuine 400% zoom.
 
+## Native keyboard access to the horizontally scrollable M4 table (instrumentation, 2026-10-30)
+
+The [read-only live Chromium probe](trade-pages-probe.mjs) now makes a
+**separate keyboard-only attempt** after expanding M4 with five native
+`Tab` presses and `Enter`. At a 320 CSS px viewport, it looks for the
+actual `#m4-table` scroll container in the subsequent native Tab order
+(without `focus()`, mouse input, synthetic key events or scrollLeft writes).
+If reached, three `ArrowRight` presses and three `ArrowLeft` presses
+must move the *container's own* `scrollLeft` in both directions; a final
+`Tab` checks whether focus can reach the following M3 summary.
+The evidence record includes the native focus trace, computed focus-indicator
+flags, declared tabindex, explicit label metadata, the container's
+scrollWidth/clientWidth, and a screenshot after attempting rightward panning,
+in each emulated light/dark theme.
+
+The [offline metric regressions](m4-table-keyboard-metrics.test.mjs)
+reject invalid geometry, contradictory focus claims, invented scroll positions,
+and a page without a native keyboard-opened M4. They **do not convert
+failure to reach or pan the region into a positive accessibility claim**.
+A genuine inability to focus, pan or escape is an explicit finding while
+a validly recorded negative observation still permits the evidence workflow
+to complete and retain artifacts.
+
+This follows the [W3C ACT rule on sequentially reachable scrollable
+content](https://www.w3.org/WAI/standards-guidelines/act/rules/0ssw9k/)
+and [WCAG 2.2 keyboard guidance](https://www.w3.org/TR/WCAG22/#keyboard).
+It is *not* a complete ACT conformance evaluation: only one identified
+scroll region, Chromium, one viewport and two emulated themes are sampled.
+DOM label metadata are not a computed accessibility-tree name; screen-reader
+announcement, other browsers, physical mobile behavior, full-page keyboard
+coverage and focus-indicator contrast remain unverified.
+
+**Live result:** pending a new exact-head browser run and separate review.
+No result is inferred from existing M4 table-overflow measurements.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
