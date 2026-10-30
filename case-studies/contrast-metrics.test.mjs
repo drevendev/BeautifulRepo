@@ -85,3 +85,20 @@ test("unsupported compositing, alpha and background image remain unknown", () =>
   assert.equal(assessTextContrast(sample({ backgroundChain: [] })).outcome,
     "not-measurable");
 });
+
+test("opaque child does not hide ancestor opacity or blending", () => {
+  const opaqueChild = { color: "rgb(255,255,255)", image: "none", opacity: "1", blend: "normal" };
+  const ancestors = [
+    { color: "rgb(20,20,20)", image: "none", opacity: "0.6", blend: "normal" },
+    { color: "rgb(20,20,20)", image: "none", opacity: "1", blend: "multiply" },
+  ];
+  for (const ancestor of ancestors) {
+    const got = assessTextContrast(sample({ backgroundChain: [opaqueChild, ancestor] }));
+    assert.equal(got.outcome, "not-measurable");
+  }
+  // A backdrop image hidden behind an opaque descendant cannot change that
+  // descendant's background; it should not invalidate a valid measurement.
+  const hiddenImage = { color: "rgb(20,20,20)", image: "linear-gradient(black, white)", opacity: "1", blend: "normal" };
+  assert.equal(assessTextContrast(sample({ backgroundChain: [opaqueChild, hiddenImage] })).outcome,
+    "meets-sampled-AA");
+});
