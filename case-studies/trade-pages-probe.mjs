@@ -342,7 +342,7 @@ async function observeM4TableKeyboard(context, theme) {
       const style = box ? getComputedStyle(box) : null;
       const labelledBy = box?.getAttribute("aria-labelledby");
       const labelledByText = labelledBy
-        ? labelledBy.split(/\\s+/).map(id => document.getElementById(id)?.textContent || "").join(" ").trim()
+        ? labelledBy.split(/\s+/).map(id => document.getElementById(id)?.textContent || "").join(" ").trim()
         : "";
       return {
         region: box ? {
