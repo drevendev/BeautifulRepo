@@ -16,7 +16,7 @@ const good = () => ({
     name: title + ", units, sampled from tick 0 through tick 59. Exact values are in the table below.",
   })),
   tableCaption: "Readable rounded values are paired with the exact artifact value.",
-  headers: ["Tick", "Output", "Employment", "Gross wages", "Essential coverage", "Food stock", "Installed capital (units)"],
+  headers: ["Tick", "Output (units/tick)", "Employment (worker-equivalents)", "Gross wages (ALP/tick)", "Essential coverage", "Food stock (units)", "Installed capital (capital units)"],
   rowCount: 13, rowHeaderCount: 13, lastRowTick: "59",
   lastCapitalCell: "78.04 exact 78.03677092437883",
   documentOverflowCssPx: 0,
