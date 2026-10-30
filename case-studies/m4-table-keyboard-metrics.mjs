@@ -32,7 +32,7 @@ export function assessM4TableKeyboard(run) {
   }
   if (typeof run.focusReached !== "boolean" ||
       (Array.isArray(run.tabTrace) &&
-        run.tabTrace.some(item => item.matches) !== run.focusReached)) {
+        run.tabTrace.some(item => item?.matches === true) !== run.focusReached)) {
     problems.push("focus-trace-inconsistent");
   }
   const reached = run.focusReached === true;
