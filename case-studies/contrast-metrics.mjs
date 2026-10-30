@@ -48,17 +48,20 @@ export function assessTextContrast(sample) {
   if (!foreground || foreground.a !== 1) return unknown("non-opaque or unsupported foreground");
   let background = null;
   for (const layer of sample.backgroundChain || []) {
-    if (layer.image !== "none" ||
-        Number(layer.opacity) !== 1 ||
-        layer.blend !== "normal") {
-      return unknown("background image, opacity or blending requires manual assessment");
+    // An ancestor's opacity or blend mode changes the rendered result even
+    // when a closer descendant already has a fully opaque background.
+    if (Number(layer.opacity) !== 1 || layer.blend !== "normal") {
+      return unknown("ancestor opacity or blending requires manual assessment");
+    }
+    if (background) continue; // Already opaque: deeper backgrounds are hidden.
+    if (layer.image !== "none") {
+      return unknown("background image requires manual assessment");
     }
     const color = parseComputedRgb(layer.color);
     if (!color) return unknown("unsupported background color");
     if (color.a === 0) continue;
     if (color.a !== 1) return unknown("translucent background requires compositing");
     background = color;
-    break;
   }
   if (!background) return unknown("no opaque background found");
   const size = Number(sample.fontSizePx);
