@@ -479,19 +479,35 @@ other website resources, present-day freshness after this observation,
 or simulation/accessibility conformance. The saved JSON byte agreement
 was checked separately. Issue #82 remains open for untested behavior.
 
-## Bottom-viewport native zoom check (implementation pending live evidence)
+## Bottom-viewport native zoom observation (2026-10-30)
 
-The native 400% observer now has a second bounded viewpoint: after saving
-the first physical Xvfb frame, it scrolls the **actual zoomed Chromium**
-window to the document end, records real scroll and footer-intersection
-geometry, and saves a separate bottom-frame screenshot. Offline regressions
-reject a first-screen capture mislabeled as bottom, missing or off-screen
-footer, invalid geometry and horizontal overflow.
+The new [exact-code Chromium run #41047777163](https://github.com/drevendev/BeautifulRepo/actions/runs/41047777163)
+completed successfully against the live saved-run Pages viewer in both
+emulated light and dark themes, using the real 400% native browser zoom
+described above. It scrolled the **actual zoomed Chromium window** to the
+document end after capturing the first physical viewport. The observer
+measured **scrollY 3309.75 CSS px**, an integer-rounded maximum of
+**3309 CSS px**, a **225 CSS px high** viewport and **316 CSS px**
+document/client width in both themes. The footer intersected the bottom
+viewport (top **14.16**, bottom **161.11** CSS px), contained 265 text
+characters, and had **0 CSS px document-level horizontal overflow**.
 
-A reviewed live result is **not yet available** for this new check. Even
-when exercised, two isolated X11 images cover only the first and bottom
-physical viewports, not the middle, expanded charts, physical phones or
-assistive technology.
+All four isolated **1440 × 1200 physical-pixel X11 screenshots** (first and
+bottom for both themes) were retained in the
+[run artifact #12972069895](https://github.com/drevendev/BeautifulRepo/actions/runs/41047777163/artifacts/12972069895).
+The two bottom images were downloaded and visually inspected: the footer
+and wrapped command were visible, without apparent horizontal clipping.
+The JSON report records **zero probe failures**, a visible footer in both
+themes and no uncaught page errors. Five new offline Node regressions
+passed (5/5); they reject mistaking a first-screen capture for the bottom,
+missing/off-screen footer, invalid metrics and document-level overflow.
+This describes a **bounded observed result**, not an ongoing site guarantee.
+
+The first and bottom viewport images do **not** cover the intervening
+page, expanded milestone/chart content, keyboard traversal through
+those sections, physical phones or screen-reader behavior. Geometry
+alone is not whole-page WCAG conformance or a measurement of every
+focus indicator, SVG or text label.
 
 ## What remains unverified
 
