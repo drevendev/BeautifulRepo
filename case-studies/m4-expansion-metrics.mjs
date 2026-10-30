@@ -22,20 +22,46 @@ export function assessM4Expansion(observation, expected) {
     problems.push("focus-lost-on-expand");
   }
   if (observation.openAfterSpace !== false) problems.push("space-did-not-collapse");
+  // This case pins a single fixture and the five distinct chart identities.
+  // A shared generic suffix is not evidence of five descriptive alternatives.
+  const chartTitles = [
+    "Realized output", "Employment", "Essential-need coverage",
+    "Food inventory", "Installed capital",
+  ];
   const charts = observation.charts;
-  if (!Array.isArray(charts) || charts.length !== 5) {
+  if (!Array.isArray(charts) || charts.length !== chartTitles.length) {
     problems.push("expected-five-chart-alternatives");
-  } else if (charts.some(chart => chart.role !== "img" ||
-    typeof chart.name !== "string" || !chart.name.includes("Exact values are in the table below."))) {
+  } else if (charts.some((chart, index) => {
+    const name = chart?.name;
+    const prefix = chartTitles[index] + ", ";
+    return chart?.role !== "img" || typeof name !== "string" ||
+      !name.startsWith(prefix) ||
+      !/^.+, sampled from tick [0-9]+ through tick [0-9]+\. Exact values are in the table below\.$/
+        .test(name.slice(prefix.length));
+  })) {
     problems.push("chart-missing-text-alternative");
   }
   if (typeof observation.tableCaption !== "string" ||
       !observation.tableCaption.includes("exact artifact value")) {
     problems.push("missing-exact-values-caption");
   }
-  if (!Array.isArray(observation.headers) || observation.headers.length !== 7 ||
-      observation.headers[0] !== "Tick" ||
-      !observation.headers[6]?.startsWith("Installed capital")) {
+  // Require all seven pinned column identities, not just the first and last.
+  const headerTitles = [
+    ["Tick", false], ["Output", true], ["Employment", true],
+    ["Gross wages", true], ["Essential coverage", false],
+    ["Food stock", true], ["Installed capital", true],
+  ];
+  const validHeader = (value, [title, hasUnit]) => {
+    if (typeof value !== "string") return false;
+    const label = value.trim();
+    if (!hasUnit) return label === title;
+    const prefix = title + " (";
+    return label.startsWith(prefix) && label.endsWith(")") &&
+      label.slice(prefix.length, -1).trim().length > 0;
+  };
+  if (!Array.isArray(observation.headers) ||
+      observation.headers.length !== headerTitles.length ||
+      observation.headers.some((header, index) => !validHeader(header, headerTitles[index]))) {
     problems.push("invalid-table-column-headers");
   }
   if (observation.rowCount !== expected.sampleCount ||

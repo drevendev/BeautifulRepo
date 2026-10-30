@@ -8,8 +8,12 @@ const good = () => ({
   summaryBefore: { matches: true, focusVisible: true, outlined: true },
   openBefore: false, openAfterEnter: true,
   summaryAfterEnter: { matches: true, focusVisible: true }, openAfterSpace: false,
-  charts: Array.from({ length: 5 }, (_, i) => ({
-    role: "img", name: "Chart " + i + ", units. Exact values are in the table below.",
+  charts: [
+    "Realized output", "Employment", "Essential-need coverage",
+    "Food inventory", "Installed capital",
+  ].map(title => ({
+    role: "img",
+    name: title + ", units, sampled from tick 0 through tick 59. Exact values are in the table below.",
   })),
   tableCaption: "Readable rounded values are paired with the exact artifact value.",
   headers: ["Tick", "Output", "Employment", "Gross wages", "Essential coverage", "Food stock", "Installed capital (units)"],
@@ -60,4 +64,24 @@ test("rejects wrong last tick or fabricated rounded/exact capital", () => {
 test("rejects document horizontal overflow instead of mistaking table scroll for success", () => {
   const run = good(); run.documentOverflowCssPx = 12;
   assert.match(assessM4Expansion(run, expected).problems.join(" "), /document-overflow/);
+});
+
+test("rejects five identical generic chart labels with the shared table suffix", () => {
+  const run = good();
+  run.charts.forEach(chart => {
+    chart.name = "Exact values are in the table below.";
+  });
+  assert.match(assessM4Expansion(run, expected).problems.join(" "), /chart-missing/);
+});
+test("rejects duplicated chart-specific names even when the labels look descriptive", () => {
+  const run = good();
+  run.charts[3].name = run.charts[0].name;
+  assert.match(assessM4Expansion(run, expected).problems.join(" "), /chart-missing/);
+});
+test("rejects any blank intermediate column header", () => {
+  for (const index of [1, 2, 3, 4, 5]) {
+    const run = good();
+    run.headers[index] = "  ";
+    assert.match(assessM4Expansion(run, expected).problems.join(" "), /column-headers/);
+  }
 });

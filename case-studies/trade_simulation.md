@@ -530,8 +530,9 @@ horizontal overflow and reports the *inner* table scroller separately,
 because a wide data table and an overflowing document are not the same
 condition. It retains a screenshot for each emulated theme.
 
-The [nine offline metric regressions](m4-expansion-metrics.test.mjs)
-reject missing labels, incomplete rows, changed values, a broken native
+The [twelve offline metric regressions](m4-expansion-metrics.test.mjs)
+reject generic or duplicated chart names, blank intermediate column headers,
+missing labels, incomplete rows, changed values, a broken native
 disclosure, lost keyboard focus and document-level overflow. The fixture
 and target remain pinned; this is a source-data visualization check, **not**
 a fresh simulation run. **Observed live Pages result:** [Chromium run #41091060298](https://github.com/drevendev/BeautifulRepo/actions/runs/41091060298)
@@ -547,7 +548,9 @@ matching the pinned saved JSON. Each expanded document had **0 CSS px**
 horizontal overflow while the **inner table scroller overflowed by
 623 CSS px** (intentional horizontal scrolling, not tested for keyboard
 reachability). There were no uncaught browser errors in these samples.
-The new offline Node test suite passed **9/9**. The
+The initial implementation-head offline Node suite passed **9/9**; three
+additional negative cases were added after a reviewer exposed semantic
+false positives. Those new cases require fresh current-head verification. The
 [retained JSON and screenshot artifact](https://github.com/drevendev/BeautifulRepo/actions/runs/41091060298/artifacts/12993133298)
 includes two viewport images of the expanded chapter, **not** a full-page
 or assistive-technology inspection. These images have not been separately
