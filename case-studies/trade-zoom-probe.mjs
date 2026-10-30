@@ -100,6 +100,13 @@ for (const theme of ["light", "dark"]) {
       const lastDataVisible = after.readout.includes("tick " + expected.tick) &&
         after.capital.includes(expected.installedCapital.toFixed(2));
       const overflow = Math.max(0, after.documentWidth - after.viewportWidth);
+      // Native zoom may invalidate the compositor surface while metrics are
+      // already available. Require two actual paint frames before capturing
+      // the physical framebuffer (the capture helper rejects blank pixels).
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(
+        () => requestAnimationFrame(resolve)
+      )));
+      await page.waitForTimeout(900);
       const screenshot = "pages-" + theme + "-native-400-viewport.png";
       // Playwright's full-page screenshot at genuine browser zoom is
       // cropped to the CSS viewport in this Chromium build. Capture the
