@@ -12,6 +12,8 @@ on:
       - 'case-studies/keyboard-path-metrics.test.mjs'
       - 'case-studies/m4-expansion-metrics.mjs'
       - 'case-studies/m4-expansion-metrics.test.mjs'
+      - 'case-studies/m4-table-keyboard-metrics.mjs'
+      - 'case-studies/m4-table-keyboard-metrics.test.mjs'
       - 'case-studies/trade-served-assets.mjs'
       - 'case-studies/trade-served-assets.test.mjs'
       - 'case-studies/trade_simulation.md'
@@ -41,6 +43,8 @@ jobs:
         run: node --test case-studies/keyboard-path-metrics.test.mjs
       - name: Run offline expanded-M4 regressions
         run: node --test case-studies/m4-expansion-metrics.test.mjs
+      - name: Run offline M4 table keyboard observation regressions
+        run: node --test case-studies/m4-table-keyboard-metrics.test.mjs
       - name: Run offline served-asset regressions
         run: node --test case-studies/trade-served-assets.test.mjs
       - name: Fetch the exact target source and lockfile
@@ -62,7 +66,7 @@ jobs:
           set -euo pipefail
           npm ci --ignore-scripts --no-audit --no-fund
           ./node_modules/.bin/playwright install --with-deps chromium
-      - name: Observe served data, keyboard, expanded M4 and sampled text contrast
+      - name: Observe served data, expanded M4 and native table panning
         shell: bash
         env:
           TARGET_ROOT: ${{ runner.temp }}/trade-after
