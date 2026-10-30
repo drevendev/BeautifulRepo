@@ -441,6 +441,44 @@ provenance, full keyboard or expanded-chart traversal, screen-reader
 usability, a physical phone, other browser engines, or whole-page WCAG
 conformance. This PR remains subject to separate later-run acceptance.
 
+## Served HTML/CSS/JS byte agreement (observed 2026-10-30)
+
+The [read-only served-asset probe](trade-served-assets.mjs) compared the
+published `index.html`, `m4.css`, `showcase.js`, and `m4.js`
+**byte for byte** with the corresponding `docs/` files from the
+immutable source checkout
+[`36bd70e`](https://github.com/drevendev/trade_simulation/tree/36bd70ea399813accf21d350aa5a0067f059757e).
+It uses SHA-256, refuses redirects, caps responses at 512 KiB per asset,
+and records HTTP status, exact byte length and outcomes. Five offline
+Node regression tests cover identical and different content, HTTP errors,
+oversized responses and unsafe URLs.
+
+The [GitHub Actions live Pages run #41033757680](https://github.com/drevendev/BeautifulRepo/actions/runs/41033757680)
+ran **successfully** on code HEAD
+[`905a674`](https://github.com/drevendev/BeautifulRepo/commit/905a6740b41485bced09ec228f69fb2b4eb8a14a)
+at **2026-10-30 09:29:34 UTC** (11:29 Cyprus). The job log records
+**4/4 exact byte matches**, **0 differences**, **0 unavailable assets**
+and HTTP **200** for all four resources:
+
+- `index.html` — 62,443 bytes; SHA-256 `5c21c740765ac5c7c588b791e2cbaea6eeec80b32c72b94cd896be80aa28a623`.
+- `m4.css` — 2,834 bytes; SHA-256 `4a900799ad087aca8779a606d77433d8c8e64a8a3f6d8cf8384a0b0708772889`.
+- `showcase.js` — 11,820 bytes; SHA-256 `9340ea3f79385567f0c58130841bf2953ca0463b73d71439fe6d4013eb354a40`.
+- `m4.js` — 17,501 bytes; SHA-256 `f2d0a90386e123f8af10657caeca3e90518db5d6e7cfec5d476208b109784170`.
+
+The [retained evidence artifact](https://github.com/drevendev/BeautifulRepo/actions/runs/41033757680/artifacts/12966594076)
+contains the `served-assets.json` record alongside prior browser
+observations. The workflow's offline served-asset regressions and browser
+checks also passed on this exact code head.
+
+**Interpretation:** These four website files **were byte-identical to
+the pinned source files at observation time**. This resolves the
+selected-file **content-agreement question**, not the broader deployment
+provenance question: identical files can exist in multiple commits,
+and these bytes do **not** prove the deployed Git SHA, Pages build settings,
+other website resources, present-day freshness after this observation,
+or simulation/accessibility conformance. The saved JSON byte agreement
+was checked separately. Issue #82 remains open for untested behavior.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
