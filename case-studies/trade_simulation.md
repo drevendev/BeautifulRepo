@@ -593,8 +593,32 @@ DOM label metadata are not a computed accessibility-tree name; screen-reader
 announcement, other browsers, physical mobile behavior, full-page keyboard
 coverage and focus-indicator contrast remain unverified.
 
-**Live result:** pending a new exact-head browser run and separate review.
-No result is inferred from existing M4 table-overflow measurements.
+**Observed 2026-10-30 on implementation HEAD
+[`0af0097`](https://github.com/drevendev/BeautifulRepo/commit/0af0097c627e868924b9ff5047c80e1b055a77e5):**
+[live Chromium run #41122747918](https://github.com/drevendev/BeautifulRepo/actions/runs/41122747918)
+completed **PASS**. In *both* emulated color schemes, from the
+keyboard-opened M4 summary, a single further native `Tab` focused the
+`DIV#m4-table` scroll container with `:focus-visible` and a computed
+nonzero outline. The region measured **889 CSS px** scrollWidth,
+**266 CSS px** clientWidth (**623 CSS px** internal overflow); the
+document itself had **0 CSS px** horizontal overflow.
+Three `ArrowRight` keypresses moved **scrollLeft 0 → 120 CSS px**,
+three `ArrowLeft` returned it **120 → 0**, and `Tab` reached the
+subsequent M3 summary without trapping focus. Both cases had HTTP 200,
+no uncaught page exceptions, and the assessor reported
+`instrumentationPassed: true`, `demonstrated: true`.
+**8/8** new offline Node regressions passed in the live workflow.
+
+**Remaining finding:** no explicit `aria-label`, `aria-labelledby`
+or declared `tabindex` was observed on the scroll region. Chromium
+nevertheless included it in native sequential focus navigation. This
+**does not establish its computed assistive-technology name or how a
+screen reader announces the region**; neither a missing accessible name
+nor screen-reader usability can be concluded from these attributes
+alone. The [retained JSON and light/dark scroll-attempt screenshots](https://github.com/drevendev/BeautifulRepo/actions/runs/41122747918/artifacts/13009172036)
+were produced by the workflow, but the new screenshots have not been
+manually assessed for visual legibility. Other engines and viewport
+sizes remain untested.
 
 ## What remains unverified
 
