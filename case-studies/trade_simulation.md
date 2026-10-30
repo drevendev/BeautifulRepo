@@ -334,7 +334,7 @@ physical mobile interaction and deployed HTML/JS revision provenance
 remain **unverified**. [Issue #82](https://github.com/drevendev/BeautifulRepo/issues/82)
 remains open; integration requires separate later-run acceptance.
 
-## Bounded text-contrast methodology (2026-10-30; live run pending)
+## Bounded text contrast (observed 2026-10-30)
 
 The [Chromium probe](trade-pages-probe.mjs) now samples nine named,
 visible text roles on the **served** saved-run viewer, separately in light and
@@ -356,11 +356,28 @@ measurable roles fails its **instrumentation minimum**, but low measured
 contrast is recorded as a finding rather than silently failing the browser
 evidence workflow. Future inspection must decide actual reader impact.
 
-**Execution status:** NOT RUN on the new contrast implementation until its
-exact-head GitHub Actions run completes. A green older Chromium job is
-not evidence for this feature. Focus-ring contrast, SVG/chart labels,
-collapsed chapters, real 400% browser zoom, screen-reader behavior and
-deployed HTML/JS provenance remain outside this specific measurement.
+**Actual evidence:** [GitHub Actions #40997307803](https://github.com/drevendev/BeautifulRepo/actions/runs/40997307803)
+ran this probe successfully at exact implementation HEAD
+[`c163aeed`](https://github.com/drevendev/BeautifulRepo/commit/c163aeed699ed71ed4da8e68a7e5e289181dd055).
+All **7/7 offline metric regressions passed**. In the live Chromium log,
+all **9/9 named roles were measurable in each theme** (18 of 18 samples).
+Every sampled pair was at or above its applicable **4.5:1 normal-text**
+threshold; none was classified below threshold or unknown. Recorded ratios:
+light **5.17–17.40:1**, dark **5.47–13.97:1**. In particular, the
+small **11.52 CSS px** metric-unit text measured **5.17:1 light** /
+**5.91:1 dark**, and the small provenance annotation measured
+**5.40:1 light** / **5.47:1 dark**. All comparisons were against actual
+computed solid backgrounds on the served viewer, not assumed theme
+variables. The run also rechecked the prior saved-JSON and sampled
+keyboard observations. Its artifact contains machine-readable measurements
+and screenshots; the **new screenshots were not manually re-reviewed** here.
+
+This is a bounded **computed-style observation, not certification** of
+WCAG 2.2 AA across the page. It omits other labels, SVG/chart data,
+focus-ring contrast, alpha compositing, collapsed chapters, physical mobile,
+real 400% zoom, screen reader and deployed HTML/JS provenance. A threshold
+pass is not a general legibility judgement; the small unit sizes remain
+an editorial concern.
 
 ## What remains unverified
 
@@ -378,8 +395,9 @@ deployed HTML/JS provenance remain outside this specific measurement.
 - The **served Pages viewer was actually observed** at 320 CSS px in emulated
   light/dark Chromium, with matching saved JSON; qualitative screenshot review,
   deployed HTML/JS revision, real 400% zoom, **full** keyboard traversal,
-  screen-reader behavior and contrast remain **unverified**. A limited
-  first-screen keyboard path was exercised on 2026-10-30 as above.
+  screen-reader behavior and **whole-page** contrast remain **unverified**.
+  A limited first-screen keyboard path and nine-role computed-style
+  light/dark contrast sampling were exercised on 2026-10-30 as above.
 - Description, topics, homepage and tracked security-policy presence were
   inspected on 2026-10-29. Private reporting enablement, inherited policies,
   current-release follow-on milestones and performance metrics remain
