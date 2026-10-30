@@ -5,9 +5,10 @@ study of a real repository. The README correction happened in the target's own
 merged PR; BeautifulRepo documents rather than repeats that target change.
 Pinned before/after offline audits and a saved-data first success from fresh
 Git clones were exercised in GitHub Actions on 2026-10-29. The target's historical
-CI and a separate isolated fixture run are also recorded. A live 320 CSS px Chromium observation now also checks served saved data and
-light/dark rendering, but does not establish HTML/JS deployment provenance,
-visual accessibility, or a rerun of the actual simulation; the case remains incomplete.
+CI and a separate isolated fixture run are also recorded. Live 320 CSS px Chromium
+observations check served saved data, light/dark rendering and a bounded
+keyboard entrance path. They do not establish HTML/JS deployment provenance,
+whole-page accessibility or an actual simulation rerun; the case is incomplete.
 
 ## Repository and exact evidence
 
@@ -287,29 +288,51 @@ not evidenced by these static images.
 The matching served data establishes **saved JSON agreement at observation
 time**, not the deployed HTML/JavaScript commit SHA or a general guarantee
 that Pages is current. Theme emulation is not a physical phone. Real
-**400% browser zoom, keyboard/focus traversal, screen-reader behavior,
-contrast measurements and expanded-chapter inspection remain NOT RUN**.
+**400% browser zoom, screen-reader behavior, contrast measurements and
+expanded-chart inspection remain NOT RUN**. Only a bounded keyboard entrance
+path was subsequently tested; full keyboard traversal remains unverified.
 The 320 px screenshot observations and text equivalent are now recorded,
 but the case is still **in progress** because deployed HTML/JS provenance
 and broader accessibility behavior remain unverified.
 
-## Sampled keyboard path (2026-10-30 candidate — NOT YET VERIFIED)
+## Sampled keyboard entrance (observed 2026-10-30)
 
-A [follow-up browser probe](trade-pages-probe.mjs) is prepared to exercise
-**actual Chromium keyboard input** at the same 320 CSS px width, in both
-emulated themes. It starts at the landing page and tests sequential Tab
-focus through the two milestone links, milestone selector, tick slider and
-first native chapter disclosure. It records computed focus-visible outlines,
-uses ArrowLeft/ArrowRight to test the saved-tick readout, then Enter to
-expand the M4 chapter. Each observation is written into the same
-`observations.json` artifact; a failed required interaction fails the job.
+The [follow-up Chromium job #40985815887](https://github.com/drevendev/BeautifulRepo/actions/runs/40985815887)
+completed **PASS** on the exact code commit
+[`1ebd016`](https://github.com/drevendev/BeautifulRepo/commit/1ebd016368f9d368d165049066c3f11f140105ae).
+The [read-only browser probe](trade-pages-probe.mjs) exercised real
+Tab, ArrowLeft, ArrowRight and Enter keypresses at **320 CSS px**,
+separately with light/dark preference emulation. The job log's
+`keyboard` observation objects showed the same results in both modes:
 
-**This is a proposed check, not an observed PASS.** The exact-head workflow
-and its artifact must be inspected before recording actual results or
-updating [#82](https://github.com/drevendev/BeautifulRepo/issues/82).
-Even a green run would not establish full keyboard navigation,
-screen-reader usability, real browser 400% zoom, contrast compliance,
-mobile touch behavior or the deployed HTML/JS commit SHA.
+- The first five sequential Tab stops were the M4 and M3 entrance links,
+  saved-milestone selector, saved-tick range slider and M4 chapter summary.
+  All five matched their intended DOM elements and matched
+  `:focus-visible` with computed `solid 2px` outlines.
+- ArrowLeft from the last sample moved the focused slider to index **11**
+  with the text readout **tick 55 · sample 12 of 13**. ArrowRight restored
+  index **12**, **tick 59 · sample 13 of 13**.
+- Enter on the keyboard-focused native M4 summary changed its
+  `details.open` state from **false** to **true**.
+- Both modes retained HTTP 200, the exact SHA-256 match for the served
+  saved-run JSON, the expected last-tick/capital text, zero document-level
+  overflow and no uncaught page errors.
+
+The [workflow artifact](https://github.com/drevendev/BeautifulRepo/actions/runs/40985815887/artifacts/12946517627)
+contains `observations.json` plus light/dark full-page screenshots
+(retention through **2026-11-13 UTC**). The screenshots were taken
+**before** keyboard traversal, so they do **not** depict the focus ring
+or expanded chapter. The focus outlines above are **computed-style
+observations**, not pixel-level contrast or visibility measurements.
+The logs were inspected; these follow-up screenshots were not manually
+re-reviewed in this run.
+
+This establishes a **small first-screen keyboard path only**.
+Full tab traversal, keyboard behavior within expanded charts,
+screen-reader usability, real 400% browser zoom, color contrast,
+physical mobile interaction and deployed HTML/JS revision provenance
+remain **unverified**. [Issue #82](https://github.com/drevendev/BeautifulRepo/issues/82)
+remains open; integration requires separate later-run acceptance.
 
 ## What remains unverified
 
@@ -326,8 +349,9 @@ mobile touch behavior or the deployed HTML/JS commit SHA.
   after-snapshot has not been independently re-tested as a target runtime.
 - The **served Pages viewer was actually observed** at 320 CSS px in emulated
   light/dark Chromium, with matching saved JSON; qualitative screenshot review,
-  deployed HTML/JS revision, real 400% zoom, keyboard and screen-reader
-  behavior remain **unverified**.
+  deployed HTML/JS revision, real 400% zoom, **full** keyboard traversal,
+  screen-reader behavior and contrast remain **unverified**. A limited
+  first-screen keyboard path was exercised on 2026-10-30 as above.
 - Description, topics, homepage and tracked security-policy presence were
   inspected on 2026-10-29. Private reporting enablement, inherited policies,
   current-release follow-on milestones and performance metrics remain

@@ -13,11 +13,12 @@ keep their original themed headings.
 
 ### Added
 
-- Extend the read-only trade_simulation live Pages probe with a sampled
-  keyboard entrance path: natural Tab order and visible focus, ArrowLeft/Right
-  saved-tick changes, and Enter on the native M4 disclosure. Candidate checks
-  must run on the exact PR head before recording results; these tests do not
-  establish whole-page accessibility or screen-reader conformance (#82).
+- Extend the read-only trade_simulation Pages probe with real keyboard input:
+  [Chromium #40985815887](https://github.com/drevendev/BeautifulRepo/actions/runs/40985815887)
+  observed five sequential Tab focus stops (all with computed 2px outlines),
+  ArrowLeft/Right moving the saved tick 59 → 55 → 59, and Enter expanding the
+  M4 disclosure in both emulated themes at 320 CSS px. This bounded path
+  does not establish whole-page accessibility or screen-reader conformance (#82).
 
 - Add a read-only Chromium workflow for the pinned trade_simulation case.
   The **live** [browser run #40973430007](https://github.com/drevendev/BeautifulRepo/actions/runs/40973430007)
