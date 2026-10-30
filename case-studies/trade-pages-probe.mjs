@@ -13,6 +13,7 @@ import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { assessTextContrast } from "./contrast-metrics.mjs";
 import { COLLAPSED_TABS, assessCollapsedTabs, assessM3Keyboard } from "./keyboard-path-metrics.mjs";
+import { assessM4Expansion } from "./m4-expansion-metrics.mjs";
 
 const target = process.env.TARGET_ROOT;
 const output = process.env.OUTPUT_DIR;
@@ -36,7 +37,7 @@ const report = {
   sourceRevision: "36bd70ea399813accf21d350aa5a0067f059757e",
   targetUrl: site,
   viewportCssPx: { width: 320, height: 900 },
-  method: "Headless Chromium at 320 CSS px; light/dark, five-stop entrance, ten-stop collapsed Tab path, native M3 tick interaction and bounded text contrast",
+  method: "Headless Chromium at 320 CSS px; light/dark, five-stop entrance, ten-stop collapsed Tab path, M3 tick, expanded M4 chart/table semantics and bounded text contrast",
   expectedFixtureSha256: sha256(fixtureBytes),
   expectedLastTick: expected.tick,
   expectedLastCapital: expected.installedCapital,
@@ -46,7 +47,7 @@ const report = {
     "400% browser zoom",
     "screen reader",
     "focus-indicator contrast, full WCAG conformance, alpha/image compositing and visually verified typography",
-    "expanded M4 and legacy controls beyond the sampled collapsed-page/M3 route",
+    "expanded M4 chart keyboard exploration, wide table keyboard panning and Legacy interaction beyond the sampled M4 semantics",
     "runtime TypeScript or .NET simulation",
     "entire deployed HTML/JS commit provenance",
   ],
@@ -235,6 +236,79 @@ async function observeChapterKeyboard(context, theme) {
   }
 }
 
+
+/** Keyboard-open M4, inspect rendered chart/table semantics, then Space-close it.
+ * This does not measure a screen reader or prove keyboard panning of the table. */
+async function observeM4Expansion(context, theme) {
+  const probe = await context.newPage();
+  const errors = [];
+  probe.on("pageerror", error => errors.push(String(error.message)));
+  try {
+    const response = await probe.goto(site, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await probe.waitForFunction(
+      () => document.querySelector("#spotlight-tick") && !document.querySelector("#spotlight-tick").disabled,
+      null, { timeout: 30000 },
+    );
+    for (let i = 0; i < 5; i++) await probe.keyboard.press("Tab");
+    const focus = () => probe.evaluate(() => {
+      const node = document.activeElement;
+      const style = node ? getComputedStyle(node) : null;
+      return {
+        matches: Boolean(node?.matches("#chapter-m4 > summary")),
+        focusVisible: Boolean(node?.matches(":focus-visible")),
+        outlined: Boolean(style && style.outlineStyle !== "none" &&
+          Number.parseFloat(style.outlineWidth) > 0),
+      };
+    });
+    const summaryBefore = await focus();
+    const openBefore = await probe.locator("#chapter-m4").evaluate(node => node.open);
+    await probe.keyboard.press("Enter");
+    await probe.waitForFunction(
+      () => document.querySelectorAll("#m4-table tbody tr").length > 0,
+      null, { timeout: 30000 },
+    );
+    const openAfterEnter = await probe.locator("#chapter-m4").evaluate(node => node.open);
+    const summaryAfterEnter = await focus();
+    const surface = await probe.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll("#m4-table tbody tr"));
+      const scroll = document.querySelector("#m4-table");
+      const clean = value => (value || "").replace(/\s+/g, " ").trim();
+      return {
+        charts: Array.from(document.querySelectorAll("#m4-groups svg.m4-chart")).map(svg => ({
+          role: svg.getAttribute("role"), name: svg.getAttribute("aria-label"),
+        })),
+        tableCaption: clean(document.querySelector("#m4-table caption")?.textContent),
+        headers: Array.from(document.querySelectorAll("#m4-table thead th[scope='col']"))
+          .map(node => clean(node.textContent)),
+        rowCount: rows.length,
+        rowHeaderCount: rows.filter(row => row.querySelector("th[scope='row']")).length,
+        lastRowTick: clean(rows.at(-1)?.querySelector("th[scope='row']")?.textContent),
+        lastCapitalCell: clean(rows.at(-1)?.querySelectorAll("td")[5]?.textContent),
+        documentOverflowCssPx: Math.max(0,
+          document.documentElement.scrollWidth - document.documentElement.clientWidth),
+        tableOverflowCssPx: scroll ? Math.max(0, scroll.scrollWidth - scroll.clientWidth) : null,
+      };
+    });
+    const screenshot = "pages-" + theme + "-m4-expanded.png";
+    await probe.screenshot({ path: path.join(output, screenshot) });
+    await probe.keyboard.press("Space");
+    const openAfterSpace = await probe.locator("#chapter-m4").evaluate(node => node.open);
+    const observation = {
+      httpStatus: response?.status() ?? null, summaryBefore, openBefore,
+      openAfterEnter, summaryAfterEnter, ...surface, openAfterSpace,
+      screenshot, errors,
+    };
+    const assessment = assessM4Expansion(observation, {
+      sampleCount: fixture.samples.length,
+      lastTick: expected.tick,
+      lastCapital: expected.installedCapital,
+    });
+    return { ...observation, ...assessment, passed: assessment.passed && errors.length === 0 };
+  } finally {
+    await probe.close();
+  }
+}
+
 let failures = 0;
 const browser = await chromium.launch({ headless: true });
 try {
@@ -287,10 +361,12 @@ try {
       const keyboard = await observeKeyboardEntrance(page, fixture.samples);
       const textContrast = await observeTextContrast(page);
       const chapterKeyboard = await observeChapterKeyboard(context, theme);
+      const m4Expanded = await observeM4Expansion(context, theme);
       const measuredTextCount = textContrast.filter(row => row.outcome !== "not-measurable").length;
       report.themes[theme] = {
         keyboard,
         chapterKeyboard,
+        m4Expanded,
         textContrast,
         measuredTextCount,
         htmlHttpStatus: response?.status() ?? null,
@@ -304,7 +380,7 @@ try {
         ...observed,
         errors,
       };
-      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || !chapterKeyboard.passed || measuredTextCount < 6 || response?.status() !== 200 || errors.length) {
+      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || !chapterKeyboard.passed || !m4Expanded.passed || measuredTextCount < 6 || response?.status() !== 200 || errors.length) {
         failures++;
       }
     } catch (error) {
@@ -341,10 +417,10 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     "",
     "Observed Chromium at **320 CSS px** in both emulated color schemes.",
     "Computed text contrast uses WCAG 2.2 SC 1.4.3 AA thresholds only for nine named rendered samples; complex layers remain NOT MEASURABLE.",
-    "This is not a phone, 400% zoom, screen-reader test, focus contrast audit, exhaustive expanded-chart traversal or proof of deployed HTML/JS revision.",
+    "This is not a phone, 400% zoom, screen-reader test, focus contrast audit, table keyboard-panning check, exhaustive chart traversal or proof of deployed HTML/JS revision.",
     "",
-    "| Theme | Saved JSON exact | Last tick/capital | Overflow | Five-stop entrance | Collapsed chapters | M3 tick |",
-    "| --- | --- | --- | --- | --- | --- |"];
+    "| Theme | Saved JSON exact | Last tick/capital | Overflow | Five-stop entrance | Collapsed chapters | M3 tick | M4 chart/table semantics |",
+    "| --- | --- | --- | --- | --- | --- | --- |"];
   for (const theme of ["light", "dark"]) {
     const data = report.themes[theme] || {};
     rows.push("| " + theme + " | " + (data.dataExact ?? "NOT OBSERVED") +
@@ -352,7 +428,8 @@ if (process.env.GITHUB_STEP_SUMMARY) {
       " | " + (data.horizontalOverflowCssPx ?? "NOT OBSERVED") + " CSS px" +
       " | " + (data.keyboard?.passed ?? "NOT OBSERVED") +
       " | " + (data.chapterKeyboard?.collapsed?.passed ?? "NOT OBSERVED") +
-      " | " + (data.chapterKeyboard?.m3?.passed ?? "NOT OBSERVED") + " |");
+      " | " + (data.chapterKeyboard?.m3?.passed ?? "NOT OBSERVED") +
+      " | " + (data.m4Expanded?.passed ?? "NOT OBSERVED") + " |");
   }
   rows.push("", "### Bounded rendered text contrast", "",
     "| Theme | Sample | Contrast ratio | AA threshold | Observation |",
