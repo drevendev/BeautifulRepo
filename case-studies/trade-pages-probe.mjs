@@ -34,7 +34,7 @@ const report = {
   sourceRevision: "36bd70ea399813accf21d350aa5a0067f059757e",
   targetUrl: site,
   viewportCssPx: { width: 320, height: 900 },
-  method: "Real headless Chromium at 320 CSS px; emulated light/dark preference",
+  method: "Real headless Chromium at 320 CSS px; emulated light/dark preference and sampled real keyboard Tab/Arrow/Enter path",
   expectedFixtureSha256: sha256(fixtureBytes),
   expectedLastTick: expected.tick,
   expectedLastCapital: expected.installedCapital,
@@ -43,11 +43,71 @@ const report = {
     "physical phone",
     "400% browser zoom",
     "screen reader",
-    "complete keyboard navigation",
+    "complete keyboard navigation beyond the five sampled entrance controls",
     "runtime TypeScript or .NET simulation",
     "entire deployed HTML/JS commit provenance",
   ],
 };
+
+/**
+ * Sample the first keyboard path from the landing page, not an exhaustive
+ * accessibility audit. Preserve actual Tab order and browser focus styles.
+ * Keyboard-driven slider changes and native disclosure are observed without
+ * dispatching synthetic events. This does not model a screen reader.
+ */
+async function observeKeyboardEntrance(page, samples) {
+  const result = { tabStops: [], slider: {}, chapter: {}, passed: false };
+  const stops = [
+    ["M4 entrance link", 'a[href="#chapter-m4"]'],
+    ["M3 entrance link", 'a[href="#chapter-m3"]'],
+    ["Saved milestone selector", "#showcase-milestone"],
+    ["Observed tick slider", "#spotlight-tick"],
+    ["M4 chapter disclosure", "#chapter-m4 > summary"],
+  ];
+  for (const [label, selector] of stops) {
+    await page.keyboard.press("Tab");
+    const focus = await page.evaluate(wanted => {
+      const node = document.activeElement;
+      const style = node ? getComputedStyle(node) : null;
+      return {
+        matches: Boolean(node?.matches(wanted)),
+        focusVisible: Boolean(node?.matches(":focus-visible")),
+        outline: style ? style.outlineStyle + " " + style.outlineWidth : null,
+        outlined: Boolean(style && style.outlineStyle !== "none" &&
+          parseFloat(style.outlineWidth) > 0),
+        actualTag: node?.tagName || null,
+        actualId: node?.id || null,
+      };
+    }, selector);
+    result.tabStops.push({ label, selector, ...focus });
+    if (selector === "#spotlight-tick") {
+      await page.keyboard.press("ArrowLeft");
+      result.slider.previous = await page.evaluate(() => ({
+        index: Number(document.querySelector("#spotlight-tick").value),
+        readout: document.querySelector("#spotlight-readout").textContent.trim(),
+      }));
+      await page.keyboard.press("ArrowRight");
+      result.slider.restored = await page.evaluate(() => ({
+        index: Number(document.querySelector("#spotlight-tick").value),
+        readout: document.querySelector("#spotlight-readout").textContent.trim(),
+      }));
+    }
+  }
+  result.chapter.wasOpen = await page.locator("#chapter-m4").evaluate(node => node.open);
+  await page.keyboard.press("Enter");
+  result.chapter.openAfterEnter = await page.locator("#chapter-m4").evaluate(node => node.open);
+  const previous = samples.at(-2), last = samples.at(-1);
+  result.slider.previousCorrect = result.slider.previous?.index === samples.length - 2 &&
+    result.slider.previous?.readout.includes("tick " + previous.tick);
+  result.slider.restoredCorrect = result.slider.restored?.index === samples.length - 1 &&
+    result.slider.restored?.readout.includes("tick " + last.tick);
+  result.passed = result.tabStops.every(step =>
+    step.matches && step.focusVisible && step.outlined) &&
+    result.slider.previousCorrect && result.slider.restoredCorrect &&
+    !result.chapter.wasOpen && result.chapter.openAfterEnter;
+  return result;
+}
+
 let failures = 0;
 const browser = await chromium.launch({ headless: true });
 try {
@@ -97,7 +157,9 @@ try {
       const tickCorrect = observed.readout.includes("tick " + expected.tick);
       const screenshot = "pages-" + theme + "-320.png";
       await page.screenshot({ path: path.join(output, screenshot), fullPage: true });
+      const keyboard = await observeKeyboardEntrance(page, fixture.samples);
       report.themes[theme] = {
+        keyboard,
         htmlHttpStatus: response?.status() ?? null,
         jsonHttpStatus: liveData.status(),
         liveFixtureSha256: liveData.ok() ? sha256(liveBytes) : null,
@@ -109,7 +171,7 @@ try {
         ...observed,
         errors,
       };
-      if (!dataExact || !capitalCorrect || !tickCorrect || response?.status() !== 200 || errors.length) {
+      if (!dataExact || !capitalCorrect || !tickCorrect || !keyboard.passed || response?.status() !== 200 || errors.length) {
         failures++;
       }
     } catch (error) {
@@ -147,17 +209,18 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     "Observed Chromium at **320 CSS px** in both emulated color schemes.",
     "This is not a phone, 400% zoom, screen-reader test, or proof of deployed HTML/JS revision.",
     "",
-    "| Theme | Live saved JSON matches pinned bytes | Last tick/capital | Page overflow |",
-    "| --- | --- | --- | --- |"];
+    "| Theme | Saved JSON exact | Last tick/capital | Overflow | Sampled keyboard entrance |",
+    "| --- | --- | --- | --- | --- |"];
   for (const theme of ["light", "dark"]) {
     const data = report.themes[theme] || {};
     rows.push("| " + theme + " | " + (data.dataExact ?? "NOT OBSERVED") +
       " | " + ((data.tickCorrect && data.capitalCorrect) ?? "NOT OBSERVED") +
-      " | " + (data.horizontalOverflowCssPx ?? "NOT OBSERVED") + " CSS px |");
+      " | " + (data.horizontalOverflowCssPx ?? "NOT OBSERVED") + " CSS px" +
+      " | " + (data.keyboard?.passed ?? "NOT OBSERVED") + " |");
   }
   rows.push("", "Artifacts contain a JSON observation record and full-page screenshots when captured.",
     "Different computed body backgrounds: " + themesDistinct + ".",
-    "Failures (network/data/viewer): " + failures + ".",
+    "Failures (network/data/viewer/selected keyboard path): " + failures + ".",
     "");
   await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, rows.join("\n"));
 }
