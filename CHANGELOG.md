@@ -13,7 +13,7 @@ keep their original themed headings.
 
 ### Added
 
-- Add a bounded, read-only expanded-M4 keyboard/semantic probe for the pinned trade_simulation case: native Tab/Enter/Space disclosure, five named SVG charts, exact-value table and expanded-document overflow observations, plus twelve offline regressions including generic/duplicated chart-label and blank middle-header rejection. This is not a screen-reader, chart-interaction or keyboard table-panning audit (#82).
+- Add a bounded, read-only expanded-M4 keyboard/semantic probe for the pinned trade_simulation case: native Tab/Enter/Space disclosure, five named SVG charts, exact-value table and expanded-document overflow observations, plus thirteen offline regressions including generic/duplicated chart-label, blank middle-header and wrong-rounded-capital rejection. This is not a screen-reader, chart-interaction or keyboard table-panning audit (#82).
 
 - Add a read-only 320px Chromium keyboard probe for all ten collapsed-page Tab stops and the keyboard-opened M3 tick control, with eleven offline assertions. This is bounded focus evidence, not screen-reader or WCAG certification (#82).
 
