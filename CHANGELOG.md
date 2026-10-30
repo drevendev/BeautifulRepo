@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a keyboard-only M4 table-panning diagnostic to the pinned trade_simulation case. Its real Chromium probe follows native Tab focus into the wide scroll container and samples ArrowRight/ArrowLeft movement and Tab exit in both emulated themes, recording non-reachability as a finding rather than a false accessibility pass. Offline regressions validate the observation contract; this is not a screen-reader or multi-browser audit (#82).
+
 - Add a bounded, read-only expanded-M4 keyboard/semantic probe for the pinned trade_simulation case: native Tab/Enter/Space disclosure, five named SVG charts, exact-value table and expanded-document overflow observations, plus thirteen offline regressions including generic/duplicated chart-label, blank middle-header and wrong-rounded-capital rejection. This is not a screen-reader, chart-interaction or keyboard table-panning audit (#82).
 
 - Add a read-only 320px Chromium keyboard probe for all ten collapsed-page Tab stops and the keyboard-opened M3 tick control, with eleven offline assertions. This is bounded focus evidence, not screen-reader or WCAG certification (#82).
