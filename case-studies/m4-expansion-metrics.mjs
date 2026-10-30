@@ -69,11 +69,11 @@ export function assessM4Expansion(observation, expected) {
     problems.push("sampled-row-or-header-count-mismatch");
   }
   if (observation.lastRowTick !== String(expected.lastTick)) problems.push("last-tick-mismatch");
-  // Check both complete values in the rendered cell, not substrings: 178.04
-  // must not pass for an expected rounded value of 78.04.
+  // Compare both complete values, not substrings: 178.04 must not match 78.04.
+  // Adjacent DOM spans can produce `78.04exact 78...` without a separator.
   const lastCapital = observation.lastCapitalCell;
   const parsedCapital = typeof lastCapital === "string"
-    ? lastCapital.match(/^(-?\d+\.\d{2}) exact (-?\d+(?:\.\d+)?)$/)
+    ? lastCapital.match(/^(-?\d+\.\d{2})\s*exact\s+(-?\d+(?:\.\d+)?)$/)
     : null;
   if (!parsedCapital ||
       parsedCapital[1] !== expected.lastCapital.toFixed(2) ||
