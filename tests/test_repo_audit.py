@@ -210,6 +210,21 @@ class AuditTests(unittest.TestCase):
         self.assertNotIn("private-route-token", json.dumps(report))
         self.assertIn("link.vague_text", audit.render_text(report))
 
+
+    def test_vague_link_scan_is_bounded_for_many_unterminated_prefixes(self):
+        # A malformed 420 KiB line remains inside the document's 500 KiB limit.
+        # The CLI's 15-second timeout catches the formerly quadratic regex.
+        self.write("README.md", "# Example\n" + "[here](" * 60000 + "\n")
+        result = self.cli("--format", "json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("link.vague_text", self.codes(json.loads(result.stdout)))
+
+    def test_vague_link_destination_cap_is_explicit(self):
+        self.write("README.md", "# Example\n[here](" + "x" * 2048 + ")\n")
+        self.assertIn("link.vague_text", self.codes())
+        self.write("README.md", "# Example\n[here](" + "x" * 2049 + ")\n")
+        self.assertNotIn("link.vague_text", self.codes())
+
     def test_markdown_empty_alt_is_information_not_failure(self):
         self.write("README.md", "# Example\n\n![](decoration.svg)\n![ ] [decoration]\n")
         report = self.report()

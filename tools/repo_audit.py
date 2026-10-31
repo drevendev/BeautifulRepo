@@ -25,8 +25,10 @@ LEVELS = {"error": 0, "warning": 1, "info": 2}
 PROFILES = ("public", "internal", "private")
 # Heuristic for common context-dependent labels in simple inline Markdown links.
 # This is not a renderer or a WCAG link-purpose decision.
+# Cap destination scans: repeated unterminated `[here](` prefixes must not
+# trigger quadratic work on a permitted 500 KiB README.
 VAGUE_INLINE_LINK = re.compile(
-    r"(?<!!)(?<!\\)\[([^\[\]\r\n]{1,80})\]\([^\r\n)]*\)"
+    r"(?<!!)(?<!\\)\[([^\[\]\r\n]{1,80})\]\([^\r\n)]{0,2048}\)"
 )
 VAGUE_LINK_LABELS = frozenset({
     "here", "click here", "read more", "learn more", "more info", "this link",

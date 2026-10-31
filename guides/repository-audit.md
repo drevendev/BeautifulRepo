@@ -91,7 +91,8 @@ journey. WCAG 2.2 SC 2.4.4 permits a link's purpose to be established by its
 programmatically determined context, so **this is not an automatic accessibility
 failure**. The checker does not compute that context, parse arbitrary nested
 Markdown labels, resolve reference links or check HTML anchor names. It ignores
-supported code/comment syntax and reports no URL contents.
+supported code/comment syntax and reports no URL contents. Destinations longer
+than 2,048 characters are outside this heuristic to bound malformed-input work.
 [W3C Understanding Link Purpose (In Context)](https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context),
 reviewed 2026-10-31.
 
