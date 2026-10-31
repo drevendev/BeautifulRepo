@@ -69,10 +69,10 @@ class MermaidAccessibilityExampleTests(unittest.TestCase):
             "## Mermaid flowcharts: accessible source and text fallback\n",
             "\n## Patterns observed in current repositories",
         )
-        nonvisual = section.split(FENCE, 2)[-1]
+        nonvisual = " ".join(section.split(FENCE, 2)[-1].split())
         self.assertIn("**Text equivalent:** Learn the promise", nonvisual)
         self.assertIn("→ Run a verified example", nonvisual)
-        self.assertIn("→\nFind contribution guidance", nonvisual)
+        self.assertIn("→ Find contribution guidance", nonvisual)
         self.assertIn("**NOT RUN**", section)
         self.assertIn("mermaid.js.org/config/accessibility", section)
         self.assertIn("../checklists/visual-accessibility-acceptance.md", section)
