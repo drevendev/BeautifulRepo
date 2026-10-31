@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Register the research/data guide's displayed JSON result against a shared
+  expected-output fixture used by both example and root tests. Detect missing,
+  malformed, duplicated or stale registered results with an explicit guide path;
+  JSON key reordering passes and unregistered Markdown commands are never run (#216).
+
 - Document an original Mermaid flowchart with `accTitle`, `accDescr` and a complete nearby text route; add the same source metadata to BeautifulRepo's own visitor-journey diagram and source-level regressions. GitHub rendering and screen-reader outcomes remain untested (#215).
 
 - Add a bounded informational `link.vague_text` hint for common context-dependent
