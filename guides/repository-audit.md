@@ -105,8 +105,12 @@ images. For HTML `<img>`, duplicate `alt`, `src`, `role`, `aria-label`,
 `alt="Description"` cannot conceal an earlier `alt=""`. This is a bounded
 source diagnostic, not a complete parser, image-purpose classifier or check of
 the resulting accessible name. Whitespace-only `aria-label` or `aria-labelledby`
-values do not count as naming candidates. Nonempty `aria-labelledby` references
-are not resolved against IDs, so a clear audit is not proof of an accessible name.
+values do not count as naming candidates. For `role`, the checker reads the
+**first whitespace-separated token**: `role="none presentation"` is treated as
+presentational, but `role="img presentation"` is not. Unsupported leading-role
+fallbacks and browser presentational-role conflict resolution are **not**
+computed. Nonempty `aria-labelledby` references are not resolved against IDs,
+so a clear audit is not proof of an accessible name.
 
 **Readable input:** non-UTF-8, NUL-containing, oversized, unreadable and non-regular selected
 documents are reported without printing their contents. A selected file that cannot be
@@ -184,6 +188,7 @@ imposed by the cited organizations.
 - [GitHub: Contributor guidelines](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors): recognized locations, case-insensitive naming and inherited alternatives.
 - [W3C WAI: Headings](https://www.w3.org/WAI/tutorials/page-structure/headings/): meaningful structure and generally avoiding skipped heading ranks.
 - [W3C WAI: Decorative images](https://www.w3.org/WAI/tutorials/images/decorative/): empty alternative text can be correct; authors must decide an image's purpose.
+- [WAI-ARIA 1.2: `presentation` role](https://www.w3.org/TR/wai-aria-1.2/#presentation): `none presentation` is a documented fallback pattern; this audit only handles the first token conservatively.
 
 **HTML image naming and duplicate attributes rechecked 2026-10-31:**
 [W3C WAI ACT, image has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/23a2a8/)
