@@ -11,6 +11,8 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+- Add a source-backed, GitHub-rendered Mermaid SVG acceptance recipe that separately checks ARIA title/description linkage, the text fallback and real screen-reader announcements without treating unrun checks as passes.
+
 ### Added
 
 - Add a complete, source-checked reference for all 23 offline repository-audit
