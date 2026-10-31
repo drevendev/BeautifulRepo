@@ -176,6 +176,40 @@ class AuditTests(unittest.TestCase):
         self.write("README.md", "# Example\n```html\n<!--\n```\nTBD\n")
         self.assertIn("readme.placeholder", self.codes())
 
+    def test_vague_inline_link_text_is_informational_with_source_lines(self):
+        self.write("README.md",
+                   "# Example\n\n"
+                   "[Here](guide.md)\n"
+                   "[READ   MORE](details.md)\n"
+                   "[click here](setup.md)\n"
+                   "[This link](report.md)\n"
+                   "[Complete setup guide](setup.md)\n")
+        report = self.report()
+        matches = [item for item in report["findings"]
+                   if item["rule_id"] == "link.vague_text"]
+        self.assertEqual([(item["line"], item["severity"]) for item in matches],
+                         [(3, "info"), (4, "info"), (5, "info"), (6, "info")])
+        self.assertEqual(audit.exit_status(report, "warning"), 0)
+        self.assertEqual(audit.exit_status(report, "error"), 0)
+
+    def test_vague_link_heuristic_ignores_images_code_comments_and_escapes(self):
+        self.write("README.md",
+                   "# Example\n"
+                   "![here](diagram.svg)\n"
+                   "Use `[read more](sample.md)` as a syntax example.\n"
+                   "<!-- [click here](commented.md) -->\n"
+                   "```md\n[here](fenced.md)\n```\n"
+                   "\\[here](escaped.md)\n"
+                   "[Descriptive installation instructions](install.md)\n")
+        self.assertNotIn("link.vague_text", self.codes())
+
+    def test_vague_link_finding_never_echoes_destination(self):
+        self.write("README.md", "# Example\n[here](private-route-token.md)\n")
+        report = self.report()
+        self.assertIn("link.vague_text", self.codes(report))
+        self.assertNotIn("private-route-token", json.dumps(report))
+        self.assertIn("link.vague_text", audit.render_text(report))
+
     def test_markdown_empty_alt_is_information_not_failure(self):
         self.write("README.md", "# Example\n\n![](decoration.svg)\n![ ] [decoration]\n")
         report = self.report()
