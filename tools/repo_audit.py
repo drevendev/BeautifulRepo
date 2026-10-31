@@ -241,12 +241,22 @@ class _HTMLFacts(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.headings: list[tuple[int, int]] = []
         self.images: list[tuple[int, dict[str, str | None]]] = []
+        self.duplicate_image_attrs: list[tuple[int, str]] = []
         self._heading: tuple[int, int] | None = None
         self._heading_text: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag == "img":
-            self.images.append((self.getpos()[0], dict(attrs)))
+            # HTML ignores later duplicate attributes. dict(attrs) would instead
+            # keep the last value and could misclassify alt/role/source findings.
+            first_attrs: dict[str, str | None] = {}
+            for name, value in attrs:
+                if name in first_attrs:
+                    if name in {"src", "alt", "role", "aria-label", "aria-labelledby", "aria-hidden"}:
+                        self.duplicate_image_attrs.append((self.getpos()[0], name))
+                    continue
+                first_attrs[name] = value
+            self.images.append((self.getpos()[0], first_attrs))
         if re.fullmatch(r"h[1-6]", tag):
             self._heading = (self.getpos()[0], int(tag[1]))
             self._heading_text = []
@@ -338,6 +348,12 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
     html = _HTMLFacts()
     html.feed(visible)
     html.close()
+    for line, name in html.duplicate_image_attrs:
+        findings.append(finding(
+            "image.duplicate_attribute", "warning", path, line,
+            f"HTML image repeats the {name!r} attribute; the first value is used.",
+            "Remove the duplicate attribute and review the rendered image and alternative.",
+        ))
     findings.extend(_absolute_image_findings(visible, path, html.images))
     headings = list(html.headings)
     for index, line in enumerate(lines):
