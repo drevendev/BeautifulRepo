@@ -175,6 +175,8 @@ not a second copy of the first-screen chooser.
   a [release-note template](templates/RELEASE_NOTES.template.md),
   [maintenance workflow](guides/maintenance-workflow.md),
   [evidence-led issue triage](guides/issue-triage.md),
+  [first-contribution route](guides/first-contribution.md) and
+  [copyable starter issue](templates/GOOD_FIRST_ISSUE.template.md),
   [offline repository audit](guides/repository-audit.md),
   [tools](tools/README.md) and how to
   [run them in your repository's CI](guides/adopting-the-checks.md) or

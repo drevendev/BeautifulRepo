@@ -46,6 +46,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 
 - [Evidence-led issue triage recipe](guides/issue-triage.md), with a copyable
   decision card, real issue examples and explicit not-run/permission boundaries.
+- [First-contribution route](guides/first-contribution.md) with a
+  [copyable good-first-issue template](templates/GOOD_FIRST_ISSUE.template.md),
+  a clearly fictional broken-link repair example, contributor and maintainer
+  acceptance steps, and no implied assignments or review guarantees.
 
 - [Maintainer handoff recipe](guides/maintainer-handoff.md), with a fictional
   one-maintainer pause notice, responsibility checklist and real checkout commands.
