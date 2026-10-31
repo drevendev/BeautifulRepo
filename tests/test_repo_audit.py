@@ -242,6 +242,21 @@ class AuditTests(unittest.TestCase):
         self.write("README.md", '# Example\n<img src="a" alt="Result">\n<img src="b" role="presentation">\n<img src="c" aria-label="Result">\n<img src="d" aria-hidden="true">\n')
         self.assertNotIn("image.missing_alt", self.codes())
 
+    def test_html_role_token_list_honors_first_role_conservatively(self):
+        self.write("README.md",
+                   '# Example\n'
+                   '<img src="a.svg" role="none presentation">\n'
+                   '<img src="b.svg" role="  presentation none  ">\n'
+                   '<img src="c.svg" role="img presentation">\n'
+                   '<img src="d.svg" role="unsupported presentation">\n'
+                   '<img src="e.svg" role="none presentation" role="img">\n'
+                   '<img src="f.svg" role="img" role="none presentation">\n')
+        findings = self.report()["findings"]
+        self.assertEqual([f["line"] for f in findings
+                          if f["rule_id"] == "image.missing_alt"], [4, 5, 7])
+        self.assertEqual([f["line"] for f in findings
+                          if f["rule_id"] == "image.duplicate_attribute"], [6, 7])
+
     def test_whitespace_only_aria_does_not_hide_missing_image_alt(self):
         self.write("README.md",
                    '# Example\n'
