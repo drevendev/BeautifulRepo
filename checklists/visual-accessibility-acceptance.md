@@ -149,6 +149,26 @@ For BeautifulRepo's original [Mermaid flowchart](../guides/readme-visuals.md#mer
 4. With an identified browser and screen reader, navigate to the rendered diagram and record what is actually announced (or **NOT RUN** when no assistive technology was used). SVG DOM attributes and an accessibility-tree inspection are not proof of spoken output. Check the surrounding text for unwanted repetition.
 5. Record light/dark, 320 CSS px reflow and real 400% zoom observations separately using the matrix above. A correct `<title>`/`<desc>` pair does not prove visual legibility, focus behavior or WCAG conformance.
 
+
+**Optional checked structure:** after identifying the actual rendered SVG,
+copy that *element's* outer HTML into a local UTF-8 `capture.svg` (not the
+whole GitHub page). Inspect the saved contents before using it. Run from a
+BeautifulRepo checkout with Python 3.11+:
+
+```sh
+python -I tools/mermaid_svg_check.py capture.svg --format json
+```
+
+Exit 0 (`STRUCTURE_PASS`) means only that the saved XML contains unique,
+nonempty SVG title/description targets for the root ARIA references; exit 1
+identifies a structural mismatch; exit 2 denotes unreadable/unsupported input.
+The JSON records the saved-file SHA-256 and resolved text without fetching
+URLs or executing embedded content. Record the exact rendered URL, GitHub
+source SHA, browser and extraction method separately. A saved SVG could be
+stale, altered or from the wrong diagram, and `STRUCTURE_PASS` cannot
+establish what a screen reader announces or whether the wording is useful.
+Without a real captured GitHub SVG, leave this receipt **NOT RUN**.
+
 The two Mermaid-specific evidence rows below default to **NOT RUN** until observed. Keep the SVG linkage check distinct from any actual screen-reader announcement. Include the full source SHA, rendered URL, browser, date and observed details. Mermaid's [accessible title and description specification](https://mermaid.js.org/config/accessibility) documents the expected SVG elements and ARIA references (rechecked **2026-10-31**); it does not attest to this GitHub page's current rendering.
 
 ## 4. Evidence receipt — copy and complete
