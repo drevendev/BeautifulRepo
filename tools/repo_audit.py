@@ -403,7 +403,10 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
         previous = level
     for line, attrs in html.images:
         role = (attrs.get("role") or "").lower()
-        named = bool(attrs.get("aria-label") or attrs.get("aria-labelledby"))
+        # Whitespace alone cannot yield a nonempty accessible name.
+        # This does not resolve aria-labelledby targets or compute browser names.
+        named = any((attrs.get(key) or "").strip()
+                    for key in ("aria-label", "aria-labelledby"))
         if "alt" not in attrs and role not in {"none", "presentation"} and not named and attrs.get("aria-hidden") != "true":
             findings.append(finding("image.missing_alt", "warning", path, line,
                                     "HTML image has no alt attribute or supported explicit naming/decorative marker.",
