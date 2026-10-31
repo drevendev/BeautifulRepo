@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a complete, source-checked reference for all 23 offline repository-audit
+  finding IDs, their severities and scopes, with a regression test that rejects
+  missing or duplicated documented IDs (Closes #218).
+
 - Register the research/data guide's displayed JSON result against a shared
   expected-output fixture used by both example and root tests. Detect missing,
   malformed, duplicated or stale registered results with an explicit guide path;
