@@ -112,6 +112,39 @@ class MermaidAccessibilityExampleTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     accessible_fields(bad)
 
+    def test_rendered_acceptance_is_specific_and_does_not_claim_a_pass(self):
+        checklist = (
+            ROOT / "checklists/visual-accessibility-acceptance.md"
+        ).read_text(encoding="utf-8")
+        section = section_between(
+            checklist,
+            "### Mermaid rendered-SVG acceptance\n",
+            "\n## 4. Evidence receipt",
+        )
+        for marker in (
+            "GitHub-rendered",
+            "aria-labelledby",
+            "aria-describedby",
+            "<title>",
+            "<desc>",
+            "same SVG",
+            "**Text equivalent**",
+            "screen reader",
+            "**NOT RUN**",
+            "320 CSS px",
+            "400% zoom",
+            "mermaid.js.org/config/accessibility",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, section)
+        self.assertIn("| Mermaid SVG name/description linkage | NOT RUN |", checklist)
+        self.assertIn("| Mermaid screen-reader announcement | NOT RUN |", checklist)
+        self.assertIn(
+            "../checklists/visual-accessibility-acceptance.md"
+            "#mermaid-rendered-svg-acceptance",
+            self.guide,
+        )
+
     def test_missing_registered_fence_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "missing"):
             first_mermaid_diagram("A -> B; no Mermaid fence")

@@ -109,9 +109,10 @@ kanban boards or other syntaxes.
 equivalent are covered by offline tests. GitHub's rendered SVG naming,
 assistive-technology announcements, theme behavior and keyboard experience
 are **NOT RUN** for this example. Follow the
-[rendered-page acceptance protocol](../checklists/visual-accessibility-acceptance.md),
-and record a real browser/screen-reader observation before claiming those
-behaviors passed.
+[Mermaid rendered-SVG acceptance steps](../checklists/visual-accessibility-acceptance.md#mermaid-rendered-svg-acceptance)
+to inspect the rendered `<title>`/`<desc>` and their ARIA ID references, then
+record a separate real screen-reader observation before claiming spoken
+behavior passed. The source-level checks above do not fill in that receipt.
 
 ## Patterns observed in current repositories
 

@@ -139,6 +139,18 @@ alternatives. Genuinely decorative images may use `alt=""`. For a complex
 diagram, provide a nearby full textual explanation. A present `alt` attribute
 is not evidence that the wording is useful.
 
+### Mermaid rendered-SVG acceptance
+
+For BeautifulRepo's original [Mermaid flowchart](../guides/readme-visuals.md#mermaid-flowcharts-accessible-source-and-text-fallback), use the **GitHub-rendered** `guides/readme-visuals.md` page pinned to one full commit SHA. The source contains `accTitle`, `accDescr` and a nearby **Text equivalent**. Those source properties alone do **not** verify the rendered result.
+
+1. Identify the actual flowchart by its visible nodes ("Learn the promise" → "Run a verified example" → "Find contribution guidance"). In the browser's Elements inspector, select its rendered SVG, not GitHub navigation icons or a raw Markdown code fence. If GitHub presents only a code block, image fallback or failed rendering, record **NOT RUN** for SVG semantics and explain what appeared.
+2. Inspect the SVG's `aria-labelledby` and `aria-describedby` ID references. Check that each resolves **within the same SVG** to a nonempty `<title>` and `<desc>` respectively, and that the content describes this flowchart. Record the actual attributes and resulting text, or a **FAIL** for missing, empty, incorrect or dangling references. Do not assume a Mermaid directive guarantees GitHub's rendered DOM.
+3. Confirm that the ordinary Markdown **Text equivalent** remains understandable if the diagram is unavailable. It must communicate the three-step route rather than merely repeat the diagram title.
+4. With an identified browser and screen reader, navigate to the rendered diagram and record what is actually announced (or **NOT RUN** when no assistive technology was used). SVG DOM attributes and an accessibility-tree inspection are not proof of spoken output. Check the surrounding text for unwanted repetition.
+5. Record light/dark, 320 CSS px reflow and real 400% zoom observations separately using the matrix above. A correct `<title>`/`<desc>` pair does not prove visual legibility, focus behavior or WCAG conformance.
+
+The two Mermaid-specific evidence rows below default to **NOT RUN** until observed. Keep the SVG linkage check distinct from any actual screen-reader announcement. Include the full source SHA, rendered URL, browser, date and observed details. Mermaid's [accessible title and description specification](https://mermaid.js.org/config/accessibility) documents the expected SVG elements and ARIA references (rechecked **2026-10-31**); it does not attest to this GitHub page's current rendering.
+
 ## 4. Evidence receipt — copy and complete
 
 Use `PASS`, `FAIL`, `NOT RUN` or `N/A` (with a reason). **Blank cells are
@@ -155,6 +167,8 @@ platform-wide accessibility.
 | Images blocked / nonvisual meaning | NOT RUN | | |
 | Keyboard and focus | NOT RUN | | |
 | Screen reader (name combination) | NOT RUN | | |
+| Mermaid SVG name/description linkage | NOT RUN | | |
+| Mermaid screen-reader announcement | NOT RUN | | |
 | Reduced motion (or N/A reason) | NOT RUN | | |
 
 **Decision:** SHIP / REVISE / DEFER / INCONCLUSIVE — _reason and responsible
