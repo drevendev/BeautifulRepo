@@ -137,6 +137,8 @@ class MermaidAccessibilityExampleTests(unittest.TestCase):
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, section)
+        self.assertIn("| Mermaid SVG name/description linkage | NOT RUN |", checklist)
+        self.assertIn("| Mermaid screen-reader announcement | NOT RUN |", checklist)
         self.assertIn(
             "../checklists/visual-accessibility-acceptance.md"
             "#mermaid-rendered-svg-acceptance",
