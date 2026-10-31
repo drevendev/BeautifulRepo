@@ -1,5 +1,7 @@
 # An offline audit of your repository's first impression
 
+The [complete rule-ID reference](audit-rule-reference.md) lists severity, scope and tests for every emitted finding.
+
 The [entry-point audit](../tools/repo_audit.py) reports observable issues in local README,
 license and contribution documents. Each finding has a rule identifier, severity, relative
 file path, line when applicable, explanation and suggested next step. It does not assign a
