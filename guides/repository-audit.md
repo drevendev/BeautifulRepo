@@ -83,6 +83,19 @@ review; they do not prove that every heading or table is semantically wrong.
 outside supported code/comment syntax. Intentional discussion of these terms can still
 trigger a warning; inspect the cited line before changing it.
 
+**Link purpose (heuristic):** an informational `link.vague_text` finding marks
+simple, single-line **inline Markdown** links labelled `here`, `click here`,
+`read more`, `learn more`, `more info` or `this link` (ignoring case and
+extra spaces). Prefer a destination-specific label where it improves the reader's
+journey. WCAG 2.2 SC 2.4.4 permits a link's purpose to be established by its
+programmatically determined context, so **this is not an automatic accessibility
+failure**. The checker does not compute that context, parse arbitrary nested
+Markdown labels, resolve reference links or check HTML anchor names. It ignores
+supported code/comment syntax and reports no URL contents. Destinations longer
+than 2,048 characters are outside this heuristic to bound malformed-input work.
+[W3C Understanding Link Purpose (In Context)](https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context),
+reviewed 2026-10-31.
+
 **Image alternatives:** an HTML image without an `alt` attribute or supported explicit
 naming/decorative marker is a warning. Empty alternative text in a Markdown or HTML image
 is informational, not an automatic failure: empty `alt` is appropriate for purely decorative

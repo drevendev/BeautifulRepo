@@ -23,6 +23,16 @@ LOCATIONS = (".github", "", "docs")
 DOCUMENT_SUFFIXES = (".md", ".markdown", ".rst", ".txt", "")
 LEVELS = {"error": 0, "warning": 1, "info": 2}
 PROFILES = ("public", "internal", "private")
+# Heuristic for common context-dependent labels in simple inline Markdown links.
+# This is not a renderer or a WCAG link-purpose decision.
+# Cap destination scans: repeated unterminated `[here](` prefixes must not
+# trigger quadratic work on a permitted 500 KiB README.
+VAGUE_INLINE_LINK = re.compile(
+    r"(?<!!)(?<!\\)\[([^\[\]\r\n]{1,80})\]\([^\r\n)]{0,2048}\)"
+)
+VAGUE_LINK_LABELS = frozenset({
+    "here", "click here", "read more", "learn more", "more info", "this link",
+})
 # NTFS junctions redirect like directory symlinks, but only lstat's reparse tag shows them.
 JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
 MARKDOWN_LINE_END_RE = re.compile(r"(?<=\n)|(?<=\r)(?!\n)")
@@ -366,6 +376,14 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
         elif index and heading_lines[index - 1].strip() and re.fullmatch(r" {0,3}(?:=+|-+)[ \t]*", heading_line):
             if not heading_lines[index - 1].lstrip().startswith(("|", "#", ">", "<")):
                 headings.append((index, 1 if line.strip().startswith("=") else 2))
+        for link in VAGUE_INLINE_LINK.finditer(line):
+            label = " ".join(link[1].split()).casefold().strip(" .,!?")
+            if label in VAGUE_LINK_LABELS:
+                findings.append(finding(
+                    "link.vague_text", "info", path, index + 1,
+                    "Inline Markdown link uses a context-dependent label.",
+                    "Review its rendered context; prefer link text naming the destination.",
+                ))
         if re.search(r"\{\{[A-Z][A-Z0-9_]*\}\}|\b(?:TODO|TBD|FIXME)\b", line):
             findings.append(finding("readme.placeholder", "warning", path, index + 1,
                                     "Possible unfilled placeholder in reader-facing text.",

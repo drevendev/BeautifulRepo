@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a bounded informational `link.vague_text` hint for common context-dependent
+  labels in simple inline README links, with code/comment/image counterexamples
+  and source-line tests. Link purpose in programmatic context requires human
+  review; this is not a WCAG conformance verdict.
+
 - Add an evidence-led first-contribution route and a copyable, non-installed
   good-first-issue template. The worked broken-link issue is explicitly
   fictional; actual issues must name a revision, reader outcome, safe
