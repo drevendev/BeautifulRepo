@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a dependency-free, read-only checker for saved GitHub-rendered Mermaid SVG ARIA title/description references, with synthetic positive/negative XML regressions and a SHA-256 evidence fingerprint. This does not run GitHub rendering, evaluate wording or test screen readers (#215).
+
 - Add a source-backed, GitHub-rendered Mermaid SVG acceptance recipe that separately checks ARIA title/description linkage, the text fallback and real screen-reader announcements without treating unrun checks as passes.
 
 - Add a complete, source-checked reference for all 23 offline repository-audit

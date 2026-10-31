@@ -113,6 +113,15 @@ are **NOT RUN** for this example. Follow the
 to inspect the rendered `<title>`/`<desc>` and their ARIA ID references, then
 record a separate real screen-reader observation before claiming spoken
 behavior passed. The source-level checks above do not fill in that receipt.
+For a **saved copy of the SVG element** from the rendered GitHub page, the
+[offline structure checker](../tools/mermaid_svg_check.py) can verify that
+both ARIA references resolve to unique, nonempty SVG `<title>` and `<desc>`
+nodes. The checker prints observed text and a SHA-256 fingerprint; compare
+that text with the actual three-step route. It does **not** download or
+render GitHub pages, certify wording, or simulate a screen reader. See the
+[acceptance checklist](../checklists/visual-accessibility-acceptance.md#mermaid-rendered-svg-acceptance)
+for the distinct manual observations.
+
 
 ## Patterns observed in current repositories
 

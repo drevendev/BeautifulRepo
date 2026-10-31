@@ -17,6 +17,28 @@ repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 `--data` and `--output` accept alternative paths for a separate collection.
 `--write` prepares UTF-8 bytes and atomically replaces the selected output via a temporary sibling; review the path before using it. Failed encoding/replacement leaves the previous file unchanged (this is not an fsync/crash-durability guarantee).
 
+
+## Saved Mermaid SVG structure check
+
+[mermaid_svg_check.py](mermaid_svg_check.py) checks the **saved SVG element**
+from a rendered Mermaid flowchart for nonempty `aria-labelledby` and
+`aria-describedby` references resolving uniquely to `<title>` and `<desc>`
+in the same SVG. It is an optional Python 3.11+ offline, dependency-free
+reader aid for the [GitHub rendering acceptance checklist](../checklists/visual-accessibility-acceptance.md#mermaid-rendered-svg-acceptance):
+
+```sh
+python -I tools/mermaid_svg_check.py capture.svg --format json
+```
+
+Exit 0 reports `STRUCTURE_PASS`, the captured bytes' SHA-256 and resolved
+texts; exit 1 reports an absent/ambiguous/empty reference or invalid SVG
+structure; exit 2 reports an unreadable path. The file must be ordinary,
+UTF-8 XML of at most 1 MiB; NUL bytes, DTD/entity declarations and symlinked
+input files are rejected. The tool never fetches GitHub, runs SVG scripts,
+modifies the capture or tests browser/screen-reader behaviour. Only a real
+pinned GitHub page inspection plus separate manual observations can close
+that evidence gap. Its regression suite uses synthetic SVG, not a browser.
+
 ## Contract
 
 The JSON root has integer `schema_version: 1` and a nonempty `resources` array. Entries
