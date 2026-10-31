@@ -420,12 +420,17 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
             first_title = False
         previous = level
     for line, attrs in html.images:
-        role = (attrs.get("role") or "").lower()
+        # A role attribute is a whitespace-separated fallback list. The common
+        # `none presentation` pairing is decorative; a later decorative token
+        # must not override a first explicit non-decorative role (e.g. `img`).
+        # Full unsupported-role fallback and conflict resolution need a browser.
+        role_tokens = (attrs.get("role") or "").lower().split()
+        decorative_role = bool(role_tokens and role_tokens[0] in {"none", "presentation"})
         # Whitespace alone cannot yield a nonempty accessible name.
         # This does not resolve aria-labelledby targets or compute browser names.
         named = any((attrs.get(key) or "").strip()
                     for key in ("aria-label", "aria-labelledby"))
-        if "alt" not in attrs and role not in {"none", "presentation"} and not named and attrs.get("aria-hidden") != "true":
+        if "alt" not in attrs and not decorative_role and not named and attrs.get("aria-hidden") != "true":
             findings.append(finding("image.missing_alt", "warning", path, line,
                                     "HTML image has no alt attribute or supported explicit naming/decorative marker.",
                                     "Add meaningful alt text, or explicitly mark a decorative image."))
