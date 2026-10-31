@@ -167,6 +167,8 @@ platform-wide accessibility.
 | Images blocked / nonvisual meaning | NOT RUN | | |
 | Keyboard and focus | NOT RUN | | |
 | Screen reader (name combination) | NOT RUN | | |
+| Mermaid SVG name/description linkage | NOT RUN | | |
+| Mermaid screen-reader announcement | NOT RUN | | |
 | Reduced motion (or N/A reason) | NOT RUN | | |
 
 **Decision:** SHIP / REVISE / DEFER / INCONCLUSIVE — _reason and responsible
