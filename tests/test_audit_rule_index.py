@@ -13,7 +13,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "tools" / "repo_audit.py"
 INDEX = ROOT / "guides" / "audit-rule-reference.md"
-ROW = re.compile(r"^\\|\\s*`([a-z][a-z0-9_.]+)`\\s*\\|\\s*([^|]+)\\|", re.M)
+ROW = re.compile(r"^\|\s*`([a-z][a-z0-9_.]+)`\s*\|\s*([^|]+)\|", re.M)
 
 
 class AuditRuleReferenceTests(unittest.TestCase):
