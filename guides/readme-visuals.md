@@ -100,7 +100,7 @@ Run a verified example (what happens when I try it?) →
 Find contribution guidance (how can I help?).
 
 The example is original and deliberately small. Keep each node meaningful
-without colors or arrows. Adapt the wording and path to an actual runnable
+without relying on colors or arrows alone. Adapt the wording and path to an actual runnable
 result, not a promised feature. The directives' support varies by diagram
 type; do not assume this flowchart recipe works unchanged for mindmaps,
 kanban boards or other syntaxes.
