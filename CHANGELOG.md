@@ -317,6 +317,8 @@ keep their original themed headings.
 
 ### Fixed
 
+- Interpret the first whitespace-separated HTML image `role` token in the offline entry audit, covering `role="none presentation"` and surrounding whitespace without allowing a later decorative token to override `role="img"`. This remains a source heuristic, not a browser accessible-name computation.
+
 - The offline HTML navigation checker now reports duplicate `role` and `aria-*`
   attributes in active Markdown HTML, where later values would be ignored by
   HTML parsing. Includes a fixture covering image labels, references, hidden
