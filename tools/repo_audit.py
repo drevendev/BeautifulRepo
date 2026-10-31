@@ -45,9 +45,28 @@ class AuditInputError(ValueError):
 
 
 def finding(rule: str, severity: str, path: str, line: int | None,
-            message: str, remedy: str) -> dict[str, Any]:
-    return {"rule_id": rule, "severity": severity, "path": path, "line": line,
-            "message": message, "remediation": remedy}
+            message: str, remedy: str, *,
+            location: dict[str, dict[str, int]] | None = None) -> dict[str, Any]:
+    result = {"rule_id": rule, "severity": severity, "path": path, "line": line,
+              "message": message, "remediation": remedy}
+    if location is not None:
+        result["location"] = location
+    return result
+
+
+def _source_span(line_starts: list[int], start: int, end: int
+                 ) -> dict[str, dict[str, int]]:
+    """Map decoded-text offsets to one-based positions, with an exclusive end.
+
+    line_starts contains the start of each existing line, not a trailing
+    sentinel for a file without a final newline. Offsets count Unicode code
+    points in the decoded text, not UTF-8 bytes or rendered columns.
+    """
+    def position(offset: int) -> dict[str, int]:
+        index = bisect.bisect_right(line_starts, offset) - 1
+        return {"line": index + 1, "column": offset - line_starts[index] + 1}
+
+    return {"start": position(start), "end": position(end)}
 
 
 def _is_redirect(path: Path) -> bool:
@@ -349,10 +368,16 @@ def _absolute_image_findings(visible: str, path: str,
     return findings
 
 
-def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
+def _inspect_markdown(text: str, path: str, *,
+                      source_spans: bool = False) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     visible = visible_source(text)
-    lines = [line.rstrip("\r\n") for line in _split_lines(visible)]
+    source_lines = _split_lines(visible)
+    lines = [line.rstrip("\r\n") for line in source_lines]
+    line_starts = [0]
+    if source_spans:
+        for source_line in source_lines[:-1]:
+            line_starts.append(line_starts[-1] + len(source_line))
     heading_lines = [line.rstrip("\r\n")
                      for line in _split_lines(visible_source(text, mask_inline=False))]
     html = _HTMLFacts()
@@ -379,15 +404,26 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
         for link in VAGUE_INLINE_LINK.finditer(line):
             label = " ".join(link[1].split()).casefold().strip(" .,!?")
             if label in VAGUE_LINK_LABELS:
+                location = (_source_span(
+                    line_starts, line_starts[index] + link.start(),
+                    line_starts[index] + link.end(),
+                ) if source_spans else None)
                 findings.append(finding(
                     "link.vague_text", "info", path, index + 1,
                     "Inline Markdown link uses a context-dependent label.",
                     "Review its rendered context; prefer link text naming the destination.",
+                    location=location,
                 ))
-        if re.search(r"\{\{[A-Z][A-Z0-9_]*\}\}|\b(?:TODO|TBD|FIXME)\b", line):
+        placeholder = re.search(r"\{\{[A-Z][A-Z0-9_]*\}\}|\b(?:TODO|TBD|FIXME)\b", line)
+        if placeholder:
+            location = (_source_span(
+                line_starts, line_starts[index] + placeholder.start(),
+                line_starts[index] + placeholder.end(),
+            ) if source_spans else None)
             findings.append(finding("readme.placeholder", "warning", path, index + 1,
                                     "Possible unfilled placeholder in reader-facing text.",
-                                    "Replace unfinished prose, or verify that the token is intentional."))
+                                    "Replace unfinished prose, or verify that the token is intentional.",
+                                    location=location))
         if re.search(r"(?<!\\)!\[\s*\]\s*(?:\(|\[)", line):
             findings.append(finding("image.empty_alt", "info", path, index + 1,
                                     "Markdown image has empty alternative text; human review is needed.",
@@ -441,7 +477,8 @@ def _inspect_markdown(text: str, path: str) -> list[dict[str, Any]]:
     return findings
 
 
-def audit_repository(target: str | Path, *, profile: str = "public") -> dict[str, Any]:
+def audit_repository(target: str | Path, *, profile: str = "public",
+                     source_spans: bool = False) -> dict[str, Any]:
     if profile not in PROFILES:
         raise AuditInputError("profile must be public, internal or private.")
     try:
@@ -482,7 +519,7 @@ def audit_repository(target: str | Path, *, profile: str = "public") -> dict[str
         elif kind == "readme":
             is_markdown = paths[0].suffix.lower() in {".md", ".markdown"}
             if is_markdown:
-                findings.extend(_inspect_markdown(text, relative))
+                findings.extend(_inspect_markdown(text, relative, source_spans=source_spans))
             else:
                 findings.append(finding("readme.unsupported_format", "info", relative, None,
                                         "README was found, but its format is outside the Markdown checks.",
@@ -496,6 +533,9 @@ def audit_repository(target: str | Path, *, profile: str = "public") -> dict[str
                         "Name the owning team and an approved internal contact or support route.",
                     ))
     findings.sort(key=lambda f: (LEVELS[f["severity"]], f["path"], f["line"] or 0, f["rule_id"]))
+    if source_spans:
+        for item in findings:
+            item.setdefault("location", None)
     report = {"schema_version": 1, "documents": documents, "read_files": sorted(read_files),
               "summary": {level: sum(f["severity"] == level for f in findings) for level in LEVELS},
               "findings": findings}
@@ -529,13 +569,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", nargs="?", default=".", help="local repository directory (default: current directory)")
     parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--source-spans", action="store_true",
+                        help="opt in to JSON source locations when the scanner can determine them")
     parser.add_argument("--profile", choices=PROFILES, default="public",
                         help="locally selected guidance profile; no remote visibility is inspected")
     parser.add_argument("--fail-on", choices=("error", "warning", "never"), default="error",
                         help="failure threshold; informational findings never fail a valid audit")
     args = parser.parse_args(argv)
+    if args.source_spans and args.format != "json":
+        parser.error("--source-spans requires --format json")
     try:
-        report = audit_repository(args.root, profile=args.profile)
+        report = audit_repository(args.root, profile=args.profile,
+                                  source_spans=args.source_spans)
     except AuditInputError as exc:
         print(f"repo_audit: {exc}", file=sys.stderr)
         return 2
