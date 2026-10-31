@@ -317,7 +317,6 @@ keep their original themed headings.
   Regression tests cover direct and duplicate attributes. This bounded source
   check does not resolve ID references or certify accessible names.
 
-
 - Make the offline README audit use the first HTML image attribute when `alt`,
   `src`, `role` or an ARIA naming/visibility attribute is repeated, instead
   of silently using the last attribute. Report these malformed duplicates and
