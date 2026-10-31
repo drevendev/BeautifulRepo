@@ -103,7 +103,8 @@ class MarkupReferences(HTMLParser):
         attributes: dict[str, str | None] = {}
         for attribute, value in attrs:
             if attribute in attributes:
-                if attribute in {"href", "src", "srcset", "alt", "id", "name", "role"} or attribute.startswith("aria-"):
+                if (attribute in {"href", "src", "srcset", "alt", "id", "name", "role"}
+                        or attribute.startswith("aria-")):
                     self.duplicate_attributes.append((self.getpos()[0], tag, attribute))
                 continue
             attributes[attribute] = value
