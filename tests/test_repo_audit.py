@@ -195,9 +195,9 @@ class AuditTests(unittest.TestCase):
 
     def test_duplicate_html_image_alt_uses_first_value(self):
         self.write("README.md",
-                   '# Example\\n'
-                   '<img src="a.svg" alt="" alt="Ignored">\\n'
-                   '<img src="b.svg" alt="Actual result" alt="" />\\n'.replace('\\n', '\n'))
+                   '# Example\n'
+                   '<img src="a.svg" alt="" alt="Ignored">\n'
+                   '<img src="b.svg" alt="Actual result" alt="" />\n')
         report = self.report()
         duplicate = [f for f in report["findings"]
                      if f["rule_id"] == "image.duplicate_attribute"]
@@ -210,11 +210,11 @@ class AuditTests(unittest.TestCase):
 
     def test_duplicate_html_image_role_and_aria_do_not_mask_missing_name(self):
         self.write("README.md",
-                   '# Example\\n'
-                   '<img src="a.svg" aria-label="" aria-label="Ignored">\\n'
-                   '<img src="b.svg" role="img" role="presentation">\\n'
-                   '<img src="c.svg" role="presentation" role="img">\\n'
-                   '<img src="d.svg" aria-hidden="true" aria-hidden="false">\\n'.replace('\\n', '\n'))
+                   '# Example\n'
+                   '<img src="a.svg" aria-label="" aria-label="Ignored">\n'
+                   '<img src="b.svg" role="img" role="presentation">\n'
+                   '<img src="c.svg" role="presentation" role="img">\n'
+                   '<img src="d.svg" aria-hidden="true" aria-hidden="false">\n')
         report = self.report()
         missing = [f["line"] for f in report["findings"]
                    if f["rule_id"] == "image.missing_alt"]
@@ -226,9 +226,9 @@ class AuditTests(unittest.TestCase):
     def test_duplicate_html_image_src_does_not_hide_remote_dependency(self):
         remote = "https://raw.githubusercontent.com/acme/demo/main/sample.svg"
         self.write("README.md",
-                   '# Example\\n'
-                   f'<img src="{remote}" src="local.svg" alt="Before">\\n'
-                   f'<img src="local.svg" src="{remote}" alt="After">\\n'.replace('\\n', '\n'))
+                   '# Example\n'
+                   f'<img src="{remote}" src="local.svg" alt="Before">\n'
+                   f'<img src="local.svg" src="{remote}" alt="After">\n')
         report = self.report()
         remote_findings = [f["line"] for f in report["findings"]
                            if f["rule_id"] == "readme.absolute_repo_asset"]
