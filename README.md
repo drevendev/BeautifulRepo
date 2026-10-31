@@ -79,6 +79,8 @@ A repository should answer the next question before the reader has to hunt for i
 
 ```mermaid
 flowchart LR
+    accTitle: The five steps of a repository visit
+    accDescr: Promise leads to Evidence, First success, Trust, and Contribute. Each step answers the next reader question.
     A["1 · Promise<br/>What is this?"] --> B["2 · Evidence<br/>What do I get?"]
     B --> C["3 · First success<br/>Can I try it?"]
     C --> D["4 · Trust<br/>Can I rely on it?"]
