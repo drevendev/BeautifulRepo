@@ -10,6 +10,7 @@ import unittest
 
 EXAMPLE = Path(__file__).resolve().parents[1]
 SCRIPT = EXAMPLE / "analysis.py"
+EXPECTED = json.loads((EXAMPLE / "expected-result.json").read_text(encoding="utf-8"))
 SPEC = importlib.util.spec_from_file_location("research_data_example", SCRIPT)
 assert SPEC and SPEC.loader
 analysis = importlib.util.module_from_spec(SPEC)
@@ -25,15 +26,13 @@ class ReproduceTests(unittest.TestCase):
         self.assertIn(expected, readme)
 
     def test_documented_result(self):
-        self.assertEqual(analysis.summarize(analysis.DEFAULT_INPUT), {
-            "rows": 6, "totals": {"A": 36, "B": 24}, "grand_total": 60,
-        })
+        self.assertEqual(analysis.summarize(analysis.DEFAULT_INPUT), EXPECTED)
 
     def test_documented_cli_and_valid_json(self):
         proc = subprocess.run([sys.executable, str(SCRIPT)], capture_output=True,
                               text=True, check=False, timeout=10)
         self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertEqual(json.loads(proc.stdout)["grand_total"], 60)
+        self.assertEqual(json.loads(proc.stdout), EXPECTED)
         self.assertEqual(proc.stderr, "")
 
     def _temporary(self, content):

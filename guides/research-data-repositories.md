@@ -34,8 +34,26 @@ python analysis.py
 python -m unittest discover -s tests -v
 ```
 
-Expected aggregate: `{"rows": 6, "totals": {"A": 36, "B": 24}, "grand_total": 60}`.
-The CLI emits pretty-printed JSON; key order is deterministic. The test suite
+Expected aggregate (registered with the test suite as structured JSON):
+
+<!-- beautifulrepo:research-result:start -->
+```json
+{
+  "grand_total": 60,
+  "rows": 6,
+  "totals": {
+    "A": 36,
+    "B": 24
+  }
+}
+```
+<!-- beautifulrepo:research-result:end -->
+
+The result is compared with the shared
+[expected-result fixture](../examples/research-data-starter/expected-result.json)
+in `tests/test_research_data_starter.py`; the actual CLI output is checked
+against the same fixture. JSON object key order is not significant.
+The CLI emits pretty-printed JSON; its output key order is deterministic. The test suite
 checks the result, reproducibility under input reordering and rejection of invalid
 schema, dates, counts and duplicates.
 
