@@ -89,9 +89,11 @@ is informational, not an automatic failure: empty `alt` is appropriate for purel
 images. For HTML `<img>`, duplicate `alt`, `src`, `role`, `aria-label`,
 `aria-labelledby` or `aria-hidden` attributes are warnings. The tool uses the
 **first** occurrence for its findings, consistent with HTML parsing, so a later
-`alt=\"Description\"` cannot conceal an earlier `alt=\"\"`. This is a bounded
+`alt="Description"` cannot conceal an earlier `alt=""`. This is a bounded
 source diagnostic, not a complete parser, image-purpose classifier or check of
-the resulting accessible name.
+the resulting accessible name. Whitespace-only `aria-label` or `aria-labelledby`
+values do not count as naming candidates. Nonempty `aria-labelledby` references
+are not resolved against IDs, so a clear audit is not proof of an accessible name.
 
 **Readable input:** non-UTF-8, NUL-containing, oversized, unreadable and non-regular selected
 documents are reported without printing their contents. A selected file that cannot be
@@ -169,6 +171,12 @@ imposed by the cited organizations.
 - [GitHub: Contributor guidelines](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors): recognized locations, case-insensitive naming and inherited alternatives.
 - [W3C WAI: Headings](https://www.w3.org/WAI/tutorials/page-structure/headings/): meaningful structure and generally avoiding skipped heading ranks.
 - [W3C WAI: Decorative images](https://www.w3.org/WAI/tutorials/images/decorative/): empty alternative text can be correct; authors must decide an image's purpose.
+
+**HTML image naming and duplicate attributes rechecked 2026-10-31:**
+[W3C WAI ACT, image has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/23a2a8/)
+notes that computed accessible names are trimmed of leading and trailing whitespace.
+The source check rejects whitespace-only naming attributes but does not calculate a
+full accessible name or establish image accessibility.
 
 **HTML duplicate-attribute handling rechecked 2026-10-31:**
 [WHATWG HTML Standard, parsing](https://html.spec.whatwg.org/multipage/parsing.html#parse-error-duplicate-attribute) specifies that later duplicate attributes are ignored. This supports the source-checker precedence only, not a claim of browser or screen-reader testing.
