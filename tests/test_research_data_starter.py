@@ -72,7 +72,8 @@ class ResearchDataIntegrationTests(unittest.TestCase):
 
     def test_reordered_json_keys_remain_valid(self):
         guide = GUIDE.read_text(encoding="utf-8")
-        reordered = {"totals": {"B": 24, "A": 36}, "rows": 6, "grand_total": 60}
+        reordered = dict(reversed(list(EXPECTED.items())))
+        reordered["totals"] = dict(reversed(list(EXPECTED["totals"].items())))
         original = "```json\n" + json.dumps(EXPECTED, indent=2) + "\n```"
         alternate = "```json\n" + json.dumps(reordered, indent=2) + "\n```"
         self.assertIn(original, guide)
@@ -80,19 +81,23 @@ class ResearchDataIntegrationTests(unittest.TestCase):
 
     def test_edited_documented_total_reports_guide_path(self):
         guide = GUIDE.read_text(encoding="utf-8")
-        self.assertIn('"grand_total": 60', guide)
-        altered = guide.replace('"grand_total": 60', '"grand_total": 61', 1)
+        old_value = f'"grand_total": {EXPECTED["grand_total"]}'
+        new_value = f'"grand_total": {EXPECTED["grand_total"] + 1}'
+        self.assertIn(old_value, guide)
+        altered = guide.replace(old_value, new_value, 1)
         with self.assertRaisesRegex(AssertionError, GUIDE_LOCATION):
             _assert_registered_result_matches_fixture(altered)
 
     def test_missing_malformed_and_duplicate_registered_json_fail(self):
         guide = GUIDE.read_text(encoding="utf-8")
+        row_value = f'"rows": {EXPECTED["rows"]}'
+        self.assertIn(row_value, guide)
         candidates = (
             guide.replace(RESULT_START, "", 1),
             guide.replace(RESULT_END, "", 1),
             guide.replace("```json", "```bash", 1),
-            guide.replace('"rows": 6', '"rows":', 1),
-            guide.replace('"rows": 6', '"rows": 6, "rows": 6', 1),
+            guide.replace(row_value, '"rows":', 1),
+            guide.replace(row_value, row_value + ", " + row_value, 1),
         )
         for altered in candidates:
             with self.subTest(case=altered[:48]):
