@@ -79,6 +79,40 @@ rendered accessibility tree. Duplicate HTML `href`, `src`, `srcset`, `alt`,
 checks, as in HTML parsing, so a later duplicate cannot conceal a broken link. For complex diagrams, preserve a full textual
 equivalent near the image.
 
+## Mermaid flowcharts: accessible source and text fallback
+
+For an original Mermaid **flowchart**, add `accTitle` and `accDescr` to the
+diagram source. Mermaid's [accessibility options](https://mermaid.js.org/config/accessibility)
+document these directives as an SVG title and description when its renderer
+supports the diagram type. This is **not** a substitute for a full explanation
+in ordinary Markdown that still works when diagrams do not render.
+
+```mermaid
+flowchart LR
+    accTitle: From promise to first contribution
+    accDescr: A visitor learns what the repository does, runs a reproducible example, then finds how to contribute.
+    A["Learn the promise"] --> B["Run a verified example"]
+    B --> C["Find contribution guidance"]
+```
+
+**Text equivalent:** Learn the promise (what does this repository do?) →
+Run a verified example (what happens when I try it?) →
+Find contribution guidance (how can I help?).
+
+The example is original and deliberately small. Keep each node meaningful
+without relying on colors or arrows alone. Adapt the wording and path to an actual runnable
+result, not a promised feature. The directives' support varies by diagram
+type; do not assume this flowchart recipe works unchanged for mindmaps,
+kanban boards or other syntaxes.
+
+**Verification boundary (2026-10-31):** source structure and its nearby text
+equivalent are covered by offline tests. GitHub's rendered SVG naming,
+assistive-technology announcements, theme behavior and keyboard experience
+are **NOT RUN** for this example. Follow the
+[rendered-page acceptance protocol](../checklists/visual-accessibility-acceptance.md),
+and record a real browser/screen-reader observation before claiming those
+behaviors passed.
+
 ## Patterns observed in current repositories
 
 ### uv — evidence before expansion
@@ -209,6 +243,7 @@ Sources and repository examples rechecked 2026-10-05.
 - [GitHub writing quickstart](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/quickstart-for-writing-on-github)
 - [GitHub basic writing and formatting syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
 - [Open Source Guides: Accessibility Best Practices](https://opensource.guide/accessibility-best-practices-for-your-project/)
+- [Mermaid accessibility options](https://mermaid.js.org/config/accessibility) — `accTitle` and `accDescr` syntax for supported diagram types; reviewed 2026-10-31.
 - [uv README at inspected blob](https://github.com/astral-sh/uv/blob/66caaf9ccc62add8c63de8e71184c9b7677377ad/README.md)
 - [Immich README at inspected blob](https://github.com/immich-app/immich/blob/ba774d44cdd7b9e9baed4cc4166d4c317e3ebae8/README.md)
 - [Awesome Python README at inspected blob](https://github.com/vinta/awesome-python/blob/c8d5186e427f4068718ebdc26b5a86eafbe386ee/README.md)

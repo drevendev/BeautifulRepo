@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Document an original Mermaid flowchart with `accTitle`, `accDescr` and a complete nearby text route; add the same source metadata to BeautifulRepo's own visitor-journey diagram and source-level regressions. GitHub rendering and screen-reader outcomes remain untested (#215).
+
 - Add a bounded informational `link.vague_text` hint for common context-dependent
   labels in simple inline README links, with code/comment/image counterexamples
   and source-line tests. Link purpose in programmatic context requires human
