@@ -98,6 +98,27 @@ class HtmlNavigationTests(unittest.TestCase):
             with self.subTest(expected=expected):
                 self.assertTrue(any(expected in error for error in errors), errors)
 
+    def test_duplicate_accessibility_attributes_are_reported(self):
+        # The HTML parser keeps the first repeated attribute; later ARIA/role
+        # values must not silently imply a different accessible name or role.
+        errors, checked, documents = self.check(
+            '<img src="art.svg" alt="Art" aria-label="First" aria-label="Last">\n'
+            '<span role="img" role="presentation" '
+            'aria-labelledby="first" aria-labelledby="second"></span>\n'
+            '<div aria-hidden="true" aria-hidden="false"></div>\n'
+            '`<span role="img" role="presentation">example</span>`\n'
+            '```html\n<div aria-label="first" aria-label="second"></div>\n```\n',
+            {"art.svg": "svg"},
+        )
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+        self.assertEqual(errors, [
+            "README.md:1: HTML img duplicate aria-label attribute",
+            "README.md:2: HTML span duplicate role attribute",
+            "README.md:2: HTML span duplicate aria-labelledby attribute",
+            "README.md:3: HTML div duplicate aria-hidden attribute",
+        ])
+
     def test_duplicate_html_attributes_ignore_inactive_code(self):
         errors, checked, documents = self.check(
             '`<a href="missing.md" href="#real">example</a>`\n'

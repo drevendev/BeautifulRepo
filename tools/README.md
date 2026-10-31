@@ -257,9 +257,13 @@ existing checker. It also flags live raw HTML `<img>` elements with no `alt`
 attribute. An explicit `alt=""` is allowed for decorative images; the tool
 cannot judge whether the alternative is appropriate or certify accessibility.
 Markdown image syntax is not graded for descriptive quality.
-Duplicate HTML `href`, `src`, `srcset`, `alt`, `id` or `name` attributes
-are reported; the first value is used for destination and alt checks, matching
-HTML parsing rather than silently trusting the last value.
+Duplicate HTML `href`, `src`, `srcset`, `alt`, `id`, `name`, `role` and
+`aria-*` attributes are reported. The first occurrence is retained for the
+checker’s destination and `alt` logic, as specified by the
+[HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#parse-error-duplicate-attribute)
+(reviewed 2026-10-31); later duplicates cannot silently replace a label or role.
+This is a source-level duplicate check, not validation of computed accessible names
+or screen-reader behavior.
 Explicit HTML `id` and `a name` anchors and ordinary
 Markdown ATX headings and simple top-level setext headings (including shared
 duplicate suffixes) are supported. For setext, the underline uses `=` or at

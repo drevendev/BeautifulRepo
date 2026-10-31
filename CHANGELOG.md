@@ -312,6 +312,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- The offline HTML navigation checker now reports duplicate `role` and `aria-*`
+  attributes in active Markdown HTML, where later values would be ignored by
+  HTML parsing. Includes a fixture covering image labels, references, hidden
+  state and code examples; it does not infer accessible names or certify WCAG.
+
 - Fix a false negative in the offline HTML-image entry-point audit: whitespace-only
   `aria-label` and `aria-labelledby` are not accepted as naming candidates.
   Regression tests cover direct and duplicate attributes. This bounded source
