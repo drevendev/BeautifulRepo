@@ -312,6 +312,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Fix a false negative in the offline HTML-image entry-point audit: whitespace-only
+  `aria-label` and `aria-labelledby` are not accepted as naming candidates.
+  Regression tests cover direct and duplicate attributes. This bounded source
+  check does not resolve ID references or certify accessible names.
+
+
 - Make the offline README audit use the first HTML image attribute when `alt`,
   `src`, `role` or an ARIA naming/visibility attribute is repeated, instead
   of silently using the last attribute. Report these malformed duplicates and
