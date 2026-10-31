@@ -35,7 +35,9 @@ python analysis.py
 python -m unittest discover -s tests -v
 ```
 
-The analysis uses the checked-in CSV by default and emits JSON equivalent to:
+The analysis uses the checked-in CSV by default and emits JSON equivalent to
+[`expected-result.json`](expected-result.json), the shared expected-output fixture
+used by the nested example tests and the root integration checks:
 
 ```json
 {
