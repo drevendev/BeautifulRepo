@@ -149,7 +149,7 @@ For BeautifulRepo's original [Mermaid flowchart](../guides/readme-visuals.md#mer
 4. With an identified browser and screen reader, navigate to the rendered diagram and record what is actually announced (or **NOT RUN** when no assistive technology was used). SVG DOM attributes and an accessibility-tree inspection are not proof of spoken output. Check the surrounding text for unwanted repetition.
 5. Record light/dark, 320 CSS px reflow and real 400% zoom observations separately using the matrix above. A correct `<title>`/`<desc>` pair does not prove visual legibility, focus behavior or WCAG conformance.
 
-In the evidence receipt below, add a **Mermaid SVG name/description linkage** row and, separately, a **Mermaid screen-reader announcement** row for this page, both defaulting to **NOT RUN** until observed. Include the full source SHA, rendered URL, browser, date and observed details. Mermaid's [accessible title and description specification](https://mermaid.js.org/config/accessibility) documents the expected SVG elements and ARIA references (rechecked **2026-10-31**); it does not attest to this GitHub page's current rendering.
+The two Mermaid-specific evidence rows below default to **NOT RUN** until observed. Keep the SVG linkage check distinct from any actual screen-reader announcement. Include the full source SHA, rendered URL, browser, date and observed details. Mermaid's [accessible title and description specification](https://mermaid.js.org/config/accessibility) documents the expected SVG elements and ARIA references (rechecked **2026-10-31**); it does not attest to this GitHub page's current rendering.
 
 ## 4. Evidence receipt — copy and complete
 
