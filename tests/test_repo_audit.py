@@ -193,6 +193,29 @@ class AuditTests(unittest.TestCase):
         self.write("README.md", '# Example\n<img src="a" alt="Result">\n<img src="b" role="presentation">\n<img src="c" aria-label="Result">\n<img src="d" aria-hidden="true">\n')
         self.assertNotIn("image.missing_alt", self.codes())
 
+    def test_whitespace_only_aria_does_not_hide_missing_image_alt(self):
+        self.write("README.md",
+                   '# Example\n'
+                   '<img src="a.svg" aria-label="   ">\n'
+                   '<img src="b.svg" aria-labelledby="  \t ">\n'
+                   '<img src="c.svg" aria-label=" " aria-labelledby="  ">\n'
+                   '<img src="d.svg" aria-label=" Chart A ">\n'
+                   '<img src="e.svg" aria-labelledby="chart-caption">\n')
+        missing = [f["line"] for f in self.report()["findings"]
+                   if f["rule_id"] == "image.missing_alt"]
+        self.assertEqual(missing, [2, 3, 4])
+
+    def test_duplicate_whitespace_aria_keeps_the_first_attribute(self):
+        self.write("README.md",
+                   '# Example\n'
+                   '<img src="a.svg" aria-label="  " aria-label="Ignored">\n'
+                   '<img src="b.svg" aria-labelledby=" " aria-labelledby="label">\n')
+        findings = self.report()["findings"]
+        self.assertEqual([f["line"] for f in findings
+                          if f["rule_id"] == "image.missing_alt"], [2, 3])
+        self.assertEqual([f["line"] for f in findings
+                          if f["rule_id"] == "image.duplicate_attribute"], [2, 3])
+
     def test_duplicate_html_image_alt_uses_first_value(self):
         self.write("README.md",
                    '# Example\n'
