@@ -312,6 +312,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Make the offline README audit use the first HTML image attribute when `alt`,
+  `src`, `role` or an ARIA naming/visibility attribute is repeated, instead
+  of silently using the last attribute. Report these malformed duplicates and
+  test both false-positive and false-negative alt/name and remote-asset cases.
+  This follows HTML parser precedence, not rendered accessibility certification.
+
 - Resolve simple top-level GFM setext heading fragments in the offline HTML
   navigation checker (including shared ATX/setext duplicate suffixes), with
   regressions for multiline text, cross-file links, and fenced/list/quote
