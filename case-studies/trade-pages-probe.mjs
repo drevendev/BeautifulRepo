@@ -12,6 +12,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { assessTextContrast } from "./contrast-metrics.mjs";
+import { assessFocusOutline } from "./focus-outline-metrics.mjs";
 import { COLLAPSED_TABS, assessCollapsedTabs, assessM3Keyboard } from "./keyboard-path-metrics.mjs";
 import { assessM4Expansion } from "./m4-expansion-metrics.mjs";
 import { assessM4TableKeyboard } from "./m4-table-keyboard-metrics.mjs";
@@ -47,7 +48,7 @@ const report = {
     "physical phone",
     "400% browser zoom",
     "screen reader",
-    "focus-indicator contrast, full WCAG conformance, alpha/image compositing and visually verified typography",
+    "rendered focus pixels and full focus-indicator contrast, WCAG conformance, alpha/image compositing and visually verified typography",
     "expanded M4 chart keyboard exploration, screen-reader table access, other-browser table panning and Legacy interaction beyond the sampled M4 semantics",
     "runtime TypeScript or .NET simulation",
     "entire deployed HTML/JS commit provenance",
@@ -182,8 +183,29 @@ async function observeChapterKeyboard(context, theme) {
       const label = (node?.getAttribute("aria-label") ||
         [...(node?.labels || [])].map(item => item.textContent || "").join(" ") ||
         node?.textContent || "").trim();
+      const backgroundChain = [];
+      let ancestor = node?.parentElement ?? null;
+      while (ancestor && backgroundChain.length < 24) {
+        const css = getComputedStyle(ancestor);
+        backgroundChain.push({
+          color: css.backgroundColor, image: css.backgroundImage,
+          opacity: css.opacity, blend: css.mixBlendMode,
+          filter: css.filter, backdropFilter: css.backdropFilter || "none",
+        });
+        ancestor = ancestor.parentElement;
+      }
       return {
         selector, matches: Boolean(node?.matches(selector)),
+        present: Boolean(node),
+        outlineStyle: style?.outlineStyle || null,
+        outlineColor: style?.outlineColor || null,
+        outlineWidthPx: style ? Number.parseFloat(style.outlineWidth) : null,
+        outlineOffsetPx: style ? Number.parseFloat(style.outlineOffset) : null,
+        focusOpacity: style?.opacity ?? null,
+        focusFilter: style?.filter ?? null,
+        focusBackdropFilter: style ? (style.backdropFilter || "none") : null,
+        focusBlend: style?.mixBlendMode ?? null,
+        backgroundChain, chainTruncated: Boolean(ancestor),
         actualTag: node?.tagName || null, actualId: node?.id || null,
         focusVisible: Boolean(node?.matches(":focus-visible")),
         outlined: Boolean(style && style.outlineStyle !== "none" &&
@@ -200,6 +222,8 @@ async function observeChapterKeyboard(context, theme) {
       result.tabStops.push({ label: step.label, ...await focus(step.selector) });
     }
     result.collapsed = assessCollapsedTabs(result.tabStops);
+    // Evidence only: measured contrast is not a pass gate for the target site.
+    result.focusOutlineContrast = result.tabStops.map(assessFocusOutline);
     // From the last (Legacy) summary, return to the fourth-from-last (M3).
     for (let i = 0; i < 4; i++) await tabPage.keyboard.press("Shift+Tab");
     const summaryFocus = await focus("#chapter-m3 > summary");
@@ -523,7 +547,7 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     "",
     "Observed Chromium at **320 CSS px** in both emulated color schemes.",
     "Computed text contrast uses WCAG 2.2 SC 1.4.3 AA thresholds only for nine named rendered samples; complex layers remain NOT MEASURABLE.",
-    "This is not a phone, 400% zoom, screen-reader test, focus contrast audit, table keyboard-panning check, exhaustive chart traversal or proof of deployed HTML/JS revision.",
+    "This is not a phone, 400% zoom, screen-reader test, full rendered focus contrast audit, exhaustive chart traversal or proof of deployed HTML/JS revision.",
     "",
     "| Theme | Saved JSON exact | Last tick/capital | Overflow | Five-stop entrance | Collapsed chapters | M3 tick | M4 chart/table semantics |",
     "| --- | --- | --- | --- | --- | --- | --- |"];
@@ -548,7 +572,18 @@ if (process.env.GITHUB_STEP_SUMMARY) {
         " | " + row.outcome + " |");
     }
   }
-  rows.push("", "These are selected computed-style values, not full-page WCAG conformance or observed visual focus contrast.",
+  rows.push("", "### Native Tab focus: computed outline color only", "",
+    "| Theme | Focus stop | Computed ratio | Observation |",
+    "| --- | --- | ---: | --- |");
+  for (const theme of ["light", "dark"]) {
+    for (const sample of report.themes[theme]?.chapterKeyboard?.focusOutlineContrast || []) {
+      rows.push("| " + theme + " | " + sample.label +
+        " | " + (sample.ratio ?? "NOT MEASURABLE") +
+        " | " + sample.outcome + " |");
+    }
+  }
+  rows.push("", "These are selected computed-style values; no focus-area, overlap, rendered-pixel or screen-reader verdict.",
+    "", "These are selected computed-style values, not full-page WCAG conformance or observed visual focus contrast.",
     "", "Artifacts contain a JSON observation record and full-page screenshots when captured.",
     "Different computed body backgrounds: " + themesDistinct + ".",
     "Failures (network/data/viewer/selected keyboard path): " + failures + ".",

@@ -8,6 +8,8 @@ on:
       - 'case-studies/trade-pages-probe.mjs'
       - 'case-studies/contrast-metrics.mjs'
       - 'case-studies/contrast-metrics.test.mjs'
+      - 'case-studies/focus-outline-metrics.mjs'
+      - 'case-studies/focus-outline-metrics.test.mjs'
       - 'case-studies/keyboard-path-metrics.mjs'
       - 'case-studies/keyboard-path-metrics.test.mjs'
       - 'case-studies/m4-expansion-metrics.mjs'
@@ -39,6 +41,8 @@ jobs:
           node-version: '22'
       - name: Run offline contrast-metric regressions
         run: node --test case-studies/contrast-metrics.test.mjs
+      - name: Run offline focus-outline metric regressions
+        run: node --test case-studies/focus-outline-metrics.test.mjs
       - name: Run offline keyboard-path regressions
         run: node --test case-studies/keyboard-path-metrics.test.mjs
       - name: Run offline expanded-M4 regressions

@@ -620,6 +620,34 @@ were produced by the workflow, but the new screenshots have not been
 manually assessed for visual legibility. Other engines and viewport
 sizes remain untested.
 
+## Native keyboard focus-outline color observations (measured 2026-11-01)
+
+The existing [live Chromium case probe](trade-pages-probe.mjs) now records
+computed outline color, width, offset and conservative outer-background samples
+for all **ten native Tab stops** in the collapsed page at 320 CSS px, in both
+emulated color schemes. The [offline test-backed assessor](focus-outline-metrics.mjs)
+compares fully opaque outline/background pairs with an **unrounded 3:1 threshold**
+inspired by [WCAG 2.2 SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast).
+It reports lower ratios as findings and unsupported gradients, alpha, filters,
+blending, missing focus or ambiguous outlines as **NOT MEASURABLE**, never PASS.
+
+The report belongs to the existing saved JSON browser evidence and GitHub
+Actions step summary; no source or settings changes are made to
+`trade_simulation`. On the repaired instrumentation code head
+[`bde338f`](https://github.com/drevendev/BeautifulRepo/commit/bde338f3e3c83d17b95e58d8ec0637aa27d80af4),
+[live Chromium run #41268897780](https://github.com/drevendev/BeautifulRepo/actions/runs/41268897780)
+measured **10/10 native Tab stops per theme** with selected opaque CSS
+outline/background ratios of **5.69:1 (light)** and **6.13:1 (dark)**.
+The [retained observations and screenshots](https://github.com/drevendev/BeautifulRepo/actions/runs/41268897780/artifacts/13067763592)
+record the focused element's opacity/filter/blending, and the selected keyboard
+sequence passed in both emulated themes. These uniform sampled ratios are
+**not** visual focus acceptance. Computed CSS alone does not
+prove visible pixels or coverage of adjacent colors, element occlusion, focus
+indicator area under [WCAG 2.2 SC 2.4.13](https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance),
+other browser engines, screen-reader access or full WCAG conformance.
+A low or indeterminate measured ratio is an observed finding for the target,
+not permission to edit its code.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
