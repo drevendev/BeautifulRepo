@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add a dependency-free, read-only `readme_preview.py` that previews a proposed
+  README as a unified diff, prints content hashes and line-ending differences,
+  rejects stale source hashes and bounded unsafe inputs, and requires no target
+  code execution. Eight regression tests and the README skill usage explain
+  the separate explicit edit-approval gate; this is not a write mechanism (#70).
+
+
 - Add a dated, source-only Quillgrain + Quillgrain_Voice_Common first-run and reporting-route baseline with pinned source revisions, reproducible candidate commands and explicit unverified execution/security limitations. This is not an executed before/after improvement (related to #83 and #88).
 
 - Explain entry-point coverage drift in offline audit comparisons: name changed
