@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import stat
 import sys
+import unicodedata
 
 MAX_BYTES = 256 * 1024
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -25,6 +26,17 @@ def _redirect(path: Path) -> bool:
     return stat.S_ISLNK(info.st_mode) or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG
 
 
+def _unsafe_display_character(ch: str) -> bool:
+    """Reject controls that could alter the apparent ordering of a terminal diff."""
+    cp = ord(ch)
+    return (
+        (unicodedata.category(ch) == "Cc" and ch not in "\t\r\n")
+        or cp in (0x061C, 0x200E, 0x200F)
+        or 0x202A <= cp <= 0x202E
+        or 0x2066 <= cp <= 0x2069
+    )
+
+
 def read_file(path: Path, label: str) -> tuple[bytes, str]:
     try:
         if _redirect(path) or not stat.S_ISREG(path.lstat().st_mode):
@@ -38,9 +50,12 @@ def read_file(path: Path, label: str) -> tuple[bytes, str]:
         if len(data) > MAX_BYTES:
             raise PreviewError(f"{label}: exceeds the 256 KiB limit.")
         text = data.decode("utf-8-sig")
-        # Do not feed untrusted terminal control codes to the reviewer.
-        if any((ord(ch) < 32 and ch not in "\t\r\n") or ord(ch) == 127 for ch in text):
-            raise PreviewError(f"{label}: contains unsupported control characters.")
+        # Bare carriage returns can overwrite terminal output; CRLF is allowed.
+        if "\r" in text.replace("\r\n", ""):
+            raise PreviewError(f"{label}: contains a bare carriage return (only CRLF is supported).")
+        # C1 controls and bidi format marks can spoof a diff without ASCII ESC.
+        if any(_unsafe_display_character(ch) for ch in text):
+            raise PreviewError(f"{label}: contains unsupported display control characters.")
         return data, text
     except PreviewError:
         raise
