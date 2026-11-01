@@ -76,6 +76,31 @@ class AuditDeltaTests(unittest.TestCase):
         self.assertNotIn("FIXED", text.stdout)
         self.assertNotIn("README.md", text.stdout)
 
+    def test_coverage_details_name_roles_but_not_file_paths(self):
+        old = report()
+        new = report(read_files=["README.md", "COPYING.md"])
+        new["documents"]["license"] = "COPYING.md"
+        result = self.run_cli(old, new, "--format", "json")
+        self.assertEqual(0, result.returncode, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload["coverage_changed"])
+        self.assertEqual(["license"], payload["coverage_details"]["changed_document_roles"])
+        self.assertTrue(payload["coverage_details"]["read_files_changed"])
+        self.assertEqual(1, payload["coverage_details"]["read_file_count_before"])
+        self.assertEqual(2, payload["coverage_details"]["read_file_count_after"])
+        self.assertNotIn("COPYING.md", result.stdout)
+        self.assertNotIn("README.md", result.stdout)
+
+    def test_equal_count_file_switch_is_reported_without_names(self):
+        before = report(read_files=["README.md"])
+        after = report(read_files=["INDEX.md"])
+        result = self.run_cli(before, after)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Coverage changed: YES", result.stdout)
+        self.assertIn("Inspected-file selection changed: 1 -> 1 entries", result.stdout)
+        self.assertNotIn("INDEX.md", result.stdout)
+        self.assertNotIn("README.md", result.stdout)
+
     def test_unmatched_profiles_rejected(self):
         text = self.run_cli(report(profile="public"), report(profile="private"))
         self.assertEqual(2, text.returncode)

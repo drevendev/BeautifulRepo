@@ -39,9 +39,13 @@ then only rules whose **occurrence counts changed**. For example, a line of
 “WARNING [readme.placeholder]: 2 -> 1 (-1)” would say exactly that one fewer
 placeholder warning was detected. It does **not** establish which placeholder
 was repaired or whether the final README is better. If coverage_changed is
-true, the selected document paths or read-file set changed; inspect that
-first. Even unchanged coverage does not prove that two checkouts have
-identical runtime behavior.
+true, the tool reports which **entry-point roles** changed (README,
+license or contribution document) and whether the set of inspected files
+changed, including before/after file counts. It deliberately withholds the
+actual filenames to avoid echoing private report paths. A switch between two
+files can have identical counts; compare both saved reports privately to
+understand the cause. Even unchanged coverage does not prove that two checkouts
+have identical runtime behavior.
 
 For reproducibility, use the same pinned BeautifulRepo audit implementation on
 both snapshots. The comparison validates source schema v1 and equal audit

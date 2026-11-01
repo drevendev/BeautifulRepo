@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Explain entry-point coverage drift in offline audit comparisons: name changed
+  document roles and report inspected-file counts, including same-count file
+  switches, without disclosing the underlying paths. Add regression cases
+  for both role changes and privacy-preserving output (follow-up to #226).
+
 - Add an offline, bounded, read-only before/after comparator for two
   repository entry-point audit JSON reports, with per-rule count deltas,
   same-profile validation, coverage-change detection, real-audit regressions,

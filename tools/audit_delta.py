@@ -90,9 +90,18 @@ def compare(before: dict, after: dict) -> dict:
         for severity, rule in sorted(set(old) | set(new), key=lambda x: (SEVERITIES.index(x[0]), x[1]))
         if old[severity, rule] != new[severity, rule]
     ]
+    changed_roles = [role for role in ("readme", "license", "contributing")
+                     if before["documents"][role] != after["documents"][role]]
+    files_changed = sorted(before["read_files"]) != sorted(after["read_files"])
+    coverage_details = {
+        "changed_document_roles": changed_roles,
+        "read_files_changed": files_changed,
+        "read_file_count_before": len(before["read_files"]),
+        "read_file_count_after": len(after["read_files"]),
+    }
     return {"schema_version": 1, "audit_schema_version": 1, "profile": first,
-            "coverage_changed": (before["documents"] != after["documents"]
-                                 or sorted(before["read_files"]) != sorted(after["read_files"])),
+            "coverage_changed": bool(changed_roles or files_changed),
+            "coverage_details": coverage_details,
             "before": {level: before["summary"][level] for level in SEVERITIES},
             "after": {level: after["summary"][level] for level in SEVERITIES},
             "changes": changes}
@@ -102,6 +111,13 @@ def render_text(delta: dict) -> str:
     lines = ["BeautifulRepo audit delta (offline; count changes, not verified fixes)",
              "Coverage changed: " + ("YES — review the entry-point documents inspected."
                                    if delta["coverage_changed"] else "no")]
+    if delta["coverage_changed"]:
+        details = delta["coverage_details"]
+        if details["changed_document_roles"]:
+            lines.append("Changed entry-point roles: " + ", ".join(details["changed_document_roles"]))
+        if details["read_files_changed"]:
+            lines.append(f"Inspected-file selection changed: {details['read_file_count_before']} -> "
+                         f"{details['read_file_count_after']} entries (paths withheld).")
     for level in SEVERITIES:
         lines.append(f"{level.capitalize()}: {delta['before'][level]} -> {delta['after'][level]}")
     if not delta["changes"]:
