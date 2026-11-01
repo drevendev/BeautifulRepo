@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -137,6 +138,18 @@ class ReadmePreviewTests(unittest.TestCase):
                     self.assertEqual("", result.stdout)
                     self.assertIn("display control", result.stderr)
                     path.write_bytes(before)
+
+    def test_utf8_output_when_parent_requests_legacy_encoding(self):
+        self.proposal.write_text("# Пример\n\nשלום  مرحبا\n", encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, "-I", str(TOOL), "--root", str(self.repo),
+             "--proposal", str(self.proposal)],
+            cwd=self.tmp, capture_output=True, text=True, encoding="utf-8",
+            env={**os.environ, "PYTHONIOENCODING": "cp1252"}, timeout=10,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Пример", result.stdout)
+        self.assertIn("مرحبا", result.stdout)
 
     def test_regular_non_ascii_text_is_allowed(self):
         self.proposal.write_text("# Пример\n\nשלום  مرحبا\n", encoding="utf-8")
