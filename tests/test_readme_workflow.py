@@ -107,7 +107,8 @@ class ReadmeWorkflowTests(unittest.TestCase):
         self.assertTrue({"readme.placeholder", "link.vague_text"} <= before_rules)
         broken_links = self.tool("docs_links.py", "--root", self.target)
         self.assertNotEqual(0, broken_links.returncode, broken_links.stdout)
-        self.assertEqual(0, self.tool("html_navigation.py", "--root", self.target).returncode)
+        broken_navigation = self.tool("html_navigation.py", "--root", self.target)
+        self.assertNotEqual(0, broken_navigation.returncode, broken_navigation.stdout)
 
         old_bytes = self.readme.read_bytes()
         proposed_bytes = self.proposal.read_bytes()
