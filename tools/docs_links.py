@@ -52,6 +52,16 @@ TYPE1_HTML_BLOCK_CLOSE_RE = re.compile(
 )
 TYPE2_HTML_COMMENT_OPEN_RE = re.compile(r"^ {0,3}<!--")
 TYPE2_HTML_COMMENT_CLOSE_RE = re.compile(r"-->")
+# GFM raw HTML block types 3–5: each closes only at its own delimiter.
+# Types 6–7 are deliberately not approximated by this source scanner.
+TYPE3_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<\?")
+TYPE4_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<![A-Z]")
+TYPE5_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<!\[CDATA\[")
+HTML_BLOCK_345_STARTS = (
+    (TYPE3_HTML_BLOCK_OPEN_RE, "?>"),
+    (TYPE4_HTML_BLOCK_OPEN_RE, ">"),
+    (TYPE5_HTML_BLOCK_OPEN_RE, "]]>"),
+)
 MARKDOWN_WHITESPACE = " \t\r\n"
 # cmark-gfm stops reading a bare link destination at its 33rd unclosed '(' (see
 # manual_scan_link_url_2), and CommonMark allows such a limit. It also keeps
@@ -679,12 +689,13 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
 
 def _mask_fenced_and_type1_html_blocks(text: str) -> str:
-    """Mask fenced code and GFM type-1/type-2 raw HTML in source order."""
+    """Mask fenced code and GFM type-1 through type-5 raw HTML in source order."""
     masked = []
     fence_char = None
     fence_length = 0
     in_type1_html = False
     in_type2_comment = False
+    in_type345_end = None
 
     for raw_line in split_markdown_lines(text):
         if raw_line.endswith("\r\n"):
@@ -716,6 +727,12 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
                 in_type2_comment = False
             continue
 
+        if in_type345_end is not None:
+            masked.append(" " * len(line) + ending)
+            if in_type345_end in line:
+                in_type345_end = None
+            continue
+
         opening = FENCE_RE.match(line)
         if opening:
             marker = opening.group("fence")
@@ -738,7 +755,14 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
                 in_type2_comment = True
             continue
 
-        masked.append(line + ending)
+        for opener, terminator in HTML_BLOCK_345_STARTS:
+            if opener.match(line):
+                masked.append(" " * len(line) + ending)
+                if terminator not in line:
+                    in_type345_end = terminator
+                break
+        else:
+            masked.append(line + ending)
 
     return "".join(masked)
 
