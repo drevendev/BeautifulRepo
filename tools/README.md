@@ -14,6 +14,12 @@ python -m unittest discover -s tests -v
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
 repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 
+For an evidence-based change comparison, save two JSON entry-point audits and
+run `python -I tools/audit_delta.py before.json after.json`. The
+[before/after comparison guide](../guides/audit-before-after.md) explains
+coverage changes, immutable revisions, input limits and why fewer warnings
+are not automatically fixes. This offline tool never executes the target.
+
 `--data` and `--output` accept alternative paths for a separate collection.
 `--write` prepares UTF-8 bytes and atomically replaces the selected output via a temporary sibling; review the path before using it. Failed encoding/replacement leaves the previous file unchanged (this is not an fsync/crash-durability guarantee).
 
