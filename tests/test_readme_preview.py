@@ -139,6 +139,29 @@ class ReadmePreviewTests(unittest.TestCase):
                     self.assertIn("display control", result.stderr)
                     path.write_bytes(before)
 
+    def test_unicode_line_separators_cannot_forge_diff_lines(self):
+        # splitlines(keepends=True) treats these as newlines even without LF.
+        for separator in ("\u2028", "\u2029"):
+            for path in (self.readme, self.proposal):
+                with self.subTest(codepoint=hex(ord(separator)), path=path.name):
+                    original = path.read_bytes()
+                    path.write_text("A" + separator + "B\n", encoding="utf-8")
+                    result = self.command()
+                    self.assertEqual(2, result.returncode)
+                    self.assertEqual("", result.stdout)
+                    self.assertIn("display control", result.stderr)
+                    self.assertNotIn("@@ -1,2 +1,2 @@", result.stdout)
+                    self.assertNotIn("No newline at end of file", result.stdout)
+                    path.write_bytes(original)
+
+        # A physical LF line really is one diff line, with no invented marker.
+        self.readme.write_text("A Пример\n", encoding="utf-8")
+        self.proposal.write_text("A Другое\n", encoding="utf-8")
+        result = self.command()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("@@ -1 +1 @@", result.stdout)
+        self.assertNotIn("No newline at end of file", result.stdout)
+
     def test_utf8_output_when_parent_requests_legacy_encoding(self):
         self.proposal.write_text("# Пример\n\nשלום  مرحبا\n", encoding="utf-8")
         result = subprocess.run(
