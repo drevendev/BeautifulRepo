@@ -356,11 +356,12 @@ keep their original themed headings.
 
 ### Fixed
 
-- Reject bare carriage returns, C1 terminal controls and Unicode directional
-  formatting marks in both input files of the read-only README diff preview.
-  These previously passed validation and could visually reorder or overwrite
-  terminal output. Preserve CRLF and ordinary non-ASCII text; three regression
-  cases cover both inputs, exact failure behavior and safe international text
+- Reject bare carriage returns, C1 terminal controls, Unicode directional
+  formatting marks, and U+2028/U+2029 line/paragraph separators in both inputs
+  of the read-only README diff preview. These previously passed validation and
+  could overwrite/reorder terminal output or invent diff lines and newline
+  markers. Preserve CRLF and ordinary non-ASCII text; regressions cover both
+  inputs, fail-closed output, physical LF hunk counts and international text
   (#70).
 
 
