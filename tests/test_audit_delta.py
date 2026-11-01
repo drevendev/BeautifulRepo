@@ -98,6 +98,23 @@ class AuditDeltaTests(unittest.TestCase):
         self.before.write_bytes(b"x" * (delta.LIMIT + 1))
         self.assertEqual(2, self.invoke().returncode)
 
+    def test_oversized_json_integer_reports_clean_error(self):
+        # CPython 3.11+ may reject integers exceeding its decimal digit limit.
+        # The parser error must not leak a traceback or exit with code 1.
+        max_digits = getattr(sys, "get_int_max_str_digits", lambda: 4300)()
+        if max_digits == 0:
+            self.skipTest("integer string conversion limit is disabled")
+        digits = "9" * max(5000, max_digits + 1)
+        oversized_integer = json.dumps(report())[:-1] + ',"unused_number":' + digits + '}'
+        self.assertLess(len(oversized_integer), delta.LIMIT)
+        self.before.write_text(oversized_integer, encoding="utf-8")
+        self.after.write_text(json.dumps(report()), encoding="utf-8")
+        result = self.invoke("--format", "json")
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertEqual("", result.stdout)
+        self.assertIn("audit_delta:", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
     def test_symlink_report_rejected(self):
         self.after.write_text(json.dumps(report()), encoding="utf-8")
         original = self.home / "original.json"
