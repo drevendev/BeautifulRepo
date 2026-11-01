@@ -31,7 +31,7 @@ def _unsafe_display_character(ch: str) -> bool:
     cp = ord(ch)
     return (
         (unicodedata.category(ch) == "Cc" and ch not in "\t\r\n")
-        or cp in (0x061C, 0x200E, 0x200F)
+        or cp in (0x061C, 0x200E, 0x200F, 0x2028, 0x2029)
         or 0x202A <= cp <= 0x202E
         or 0x2066 <= cp <= 0x2069
     )
@@ -53,7 +53,7 @@ def read_file(path: Path, label: str) -> tuple[bytes, str]:
         # Bare carriage returns can overwrite terminal output; CRLF is allowed.
         if "\r" in text.replace("\r\n", ""):
             raise PreviewError(f"{label}: contains a bare carriage return (only CRLF is supported).")
-        # C1 controls and bidi format marks can spoof a diff without ASCII ESC.
+        # C1/bidi controls can spoof output; Unicode separators misframe splitlines().
         if any(_unsafe_display_character(ch) for ch in text):
             raise PreviewError(f"{label}: contains unsupported display control characters.")
         return data, text
