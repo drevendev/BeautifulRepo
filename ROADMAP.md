@@ -20,6 +20,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Offline repository entry-point audit](guides/repository-audit.md), with bounded
   read-only checks, actionable findings and a
   [tested before/after walkthrough](examples/repository-audit/README.md).
+- [Read-only audit delta](guides/audit-before-after.md) for comparing saved
+  JSON reports across pinned revisions, with coverage-change warnings and
+  no claim that reduced finding counts prove an improved experience.
 - [Community safety readiness](guides/community-safety.md) guidance and an explicitly
   non-live security-policy scaffold, without fictitious confidential reporting routes.
 - [Tested CLI repository starter](guides/cli-repositories.md), including an executable

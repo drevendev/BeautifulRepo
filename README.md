@@ -65,6 +65,10 @@ For an actual **before/after documentation diagnostic**, run
 warnings becoming one after README fixes; the fictional input is disclosed,
 and unresolved license/contribution observations remain visible.
 
+For real repository revisions, the [offline audit comparison](guides/audit-before-after.md)
+reads two saved entry-point audit reports and lists changed rule counts and
+coverage without inventing a beauty score or claiming that warnings were fixed.
+
 ## Start here
 
 | Your goal | First step | Visible result |
