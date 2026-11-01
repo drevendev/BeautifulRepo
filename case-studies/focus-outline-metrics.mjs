@@ -12,6 +12,13 @@ export function assessFocusOutline(sample) {
       sample.focusVisible !== true || sample.inViewport !== true) {
     return unknown("missing, mismatched or non-visible keyboard focus");
   }
+  // A focused element can have an opaque outline yet be invisible after its own
+  // opacity, filter or blend is applied. Treat all non-identity (or missing)
+  // focused-element compositing as unknown, not as measured contrast.
+  if (Number(sample.focusOpacity) !== 1 || sample.focusFilter !== "none" ||
+      sample.focusBackdropFilter !== "none" || sample.focusBlend !== "normal") {
+    return unknown("focused-element compositing requires visual assessment");
+  }
   if (sample.outlineStyle !== "solid" || !Number.isFinite(sample.outlineWidthPx) ||
       sample.outlineWidthPx < 2) {
     return unknown("requires a solid outline at least two CSS pixels wide");
