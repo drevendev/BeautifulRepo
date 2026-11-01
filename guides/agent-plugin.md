@@ -156,6 +156,13 @@ codes and verifies that neither the source nor the test target was modified by
 the tools. It does **not** execute fixture code, call an LLM or prove that a model
 would ignore a malicious README.
 
+For a **mechanical end-to-end README edit** with an initial audit, exact
+preview, refused unapproved write, test-only simulated approval, README-only
+replacement and repeat audit, run the
+[synthetic README approval flow](../examples/readme-approval-flow/README.md).
+This regression never executes target code or a model and does not prove
+that an agent actually waited for user consent.
+
 For **manual Codex and Claude Code acceptance across all four skills**, use the
 [synthetic smoke-test matrix](../evals/manual-smoke.md). It names every positive,
 negative and hostile case, checks actual skill invocation and fixture visibility,
