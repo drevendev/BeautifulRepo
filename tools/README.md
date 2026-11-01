@@ -40,6 +40,37 @@ that the proposed README is correct or authorized. Review the diff for private
 content before sharing it. The checker is not a sandbox against a concurrently
 mutating or hostile filesystem.
 
+## Apply a previously approved README proposal
+
+After a human has **explicitly approved the exact displayed diff and file list**,
+a separate helper can apply the already inspected candidate, with both SHA-256
+values from that approval:
+
+```sh
+python -I tools/readme_apply.py --root /path/to/target \
+  --proposal /path/to/candidate.md \
+  --approved-current-sha256 ORIGINAL_HASH \
+  --approved-proposed-sha256 PROPOSAL_HASH
+```
+
+The proposal must be outside the target checkout. The tool rechecks both byte
+hashes and refuses stale or unsafe input, missing required hashes, symlinked
+files, non-UTF-8 text, display controls and candidates over 256 KiB. On a normal
+local filesystem it stages a temporary sibling, checks the current README again,
+and replaces **only** `README.md`; it removes the staging file on ordinary
+failures and retains the proposal file. It preserves POSIX mode bits. The tool
+does not obtain, authenticate or infer consent: **hash arguments prove byte
+identity, not approval.** Never invoke it unless a separate, specific human
+approval of this exact diff has already been received. A general edit request
+does not qualify.
+
+After application run the handbook's read-only audit and link checks, compare
+results with the recorded before-state, and keep unexecuted target commands
+labelled unverified. The helper does not audit claims, run repository code,
+commit, push or provide a sandbox against a concurrently hostile filesystem.
+An abrupt crash can leave a staging file; atomic replacement is not a
+durability guarantee. See the [improve-readme skill](../skills/improve-readme/SKILL.md).
+
 For an evidence-based change comparison, save two JSON entry-point audits and
 run `python -I tools/audit_delta.py before.json after.json`. The
 [before/after comparison guide](../guides/audit-before-after.md) explains

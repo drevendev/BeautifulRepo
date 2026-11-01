@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Add an explicit-after-consent, SHA-256-bound `readme_apply.py` to apply
+  only an already reviewed `README.md` proposal, with stale source/candidate
+  checks, constrained input files, temporary-sibling replacement and ten
+  black-box regressions. Hashes verify exact bytes **not** user approval;
+  the skill still requires a separate explicit yes and before/after read-only
+  audits. This is not a sandbox against concurrent hostile filesystem changes
+  or proof of model behavior (#70).
+
 - Add a dependency-free, read-only `readme_preview.py` that previews a proposed
   README as a unified diff, prints content hashes and line-ending differences,
   rejects stale source hashes and bounded unsafe inputs, and requires no target

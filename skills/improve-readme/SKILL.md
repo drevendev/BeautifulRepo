@@ -112,6 +112,23 @@ files, run the target's code, invoke network tools or commit/push by inference.
 If approval is partial, apply only the explicitly approved subset with a
 matching diff; otherwise stop.
 
+When the already-reviewed candidate is a regular file **outside** `T`,
+you may use the installed exact-hash helper **only after** the user has
+approved that specific file list and displayed diff. Take both hashes from the
+approved `readme_preview.py` output:
+
+```text
+<py> -I "R/tools/readme_apply.py" --root "T" --proposal "/path/to/approved/candidate.md" --approved-current-sha256 ORIGINAL_SHA256 --approved-proposed-sha256 PROPOSED_SHA256
+```
+
+The two hashes are integrity checks, **not evidence of user permission**.
+Never derive an implicit "yes" from their availability. The helper applies
+only `README.md` through a temporary sibling, rejects changed inputs and
+does not authenticate approval, prevent hostile concurrent filesystem races,
+run target code or commit/push. Stop on a mismatch; show a fresh diff and
+obtain new approval, rather than retrying with updated hashes. For other
+approved files, follow the explicit per-file diff/confirmation workflow above.
+
 Run the same three **BeautifulRepo read-only checks** above again, against
 `T`. Report before/after findings and actual exit statuses, clearly
 separating the verified link/audit results from the unexecuted target's
