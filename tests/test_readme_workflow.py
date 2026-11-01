@@ -14,7 +14,6 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-HASH_LINE = re.compile(r"^(.+README SHA-256:)\s+([0-9a-f]{64})$", re.MULTILINE)
 
 
 class ReadmeWorkflowTests(unittest.TestCase):
