@@ -124,6 +124,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.expected_sha256 is not None and not SHA256.fullmatch(args.expected_sha256):
         parser.error("--expected-sha256 must contain 64 lowercase hex characters")
     try:
+        # A piped Windows console may default to cp1252; emit valid UTF-8 diffs.
+        sys.stdout.reconfigure(encoding="utf-8")
         print(preview(args.root, args.proposal, args.expected_sha256), end="")
     except PreviewError as exc:
         print(f"readme_preview: {exc}", file=sys.stderr)
