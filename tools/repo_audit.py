@@ -166,7 +166,7 @@ def _split_lines(text: str) -> list[str]:
 
 
 def _masked(text: str) -> str:
-    return "".join("\n" if char == "\n" else " " for char in text)
+    return "".join(char if char in "\r\n" else " " for char in text)
 
 
 def _mask_code_spans(source: str) -> str:
@@ -184,7 +184,7 @@ def _mask_code_spans(source: str) -> str:
             continue
         end = candidates[j]
         for pos in range(runs[i].start(), runs[end].end()):
-            if chars[pos] != "\n":
+            if chars[pos] not in "\r\n":
                 chars[pos] = " "
         i = end + 1
     return "".join(chars)
