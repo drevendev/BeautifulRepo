@@ -84,6 +84,20 @@ Return a concise diagnosis and **plan**, then:
    **Stop with no edits** until that approval is received. A general request
    to improve a README is not this confirmation.
 
+When a proposal file already exists **outside the target checkout**, optionally
+show a local read-only preview using:
+
+```text
+<py> -I "R/tools/readme_preview.py" --root "T" --proposal "/path/to/existing/candidate.md"
+```
+
+Its current README SHA-256 can be supplied later as `--expected-sha256` to
+reject an outdated preview. The helper prints a diff but **never edits** the
+target, grants approval or replaces this skill's exact-diff confirmation.
+If no proposal file already exists, show the unified diff directly in the
+conversation; do **not** create an unapproved candidate in the target.
+Never treat the tool's exit code 0 as proof that any README claim is true.
+
 Do not add a green CI/status badge merely because a workflow filename exists:
 verify its backing workflow/target URL **and** obtain the user's confirmation
 of the badge claim. Without both, omit the badge. Likewise avoid invented
