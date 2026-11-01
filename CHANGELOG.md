@@ -13,7 +13,7 @@ keep their original themed headings.
 
 ### Added
 
-- Add read-only sampled focus-outline color observations to the existing live trade_simulation Chromium workflow: real native Tab focus at ten collapsed-page stops, two emulated color schemes, conservative unknowns, computed CSS evidence and seven deterministic Node regressions. This is not a rendered-pixel, screen-reader or WCAG conformance result (#82).
+- Add read-only sampled focus-outline color observations to the existing live trade_simulation Chromium workflow: real native Tab focus at ten collapsed-page stops, two emulated color schemes, conservative unknowns (including focused-element compositing), observed computed CSS evidence and eight deterministic Node regressions. This is not a rendered-pixel, screen-reader or WCAG conformance result (#82).
 
 - Offer opt-in, one-based and end-exclusive JSON source spans for simple vague inline links and placeholders. Preserve the default audit schema, legacy path/line fields, scan bounds and read-only behavior; unknown locations are null (#223).
 
