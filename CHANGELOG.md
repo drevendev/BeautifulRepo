@@ -372,7 +372,7 @@ keep their original themed headings.
 
 ### Fixed
 
-- Mask GFM raw HTML block types 3–5 in the offline Markdown destination scanner, retaining source line positions and matching each terminator only to its own block kind. Add regression cases for multi-line, single-line, unclosed, fenced and adjacent Markdown content; types 6–7 remain out of scope (issue #230, GFM source reviewed 2026-11-02).
+- Mask GFM raw HTML block types 3–5 in the offline Markdown destination scanner, retaining source line positions and matching each terminator only to its own block kind. Add regression cases for multi-line, single-line, unclosed, fenced and adjacent Markdown content; types 6–7 remain out of scope (issue #230, GFM source reviewed 2026-11-01 (UTC)).
 
 - Reject bare carriage returns, C1 terminal controls, Unicode directional
   formatting marks, and U+2028/U+2029 line/paragraph separators in both inputs
