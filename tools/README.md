@@ -322,7 +322,7 @@ instructions, uppercase declarations and CDATA), including unclosed blocks, whil
 source line numbers. Each type 3–5 block ends only at its matching `?>`, `>` or `]]>`.
 Types 6–7, complete container parsing and inline HTML rendering are outside this
 bounded scanner; raw HTML navigation is handled separately. See the
-[GFM HTML block rules](https://github.github.com/gfm/#html-blocks), reviewed 2026-11-02.
+[GFM HTML block rules](https://github.github.com/gfm/#html-blocks), reviewed 2026-11-01 (UTC).
 One-line full (`[text][id]`), collapsed (`[text][]`) and shortcut (`[id]`)
 reference-style links and images are checked when the matching single-line
 definition starts a Markdown block. Definitions may follow their uses. Labels
