@@ -74,7 +74,7 @@ class ReadmeApplyTests(unittest.TestCase):
 
     def test_stale_original_rejected_with_no_write(self):
         old = self.readme.read_bytes()
-        self.readme.write_text("# Edited by someone else\n", encoding="utf-8")
+        self.readme.write_bytes(b"# Edited by someone else\n")
         result = self.command(current=self.digest(old), proposed=self.digest(self.proposal.read_bytes()))
         self.assertEqual(2, result.returncode)
         self.assertEqual("", result.stdout)
