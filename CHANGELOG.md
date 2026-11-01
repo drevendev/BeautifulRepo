@@ -356,6 +356,15 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject bare carriage returns, C1 terminal controls, Unicode directional
+  formatting marks, and U+2028/U+2029 line/paragraph separators in both inputs
+  of the read-only README diff preview. These previously passed validation and
+  could overwrite/reorder terminal output or invent diff lines and newline
+  markers. Preserve CRLF and ordinary non-ASCII text; regressions cover both
+  inputs, fail-closed output, physical LF hunk counts and international text
+  (#70).
+
+
 - Interpret the first whitespace-separated HTML image `role` token in the offline entry audit, covering `role="none presentation"` and surrounding whitespace without allowing a later decorative token to override `role="img"`. This remains a source heuristic, not a browser accessible-name computation.
 
 - The offline HTML navigation checker now reports duplicate `role` and `aria-*`

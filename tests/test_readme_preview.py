@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -114,6 +115,70 @@ class ReadmePreviewTests(unittest.TestCase):
         self.assertIn("current=CRLF proposed=LF", result.stdout)
         self.assertIn("No newline at end of file", result.stdout)
         self.assertIn("+After", result.stdout)
+
+    def test_bare_carriage_return_is_rejected_in_both_inputs(self):
+        for path in (self.readme, self.proposal):
+            with self.subTest(path=path.name):
+                before = path.read_bytes()
+                path.write_bytes(b"# Example\rHide earlier output\n")
+                result = self.command()
+                self.assertEqual(2, result.returncode)
+                self.assertEqual("", result.stdout)
+                self.assertIn("bare carriage return", result.stderr)
+                path.write_bytes(before)
+
+    def test_unicode_c1_and_bidi_controls_are_rejected_in_both_inputs(self):
+        for ch in ("\u009b", "\u0085", "\u061c", "\u200e", "\u200f", "\u202a", "\u202e", "\u202c", "\u2066", "\u2069"):
+            for path in (self.readme, self.proposal):
+                with self.subTest(codepoint=hex(ord(ch)), path=path.name):
+                    before = path.read_bytes()
+                    path.write_text("# Example\n" + ch + "Hidden claim\n", encoding="utf-8")
+                    result = self.command()
+                    self.assertEqual(2, result.returncode)
+                    self.assertEqual("", result.stdout)
+                    self.assertIn("display control", result.stderr)
+                    path.write_bytes(before)
+
+    def test_unicode_line_separators_cannot_forge_diff_lines(self):
+        # splitlines(keepends=True) treats these as newlines even without LF.
+        for separator in ("\u2028", "\u2029"):
+            for path in (self.readme, self.proposal):
+                with self.subTest(codepoint=hex(ord(separator)), path=path.name):
+                    original = path.read_bytes()
+                    path.write_text("A" + separator + "B\n", encoding="utf-8")
+                    result = self.command()
+                    self.assertEqual(2, result.returncode)
+                    self.assertEqual("", result.stdout)
+                    self.assertIn("display control", result.stderr)
+                    self.assertNotIn("@@ -1,2 +1,2 @@", result.stdout)
+                    self.assertNotIn("No newline at end of file", result.stdout)
+                    path.write_bytes(original)
+
+        # A physical LF line really is one diff line, with no invented marker.
+        self.readme.write_text("A Пример\n", encoding="utf-8")
+        self.proposal.write_text("A Другое\n", encoding="utf-8")
+        result = self.command()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("@@ -1 +1 @@", result.stdout)
+        self.assertNotIn("No newline at end of file", result.stdout)
+
+    def test_utf8_output_when_parent_requests_legacy_encoding(self):
+        self.proposal.write_text("# Пример\n\nשלום  مرحبا\n", encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, "-I", str(TOOL), "--root", str(self.repo),
+             "--proposal", str(self.proposal)],
+            cwd=self.tmp, capture_output=True, text=True, encoding="utf-8",
+            env={**os.environ, "PYTHONIOENCODING": "cp1252"}, timeout=10,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Пример", result.stdout)
+        self.assertIn("مرحبا", result.stdout)
+
+    def test_regular_non_ascii_text_is_allowed(self):
+        self.proposal.write_text("# Пример\n\nשלום  مرحبا\n", encoding="utf-8")
+        result = self.command()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Пример", result.stdout)
 
 
 if __name__ == "__main__":

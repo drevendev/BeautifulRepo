@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import stat
 import sys
+import unicodedata
 
 MAX_BYTES = 256 * 1024
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -25,6 +26,17 @@ def _redirect(path: Path) -> bool:
     return stat.S_ISLNK(info.st_mode) or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG
 
 
+def _unsafe_display_character(ch: str) -> bool:
+    """Reject controls that could alter the apparent ordering of a terminal diff."""
+    cp = ord(ch)
+    return (
+        (unicodedata.category(ch) == "Cc" and ch not in "\t\r\n")
+        or cp in (0x061C, 0x200E, 0x200F, 0x2028, 0x2029)
+        or 0x202A <= cp <= 0x202E
+        or 0x2066 <= cp <= 0x2069
+    )
+
+
 def read_file(path: Path, label: str) -> tuple[bytes, str]:
     try:
         if _redirect(path) or not stat.S_ISREG(path.lstat().st_mode):
@@ -38,9 +50,12 @@ def read_file(path: Path, label: str) -> tuple[bytes, str]:
         if len(data) > MAX_BYTES:
             raise PreviewError(f"{label}: exceeds the 256 KiB limit.")
         text = data.decode("utf-8-sig")
-        # Do not feed untrusted terminal control codes to the reviewer.
-        if any((ord(ch) < 32 and ch not in "\t\r\n") or ord(ch) == 127 for ch in text):
-            raise PreviewError(f"{label}: contains unsupported control characters.")
+        # Bare carriage returns can overwrite terminal output; CRLF is allowed.
+        if "\r" in text.replace("\r\n", ""):
+            raise PreviewError(f"{label}: contains a bare carriage return (only CRLF is supported).")
+        # C1/bidi controls can spoof output; Unicode separators misframe splitlines().
+        if any(_unsafe_display_character(ch) for ch in text):
+            raise PreviewError(f"{label}: contains unsupported display control characters.")
         return data, text
     except PreviewError:
         raise
@@ -109,6 +124,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.expected_sha256 is not None and not SHA256.fullmatch(args.expected_sha256):
         parser.error("--expected-sha256 must contain 64 lowercase hex characters")
     try:
+        # A piped Windows console may default to cp1252; emit valid UTF-8 diffs.
+        sys.stdout.reconfigure(encoding="utf-8")
         print(preview(args.root, args.proposal, args.expected_sha256), end="")
     except PreviewError as exc:
         print(f"readme_preview: {exc}", file=sys.stderr)
