@@ -547,5 +547,115 @@ class AuditTests(unittest.TestCase):
             audit.audit_repository(self.root, profile="hidden")
 
 
+    def test_opt_in_source_spans_are_exact_and_legacy_default_is_unchanged(self):
+        self.write("README.md", "# Example\nΩ [here](docs.md) TODO\n")
+        original = self.report()
+        spanned = audit.audit_repository(self.root, source_spans=True)
+        self.assertEqual(spanned["schema_version"], 1)
+        self.assertEqual(spanned["summary"], original["summary"])
+        self.assertEqual(
+            [{key: value for key, value in item.items() if key != "location"}
+             for item in spanned["findings"]],
+            original["findings"],
+        )
+        self.assertTrue(all("location" not in item for item in original["findings"]))
+        entries = {item["rule_id"]: item for item in spanned["findings"]}
+        self.assertEqual(entries["link.vague_text"]["path"], "README.md")
+        self.assertEqual(entries["link.vague_text"]["line"], 2)
+        self.assertEqual(entries["link.vague_text"]["location"], {
+            "start": {"line": 2, "column": 3},
+            "end": {"line": 2, "column": 18},
+        })
+        self.assertEqual(entries["readme.placeholder"]["location"], {
+            "start": {"line": 2, "column": 19},
+            "end": {"line": 2, "column": 23},
+        })
+
+    def test_source_spans_use_code_points_for_crlf_and_no_final_newline(self):
+        self.write("README.md", "# Example\r\nπ [here](guide.md)\r\n".encode("utf-8"))
+        report = audit.audit_repository(self.root, source_spans=True)
+        link = next(x for x in report["findings"] if x["rule_id"] == "link.vague_text")
+        self.assertEqual(link["location"], {
+            "start": {"line": 2, "column": 3},
+            "end": {"line": 2, "column": 19},
+        })
+        self.write("README.md", b"# Example\r\n[here](x.md)")
+        report = audit.audit_repository(self.root, source_spans=True)
+        link = next(x for x in report["findings"] if x["rule_id"] == "link.vague_text")
+        self.assertEqual(link["location"], {
+            "start": {"line": 2, "column": 1},
+            "end": {"line": 2, "column": 13},
+        })
+        self.assertEqual(audit._source_span([0, 4, 8], 2, 5), {
+            "start": {"line": 1, "column": 3},
+            "end": {"line": 2, "column": 2},
+        })
+
+    def test_bare_cr_masking_preserves_source_lines_and_columns(self):
+        # CR-only line endings inside hidden regions must remain addressable.
+        self.write("README.md",
+                   b"# Example\r"
+                   b"```\rTODO [here](hidden.md)\r```\r"
+                   b"<!--\r[here](hidden.md) TODO\r-->\r"
+                   b"`TODO\rIGNORE` [here](x.md)")
+        report = audit.audit_repository(self.root, source_spans=True)
+        links = [item for item in report["findings"]
+                 if item["rule_id"] == "link.vague_text"]
+        self.assertEqual(len(links), 1)
+        self.assertEqual((links[0]["path"], links[0]["line"]),
+                         ("README.md", 9))
+        self.assertEqual(links[0]["location"], {
+            "start": {"line": 9, "column": 9},
+            "end": {"line": 9, "column": 21},
+        })
+        self.assertNotIn("readme.placeholder", self.codes(report))
+        legacy = self.report()
+        self.assertEqual(
+            [(item["path"], item["line"]) for item in legacy["findings"]
+             if item["rule_id"] == "link.vague_text"],
+            [("README.md", 9)],
+        )
+        self.assertTrue(all("location" not in item for item in legacy["findings"]))
+
+    def test_unknown_spans_are_null_and_hidden_code_is_not_reported(self):
+        (self.root / "LICENSE").unlink()
+        tick = chr(96)
+        self.write("README.md",
+                   "# Example\n"
+                   "<!-- [here](hidden.md) TODO -->\n"
+                   "[here](\nother.md)\n"
+                   f"{tick * 3}\n[click here](fenced.md) TODO\n{tick * 3}\n"
+                   "[Here](active.md)\n")
+        report = audit.audit_repository(self.root, source_spans=True)
+        self.assertEqual(len([f for f in report["findings"]
+                              if f["rule_id"] == "link.vague_text"]), 1)
+        self.assertNotIn("readme.placeholder", self.codes(report))
+        missing = next(f for f in report["findings"] if f["rule_id"] == "license.missing")
+        self.assertEqual(missing["path"], ".")
+        self.assertIsNone(missing["line"])
+        self.assertIsNone(missing["location"])
+
+    def test_source_spans_cli_is_json_only_and_deterministic(self):
+        self.write("README.md", "# Example\n[here](docs.md)\n")
+        first = self.cli("--format", "json", "--source-spans")
+        second = self.cli("--format", "json", "--source-spans")
+        self.assertEqual(first.returncode, 0, first.stderr)
+        self.assertEqual(first.stdout, second.stdout)
+        self.assertEqual(json.loads(first.stdout)["schema_version"], 1)
+        self.assertIn('"location"', first.stdout)
+        self.assertNotIn(str(self.root), first.stdout)
+        self.assertEqual(self.cli("--source-spans").returncode, 2)
+        default_report = json.loads(self.cli("--format", "json").stdout)
+        self.assertTrue(all("location" not in f for f in default_report["findings"]))
+
+    def test_oversized_document_with_spans_is_bounded_and_has_no_position(self):
+        self.write("README.md", b"# Example\n" + b"a" * (audit.MAX_DOCUMENT_BYTES + 1))
+        report = audit.audit_repository(self.root, source_spans=True)
+        item = next(f for f in report["findings"]
+                    if f["rule_id"] == "document.too_large")
+        self.assertIsNone(item["line"])
+        self.assertIsNone(item["location"])
+
+
 if __name__ == "__main__":
     unittest.main()

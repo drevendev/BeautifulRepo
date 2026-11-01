@@ -166,6 +166,33 @@ finding contains `rule_id`, `severity`, `path`, `line` (integer or null), `messa
 `remediation`. Output contains no timestamps or machine-specific absolute root path, and
 findings are sorted by severity, relative path, line and rule identifier.
 
+To opt in to **precise source positions** for supported diagnostics, request
+JSON explicitly:
+
+```bash
+python tools/repo_audit.py ../your-repository --format json --source-spans
+```
+
+In this mode each finding also has a `location` key: a
+`{start: {line, column}, end: {line, column}}` object when determinable,
+otherwise `null`. Currently only simple single-line `link.vague_text` and
+`readme.placeholder` findings have source spans; a reported heading, HTML
+image, missing document or other rule does **not** acquire a guessed location.
+The legacy `path` and `line` values are unchanged. Without the opt-in flag
+the entire prior JSON/text shape is unchanged.
+
+Positions are **one-based** line and column numbers in the UTF-8-decoded
+source text (after an optional UTF-8 BOM), with **end exclusive**. Columns
+count Unicode code points, not UTF-8 bytes, visual character widths or
+tab-expanded display cells. CRLF and bare CR count as line breaks; a file
+without a final newline remains on its last line. The span describes the
+matched source token (including the Markdown link destination's extent),
+**not** GitHub's rendered or accessible DOM range. The tool neither emits
+the destination URL in the finding nor resolves multiline Markdown links.
+Run without `--source-spans` when integrating with an existing strict JSON
+consumer; `--source-spans` requires `--format json`. Review location data
+along with filenames before sharing an audit report.
+
 Exit code **0** means the configured threshold was not reached; it does not mean the
 repository has no findings. Code **1** means that threshold was reached. Code **2** means
 invalid arguments or a target/inventory error prevented a complete bounded audit.
