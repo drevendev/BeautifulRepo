@@ -9,6 +9,8 @@ const sample = (overrides = {}) => ({
   label: "Link", selector: "#link", present: true, matches: true,
   focusVisible: true, inViewport: true, outlineStyle: "solid",
   outlineWidthPx: 2, outlineOffsetPx: 2, outlineColor: "rgb(30,50,90)",
+  focusOpacity: "1", focusFilter: "none", focusBackdropFilter: "none",
+  focusBlend: "normal",
   backgroundChain: [transparent, white], chainTruncated: false,
   ...overrides,
 });
@@ -17,6 +19,22 @@ test("opaque outline and first opaque ancestor have 3:1+ sampled contrast", () =
   assert.equal(got.outcome, "sampled-3-to-1-or-better");
   assert.ok(got.ratio > 3);
   assert.equal(got.backgroundColor, "rgb(255, 255, 255)");
+});
+test("focused-element opacity, filters and blending must not produce a false contrast pass", () => {
+  const normal = assessFocusOutline(sample());
+  assert.equal(normal.outcome, "sampled-3-to-1-or-better");
+  for (const bad of [
+    { focusOpacity: "0" }, { focusOpacity: "0.5" },
+    { focusFilter: "blur(1px)" },
+    { focusBackdropFilter: "blur(1px)" },
+    { focusBlend: "multiply" },
+    { focusOpacity: undefined }, { focusFilter: undefined },
+    { focusBackdropFilter: undefined }, { focusBlend: undefined },
+  ]) {
+    const got = assessFocusOutline(sample(bad));
+    assert.equal(got.outcome, "not-measurable", JSON.stringify(bad));
+    assert.match(got.reason, /focused-element compositing/);
+  }
 });
 test("low contrast is a finding rather than false success", () => {
   const got = assessFocusOutline(sample({ outlineColor: "rgb(190,190,190)" }));
