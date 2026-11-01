@@ -620,6 +620,27 @@ were produced by the workflow, but the new screenshots have not been
 manually assessed for visual legibility. Other engines and viewport
 sizes remain untested.
 
+## Native keyboard focus-outline color observations (instrumentation prepared 2026-11-01)
+
+The existing [live Chromium case probe](trade-pages-probe.mjs) now records
+computed outline color, width, offset and conservative outer-background samples
+for all **ten native Tab stops** in the collapsed page at 320 CSS px, in both
+emulated color schemes. The [offline test-backed assessor](focus-outline-metrics.mjs)
+compares fully opaque outline/background pairs with an **unrounded 3:1 threshold**
+inspired by [WCAG 2.2 SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast).
+It reports lower ratios as findings and unsupported gradients, alpha, filters,
+blending, missing focus or ambiguous outlines as **NOT MEASURABLE**, never PASS.
+
+The report belongs to the existing saved JSON browser evidence and GitHub
+Actions step summary; no source or settings changes are made to
+`trade_simulation`. **No live focus-color measurement from this change is
+claimed until exact-head CI actually executes.** Computed CSS alone does not
+prove visible pixels or coverage of adjacent colors, element occlusion, focus
+indicator area under [WCAG 2.2 SC 2.4.13](https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance),
+other browser engines, screen-reader access or full WCAG conformance.
+A low or indeterminate measured ratio is an observed finding for the target,
+not permission to edit its code.
+
 ## What remains unverified
 
 - The **offline source-only** auditors did run on both clean Git clones, but
