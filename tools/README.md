@@ -14,6 +14,28 @@ python -m unittest discover -s tests -v
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
 repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 
+## Preview a proposed README without writing it
+
+Given an **already prepared** candidate README file outside the target, inspect a
+unified diff against the target's current `README.md`:
+
+```sh
+python -I tools/readme_preview.py --root /path/to/target --proposal /path/to/candidate.md
+```
+
+The [README improvement skill](../skills/improve-readme/SKILL.md) can use this
+optional preview to show the exact candidate before requesting approval.
+For a stale-content guard, repeat with `--expected-sha256` followed by the
+64-character SHA-256 printed for the original README in an earlier preview.
+The command fails with exit code 2 if that content has changed; it **does not**
+apply a patch, obtain consent or prevent later concurrent edits. No file is
+created or modified. Both inputs must be ordinary, non-symlinked UTF-8 files
+of at most 256 KiB; the tool checks terminal control characters and reports
+line-ending differences. Exit code 0 means a comparison was produced, **not**
+that the proposed README is correct or authorized. Review the diff for private
+content before sharing it. The checker is not a sandbox against a concurrently
+mutating or hostile filesystem.
+
 For an evidence-based change comparison, save two JSON entry-point audits and
 run `python -I tools/audit_delta.py before.json after.json`. The
 [before/after comparison guide](../guides/audit-before-after.md) explains
