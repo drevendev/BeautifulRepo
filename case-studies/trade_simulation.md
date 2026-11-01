@@ -620,7 +620,7 @@ were produced by the workflow, but the new screenshots have not been
 manually assessed for visual legibility. Other engines and viewport
 sizes remain untested.
 
-## Native keyboard focus-outline color observations (instrumentation prepared 2026-11-01)
+## Native keyboard focus-outline color observations (measured 2026-11-01)
 
 The existing [live Chromium case probe](trade-pages-probe.mjs) now records
 computed outline color, width, offset and conservative outer-background samples
@@ -633,8 +633,15 @@ blending, missing focus or ambiguous outlines as **NOT MEASURABLE**, never PASS.
 
 The report belongs to the existing saved JSON browser evidence and GitHub
 Actions step summary; no source or settings changes are made to
-`trade_simulation`. **No live focus-color measurement from this change is
-claimed until exact-head CI actually executes.** Computed CSS alone does not
+`trade_simulation`. On the repaired instrumentation code head
+[`bde338f`](https://github.com/drevendev/BeautifulRepo/commit/bde338f3e3c83d17b95e58d8ec0637aa27d80af4),
+[live Chromium run #41268897780](https://github.com/drevendev/BeautifulRepo/actions/runs/41268897780)
+measured **10/10 native Tab stops per theme** with selected opaque CSS
+outline/background ratios of **5.69:1 (light)** and **6.13:1 (dark)**.
+The [retained observations and screenshots](https://github.com/drevendev/BeautifulRepo/actions/runs/41268897780/artifacts/13067763592)
+record the focused element's opacity/filter/blending, and the selected keyboard
+sequence passed in both emulated themes. These uniform sampled ratios are
+**not** visual focus acceptance. Computed CSS alone does not
 prove visible pixels or coverage of adjacent colors, element occlusion, focus
 indicator area under [WCAG 2.2 SC 2.4.13](https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance),
 other browser engines, screen-reader access or full WCAG conformance.
