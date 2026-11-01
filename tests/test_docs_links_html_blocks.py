@@ -31,8 +31,8 @@ class GfmRawHtmlLinksTests(unittest.TestCase):
             "?>\n"
             "<!DOCTYPE html\n"
             "[Declaration](missing-declaration.md)\n"
-            "?> [Wrong end](missing-wrong-declaration.md)\n"
-            "]]> [Still declaration](missing-still-declaration.md)\n"
+            "?? [Wrong end](missing-wrong-declaration.md)\n"
+            "]] [Still declaration](missing-still-declaration.md)\n"
             ">\n"
             "<![CDATA[\n"
             "[CDATA](missing-cdata.md)\n"
@@ -48,7 +48,7 @@ class GfmRawHtmlLinksTests(unittest.TestCase):
         for hidden in ("missing-pi.md", "missing-declaration.md", "missing-cdata.md",
                        "missing-shadow.md", "missing-wrong-", "missing-still-"):
             self.assertNotIn(hidden, result.stderr)
-        self.assertIn("checked 2 relative Markdown destination(s)", result.stdout)
+        self.assertIn("ERROR: 2 broken relative Markdown destination(s)", result.stderr)
 
     def test_same_line_closure_and_nonblock_adjacent_markdown(self):
         result = self.check(
@@ -65,7 +65,7 @@ class GfmRawHtmlLinksTests(unittest.TestCase):
         for hidden in ("inside-pi.md", "end-pi.md", "inside-declaration.md",
                        "inside-cdata.md", "end-cdata.md"):
             self.assertNotIn(hidden, result.stderr)
-        self.assertIn("checked 3 relative Markdown destination(s)", result.stdout)
+        self.assertIn("ERROR: 3 broken relative Markdown destination(s)", result.stderr)
 
     def test_unterminated_types_only_accept_their_own_closer(self):
         for opener, wrong in (
@@ -83,7 +83,7 @@ class GfmRawHtmlLinksTests(unittest.TestCase):
                 self.assertIn("missing-before.md", result.stderr)
                 self.assertNotIn("missing-inside.md", result.stderr)
                 self.assertNotIn("missing-still.md", result.stderr)
-                self.assertIn("checked 1 relative Markdown destination(s)", result.stdout)
+                self.assertIn("ERROR: 1 broken relative Markdown destination(s)", result.stderr)
 
     def test_fences_and_inline_entities_do_not_start_raw_blocks(self):
         result = self.check(
@@ -97,7 +97,7 @@ class GfmRawHtmlLinksTests(unittest.TestCase):
         )
         self.assertEqual(1, result.returncode, result.stdout)
         self.assertIn("README.md:7: missing relative destination: 'missing-after-fence.md'", result.stderr)
-        self.assertIn("checked 1 relative Markdown destination(s)", result.stdout)
+        self.assertIn("ERROR: 1 broken relative Markdown destination(s)", result.stderr)
 
     def test_types_in_containers_preserve_following_links(self):
         result = self.check(
