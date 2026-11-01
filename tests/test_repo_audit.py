@@ -591,6 +591,32 @@ class AuditTests(unittest.TestCase):
             "end": {"line": 2, "column": 2},
         })
 
+    def test_bare_cr_masking_preserves_source_lines_and_columns(self):
+        # CR-only line endings inside hidden regions must remain addressable.
+        self.write("README.md",
+                   b"# Example\r"
+                   b"```\rTODO [here](hidden.md)\r```\r"
+                   b"<!--\r[here](hidden.md) TODO\r-->\r"
+                   b"`TODO\rIGNORE` [here](x.md)")
+        report = audit.audit_repository(self.root, source_spans=True)
+        links = [item for item in report["findings"]
+                 if item["rule_id"] == "link.vague_text"]
+        self.assertEqual(len(links), 1)
+        self.assertEqual((links[0]["path"], links[0]["line"]),
+                         ("README.md", 9))
+        self.assertEqual(links[0]["location"], {
+            "start": {"line": 9, "column": 9},
+            "end": {"line": 9, "column": 21},
+        })
+        self.assertNotIn("readme.placeholder", self.codes(report))
+        legacy = self.report()
+        self.assertEqual(
+            [(item["path"], item["line"]) for item in legacy["findings"]
+             if item["rule_id"] == "link.vague_text"],
+            [("README.md", 9)],
+        )
+        self.assertTrue(all("location" not in item for item in legacy["findings"]))
+
     def test_unknown_spans_are_null_and_hidden_code_is_not_reported(self):
         (self.root / "LICENSE").unlink()
         tick = chr(96)
