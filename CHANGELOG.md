@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Add a synthetic **preview → exact-hash apply → re-audit** integration
+  regression for the README improvement workflow. The test exercises the actual
+  offline audit, relative-link and HTML-navigation checkers, requires a refused
+  no-hash write, rejects stale input and checks only README bytes change. Its
+  approval is deliberately simulated inside a disposable fixture: no model run,
+  actual user consent, target command or fabricated badge/output validation is
+  claimed (#70, #74).
+
 - Add an explicit-after-consent, SHA-256-bound `readme_apply.py` to apply
   only an already reviewed `README.md` proposal, with stale source/candidate
   checks, constrained input files, temporary-sibling replacement and ten
