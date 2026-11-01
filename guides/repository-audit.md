@@ -31,6 +31,9 @@ although the tool does not include document contents or absolute filesystem path
 includes relative document names and the kinds of findings detected.
 
 Try the [tested before/after walkthrough](../examples/repository-audit/README.md).
+To compare the **rule counts** in two saved JSON reports without a beauty score,
+use the [offline before/after comparison tool](audit-before-after.md); it also
+flags changed entry-point coverage, but does not verify that findings were fixed.
 
 ## Choose a profile explicitly
 
