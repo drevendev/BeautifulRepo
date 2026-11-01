@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add an offline, bounded, read-only before/after comparator for two
+  repository entry-point audit JSON reports, with per-rule count deltas,
+  same-profile validation, coverage-change detection, real-audit regressions,
+  and a guide to immutable revisions. The tool neither certifies repairs nor
+  assigns a beauty score (related to #88).
+
 - Add read-only sampled focus-outline color observations to the existing live trade_simulation Chromium workflow: real native Tab focus at ten collapsed-page stops, two emulated color schemes, conservative unknowns (including focused-element compositing), observed computed CSS evidence and eight deterministic Node regressions. This is not a rendered-pixel, screen-reader or WCAG conformance result (#82).
 
 - Offer opt-in, one-based and end-exclusive JSON source spans for simple vague inline links and placeholders. Preserve the default audit schema, legacy path/line fields, scan bounds and read-only behavior; unknown locations are null (#223).
