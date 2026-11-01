@@ -91,12 +91,18 @@ class ReadmePreviewTests(unittest.TestCase):
         self.proposal.unlink()
         self.proposal.write_text("# Proposed\n", encoding="utf-8")
         self.readme.unlink()
-        self.readme.symlink_to(target)
+        try:
+            self.readme.symlink_to(target)
+        except (OSError, NotImplementedError):
+            self.skipTest("README symlinks unavailable")
         self.assertEqual(2, self.command().returncode)
         self.readme.unlink()
         self.readme.write_text("# Original\n", encoding="utf-8")
         linked = self.tmp / "linked"
-        linked.symlink_to(self.repo, target_is_directory=True)
+        try:
+            linked.symlink_to(self.repo, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
         self.repo = linked
         self.assertEqual(2, self.command().returncode)
 
