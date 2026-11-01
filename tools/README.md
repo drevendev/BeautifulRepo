@@ -31,9 +31,11 @@ The command fails with exit code 2 if that content has changed; it **does not**
 apply a patch, obtain consent or prevent later concurrent edits. No file is
 created or modified. Both inputs must be ordinary, non-symlinked UTF-8 files
 of at most 256 KiB; the tool rejects bare carriage returns, C0/C1
-terminal controls (except tab and ordinary newlines), and Unicode bidirectional
-formatting marks that could mislead a terminal diff reviewer. Ordinary CRLF and
-non-ASCII scripts are supported. It reports line-ending differences. Exit code 0 means a comparison was produced, **not**
+terminal controls (except tab and ordinary newlines), Unicode bidirectional
+formatting marks, and U+2028/U+2029 line/paragraph separators that would
+misframe a physical-line diff. Ordinary CRLF and non-ASCII scripts are
+supported. It reports line-ending differences. Exit code 0 means a
+comparison was produced, **not**
 that the proposed README is correct or authorized. Review the diff for private
 content before sharing it. The checker is not a sandbox against a concurrently
 mutating or hostile filesystem.
