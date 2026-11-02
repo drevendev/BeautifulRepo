@@ -38,6 +38,22 @@ class Type6HtmlNavigationTests(unittest.TestCase):
         self.assertIn("missing HTML a destination: 'missing-page.md'", result.stderr)
         self.assertNotIn("missing section anchor: '#visible'", result.stderr)
 
+    def test_backslash_before_html_img_inside_type6_is_not_a_markdown_escape(self):
+        result = self.check(
+            "<div>\n"
+            '\\<img src="missing-inside-raw.svg">\n'
+            "</div>\n"
+        )
+        self.assertEqual(1, result.returncode, result.stdout)
+        self.assertIn("README.md:2: HTML img missing alt attribute", result.stderr)
+        self.assertIn("missing HTML img destination: 'missing-inside-raw.svg'", result.stderr)
+
+    def test_backslash_escaped_html_img_outside_type6_remains_inert(self):
+        result = self.check('\\<img src="missing-outside-raw.svg">\n')
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertNotIn("missing-outside-raw.svg", result.stderr)
+        self.assertNotIn("HTML img missing alt attribute", result.stderr)
+
     def test_fence_like_text_inside_raw_html_does_not_hide_real_img(self):
         result = self.check(
             "<div>\n"
