@@ -355,6 +355,11 @@ keep their original themed headings.
 
 ### Changed
 
+- Avoid repeated source-prefix scans when reporting inline Markdown link line
+  numbers. The scanner now advances a monotonic newline cursor across each
+  document, preserving default diagnostic text and link ordering, including
+  CRLF, Unicode and masked examples (issue #240).
+
 - Upgrade the SHA-pinned `actions/setup-python` from v7.0.0 to v7.1.0 in quality and scheduled checks. Recheck the upstream release ref on 2026-10-29; retain existing Python versions and CI steps. No performance or compatibility gain is claimed (related to PR #194).
 
 - Reconcile the roadmap with completed v0.2.0 plugin, private-repository,
@@ -393,13 +398,6 @@ keep their original themed headings.
   (`.crab/ledger.json`) from the public repository. These were maintainer tooling
   state, not reusable BeautifulRepo product examples. Ignore future local Crab files;
   public guidance and issue history remain available.
-
-### Changed
-
-- Avoid repeated source-prefix scans when reporting inline Markdown link line
-  numbers. The scanner now advances a monotonic newline cursor across each
-  document, preserving default diagnostic text and link ordering, including
-  CRLF, Unicode and masked examples (issue #240).
 
 ### Fixed
 
