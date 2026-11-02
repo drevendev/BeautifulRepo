@@ -73,7 +73,7 @@ TYPE6_BLOCK_TAGS = (
     "title|tr|track|ul"
 )
 TYPE6_HTML_BLOCK_OPEN_RE = re.compile(
-    rf"^ {{0,3}}</?(?:{TYPE6_BLOCK_TAGS})(?=[ \\t]|/?>|$)", re.IGNORECASE
+    rf"^ {{0,3}}</?(?:{TYPE6_BLOCK_TAGS})(?=[ \t]|/?>|$)", re.IGNORECASE
 )
 MARKDOWN_WHITESPACE = " \t\r\n"
 # cmark-gfm stops reading a bare link destination at its 33rd unclosed '(' (see
@@ -748,7 +748,7 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
             continue
 
         if in_type6_html:
-            if not line.strip(" \\t"):
+            if not line.strip(" \t"):
                 # Unlike types 1–5, type 6 ends at the next blank line.
                 in_type6_html = False
                 masked.append(line + ending)
