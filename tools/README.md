@@ -317,12 +317,14 @@ python -I /path/to/BeautifulRepo/tools/repo_audit.py .
 The checker deliberately does **not** fetch external URLs, validate redirect targets, certify
 rendered HTML, or validate section fragments/heading anchors. It ignores links inside fenced
 and single-backtick inline code because documentation examples should not become dependencies.
-It also masks GFM raw HTML block types 1–5 (script/pre/style, comments, processing
-instructions, uppercase declarations and CDATA), including unclosed blocks, while keeping
-source line numbers. Each type 3–5 block ends only at its matching `?>`, `>` or `]]>`.
-Types 6–7, complete container parsing and inline HTML rendering are outside this
-bounded scanner; raw HTML navigation is handled separately. See the
-[GFM HTML block rules](https://github.github.com/gfm/#html-blocks), reviewed 2026-11-01 (UTC).
+It also masks GFM raw HTML block types 1–6 (script/pre/style, comments, processing
+instructions, uppercase declarations, CDATA and named block-level HTML tags),
+including unclosed blocks, while keeping source line numbers. Each type 3–5 block
+ends only at its matching `?>`, `>` or `]]>`; type 6 ends at the next blank line,
+even if a closing HTML tag appeared earlier. Type 7, full list/quote-container
+parsing and inline HTML rendering remain outside this bounded scanner; raw HTML
+navigation is handled separately. See the
+[GFM HTML block rules](https://github.github.com/gfm/#html-blocks), reviewed 2026-11-02 (UTC).
 One-line full (`[text][id]`), collapsed (`[text][]`) and shortcut (`[id]`)
 reference-style links and images are checked when the matching single-line
 definition starts a Markdown block. Definitions may follow their uses. Labels
