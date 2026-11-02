@@ -136,11 +136,18 @@ agent smoke test. It uses only the standard library and does not execute target
 code or fetch anything. See [the complete runbook](../evals/README.md) for
 a capture/verify example, exit codes and important limits.
 
-It snapshots file bytes (SHA-256), directory entries and symlink target **text**.
+Snapshot **format 2** records file bytes (SHA-256), file and directory mode bits
+(including the target root), directory entries and symlink target **text**.
+A permission-only change to a file or directory now fails verification even
+when its bytes are unchanged. Earlier format-1 baselines must be **recaptured**:
+they did not record permission bits and cannot provide this evidence.
+
 It does not traverse symlink directories or touch their destinations, and
-refuses to write the JSON baseline inside the target. A match only establishes
-unchanged watched entries, not successful agent skill triggering, a sandbox,
-resistance to prompt injection, or absence of side effects elsewhere.
+refuses to write the JSON baseline inside the target. Windows mode bits are
+not a complete ACL or ownership check; symlink permission metadata is not
+compared. A match only establishes unchanged watched attributes at the two
+snapshot instants, not absence of intervening writes, changes outside the
+target, successful skill triggering, a sandbox, or resistance to prompt injection.
 
 ## Local release-history inventory
 
