@@ -15,10 +15,12 @@ keep their original themed headings.
 
 - Extend the read-only Markdown link scanner to GFM type-6 raw HTML blocks
   (named block-level tags, ending at a blank line), suppressing false link
-  findings in literal HTML. Six focused offline regressions cover case-folded
-  tags, incomplete tags, CRLF, source line numbers, fences and non-tags.
-  Type 7 and full list/quote-container rendering remain outside its scope
-  (follow-up to #230; GFM rules reviewed 2026-11-02).
+  findings in literal HTML. Preserve the companion HTML navigation check's
+  real `<a>`/`<img>` destinations, alt attributes and explicit IDs while
+  excluding raw-block text from generated Markdown heading anchors.
+  Nine focused regressions cover those distinct behaviors, tag boundaries,
+  CRLF, source line numbers and fences. Type 7 and full list/quote-container
+  rendering remain outside scope (follow-up to #230; GFM reviewed 2026-11-02).
 
 - Add a synthetic **preview → exact-hash apply → re-audit** integration
   regression for the README improvement workflow. The test exercises the actual
