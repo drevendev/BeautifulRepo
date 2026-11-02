@@ -49,7 +49,7 @@ class NestedInlineLinksTests(unittest.TestCase):
         self.assertEqual(1, cli.returncode)
         self.assertIn("'inner.md'", cli.stderr)
         self.assertIn("'side.md'", cli.stderr)
-        self.assertNotIn("'assets/'", cli.stderr)
+        self.assertNotIn("assets/", cli.stderr)
 
     def test_multiple_levels_keep_only_innermost_ordinary_link(self):
         links, legacy, cli = self.inspect(
