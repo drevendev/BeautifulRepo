@@ -1069,31 +1069,138 @@ def _extract_reference_definitions(masked: str):
 
 
 def _iter_reference_locations(masked: str, definitions: dict[str, str]):
-    """Yield (line, source-character column, destination) for reference uses."""
+    """Yield one-based locations for bounded balanced reference-link uses.
+
+    Link text can contain balanced brackets; reference *labels* remain flat.
+    One pass pairs delimiters, and prefix counts avoid rescanning deep text.
+    """
     for lineno, raw_line in enumerate(split_markdown_lines(masked), 1):
         line = raw_line.rstrip("\r\n")
-        # An inline destination can itself contain brackets. Avoid treating
-        # those as shortcut references to a separate definition.
         active = list(line)
-        for start in _iter_inline_link_starts(line):
-            parsed = _parse_destination(line, start)
-            if parsed is not None:
-                _, end = parsed
-                for index in range(start, min(end, len(active))):
-                    active[index] = " "
+        inline_image_alt = []
+        # Hide inline destinations and inline-image alt text without shifting
+        # source coordinates. Neither can introduce another live reference.
+        for origin, destination_start in _iter_inline_link_candidates(line):
+            parsed = _parse_destination(line, destination_start)
+            if parsed is None:
+                continue
+            _, end = parsed
+            for index in range(destination_start, min(end, len(active))):
+                active[index] = " "
+            if line[origin] == "!":
+                cursor = destination_start - 1
+                while cursor >= 0 and line[cursor] in MARKDOWN_WHITESPACE:
+                    cursor -= 1
+                inline_image_alt.append((origin + 2, cursor - 1))
+        for start, end in inline_image_alt:
+            for index in range(start, end):
+                active[index] = " "
+
         visible = "".join(active)
-        for match in REFERENCE_USE_RE.finditer(visible):
-            if (_is_backslash_escaped(visible, match.start())
-                    or (match.start() > 0 and visible[match.start() - 1] == "[")):
+        opened = []
+        starts = []
+        closing = {}
+        delimiter = bytearray(len(visible))
+        position = 0
+        while position < len(visible):
+            char = visible[position]
+            if (char == "\\" and position + 1 < len(visible)
+                    and visible[position + 1] in string.punctuation):
+                position += 2
                 continue
-            if (match.group("label") is None and match.end() < len(visible)
-                    and visible[match.end()] in "(["):
-                # Inline link or nested bracket syntax, not a shortcut.
+            if char == "[":
+                opened.append(position)
+                starts.append(position)
+                delimiter[position] = 1
+            elif char == "]":
+                delimiter[position] = 1
+                if opened:
+                    closing[opened.pop()] = position
+            position += 1
+
+        prefix = [0]
+        for marked in delimiter:
+            prefix.append(prefix[-1] + marked)
+
+        def flat(start: int, end: int) -> bool:
+            return prefix[start] == prefix[end]
+
+        # (origin, opener, text-end, explicit-label opener, target, is-image)
+        candidates = []
+        consumed_labels = set()
+        for start in starts:
+            close = closing.get(start)
+            if close is None:
                 continue
-            label = match.group("label") or match.group("text")
+            tail = close + 1
+            if tail < len(visible) and visible[tail] == "(":
+                # The established inline scanner owns these candidates.
+                continue
+
+            # A link label is bounded to 999 characters. Long balanced link
+            # *text* is still valid when a separate short explicit label exists.
+            text = (
+                visible[start + 1:close]
+                if close - start <= 1000 and flat(start + 1, close)
+                else None
+            )
+            label_end = closing.get(tail) if tail < len(visible) and visible[tail] == "[" else None
+            explicit = (
+                label_end is not None
+                and label_end - tail <= 1000
+                and flat(tail + 1, label_end)
+            )
+            if explicit:
+                explicit_label = visible[tail + 1:label_end]
+                label = explicit_label if explicit_label else text
+            else:
+                label = text
+            if not label or not label.strip():
+                continue
             destination = definitions.get(_normalize_reference_label(label))
-            if destination is not None:
-                yield lineno, match.start() + 1, destination
+            if destination is None:
+                continue
+
+            origin = start
+            if start and visible[start - 1] == "!" and not _is_backslash_escaped(visible, start - 1):
+                origin -= 1
+            candidates.append((origin, start, close, tail if explicit else None,
+                               destination, origin != start))
+            if explicit:
+                consumed_labels.add(tail)
+
+        # GFM allows image references inside ordinary links, but not a live
+        # ordinary reference link inside another ordinary reference link.
+        image_spans = _interval_coverage(
+            (origin + 2, close)
+            for origin, _, close, _, _, image in candidates if image
+        )
+        ordinary_starts = sorted(
+            start for origin, start, _, _, _, image in candidates
+            if not image and start not in consumed_labels
+            and not _interval_contains(image_spans, origin)
+        )
+        survivors = []
+        for candidate in candidates:
+            origin, start, close, _, _, image = candidate
+            if _interval_contains(image_spans, origin):
+                continue
+            if not image:
+                inner = bisect_right(ordinary_starts, start)
+                if inner < len(ordinary_starts) and ordinary_starts[inner] < close:
+                    continue
+            survivors.append(candidate)
+
+        # A live full reference consumes its second [label] token. When an
+        # outer reference loses to a nested link, its trailing [label] may
+        # instead become an independent shortcut reference.
+        live_labels = {
+            label_start for _, _, _, label_start, _, _ in survivors
+            if label_start is not None
+        }
+        for origin, start, _, _, destination, _ in survivors:
+            if start not in live_labels:
+                yield lineno, origin + 1, destination
 
 
 def _iter_reference_uses(masked: str, definitions: dict[str, str]):
