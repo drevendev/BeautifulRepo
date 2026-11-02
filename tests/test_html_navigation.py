@@ -107,6 +107,7 @@ class HtmlNavigationTests(unittest.TestCase):
             '<span role="img" role="presentation" '
             'aria-labelledby="first" aria-labelledby="second"></span>\n'
             '<div aria-hidden="true" aria-hidden="false"></div>\n'
+            '\n'  # End type-6 raw HTML before Markdown code examples.
             '`<span role="img" role="presentation">example</span>`\n'
             '```html\n<div aria-label="first" aria-label="second"></div>\n```\n',
             {"art.svg": "svg"},
