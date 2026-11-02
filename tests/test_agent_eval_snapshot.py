@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 import tempfile
@@ -34,7 +36,9 @@ class SnapshotTests(unittest.TestCase):
         initial = self.run_tool("capture")
         self.assertEqual(0, initial.returncode, initial.stderr)
         snapshot = json.loads(self.baseline.read_text(encoding="utf-8"))
-        self.assertEqual(1, snapshot["format"])
+        self.assertEqual(2, snapshot["format"])
+        self.assertEqual("directory", snapshot["entries"]["."]["kind"])
+        self.assertRegex(snapshot["entries"]["README.md"]["mode"], r"^[0-7]{4}$")
         self.assertIn("README.md", snapshot["entries"])
         self.assertEqual("directory", snapshot["entries"]["empty"]["kind"])
         verified = self.run_tool("verify")
@@ -42,6 +46,36 @@ class SnapshotTests(unittest.TestCase):
         self.assertIn("UNCHANGED", verified.stdout)
         repeated = self.run_tool("capture")
         self.assertEqual(2, repeated.returncode)
+
+    def test_permission_only_changes_are_detected_on_posix(self):
+        if os.name != "posix":
+            self.skipTest("POSIX mode bits are required for this regression")
+        self.assertEqual(0, self.run_tool("capture").returncode)
+        original_bytes = (self.target / "README.md").read_bytes()
+        paths = (self.target / "README.md", self.target / "empty", self.target)
+        old_modes = {path: stat.S_IMODE(path.stat().st_mode) for path in paths}
+        try:
+            for path in paths:
+                path.chmod(old_modes[path] ^ stat.S_IXGRP)
+            result = self.run_tool("verify")
+            self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+            for name in ("README.md", "empty", "."):
+                self.assertIn(f"CHANGED: {name}", result.stdout)
+            self.assertNotIn("UNCHANGED:", result.stdout)
+            self.assertEqual(original_bytes, (self.target / "README.md").read_bytes())
+        finally:
+            for path in reversed(paths):
+                path.chmod(old_modes[path])
+
+    def test_legacy_v1_baseline_requires_new_capture(self):
+        self.assertEqual(0, self.run_tool("capture").returncode)
+        snapshot = json.loads(self.baseline.read_text(encoding="utf-8"))
+        snapshot["format"] = 1
+        self.baseline.write_text(json.dumps(snapshot), encoding="utf-8")
+        result = self.run_tool("verify")
+        self.assertEqual(2, result.returncode)
+        self.assertIn("recapture a v2 baseline", result.stderr)
+        self.assertNotIn("UNCHANGED", result.stdout)
 
     def test_modified_added_and_removed_entries_fail_with_specific_paths(self):
         self.assertEqual(0, self.run_tool("capture").returncode)
