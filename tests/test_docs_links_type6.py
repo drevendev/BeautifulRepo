@@ -15,7 +15,8 @@ class Type6HtmlBlockTests(unittest.TestCase):
     def check(self, source: str):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "README.md").write_text(source, encoding="utf-8")
+            # Preserve CRLF fixtures exactly; Windows text mode would make CRCRLF.
+            (root / "README.md").write_bytes(source.encode("utf-8"))
             return subprocess.run(
                 [sys.executable, "-I", str(TOOL), "--root", str(root)],
                 cwd=tmp, capture_output=True, text=True, encoding="utf-8", timeout=15,
