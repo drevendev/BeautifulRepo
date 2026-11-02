@@ -144,6 +144,19 @@ class ReadmeApplyTests(unittest.TestCase):
         self.assertEqual(2, result.returncode)
         self.assert_clean()
 
+    def test_invisible_proposal_characters_fail_before_replacement(self):
+        original = self.readme.read_bytes()
+        for ch in ("\u200b", "\u2060", "\ufeff"):
+            with self.subTest(codepoint=hex(ord(ch))):
+                self.proposal.write_text("# Project\n\nAfter" + ch + ".\n",
+                                         encoding="utf-8")
+                result = self.approved()
+                self.assertEqual(2, result.returncode)
+                self.assertIn("display control", result.stderr)
+                self.assertEqual("", result.stdout)
+                self.assertEqual(original, self.readme.read_bytes())
+                self.assert_clean()
+
     def test_crlf_and_utf8_bom_proposal_bytes_preserved(self):
         proposed = b"\xef\xbb\xbf# Project\r\n\r\nAfter.\r\n"
         self.proposal.write_bytes(proposed)
