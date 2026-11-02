@@ -368,8 +368,13 @@ The older `iter_markdown_destinations(path)` still yields exactly
 `(diagnostic_line, destination)` pairs. In a multiline inline link,
 `diagnostic_line` identifies the destination line and can differ from
 `source_line`; preserving it keeps the CLI's existing `file:line` output
-unchanged. The new API does not broaden GFM coverage or turn this bounded
-scanner into a full Markdown parser.
+unchanged. The inline scanner follows [GFM link nesting precedence](https://github.github.com/gfm/#links)
+(reviewed 2026-11-02): a successfully parsed inner ordinary link prevents an
+invalid enclosing ordinary link from being checked as a second destination.
+Images inside links remain valid; link-like text inside a parsed image's alt
+text or another link's destination is not counted as a separate link. Failed
+inner parses leave a valid outer link available. The scanner is still a
+bounded subset rather than a full Markdown renderer.
 
 GitHub recommends relative links for repository-owned files because they follow the branch a
 reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
