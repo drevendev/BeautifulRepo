@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Recognize bounded top-level GFM type-7 raw HTML blocks in offline Markdown
+  link checks: a complete standalone opening/closing tag only at a block
+  boundary, ending at the next blank line. Preserve LF/CRLF offsets, post-block
+  Markdown links and live HTML navigation of actual tags. Regressions cover
+  lazy paragraph continuations, inline/incomplete tags, raw HTML assets and
+  reference definitions; full nested-container rendering remains out of scope
+  (#237, GFM reviewed 2026-11-02).
+
 - Extend the offline agent-eval target snapshot to detect permission-only
   changes in regular files and directories, including the selected target
   root, instead of checking only file bytes and entry names. Snapshot format
@@ -26,8 +34,8 @@ keep their original themed headings.
   real `<a>`/`<img>` destinations, alt attributes and explicit IDs while
   excluding raw-block text from generated Markdown heading anchors.
   Ten focused regressions cover those distinct behaviors, tag boundaries,
-  CRLF, source line numbers and fences. Type 7 and full list/quote-container
-  rendering remain outside scope (follow-up to #230; GFM reviewed 2026-11-02).
+  CRLF, source line numbers and fences. Full list/quote-container
+  rendering remains outside scope (follow-up to #230; GFM reviewed 2026-11-02).
 
 - Add a synthetic **preview → exact-hash apply → re-audit** integration
   regression for the README improvement workflow. The test exercises the actual
