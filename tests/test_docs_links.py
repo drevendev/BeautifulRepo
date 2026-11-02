@@ -569,5 +569,50 @@ class DocsLinksTests(unittest.TestCase):
             self.assertIn("absent-after-code.md", result.stderr)
 
 
+    def test_dense_inline_links_keep_crlf_unicode_and_final_line_positions(self):
+        # Hundreds of links formerly recounted the entire Markdown prefix.
+        # Assert the unchanged diagnostic contract, not a timing threshold.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            parts = [
+                "# Dense links\r\n",
+                "\r\n",
+                "[ref]: missing/ref.md\r\n",
+                "\r\n",
+                "`[Code](missing/hidden-code.md)`\r\n",
+                "<!-- [Comment](missing/hidden-comment.md) -->\r\n",
+                "\r\n",
+            ]
+            for index in range(120):
+                parts.append(
+                    f"Ω{index} [First](missing/first-{index}.md) "
+                    f"[Second](missing/second-{index}.md)\r\n"
+                )
+            # No trailing line ending; reference uses still resolve as before.
+            parts.append("[Final](missing/final.md) [ref]")
+            (root / "README.md").write_bytes("".join(parts).encode("utf-8"))
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode, result.stderr)
+            for index in range(120):
+                lineno = index + 8
+                for prefix in ("first", "second"):
+                    self.assertIn(
+                        f"README.md:{lineno}: missing relative destination: "
+                        f"'missing/{prefix}-{index}.md'",
+                        result.stderr,
+                    )
+            self.assertIn(
+                "README.md:128: missing relative destination: 'missing/final.md'",
+                result.stderr,
+            )
+            self.assertIn(
+                "README.md:128: missing relative destination: 'missing/ref.md'",
+                result.stderr,
+            )
+            self.assertNotIn("missing/hidden-code.md", result.stderr)
+            self.assertNotIn("missing/hidden-comment.md", result.stderr)
+            self.assertEqual(242, result.stderr.count("missing relative destination"))
+
+
 if __name__ == "__main__":
     unittest.main()
