@@ -1182,7 +1182,8 @@ def iter_markdown_locations(path: Path):
         destination_spans = _interval_coverage(
             (close + 1, end)
             for origin, _, close, end, _, image in candidates
-            if image or origin not in suppressed_ordinary
+            if (image or origin not in suppressed_ordinary)
+            and not _interval_contains(image_text_spans, origin)
         )
         for origin, position, close, _, destination, image in candidates:
             if (_interval_contains(destination_spans, origin)
