@@ -570,9 +570,9 @@ class DocsLinksTests(unittest.TestCase):
 
 
     def test_nested_multiline_destinations_preserve_lines_and_order(self):
-        # Open brackets are visited in source order, but a nested inner link's
-        # destination can precede the outer link's destination. Preserve the
-        # original diagnostics even when link offsets are not monotonic.
+        # GFM prohibits nested ordinary links: the successfully parsed inner
+        # link wins. Preserve its physical destination line and keep following
+        # destinations in order under CRLF and Unicode.
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "README.md").write_bytes(
@@ -589,7 +589,6 @@ class DocsLinksTests(unittest.TestCase):
             ]
             self.assertEqual(
                 [
-                    "README.md:3: missing relative destination: 'missing/outer.md'",
                     "README.md:2: missing relative destination: 'missing/inner.md'",
                     "README.md:4: missing relative destination: 'missing/after.md'",
                 ],
