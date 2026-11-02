@@ -349,7 +349,7 @@ shortcut reference labels remain flat (at most 999 characters) as required by
 GFM; nested unescaped brackets do not create new labels. The scanner uses
 bounded, nonrecursive delimiter matching, preserves source-character positions,
 and does not parse every multiline/nested-container GFM construct. See the
-[GFM link rules](https://github.github.com/gfm/#links), reviewed 2026-11-03. Definitions may follow their uses; labels use
+[GFM link rules](https://github.github.com/gfm/#links), reviewed 2026-11-02. Definitions may follow their uses; labels use
 case folding and collapsed whitespace, first definition wins, and unused
 definitions are not checked. A bounded GFM subset permits the destination on
 the next nonblank line after `[id]:` and/or a title on the next nonblank line
