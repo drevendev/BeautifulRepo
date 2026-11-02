@@ -1021,6 +1021,10 @@ def iter_markdown_destinations(path: Path):
     masked = _mask_markdown_code(text)
     definitions, visible = _extract_reference_definitions(masked)
 
+    # Inline link starts are visited in source order across the blocks. Advance
+    # the line counter only over unseen text instead of recounting prefixes.
+    last_scanned = 0
+    current_line = 1
     block_start = 0
     separators = list(BLANK_LINE_RE.finditer(visible))
     for separator in separators + [None]:
@@ -1032,8 +1036,9 @@ def iter_markdown_destinations(path: Path):
             if parsed is not None:
                 destination, _ = parsed
                 absolute_position = block_start + position
-                lineno = visible.count("\n", 0, absolute_position) + 1
-                yield lineno, destination
+                current_line += visible.count("\n", last_scanned, absolute_position)
+                last_scanned = absolute_position
+                yield current_line, destination
 
         if separator is None:
             break
