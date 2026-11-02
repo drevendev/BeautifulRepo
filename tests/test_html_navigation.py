@@ -29,6 +29,7 @@ class HtmlNavigationTests(unittest.TestCase):
             '<source srcset="assets/a.svg 1x, assets/b.svg 2x">\n'
             '<a href="guide.md#usage">Guide</a>\n'
             '<a href="https://example.org/not-local">External</a>\n'
+            '\n'  # GFM type-6 <source> block ends before the Markdown heading.
             '## Start here\n',
             {"assets/diagram.svg": "svg", "assets/a.svg": "svg", "assets/b.svg": "svg",
              "guide.md": "# Usage\n"},
