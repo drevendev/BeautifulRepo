@@ -325,10 +325,15 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
                                              list[int], list[tuple[int, str, str]]]:
         if path not in parsed_files:
             content = path.read_text(encoding="utf-8")
-            masked = mask_escaped_html_openers(docs_links._mask_markdown_code(content))
+            # A type-6 HTML block is literal Markdown but its real <a>/<img>
+            # elements still need destination, alt and duplicate-attribute checks.
+            html_masked = mask_escaped_html_openers(
+                docs_links._mask_markdown_code(content, mask_type6=False))
+            heading_masked = mask_escaped_html_openers(
+                docs_links._mask_markdown_code(content))
             markup = MarkupReferences()
-            markup.feed(masked)
-            parsed_files[path] = (heading_ids(masked, markup.ids, content), markup.refs,
+            markup.feed(html_masked)
+            parsed_files[path] = (heading_ids(heading_masked, markup.ids, content), markup.refs,
                                   markup.images_without_alt, markup.duplicate_attributes)
         return parsed_files[path]
 
