@@ -13,6 +13,7 @@ import string
 import sys
 from pathlib import Path, PureWindowsPath
 from urllib.parse import unquote, urlsplit
+from typing import NamedTuple
 
 # Version control and installed dependency trees are never repository-owned documentation.
 SKIPPED_DIRECTORIES = frozenset({".git", "node_modules"})
@@ -202,11 +203,11 @@ def _decode_character_references(value: str) -> str:
     return CHARACTER_REFERENCE_RE.sub(replace, value)
 
 
-def _iter_inline_link_starts(line: str):
-    """Yield destination start indices for inline links with balanced link text.
+def _iter_inline_link_candidates(line: str):
+    """Yield (link-use start, destination start) for balanced inline links.
 
-    One pass pairs every unescaped '[' with its closing ']' through a stack, so text
-    full of unmatched brackets costs linear time instead of a rescan per bracket.
+    Both offsets are source-character indices, not byte offsets. An image
+    begins at '!' when it is not escaped; other links begin at '['.
     """
     opened: list[int] = []
     starts: list[int] = []
@@ -230,7 +231,16 @@ def _iter_inline_link_starts(line: str):
             destination = close + 2
             while destination < len(line) and line[destination] in MARKDOWN_WHITESPACE:
                 destination += 1
-            yield destination
+            origin = start
+            if start and line[start - 1] == "!" and not _is_backslash_escaped(line, start - 1):
+                origin -= 1
+            yield origin, destination
+
+
+def _iter_inline_link_starts(line: str):
+    """Yield destination starts in the existing inline scanner order."""
+    for _, destination in _iter_inline_link_candidates(line):
+        yield destination
 
 
 def _consume_title_and_close(line: str, position: int):
@@ -936,6 +946,19 @@ REFERENCE_USE_RE = re.compile(
 )
 
 
+class MarkdownLinkLocation(NamedTuple):
+    """One-based source-character anchor and unchanged legacy diagnostic line.
+
+    The anchor points at the original link-use opener ('[' or image '!').
+    In a multiline inline link, legacy diagnostics retain the destination's
+    line, which can differ from the opening link-use line.
+    """
+    source_line: int
+    source_column: int
+    destination: str
+    diagnostic_line: int
+
+
 def _normalize_reference_label(label: str) -> str:
     """GFM label matching folds case and collapses whitespace."""
     return " ".join(label.split()).casefold()
@@ -988,8 +1011,8 @@ def _extract_reference_definitions(masked: str):
     return definitions, "".join(remaining)
 
 
-def _iter_reference_uses(masked: str, definitions: dict[str, str]):
-    """Yield (source line, destination) for used local or remote references."""
+def _iter_reference_locations(masked: str, definitions: dict[str, str]):
+    """Yield (line, source-character column, destination) for reference uses."""
     for lineno, raw_line in enumerate(split_markdown_lines(masked), 1):
         line = raw_line.rstrip("\r\n")
         # An inline destination can itself contain brackets. Avoid treating
@@ -1013,18 +1036,27 @@ def _iter_reference_uses(masked: str, definitions: dict[str, str]):
             label = match.group("label") or match.group("text")
             destination = definitions.get(_normalize_reference_label(label))
             if destination is not None:
-                yield lineno, destination
+                yield lineno, match.start() + 1, destination
 
 
-def iter_markdown_destinations(path: Path):
-    """Yield local and remote destinations from inline and bounded reference links."""
+def _iter_reference_uses(masked: str, definitions: dict[str, str]):
+    """Retain the existing (line, destination) private helper contract."""
+    for lineno, _, destination in _iter_reference_locations(masked, definitions):
+        yield lineno, destination
+
+
+def iter_markdown_locations(path: Path):
+    """Yield link-use source anchors without changing the legacy checker.
+
+    Columns count Unicode code points in the decoded Markdown line, starting
+    with one. These are not UTF-8 byte offsets or decoded destination offsets.
+    """
     text = path.read_text(encoding="utf-8")
     masked = _mask_markdown_code(text)
     definitions, visible = _extract_reference_definitions(masked)
 
-    # Nested multiline links can yield destination offsets out of order even
-    # though opening brackets are visited in source order. Index line starts
-    # once, then look up each destination independently without prefix rescans.
+    # The masking and definition pass keep source offsets intact. A single
+    # index supports out-of-order nested links and the legacy destination line.
     line_starts = [0]
     line_starts.extend(match.end() for match in re.finditer("\n", visible))
     block_start = 0
@@ -1033,18 +1065,34 @@ def iter_markdown_destinations(path: Path):
         block_end = separator.start() if separator is not None else len(visible)
         block = visible[block_start:block_end]
 
-        for position in _iter_inline_link_starts(block):
+        for origin, position in _iter_inline_link_candidates(block):
             parsed = _parse_destination(block, position)
             if parsed is not None:
                 destination, _ = parsed
-                absolute_position = block_start + position
-                yield bisect_right(line_starts, absolute_position), destination
+                source_offset = block_start + origin
+                source_line = bisect_right(line_starts, source_offset)
+                source_column = source_offset - line_starts[source_line - 1] + 1
+                diagnostic_line = bisect_right(line_starts, block_start + position)
+                yield MarkdownLinkLocation(
+                    source_line, source_column, destination, diagnostic_line
+                )
 
         if separator is None:
             break
         block_start = separator.end()
 
-    yield from _iter_reference_uses(visible, definitions)
+    for lineno, column, destination in _iter_reference_locations(visible, definitions):
+        yield MarkdownLinkLocation(lineno, column, destination, lineno)
+
+
+def iter_markdown_destinations(path: Path):
+    """Yield legacy (diagnostic line, destination) pairs.
+
+    For opt-in source-character line/column anchors at the link-use opener,
+    use iter_markdown_locations instead. No default CLI output has changed.
+    """
+    for link in iter_markdown_locations(path):
+        yield link.diagnostic_line, link.destination
 
 
 def _is_redirect(info: os.stat_result) -> bool:

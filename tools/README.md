@@ -348,6 +348,24 @@ scanner. Raw HTML destinations are checked separately by `html_navigation.py`.
 See the [GFM reference definition rules](https://github.github.com/gfm/#link-reference-definitions),
 reviewed 2026-10-27.
 
+### Optional link-use source anchors
+
+For tooling that needs to distinguish two links on the same Markdown line, import
+`iter_markdown_locations(path)` from `tools/docs_links.py`. It yields
+`MarkdownLinkLocation(source_line, source_column, destination, diagnostic_line)`
+records, in the **same order** as the existing iterator. Source coordinates are
+one-based Unicode-character positions of the original link-use opener (the
+opening `[` or an image `!`), not UTF-8 byte positions or decoded destination
+offsets. Reference uses point to their actual use, not their definition. CRLF
+does not add a column to the following line.
+
+The older `iter_markdown_destinations(path)` still yields exactly
+`(diagnostic_line, destination)` pairs. In a multiline inline link,
+`diagnostic_line` identifies the destination line and can differ from
+`source_line`; preserving it keeps the CLI's existing `file:line` output
+unchanged. The new API does not broaden GFM coverage or turn this bounded
+scanner into a full Markdown parser.
+
 GitHub recommends relative links for repository-owned files because they follow the branch a
 reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
 <https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#relative-links>.
