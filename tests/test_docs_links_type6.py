@@ -102,7 +102,7 @@ class Type6HtmlBlockTests(unittest.TestCase):
         self.assertIn("checked 0 relative Markdown destination(s)", result.stdout)
 
     def test_tag_name_must_have_gfm_boundary(self):
-        for line in ("<diversion>", "<div-other>", "<div/ invalid>", "Prefix <div>"):
+        for line in ("<diversion> inline", "<div-other> inline", "<div/ invalid>", "Prefix <div>"):
             with self.subTest(line=line):
                 result = self.check(line + "\n[Parsed](missing-not-a-type6.md)\n")
                 self.assertEqual(1, result.returncode, result.stderr)

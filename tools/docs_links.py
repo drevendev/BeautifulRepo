@@ -53,7 +53,7 @@ TYPE1_HTML_BLOCK_CLOSE_RE = re.compile(
 TYPE2_HTML_COMMENT_OPEN_RE = re.compile(r"^ {0,3}<!--")
 TYPE2_HTML_COMMENT_CLOSE_RE = re.compile(r"-->")
 # GFM raw HTML block types 3–5: each closes only at its own delimiter.
-# Type 6 closes at a blank line; type 7 remains outside this bounded scanner.
+# Types 6 and 7 close at a blank line; type 7 cannot interrupt a paragraph.
 TYPE3_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<\?")
 TYPE4_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<![A-Z]")
 TYPE5_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<!\[CDATA\[")
@@ -76,6 +76,86 @@ TYPE6_BLOCK_TAGS = (
 TYPE6_HTML_BLOCK_OPEN_RE = re.compile(
     rf"^ {{0,3}}</?(?:{TYPE6_BLOCK_TAGS})(?=[ \t\v\f]|/?>|$)", re.IGNORECASE
 )
+# GFM type 7: a complete standalone opening/closing HTML tag, at block start.
+# Recognize tags in linear time, without a general HTML/Markdown parser.
+TYPE7_HTML_WHITESPACE = " \t\v\f"
+
+
+def _is_type7_html_block_start(line: str) -> bool:
+    """Recognize complete standalone type-7 tags with at most 3 indent columns."""
+    indent, pos = _leading_indent_columns(line)
+    if indent > 3 or pos >= len(line) or line[pos] != "<":
+        return False
+    pos += 1
+    closing = pos < len(line) and line[pos] == "/"
+    if closing:
+        pos += 1
+    if pos >= len(line) or not ("A" <= line[pos] <= "Z" or "a" <= line[pos] <= "z"):
+        return False
+    pos += 1
+    while pos < len(line) and line[pos].isascii() and (
+        line[pos].isalnum() or line[pos] == "-"
+    ):
+        pos += 1
+
+    whitespace = TYPE7_HTML_WHITESPACE
+    if closing:
+        while pos < len(line) and line[pos] in whitespace:
+            pos += 1
+        return pos < len(line) and line[pos] == ">" and not line[pos + 1:].strip(whitespace)
+
+    while pos < len(line):
+        if line[pos] == ">":
+            return not line[pos + 1:].strip(whitespace)
+        if line[pos:pos + 2] == "/>":
+            return not line[pos + 2:].strip(whitespace)
+        if line[pos] not in whitespace:
+            return False
+
+        while pos < len(line) and line[pos] in whitespace:
+            pos += 1
+        if pos >= len(line):
+            return False
+        if line[pos] == ">" or line[pos:pos + 2] == "/>":
+            continue
+        if not ("A" <= line[pos] <= "Z" or "a" <= line[pos] <= "z"
+                or line[pos] in "_:"):
+            return False
+        pos += 1
+        while pos < len(line) and line[pos].isascii() and (
+            line[pos].isalnum() or line[pos] in ":._-"
+        ):
+            pos += 1
+
+        after_name = pos
+        while pos < len(line) and line[pos] in whitespace:
+            pos += 1
+        if pos < len(line) and line[pos] == "=":
+            pos += 1
+            while pos < len(line) and line[pos] in whitespace:
+                pos += 1
+            if pos >= len(line):
+                return False
+            if line[pos] in "\"'":
+                quote = line[pos]
+                pos = line.find(quote, pos + 1)
+                if pos < 0:
+                    return False
+                pos += 1
+            else:
+                value_start = pos
+                while pos < len(line) and line[pos] not in whitespace + ">":
+                    if line[pos] in "\"'\x60=<":
+                        return False
+                    pos += 1
+                if pos == value_start:
+                    return False
+        else:
+            # Revisit the spaces after an unvalued attribute: they delimit
+            # the next attribute, or permit a terminal > or />.
+            pos = after_name
+    return False
+
 MARKDOWN_WHITESPACE = " \t\r\n"
 # cmark-gfm stops reading a bare link destination at its 33rd unclosed '(' (see
 # manual_scan_link_url_2), and CommonMark allows such a limit. It also keeps
@@ -703,7 +783,7 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
 
 def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) -> str:
-    """Mask fenced code and GFM raw HTML; HTML navigation keeps type-6 tags."""
+    """Mask fenced code and GFM raw HTML; HTML navigation keeps type-6/7 tags."""
     masked = []
     fence_char = None
     fence_length = 0
@@ -711,6 +791,8 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
     in_type2_comment = False
     in_type345_end = None
     in_type6_html = False
+    in_type7_html = False
+    paragraph_open = False
 
     for raw_line in split_markdown_lines(text):
         if raw_line.endswith("\r\n"):
@@ -748,14 +830,16 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
                 in_type345_end = None
             continue
 
-        if in_type6_html:
+        if in_type6_html or in_type7_html:
             if not line.strip(" \t"):
-                # Unlike types 1–5, type 6 ends at the next blank line.
+                # Both types 6 and 7 terminate only at a GFM blank line.
                 in_type6_html = False
+                in_type7_html = False
+                paragraph_open = False
                 masked.append(line + ending)
             else:
-                # The HTML companion still needs real tags within this block.
-                # In that view, Markdown-looking fences are raw HTML text.
+                # In the HTML-navigation view, retain real HTML tags without
+                # allowing raw Markdown-looking fences to hide later tags.
                 masked.append((" " * len(line) if mask_type6 else line) + ending)
             continue
 
@@ -766,16 +850,19 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
             if marker[0] != "`" or "`" not in info:
                 fence_char = marker[0]
                 fence_length = len(marker)
+                paragraph_open = False
                 masked.append(" " * len(line) + ending)
                 continue
 
         if TYPE1_HTML_BLOCK_OPEN_RE.match(line):
+            paragraph_open = False
             masked.append(" " * len(line) + ending)
             if not TYPE1_HTML_BLOCK_CLOSE_RE.search(line):
                 in_type1_html = True
             continue
 
         if TYPE2_HTML_COMMENT_OPEN_RE.match(line):
+            paragraph_open = False
             masked.append(" " * len(line) + ending)
             if not TYPE2_HTML_COMMENT_CLOSE_RE.search(line):
                 in_type2_comment = True
@@ -783,6 +870,7 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
 
         for opener, terminator in HTML_BLOCK_345_STARTS:
             if opener.match(line):
+                paragraph_open = False
                 masked.append(" " * len(line) + ending)
                 if terminator not in line:
                     in_type345_end = terminator
@@ -791,14 +879,31 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
             if TYPE6_HTML_BLOCK_OPEN_RE.match(line):
                 masked.append((" " * len(line) if mask_type6 else line) + ending)
                 in_type6_html = True
+                paragraph_open = False
+            elif not paragraph_open and _is_type7_html_block_start(line):
+                masked.append((" " * len(line) if mask_type6 else line) + ending)
+                in_type7_html = True
             else:
                 masked.append(line + ending)
+                if not line.strip(" \t"):
+                    paragraph_open = False
+                elif _block_quote_content_start(line) is not None:
+                    # A quoted paragraph may have lazy continuation lines.
+                    paragraph_open = True
+                elif _starts_nonparagraph_block(line):
+                    paragraph_open = False
+                elif not paragraph_open and REFERENCE_DEFINITION_RE.fullmatch(line):
+                    # One-line definitions are block material, not paragraphs.
+                    paragraph_open = False
+                else:
+                    indent, _ = _leading_indent_columns(line)
+                    paragraph_open = indent < 4 or paragraph_open
 
     return "".join(masked)
 
 
 def _mask_markdown_code(text: str, *, mask_type6: bool = True) -> str:
-    """Mask literal regions; HTML navigation can restore actual type-6 markup."""
+    """Mask literal regions; HTML navigation can restore actual type-6/7 markup."""
     text = _mask_list_item_code_blocks(text)
     block_masked = _mask_fenced_and_type1_html_blocks(text)
     indented_masked = _mask_indented_code_blocks(block_masked)
@@ -807,7 +912,7 @@ def _mask_markdown_code(text: str, *, mask_type6: bool = True) -> str:
     if mask_type6:
         return masked
 
-    # Restore only the type-6 region *after* Markdown masking. Otherwise
+    # Restore type-6/7 regions *after* Markdown masking. Otherwise
     # literal backticks/fences inside raw HTML can wrongly hide later <img>
     # and <a> tags in the HTML-navigation checker. Preserve original offsets.
     html_view = _mask_fenced_and_type1_html_blocks(text, mask_type6=False)
