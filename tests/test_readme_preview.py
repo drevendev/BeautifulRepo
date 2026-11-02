@@ -139,6 +139,27 @@ class ReadmePreviewTests(unittest.TestCase):
                     self.assertIn("display control", result.stderr)
                     path.write_bytes(before)
 
+    def test_invisible_zero_width_controls_are_rejected_in_both_inputs(self):
+        # The text looks unchanged in a terminal despite different approved bytes.
+        # Script-shaping joiners remain supported for non-Latin README text.
+        for ch in ("\u200b", "\u2060", "\ufeff"):
+            for path in (self.readme, self.proposal):
+                with self.subTest(codepoint=hex(ord(ch)), path=path.name):
+                    original = path.read_bytes()
+                    path.write_text("# Example\nBefore" + ch + "After\n", encoding="utf-8")
+                    result = self.command()
+                    self.assertEqual(2, result.returncode)
+                    self.assertEqual("", result.stdout)
+                    self.assertIn("display control", result.stderr)
+                    path.write_bytes(original)
+
+    def test_joiners_needed_by_scripts_remain_supported(self):
+        self.proposal.write_text("# Example\n\nक्\u200dष and ک\u200cتاب\n", encoding="utf-8")
+        result = self.command()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("क्\u200dष", result.stdout)
+        self.assertIn("ک\u200cتاب", result.stdout)
+
     def test_unicode_line_separators_cannot_forge_diff_lines(self):
         # splitlines(keepends=True) treats these as newlines even without LF.
         for separator in ("\u2028", "\u2029"):
