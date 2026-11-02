@@ -54,7 +54,7 @@ class NestedInlineLinksTests(unittest.TestCase):
     def test_fake_link_inside_image_destination_cannot_suppress_outer(self):
         # A syntactically valid-looking ordinary link in an image destination
         # is literal destination text. It cannot invalidate the outer link.
-        markdown = "[outer ![alt](path/[fake](fake.md))](outer.md)\\n"
+        markdown = "[outer ![alt](path/[fake](fake.md))](outer.md)\n"
         links, legacy, cli = self.inspect(markdown)
         self.assertEqual(
             [(1, 1, "outer.md", 1),
