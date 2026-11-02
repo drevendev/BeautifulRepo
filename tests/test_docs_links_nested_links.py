@@ -51,6 +51,30 @@ class NestedInlineLinksTests(unittest.TestCase):
         self.assertIn("'side.md'", cli.stderr)
         self.assertNotIn("assets/", cli.stderr)
 
+    def test_fake_link_inside_image_destination_cannot_suppress_outer(self):
+        # A syntactically valid-looking ordinary link in an image destination
+        # is literal destination text. It cannot invalidate the outer link.
+        markdown = "[outer ![alt](path/[fake](fake.md))](outer.md)\\n"
+        links, legacy, cli = self.inspect(markdown)
+        self.assertEqual(
+            [(1, 1, "outer.md", 1),
+             (1, markdown.index("![alt]") + 1,
+              "path/[fake](fake.md)", 1)],
+            links,
+        )
+        self.assertEqual(
+            [(1, "outer.md"), (1, "path/[fake](fake.md)")], legacy
+        )
+        self.assertEqual(1, cli.returncode)
+        self.assertIn("missing relative destination: 'outer.md'", cli.stderr)
+        self.assertIn(
+            "missing relative destination: 'path/[fake](fake.md)'",
+            cli.stderr,
+        )
+        self.assertNotIn(
+            "missing relative destination: 'fake.md'", cli.stderr
+        )
+
     def test_multiple_levels_keep_only_innermost_ordinary_link(self):
         links, legacy, cli = self.inspect(
             "[A [B [C](c.md)](b.md)](a.md)\n"
