@@ -1164,13 +1164,25 @@ def iter_markdown_locations(path: Path):
             (origin + 1, close)
             for origin, _, close, _, _, image in candidates if image
         )
+        # An image destination is literal syntax, not link text. Exclude
+        # apparent ordinary links within it *before* nesting precedence:
+        # otherwise a fake link inside the image destination can incorrectly
+        # suppress the enclosing live ordinary link.
+        image_destination_spans = _interval_coverage(
+            (close + 1, end)
+            for origin, _, close, end, _, image in candidates
+            if image and not _interval_contains(image_text_spans, origin)
+        )
         ordinary_opens = sorted(
             origin for origin, _, _, _, _, image in candidates
-            if not image and not _interval_contains(image_text_spans, origin)
+            if not image
+            and not _interval_contains(image_text_spans, origin)
+            and not _interval_contains(image_destination_spans, origin)
         )
         suppressed_ordinary = set()
         for origin, _, close, _, _, image in candidates:
-            if image or _interval_contains(image_text_spans, origin):
+            if (image or _interval_contains(image_text_spans, origin)
+                    or _interval_contains(image_destination_spans, origin)):
                 continue
             next_link = bisect_right(ordinary_opens, origin)
             if (next_link < len(ordinary_opens)
@@ -1184,8 +1196,9 @@ def iter_markdown_locations(path: Path):
             for origin, _, close, end, _, image in candidates
             if (image or origin not in suppressed_ordinary)
             and not _interval_contains(image_text_spans, origin)
+            and not _interval_contains(image_destination_spans, origin)
         )
-        for origin, position, close, _, destination, image in candidates:
+        for origin, position, _close, _, destination, image in candidates:
             if (_interval_contains(destination_spans, origin)
                     or _interval_contains(image_text_spans, origin)
                     or (not image and origin in suppressed_ordinary)):
