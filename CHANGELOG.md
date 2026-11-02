@@ -396,6 +396,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject U+200B zero-width space, U+2060 word joiner and embedded U+FEFF
+  in both inputs to the exact-hash README preview/approval helpers. These
+  invisible characters can conceal a change in terminal diffs; ordinary
+  non-ASCII text and U+200C/U+200D script joiners remain supported. This
+  is a bounded display-integrity check, not a filesystem-race defense or
+  proof of consent (follow-up to #70).
+
 - Mask GFM raw HTML block types 3–5 in the offline Markdown destination scanner, retaining source line positions and matching each terminator only to its own block kind. Add regression cases for multi-line, single-line, unclosed, fenced and adjacent Markdown content; types 6–7 remain out of scope (issue #230, GFM source reviewed 2026-11-01 (UTC)).
 
 - Reject bare carriage returns, C1 terminal controls, Unicode directional
