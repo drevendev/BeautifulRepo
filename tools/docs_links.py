@@ -701,8 +701,8 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
 
 
-def _mask_fenced_and_type1_html_blocks(text: str) -> str:
-    """Mask fenced code and GFM type-1 through type-6 raw HTML in source order."""
+def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) -> str:
+    """Mask fenced code and GFM raw HTML; HTML navigation keeps type-6 tags."""
     masked = []
     fence_char = None
     fence_length = 0
@@ -785,7 +785,7 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
                     in_type345_end = terminator
                 break
         else:
-            if TYPE6_HTML_BLOCK_OPEN_RE.match(line):
+            if mask_type6 and TYPE6_HTML_BLOCK_OPEN_RE.match(line):
                 masked.append(" " * len(line) + ending)
                 in_type6_html = True
             else:
@@ -794,10 +794,10 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
     return "".join(masked)
 
 
-def _mask_markdown_code(text: str) -> str:
-    """Mask fenced, indented, raw-HTML and inline GFM literal regions."""
+def _mask_markdown_code(text: str, *, mask_type6: bool = True) -> str:
+    """Mask literal regions; retain type-6 markup for the HTML navigation pass."""
     text = _mask_list_item_code_blocks(text)
-    block_masked = _mask_fenced_and_type1_html_blocks(text)
+    block_masked = _mask_fenced_and_type1_html_blocks(text, mask_type6=mask_type6)
     indented_masked = _mask_indented_code_blocks(block_masked)
     quote_masked = _mask_block_quote_code_blocks(indented_masked)
     return _mask_inline_html_comments(_mask_inline_code_blocks(quote_masked))
