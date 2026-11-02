@@ -40,7 +40,7 @@ class NestedInlineLinksTests(unittest.TestCase):
         # The invalid outer link's destination-looking suffix is plain text.
         # Its apparent side link therefore remains independently live.
         links, legacy, cli = self.inspect(
-            "[Outer [inner](inner.md)](assets/[side](side.md))\\n"
+            "[Outer [inner](inner.md)](assets/[side](side.md))\n"
         )
         self.assertEqual(
             [(1, 8, "inner.md", 1), (1, 34, "side.md", 1)], links
