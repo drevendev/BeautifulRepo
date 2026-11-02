@@ -1078,6 +1078,8 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
         line = raw_line.rstrip("\r\n")
         active = list(line)
         inline_image_alt = []
+        inline_ordinary = []
+        inline_destinations = []
         # Hide inline destinations and inline-image alt text without shifting
         # source coordinates. Neither can introduce another live reference.
         for origin, destination_start in _iter_inline_link_candidates(line):
@@ -1085,6 +1087,9 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
             if parsed is None:
                 continue
             _, end = parsed
+            inline_destinations.append((destination_start, end))
+            if line[origin] != "!":
+                inline_ordinary.append(origin)
             for index in range(destination_start, min(end, len(active))):
                 active[index] = " "
             if line[origin] == "!":
@@ -1172,10 +1177,22 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
             (origin + 2, close)
             for origin, _, close, _, _, image in candidates if image
         )
+        # Link kinds share nesting precedence: an inline ordinary link
+        # invalidates a surrounding reference link, but image alt text and
+        # destinations cannot introduce live nested links.
+        inline_destination_spans = _interval_coverage(inline_destinations)
+        inline_alt_spans = _interval_coverage(inline_image_alt)
         ordinary_starts = sorted(
-            start for origin, start, _, _, _, image in candidates
-            if not image and start not in consumed_labels
-            and not _interval_contains(image_spans, origin)
+            [
+                start for origin, start, _, _, _, image in candidates
+                if not image and start not in consumed_labels
+                and not _interval_contains(image_spans, origin)
+            ] + [
+                origin for origin in inline_ordinary
+                if not _interval_contains(image_spans, origin)
+                and not _interval_contains(inline_alt_spans, origin)
+                and not _interval_contains(inline_destination_spans, origin)
+            ]
         )
         survivors = []
         for candidate in candidates:
@@ -1238,6 +1255,12 @@ def iter_markdown_locations(path: Path):
     # index supports out-of-order nested links and the legacy destination line.
     line_starts = [0]
     line_starts.extend(match.end() for match in re.finditer("\n", visible))
+    reference_uses = list(_iter_reference_locations(visible, definitions))
+    reference_link_offsets = sorted(
+        line_starts[line - 1] + column - 1
+        for line, column, _ in reference_uses
+        if visible[line_starts[line - 1] + column - 1] != "!"
+    )
     block_start = 0
     separators = list(BLANK_LINE_RE.finditer(visible))
     for separator in separators + [None]:
@@ -1302,11 +1325,18 @@ def iter_markdown_locations(path: Path):
             and not _interval_contains(image_text_spans, origin)
             and not _interval_contains(image_destination_spans, origin)
         )
-        for origin, position, _close, _, destination, image in candidates:
+        for origin, position, close, _, destination, image in candidates:
             if (_interval_contains(destination_spans, origin)
                     or _interval_contains(image_text_spans, origin)
                     or (not image and origin in suppressed_ordinary)):
                 continue
+            if not image:
+                # A valid reference link nested in inline link text wins,
+                # just as a nested inline link wins over an outer reference.
+                inner = bisect_right(reference_link_offsets, block_start + origin)
+                if (inner < len(reference_link_offsets)
+                        and reference_link_offsets[inner] < block_start + close):
+                    continue
             source_offset = block_start + origin
             source_line = bisect_right(line_starts, source_offset)
             source_column = source_offset - line_starts[source_line - 1] + 1
@@ -1319,7 +1349,7 @@ def iter_markdown_locations(path: Path):
             break
         block_start = separator.end()
 
-    for lineno, column, destination in _iter_reference_locations(visible, definitions):
+    for lineno, column, destination in reference_uses:
         yield MarkdownLinkLocation(lineno, column, destination, lineno)
 
 
