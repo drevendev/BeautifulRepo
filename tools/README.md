@@ -340,7 +340,16 @@ Real HTML destinations are still inspected separately by `html_navigation.py`. S
 [GFM HTML block rules](https://github.github.com/gfm/#html-blocks), reviewed 2026-11-02 (UTC).
 Full (`[text][id]`), collapsed (`[text][]`) and shortcut (`[id]`)
 reference-style links and images are checked when a valid definition begins
-at a Markdown block boundary. Definitions may follow their uses; labels use
+at a Markdown block boundary. The full-reference *visible text* may contain
+balanced nested square brackets on one physical line, such as
+`[a [nested] title][id]`; ordinary nested references follow inner-link
+precedence while image references may remain inside a live link. A consumed
+explicit `[id]` token is not double-counted as a shortcut. Collapsed and
+shortcut reference labels remain flat (at most 999 characters) as required by
+GFM; nested unescaped brackets do not create new labels. The scanner uses
+bounded, nonrecursive delimiter matching, preserves source-character positions,
+and does not parse every multiline/nested-container GFM construct. See the
+[GFM link rules](https://github.github.com/gfm/#links), reviewed 2026-11-03. Definitions may follow their uses; labels use
 case folding and collapsed whitespace, first definition wins, and unused
 definitions are not checked. A bounded GFM subset permits the destination on
 the next nonblank line after `[id]:` and/or a title on the next nonblank line
