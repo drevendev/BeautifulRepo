@@ -641,5 +641,70 @@ class DocsLinksTests(unittest.TestCase):
             self.assertEqual(242, result.stderr.count("missing relative destination"))
 
 
+
+    def test_opt_in_source_columns_preserve_legacy_link_diagnostics(self):
+        # Anchors describe the link *use*, not the destination or definition.
+        # CRLF, Unicode and multiple uses on one line are character-based.
+        import runpy
+
+        module = runpy.run_path(str(SCRIPT))
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "README.md"
+            source.write_bytes(
+                ("[full]: missing/full.md\r\n"
+                 "[Beta]: missing/collapsed.md\r\n"
+                 "[gamma]: missing/short.md\r\n"
+                 "\r\n"
+                 "Ω [one](missing/one.md) ![two](missing/two.png)\r\n"
+                 "[label][full] [Beta][] [gamma] "
+                 "\x60[hidden](missing/code.md)\x60\r\n"
+                 "<!-- [Hidden](missing/comment.md) -->\r\n").encode("utf-8")
+            )
+            links = list(module["iter_markdown_locations"](source))
+            expected = [
+                (5, 3, "missing/one.md", 5),
+                (5, 25, "missing/two.png", 5),
+                (6, 1, "missing/full.md", 6),
+                (6, 15, "missing/collapsed.md", 6),
+                (6, 24, "missing/short.md", 6),
+            ]
+            self.assertEqual(expected, [tuple(link) for link in links])
+            self.assertEqual(
+                [(line, destination) for _, _, destination, line in expected],
+                list(module["iter_markdown_destinations"](source)),
+            )
+            result = self.run_checker(source.parent)
+            self.assertEqual(1, result.returncode)
+            self.assertIn(
+                "README.md:5: missing relative destination: 'missing/one.md'",
+                result.stderr,
+            )
+            self.assertNotIn("README.md:5:3", result.stderr)
+            self.assertNotIn("missing/code.md", result.stderr)
+            self.assertNotIn("missing/comment.md", result.stderr)
+
+    def test_opt_in_anchor_precedes_multiline_destination_line(self):
+        # Legacy reports destination lines, while the optional anchor reports
+        # the first character of the original link-use syntax.
+        import runpy
+
+        module = runpy.run_path(str(SCRIPT))
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "README.md"
+            source.write_bytes(
+                ("Ω [Outer\r\n"
+                 "[Inner](missing/inner.md)\r\n"
+                 "](missing/outer.md)\r\n").encode("utf-8")
+            )
+            self.assertEqual(
+                [(1, 3, "missing/outer.md", 3),
+                 (2, 1, "missing/inner.md", 2)],
+                [tuple(link) for link in module["iter_markdown_locations"](source)],
+            )
+            self.assertEqual(
+                [(3, "missing/outer.md"), (2, "missing/inner.md")],
+                list(module["iter_markdown_destinations"](source)),
+            )
+
 if __name__ == "__main__":
     unittest.main()
