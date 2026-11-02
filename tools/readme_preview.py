@@ -32,6 +32,9 @@ def _unsafe_display_character(ch: str) -> bool:
     return (
         (unicodedata.category(ch) == "Cc" and ch not in "\t\r\n")
         or cp in (0x061C, 0x200E, 0x200F, 0x2028, 0x2029)
+        # These zero-width characters can conceal changes in a terminal diff.
+        # Keep common script-shaping joiners (U+200C/U+200D) supported.
+        or cp in (0x200B, 0x2060, 0xFEFF)
         or 0x202A <= cp <= 0x202E
         or 0x2066 <= cp <= 0x2069
     )
