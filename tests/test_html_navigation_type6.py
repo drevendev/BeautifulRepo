@@ -38,6 +38,18 @@ class Type6HtmlNavigationTests(unittest.TestCase):
         self.assertIn("missing HTML a destination: 'missing-page.md'", result.stderr)
         self.assertNotIn("missing section anchor: '#visible'", result.stderr)
 
+    def test_fence_like_text_inside_raw_html_does_not_hide_real_img(self):
+        result = self.check(
+            "<div>\n"
+            "```md\n"
+            '<img src="missing-inside-raw.svg">\n'
+            "```\n"
+            "</div>\n"
+        )
+        self.assertEqual(1, result.returncode, result.stdout)
+        self.assertIn("README.md:3: HTML img missing alt attribute", result.stderr)
+        self.assertIn("missing HTML img destination: 'missing-inside-raw.svg'", result.stderr)
+
     def test_markdown_headings_in_type6_block_do_not_create_false_anchors(self):
         result = self.check(
             "<div>\n"
