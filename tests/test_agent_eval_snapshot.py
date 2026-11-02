@@ -108,13 +108,13 @@ class SnapshotTests(unittest.TestCase):
         duplicate_file = json.dumps(snapshot["entries"]["README.md"], sort_keys=True)
         cases = [
             ("duplicate top-level", original.replace(
-                '"format": 1,', '"format": 1, "format": 1,', 1), "duplicate JSON key"),
+                '"format": 2,', '"format": 2, "format": 2,', 1), "duplicate JSON key"),
             ("duplicate entry", original.replace(
                 '"README.md": {',
                 '"README.md": ' + duplicate_file + ', "README.md": {', 1),
                 "duplicate JSON key"),
             ("boolean version", original.replace(
-                '"format": 1,', '"format": true,', 1), "baseline format"),
+                '"format": 2,', '"format": true,', 1), "baseline format"),
         ]
         for label, modified, expected_error in cases:
             with self.subTest(label=label):
