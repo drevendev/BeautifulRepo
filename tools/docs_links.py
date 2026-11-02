@@ -1156,33 +1156,39 @@ def iter_markdown_locations(path: Path):
                 (origin, position, close, end, destination, block[origin] == "!")
             )
 
-        # Source inside parsed inline destinations is literal; source inside
-        # a parsed image's alt text does not become a separate live link.
-        destination_spans = _interval_coverage(
-            (close + 1, end) for _, _, close, end, _, _ in candidates
-        )
+        # Image alt text is literal even if it contains link-like syntax.
+        # Decide ordinary-link precedence *before* indexing destinations:
+        # a discarded outer link has no live destination, so its trailing
+        # destination-looking text must not mask independently valid links.
         image_text_spans = _interval_coverage(
             (origin + 1, close)
             for origin, _, close, _, _, image in candidates if image
         )
-        ordinary_opens = [
+        ordinary_opens = sorted(
             origin for origin, _, _, _, _, image in candidates
-            if not image
-            and not _interval_contains(destination_spans, origin)
-            and not _interval_contains(image_text_spans, origin)
-        ]
+            if not image and not _interval_contains(image_text_spans, origin)
+        )
+        suppressed_ordinary = set()
+        for origin, _, close, _, _, image in candidates:
+            if image or _interval_contains(image_text_spans, origin):
+                continue
+            next_link = bisect_right(ordinary_opens, origin)
+            if (next_link < len(ordinary_opens)
+                    and ordinary_opens[next_link] < close):
+                # GFM forbids an ordinary link containing a successful
+                # ordinary inner link, but permits images in its link text.
+                suppressed_ordinary.add(origin)
 
+        destination_spans = _interval_coverage(
+            (close + 1, end)
+            for origin, _, close, end, _, image in candidates
+            if image or origin not in suppressed_ordinary
+        )
         for origin, position, close, _, destination, image in candidates:
             if (_interval_contains(destination_spans, origin)
-                    or _interval_contains(image_text_spans, origin)):
+                    or _interval_contains(image_text_spans, origin)
+                    or (not image and origin in suppressed_ordinary)):
                 continue
-            if not image:
-                # GFM disallows nested ordinary links, but permits images in
-                # link text. Only a syntactically successful inner link wins.
-                next_link = bisect_right(ordinary_opens, origin)
-                if (next_link < len(ordinary_opens)
-                        and ordinary_opens[next_link] < close):
-                    continue
             source_offset = block_start + origin
             source_line = bisect_right(line_starts, source_offset)
             source_column = source_offset - line_starts[source_line - 1] + 1
