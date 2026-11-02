@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Expose optional source-character line/column anchors for inline, image and
+  reference Markdown link uses while preserving the old two-item iterator and
+  unchanged CLI diagnostics. Multiline links retain their legacy destination
+  diagnostic line separately from the link-use anchor (#241).
+
 - Recognize bounded top-level GFM type-7 raw HTML blocks in offline Markdown
   link checks: a complete standalone opening/closing tag only at a block
   boundary, ending at the next blank line. Preserve LF/CRLF offsets, post-block
