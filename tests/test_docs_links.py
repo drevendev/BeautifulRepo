@@ -693,16 +693,17 @@ class DocsLinksTests(unittest.TestCase):
             source = Path(tmp) / "README.md"
             source.write_bytes(
                 ("Ω [Outer\r\n"
-                 "[Inner](missing/inner.md)\r\n"
-                 "](missing/outer.md)\r\n").encode("utf-8")
+                 "plain text\r\n"
+                 "](missing/outer.md)\r\n"
+                 "[Inner](missing/inner.md)\r\n").encode("utf-8")
             )
             self.assertEqual(
                 [(1, 3, "missing/outer.md", 3),
-                 (2, 1, "missing/inner.md", 2)],
+                 (4, 1, "missing/inner.md", 4)],
                 [tuple(link) for link in module["iter_markdown_locations"](source)],
             )
             self.assertEqual(
-                [(3, "missing/outer.md"), (2, "missing/inner.md")],
+                [(3, "missing/outer.md"), (4, "missing/inner.md")],
                 list(module["iter_markdown_destinations"](source)),
             )
 
