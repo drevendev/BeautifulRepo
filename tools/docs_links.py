@@ -1122,9 +1122,6 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
         for marked in delimiter:
             prefix.append(prefix[-1] + marked)
 
-        def flat(start: int, end: int) -> bool:
-            return prefix[start] == prefix[end]
-
         # (origin, opener, text-end, explicit-label opener, target, is-image)
         candidates = []
         consumed_labels = set()
@@ -1141,14 +1138,14 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
             # *text* is still valid when a separate short explicit label exists.
             text = (
                 visible[start + 1:close]
-                if close - start <= 1000 and flat(start + 1, close)
+                if close - start <= 1000 and prefix[start + 1] == prefix[close]
                 else None
             )
             label_end = closing.get(tail) if tail < len(visible) and visible[tail] == "[" else None
             explicit = (
                 label_end is not None
                 and label_end - tail <= 1000
-                and flat(tail + 1, label_end)
+                and prefix[tail + 1] == prefix[label_end]
             )
             if explicit:
                 explicit_label = visible[tail + 1:label_end]
