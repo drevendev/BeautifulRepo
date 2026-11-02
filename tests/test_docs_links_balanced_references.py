@@ -136,5 +136,46 @@ class BalancedReferenceUseTests(unittest.TestCase):
         self.assertEqual([(1, "missing.md"), (2, "missing.md")], legacy)
 
 
+    def test_inline_link_inside_reference_wins_and_trailing_label_recovers(self):
+        # GFM links example 541: the outer full reference is not a link.
+        line = "[outer [inner](inner.md)][ref]"
+        locations, _, cli = self.inspect(line + "\n\n[ref]: outer.md\n")
+        self.assertEqual(
+            [(1, line.index("[inner]") + 1, "inner.md", 1),
+             (1, line.rindex("[ref]") + 1, "outer.md", 1)],
+            locations,
+        )
+        self.assertIn("'inner.md'", cli.stderr)
+        self.assertIn("'outer.md'", cli.stderr)
+
+    def test_reference_inside_inline_wins_over_outer_inline(self):
+        line = "[outer [inner][child]](outer.md)"
+        locations, _, cli = self.inspect(line + "\n\n[child]: inner.md\n")
+        self.assertEqual(
+            [(1, line.index("[inner]") + 1, "inner.md", 1)],
+            locations,
+        )
+        self.assertIn("'inner.md'", cli.stderr)
+        self.assertNotIn("'outer.md'", cli.stderr)
+
+    def test_inline_image_inside_reference_does_not_suppress_link(self):
+        line = "[outer ![badge](badge.svg)][ref]"
+        locations, _, _ = self.inspect(line + "\n\n[ref]: outer.md\n")
+        self.assertEqual(
+            [(1, line.index("![badge]") + 1, "badge.svg", 1),
+             (1, 1, "outer.md", 1)],
+            locations,
+        )
+
+    def test_reference_image_inside_inline_does_not_suppress_link(self):
+        line = "[outer ![badge][image]](outer.md)"
+        locations, _, _ = self.inspect(line + "\n\n[image]: badge.svg\n")
+        self.assertEqual(
+            [(1, 1, "outer.md", 1),
+             (1, line.index("![badge]") + 1, "badge.svg", 1)],
+            locations,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
