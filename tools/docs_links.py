@@ -53,7 +53,7 @@ TYPE1_HTML_BLOCK_CLOSE_RE = re.compile(
 TYPE2_HTML_COMMENT_OPEN_RE = re.compile(r"^ {0,3}<!--")
 TYPE2_HTML_COMMENT_CLOSE_RE = re.compile(r"-->")
 # GFM raw HTML block types 3–5: each closes only at its own delimiter.
-# Types 6–7 are deliberately not approximated by this source scanner.
+# Type 6 closes at a blank line; type 7 remains outside this bounded scanner.
 TYPE3_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<\?")
 TYPE4_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<![A-Z]")
 TYPE5_HTML_BLOCK_OPEN_RE = re.compile(r"^ {0,3}<!\[CDATA\[")
@@ -61,6 +61,20 @@ HTML_BLOCK_345_STARTS = (
     (TYPE3_HTML_BLOCK_OPEN_RE, "?>"),
     (TYPE4_HTML_BLOCK_OPEN_RE, ">"),
     (TYPE5_HTML_BLOCK_OPEN_RE, "]]>"),
+)
+# Exact GFM type-6 tag names (not arbitrary inline tags such as <a>).
+# Type 6 may interrupt a paragraph; its content is raw HTML until a blank line.
+# GFM whitespace after a tag includes VT/FF; CR/LF are parsed as line endings.
+TYPE6_BLOCK_TAGS = (
+    "address|article|aside|base|basefont|blockquote|body|caption|center|"
+    "col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|"
+    "figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|"
+    "html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|"
+    "option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|"
+    "title|tr|track|ul"
+)
+TYPE6_HTML_BLOCK_OPEN_RE = re.compile(
+    rf"^ {{0,3}}</?(?:{TYPE6_BLOCK_TAGS})(?=[ \t\v\f]|/?>|$)", re.IGNORECASE
 )
 MARKDOWN_WHITESPACE = " \t\r\n"
 # cmark-gfm stops reading a bare link destination at its 33rd unclosed '(' (see
@@ -688,14 +702,15 @@ def _mask_block_quote_code_blocks(text: str) -> str:
 
 
 
-def _mask_fenced_and_type1_html_blocks(text: str) -> str:
-    """Mask fenced code and GFM type-1 through type-5 raw HTML in source order."""
+def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) -> str:
+    """Mask fenced code and GFM raw HTML; HTML navigation keeps type-6 tags."""
     masked = []
     fence_char = None
     fence_length = 0
     in_type1_html = False
     in_type2_comment = False
     in_type345_end = None
+    in_type6_html = False
 
     for raw_line in split_markdown_lines(text):
         if raw_line.endswith("\r\n"):
@@ -733,6 +748,17 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
                 in_type345_end = None
             continue
 
+        if in_type6_html:
+            if not line.strip(" \t"):
+                # Unlike types 1–5, type 6 ends at the next blank line.
+                in_type6_html = False
+                masked.append(line + ending)
+            else:
+                # The HTML companion still needs real tags within this block.
+                # In that view, Markdown-looking fences are raw HTML text.
+                masked.append((" " * len(line) if mask_type6 else line) + ending)
+            continue
+
         opening = FENCE_RE.match(line)
         if opening:
             marker = opening.group("fence")
@@ -762,18 +788,33 @@ def _mask_fenced_and_type1_html_blocks(text: str) -> str:
                     in_type345_end = terminator
                 break
         else:
-            masked.append(line + ending)
+            if TYPE6_HTML_BLOCK_OPEN_RE.match(line):
+                masked.append((" " * len(line) if mask_type6 else line) + ending)
+                in_type6_html = True
+            else:
+                masked.append(line + ending)
 
     return "".join(masked)
 
 
-def _mask_markdown_code(text: str) -> str:
-    """Mask fenced, indented, raw-HTML and inline GFM literal regions."""
+def _mask_markdown_code(text: str, *, mask_type6: bool = True) -> str:
+    """Mask literal regions; HTML navigation can restore actual type-6 markup."""
     text = _mask_list_item_code_blocks(text)
     block_masked = _mask_fenced_and_type1_html_blocks(text)
     indented_masked = _mask_indented_code_blocks(block_masked)
     quote_masked = _mask_block_quote_code_blocks(indented_masked)
-    return _mask_inline_html_comments(_mask_inline_code_blocks(quote_masked))
+    masked = _mask_inline_html_comments(_mask_inline_code_blocks(quote_masked))
+    if mask_type6:
+        return masked
+
+    # Restore only the type-6 region *after* Markdown masking. Otherwise
+    # literal backticks/fences inside raw HTML can wrongly hide later <img>
+    # and <a> tags in the HTML-navigation checker. Preserve original offsets.
+    html_view = _mask_fenced_and_type1_html_blocks(text, mask_type6=False)
+    return "".join(
+        original if original != block else checked
+        for block, original, checked in zip(block_masked, html_view, masked, strict=True)
+    )
 
 
 # Bounded, one-line GFM reference definitions. Multiline definitions and
