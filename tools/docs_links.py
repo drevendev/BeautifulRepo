@@ -934,7 +934,7 @@ def _mask_markdown_code(text: str, *, mask_type6: bool = True) -> str:
 
 
 # GFM reference definitions: original one-line grammar plus a bounded,
-# opt-in continuation subset. List/quote-container definitions are excluded.
+# bounded continuation subset. List/quote-container definitions are excluded.
 MAX_REFERENCE_CONTINUATION_CHARS = 4096
 REFERENCE_DEFINITION_RE = re.compile(
     r"^ {0,3}\[(?P<label>(?:\\.|[^\[\]\\\r\n])+)\]:[ \t]*"
