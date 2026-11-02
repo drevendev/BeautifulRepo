@@ -215,7 +215,7 @@ def _iter_inline_link_candidates(line: str):
     position = 0
     while position < len(line):
         char = line[position]
-        if char == "\" and position + 1 < len(line) and line[position + 1] in string.punctuation:
+        if char == "\\" and position + 1 < len(line) and line[position + 1] in string.punctuation:
             position += 2
             continue
         if char == "[":
