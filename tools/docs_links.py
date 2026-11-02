@@ -753,7 +753,9 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
                 in_type6_html = False
                 masked.append(line + ending)
             else:
-                masked.append(" " * len(line) + ending)
+                # The HTML companion still needs real tags within this block.
+                # In that view, Markdown-looking fences are raw HTML text.
+                masked.append((" " * len(line) if mask_type6 else line) + ending)
             continue
 
         opening = FENCE_RE.match(line)
@@ -785,8 +787,8 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
                     in_type345_end = terminator
                 break
         else:
-            if mask_type6 and TYPE6_HTML_BLOCK_OPEN_RE.match(line):
-                masked.append(" " * len(line) + ending)
+            if TYPE6_HTML_BLOCK_OPEN_RE.match(line):
+                masked.append((" " * len(line) if mask_type6 else line) + ending)
                 in_type6_html = True
             else:
                 masked.append(line + ending)
