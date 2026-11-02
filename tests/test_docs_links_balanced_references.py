@@ -103,7 +103,7 @@ class BalancedReferenceUseTests(unittest.TestCase):
         )
         self.assertEqual(
             [(1, 1, "logo.svg", 1),
-             (1, 31, "assets/[child](hidden.md)", 1)],
+             (1, 32, "assets/[child](hidden.md)", 1)],
             locations,
         )
         self.assertNotIn("missing relative destination: 'hidden.md'", cli.stderr)
