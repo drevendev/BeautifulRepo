@@ -36,6 +36,21 @@ class NestedInlineLinksTests(unittest.TestCase):
         self.assertIn("missing relative destination: 'inner.md'", cli.stderr)
         self.assertNotIn("'outer.md'", cli.stderr)
 
+    def test_discarded_outer_destination_does_not_mask_side_link(self):
+        # The invalid outer link's destination-looking suffix is plain text.
+        # Its apparent side link therefore remains independently live.
+        links, legacy, cli = self.inspect(
+            "[Outer [inner](inner.md)](assets/[side](side.md))\\n"
+        )
+        self.assertEqual(
+            [(1, 8, "inner.md", 1), (1, 33, "side.md", 1)], links
+        )
+        self.assertEqual([(1, "inner.md"), (1, "side.md")], legacy)
+        self.assertEqual(1, cli.returncode)
+        self.assertIn("'inner.md'", cli.stderr)
+        self.assertIn("'side.md'", cli.stderr)
+        self.assertNotIn("'assets/'", cli.stderr)
+
     def test_multiple_levels_keep_only_innermost_ordinary_link(self):
         links, legacy, cli = self.inspect(
             "[A [B [C](c.md)](b.md)](a.md)\n"
