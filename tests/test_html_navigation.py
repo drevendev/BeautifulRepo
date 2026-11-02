@@ -29,6 +29,7 @@ class HtmlNavigationTests(unittest.TestCase):
             '<source srcset="assets/a.svg 1x, assets/b.svg 2x">\n'
             '<a href="guide.md#usage">Guide</a>\n'
             '<a href="https://example.org/not-local">External</a>\n'
+            '\n'  # GFM type-6 <source> block ends before the Markdown heading.
             '## Start here\n',
             {"assets/diagram.svg": "svg", "assets/a.svg": "svg", "assets/b.svg": "svg",
              "guide.md": "# Usage\n"},
@@ -106,6 +107,7 @@ class HtmlNavigationTests(unittest.TestCase):
             '<span role="img" role="presentation" '
             'aria-labelledby="first" aria-labelledby="second"></span>\n'
             '<div aria-hidden="true" aria-hidden="false"></div>\n'
+            '\n'  # End type-6 raw HTML before Markdown code examples.
             '`<span role="img" role="presentation">example</span>`\n'
             '```html\n<div aria-label="first" aria-label="second"></div>\n```\n',
             {"art.svg": "svg"},
