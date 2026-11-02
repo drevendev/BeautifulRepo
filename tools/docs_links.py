@@ -933,13 +933,18 @@ def _mask_markdown_code(text: str, *, mask_type6: bool = True) -> str:
     )
 
 
-# Bounded, one-line GFM reference definitions. Multiline definitions and
-# definitions nested in lists/quotes are intentionally not interpreted here.
+# GFM reference definitions: original one-line grammar plus a bounded,
+# opt-in continuation subset. List/quote-container definitions are excluded.
+MAX_REFERENCE_CONTINUATION_CHARS = 4096
 REFERENCE_DEFINITION_RE = re.compile(
     r"^ {0,3}\[(?P<label>(?:\\.|[^\[\]\\\r\n])+)\]:[ \t]*"
     r"(?P<target><(?:\\.|[^<>\r\n])*>|(?:\\.|[^\s\r\n])+)"
     r"(?:[ \t]+(?:\"(?:\\.|[^\"\\\r\n])*\"|'(?:\\.|[^'\\\r\n])*'|\((?:\\.|[^()\\\r\n])*\)))?[ \t]*$"
 )
+REFERENCE_PENDING_RE = re.compile(
+    r"^ {0,3}\[(?P<label>(?:\\.|[^\[\]\\\r\n])+)\]:[ \t]*$"
+)
+
 REFERENCE_USE_RE = re.compile(
     r"!?\[(?P<text>(?:\\.|[^\[\]\\\r\n])+)\]"
     r"(?:\[(?P<label>(?:\\.|[^\[\]\\\r\n])*)\])?"
@@ -981,32 +986,84 @@ def _unescape_reference_destination(value: str) -> str:
     return "".join(unescaped)
 
 
+def _reference_continuation(lines: list[str], index: int) -> str | None:
+    """Return one short nonblank, non-code continuation; never scan farther."""
+    if index >= len(lines):
+        return None
+    line = lines[index].rstrip("\r\n")
+    indent, _ = _leading_indent_columns(line)
+    if not line.strip() or indent > 3 or len(line) > MAX_REFERENCE_CONTINUATION_CHARS:
+        return None
+    return line.lstrip(" \t")
+
+
+def _parse_reference_definition(lines: list[str], index: int):
+    """Return (regex match, consumed physical lines) for the bounded subset.
+
+    GFM permits one line ending before a destination and one before a title.
+    Only the existing one-line destination/title grammar is interpreted.
+    A failed candidate consumes nothing; following Markdown stays visible.
+    """
+    first = lines[index].rstrip("\r\n")
+    match = REFERENCE_DEFINITION_RE.fullmatch(first)
+    consumed = 1
+    source = first
+    if match is None:
+        if REFERENCE_PENDING_RE.fullmatch(first) is None:
+            return None
+        continuation = _reference_continuation(lines, index + 1)
+        if continuation is None or len(first) + len(continuation) + 1 > MAX_REFERENCE_CONTINUATION_CHARS:
+            return None
+        source = first + " " + continuation
+        match = REFERENCE_DEFINITION_RE.fullmatch(source)
+        if match is None:
+            return None
+        consumed = 2
+
+    # A title on the next physical line is optional. Accept it only when the
+    # complete concatenated candidate matches; otherwise keep the next line.
+    continuation = _reference_continuation(lines, index + consumed)
+    if (continuation is not None
+            and len(source) + len(continuation) + 1 <= MAX_REFERENCE_CONTINUATION_CHARS):
+        extended = REFERENCE_DEFINITION_RE.fullmatch(source + " " + continuation)
+        if extended is not None:
+            return extended, consumed + 1
+    return match, consumed
+
+
 def _extract_reference_definitions(masked: str):
     """Return definitions and a same-size source with definitions blanked.
 
-    Recognize single-line definitions only at a block start; paragraph text
-    must not create a link definition. Earlier definitions take precedence.
+    Definitions only begin at a block boundary; paragraph text cannot define
+    links. The first matching label wins, with at most two continuation lines.
     """
     definitions = {}
     remaining = []
     at_block_start = True
-    for raw_line in split_markdown_lines(masked):
+    lines = list(split_markdown_lines(masked))
+    index = 0
+    while index < len(lines):
+        raw_line = lines[index]
         line = raw_line.rstrip("\r\n")
-        ending = raw_line[len(line):]
-        match = REFERENCE_DEFINITION_RE.fullmatch(line) if at_block_start else None
-        if match is not None and _normalize_reference_label(match.group("label")):
+        parsed = _parse_reference_definition(lines, index) if at_block_start else None
+        if parsed is not None:
+            match, consumed = parsed
             label = _normalize_reference_label(match.group("label"))
-            definitions.setdefault(
-                label, _unescape_reference_destination(match.group("target"))
-            )
-            remaining.append(" " * len(line) + ending)
-            at_block_start = True
-            continue
+            if label:
+                definitions.setdefault(
+                    label, _unescape_reference_destination(match.group("target"))
+                )
+                for raw in lines[index:index + consumed]:
+                    body = raw.rstrip("\r\n")
+                    remaining.append(" " * len(body) + raw[len(body):])
+                index += consumed
+                at_block_start = True
+                continue
 
         remaining.append(raw_line)
-        # Headings, thematic breaks and setext underlines close the previous
-        # block, so a one-line reference definition may begin immediately after.
+        # Headings, thematic breaks and setext underlines close a block.
         at_block_start = not line.strip() or _starts_nonparagraph_block(line)
+        index += 1
 
     return definitions, "".join(remaining)
 
