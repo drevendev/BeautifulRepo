@@ -18,7 +18,7 @@ keep their original themed headings.
   findings in literal HTML. Preserve the companion HTML navigation check's
   real `<a>`/`<img>` destinations, alt attributes and explicit IDs while
   excluding raw-block text from generated Markdown heading anchors.
-  Nine focused regressions cover those distinct behaviors, tag boundaries,
+  Ten focused regressions cover those distinct behaviors, tag boundaries,
   CRLF, source line numbers and fences. Type 7 and full list/quote-container
   rendering remain outside scope (follow-up to #230; GFM reviewed 2026-11-02).
 
