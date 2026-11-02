@@ -81,7 +81,7 @@ class MultilineReferenceTests(unittest.TestCase):
         )
         self.assertEqual(1, result.returncode)
         self.assertIn("README.md:4: missing relative destination: 'missing.md'", result.stderr)
-        self.assertIn("checked 1 relative Markdown destination(s)", result.stdout)
+        self.assertEqual(1, result.stderr.count("missing relative destination:"))
 
     def test_malformed_title_does_not_swallow_next_link(self):
         result = self.check(
@@ -110,7 +110,7 @@ class MultilineReferenceTests(unittest.TestCase):
         )
         self.assertEqual(1, result.returncode)
         self.assertIn("README.md:5: missing relative destination: 'missing.md'", result.stderr)
-        self.assertIn("checked 1 relative Markdown destination(s)", result.stdout)
+        self.assertEqual(1, result.stderr.count("missing relative destination:"))
 
     def test_many_invalid_continuations_remain_bounded(self):
         text = "".join("[ref]:\n" + "a" * 4100 + "\n\n" for _ in range(50))
