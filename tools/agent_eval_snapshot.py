@@ -14,7 +14,7 @@ from pathlib import Path
 import stat
 import sys
 
-VERSION = 1
+VERSION = 2
 
 
 def reject_duplicate_json_members(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -53,7 +53,7 @@ def baseline_path(path: Path, root: Path) -> Path:
 
 def inventory(root: Path) -> dict[str, dict[str, str]]:
     """Walk entries without traversing directory symlinks or running target code."""
-    found = {}
+    found = {".": {"kind": "directory", "mode": f"{stat.S_IMODE(root.lstat().st_mode):04o}"}}
 
     def fail_on_unreadable_directory(exc: OSError) -> None:
         # os.walk otherwise silently skips unreadable directories: false green.
@@ -76,13 +76,14 @@ def inventory(root: Path) -> dict[str, dict[str, str]]:
                 # cross the target boundary even with followlinks=False.
                 raise ValueError(f"unsupported reparse point: {key}")
             elif stat.S_ISDIR(mode):
-                found[key] = {"kind": "directory"}
+                found[key] = {"kind": "directory", "mode": f"{stat.S_IMODE(mode):04o}"}
             elif stat.S_ISREG(mode):
                 digest = hashlib.sha256()
                 with entry.open("rb") as stream:
                     for chunk in iter(lambda: stream.read(131072), b""):
                         digest.update(chunk)
-                found[key] = {"kind": "file", "sha256": digest.hexdigest()}
+                found[key] = {"kind": "file", "sha256": digest.hexdigest(),
+                              "mode": f"{stat.S_IMODE(mode):04o}"}
             else:
                 raise ValueError(f"unsupported special file: {key}")
         dirs[:] = [name for name in dirs if not (Path(parent) / name).is_symlink()]
@@ -104,6 +105,9 @@ def verify(root: Path, baseline: Path) -> int:
         raise ValueError("baseline is too large")
     data = json.loads(baseline.read_text(encoding="utf-8"),
                       object_pairs_hook=reject_duplicate_json_members)
+    if (isinstance(data, dict) and type(data.get("format")) is int
+            and data["format"] == 1):
+        raise ValueError("baseline v1 did not capture permission bits; recapture a v2 baseline")
     if (not isinstance(data, dict) or type(data.get("format")) is not int
             or data.get("format") != VERSION
             or data.get("root") != str(root) or not isinstance(data.get("entries"), dict)):
