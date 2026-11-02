@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Recognize a bounded GFM reference-definition continuation in the offline
+  Markdown link checker: a destination on the next physical line, an optional
+  title on the following line, and first-definition precedence. Reject blank,
+  over-limit, masked and invalid continuations without consuming later links;
+  keep the legacy diagnostic location and tool's no-network contract (#243,
+  GFM reviewed 2026-11-02).
+
 - Expose optional source-character line/column anchors for inline, image and
   reference Markdown link uses while preserving the old two-item iterator and
   unchanged CLI diagnostics. Multiline links retain their legacy destination
