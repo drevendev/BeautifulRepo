@@ -1102,6 +1102,24 @@ def _iter_reference_uses(masked: str, definitions: dict[str, str]):
         yield lineno, destination
 
 
+def _interval_coverage(intervals):
+    """Index half-open source spans for bounded O(log n) containment tests."""
+    starts = []
+    furthest_ends = []
+    furthest = -1
+    for start, end in sorted(intervals):
+        starts.append(start)
+        furthest = max(furthest, end)
+        furthest_ends.append(furthest)
+    return starts, furthest_ends
+
+
+def _interval_contains(index, position):
+    starts, furthest_ends = index
+    previous = bisect_right(starts, position) - 1
+    return previous >= 0 and furthest_ends[previous] > position
+
+
 def iter_markdown_locations(path: Path):
     """Yield link-use source anchors without changing the legacy checker.
 
@@ -1122,17 +1140,56 @@ def iter_markdown_locations(path: Path):
         block_end = separator.start() if separator is not None else len(visible)
         block = visible[block_start:block_end]
 
+        # Parse candidates once and track the end of their link text and
+        # destination so nested source syntax can be resolved without recursion.
+        candidates = []
         for origin, position in _iter_inline_link_candidates(block):
             parsed = _parse_destination(block, position)
-            if parsed is not None:
-                destination, _ = parsed
-                source_offset = block_start + origin
-                source_line = bisect_right(line_starts, source_offset)
-                source_column = source_offset - line_starts[source_line - 1] + 1
-                diagnostic_line = bisect_right(line_starts, block_start + position)
-                yield MarkdownLinkLocation(
-                    source_line, source_column, destination, diagnostic_line
-                )
+            if parsed is None:
+                continue
+            destination, end = parsed
+            opener = position - 1
+            while opener >= 0 and block[opener] in MARKDOWN_WHITESPACE:
+                opener -= 1
+            close = opener - 1
+            candidates.append(
+                (origin, position, close, end, destination, block[origin] == "!")
+            )
+
+        # Source inside parsed inline destinations is literal; source inside
+        # a parsed image's alt text does not become a separate live link.
+        destination_spans = _interval_coverage(
+            (close + 1, end) for _, _, close, end, _, _ in candidates
+        )
+        image_text_spans = _interval_coverage(
+            (origin + 1, close)
+            for origin, _, close, _, _, image in candidates if image
+        )
+        ordinary_opens = [
+            origin for origin, _, _, _, _, image in candidates
+            if not image
+            and not _interval_contains(destination_spans, origin)
+            and not _interval_contains(image_text_spans, origin)
+        ]
+
+        for origin, position, close, _, destination, image in candidates:
+            if (_interval_contains(destination_spans, origin)
+                    or _interval_contains(image_text_spans, origin)):
+                continue
+            if not image:
+                # GFM disallows nested ordinary links, but permits images in
+                # link text. Only a syntactically successful inner link wins.
+                next_link = bisect_right(ordinary_opens, origin)
+                if (next_link < len(ordinary_opens)
+                        and ordinary_opens[next_link] < close):
+                    continue
+            source_offset = block_start + origin
+            source_line = bisect_right(line_starts, source_offset)
+            source_column = source_offset - line_starts[source_line - 1] + 1
+            diagnostic_line = bisect_right(line_starts, block_start + position)
+            yield MarkdownLinkLocation(
+                source_line, source_column, destination, diagnostic_line
+            )
 
         if separator is None:
             break
