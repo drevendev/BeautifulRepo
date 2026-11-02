@@ -135,6 +135,7 @@ class GfmType7Tests(unittest.TestCase):
             "<img src='missing.svg'>\r\n"
             "\r\n"
             "[Visible](real.md)\n"
+            "\n"
             "</Widget>\n"
             "[Hidden](another.md)\r"
             "\r"
