@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from bisect import bisect_right
 import fnmatch
 from html.entities import html5
 import os
@@ -1021,6 +1022,11 @@ def iter_markdown_destinations(path: Path):
     masked = _mask_markdown_code(text)
     definitions, visible = _extract_reference_definitions(masked)
 
+    # Nested multiline links can yield destination offsets out of order even
+    # though opening brackets are visited in source order. Index line starts
+    # once, then look up each destination independently without prefix rescans.
+    line_starts = [0]
+    line_starts.extend(match.end() for match in re.finditer("\n", visible))
     block_start = 0
     separators = list(BLANK_LINE_RE.finditer(visible))
     for separator in separators + [None]:
@@ -1032,8 +1038,7 @@ def iter_markdown_destinations(path: Path):
             if parsed is not None:
                 destination, _ = parsed
                 absolute_position = block_start + position
-                lineno = visible.count("\n", 0, absolute_position) + 1
-                yield lineno, destination
+                yield bisect_right(line_starts, absolute_position), destination
 
         if separator is None:
             break
