@@ -797,12 +797,23 @@ def _mask_fenced_and_type1_html_blocks(text: str, *, mask_type6: bool = True) ->
 
 
 def _mask_markdown_code(text: str, *, mask_type6: bool = True) -> str:
-    """Mask literal regions; retain type-6 markup for the HTML navigation pass."""
+    """Mask literal regions; HTML navigation can restore actual type-6 markup."""
     text = _mask_list_item_code_blocks(text)
-    block_masked = _mask_fenced_and_type1_html_blocks(text, mask_type6=mask_type6)
+    block_masked = _mask_fenced_and_type1_html_blocks(text)
     indented_masked = _mask_indented_code_blocks(block_masked)
     quote_masked = _mask_block_quote_code_blocks(indented_masked)
-    return _mask_inline_html_comments(_mask_inline_code_blocks(quote_masked))
+    masked = _mask_inline_html_comments(_mask_inline_code_blocks(quote_masked))
+    if mask_type6:
+        return masked
+
+    # Restore only the type-6 region *after* Markdown masking. Otherwise
+    # literal backticks/fences inside raw HTML can wrongly hide later <img>
+    # and <a> tags in the HTML-navigation checker. Preserve original offsets.
+    html_view = _mask_fenced_and_type1_html_blocks(text, mask_type6=False)
+    return "".join(
+        original if original != block else checked
+        for block, original, checked in zip(block_masked, html_view, masked, strict=True)
+    )
 
 
 # Bounded, one-line GFM reference definitions. Multiline definitions and
