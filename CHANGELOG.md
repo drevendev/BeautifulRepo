@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Extend the offline agent-eval target snapshot to detect permission-only
+  changes in regular files and directories, including the selected target
+  root, instead of checking only file bytes and entry names. Snapshot format
+  2 rejects old format-1 baselines and requires a fresh capture; Windows ACLs,
+  ownership, intervening reverted writes and model behavior remain unverified
+  (follow-up to #74).
+
 - Extend the read-only Markdown link scanner to GFM type-6 raw HTML blocks
   (named block-level tags, ending at a blank line), suppressing false link
   findings in literal HTML. Preserve the companion HTML navigation check's
