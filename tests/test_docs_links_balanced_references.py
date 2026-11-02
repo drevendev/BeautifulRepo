@@ -61,7 +61,7 @@ class BalancedReferenceUseTests(unittest.TestCase):
         locations, _, cli = self.inspect(markdown)
         self.assertEqual(
             [(1, markdown.index("[inner]") + 1, "inner.md", 1),
-             (1, markdown.rindex("[outer]") + 1, "recovered.md", 1)],
+             (1, markdown.split("\n", 1)[0].rindex("[outer]") + 1, "recovered.md", 1)],
             locations,
         )
         self.assertIn("'inner.md'", cli.stderr)
