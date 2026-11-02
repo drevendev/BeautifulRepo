@@ -338,15 +338,20 @@ opening/closing tag cannot interrupt a paragraph or lazy continuation. This
 bounded check is not a full GFM parser for nested lists/quotes or inline HTML.
 Real HTML destinations are still inspected separately by `html_navigation.py`. See the
 [GFM HTML block rules](https://github.github.com/gfm/#html-blocks), reviewed 2026-11-02 (UTC).
-One-line full (`[text][id]`), collapsed (`[text][]`) and shortcut (`[id]`)
-reference-style links and images are checked when the matching single-line
-definition starts a Markdown block. Definitions may follow their uses. Labels
-use case folding and collapsed whitespace, the first definition wins, and
-unused definitions are not checked. Multiline definitions, definitions inside
-list/quote containers and complex nested labels remain outside this bounded
-scanner. Raw HTML destinations are checked separately by `html_navigation.py`.
+Full (`[text][id]`), collapsed (`[text][]`) and shortcut (`[id]`)
+reference-style links and images are checked when a valid definition begins
+at a Markdown block boundary. Definitions may follow their uses; labels use
+case folding and collapsed whitespace, first definition wins, and unused
+definitions are not checked. A bounded GFM subset permits the destination on
+the next nonblank line after `[id]:` and/or a title on the next nonblank line
+after the destination. Each continuation must be indented by at most three
+columns; at most two additional physical lines and 4096 combined characters
+are accepted. Invalid, over-limit and blank-line-separated candidates do not
+consume subsequent Markdown. Definitions inside list/quote containers and
+complex nested labels remain unsupported; this is not a complete GFM parser.
+Raw HTML destinations are checked separately by `html_navigation.py`.
 See the [GFM reference definition rules](https://github.github.com/gfm/#link-reference-definitions),
-reviewed 2026-10-27.
+reviewed 2026-11-02.
 
 ### Optional link-use source anchors
 
