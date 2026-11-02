@@ -569,6 +569,33 @@ class DocsLinksTests(unittest.TestCase):
             self.assertIn("absent-after-code.md", result.stderr)
 
 
+    def test_nested_multiline_destinations_preserve_lines_and_order(self):
+        # Open brackets are visited in source order, but a nested inner link's
+        # destination can precede the outer link's destination. Preserve the
+        # original diagnostics even when link offsets are not monotonic.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_bytes(
+                ("Ω [Outer\r\n"
+                 "[Inner](missing/inner.md)\r\n"
+                 "](missing/outer.md)\r\n"
+                 "[After](missing/after.md)").encode("utf-8")
+            )
+            result = self.run_checker(root)
+            self.assertEqual(1, result.returncode, result.stderr)
+            findings = [
+                line for line in result.stderr.splitlines()
+                if "missing relative destination" in line
+            ]
+            self.assertEqual(
+                [
+                    "README.md:3: missing relative destination: 'missing/outer.md'",
+                    "README.md:2: missing relative destination: 'missing/inner.md'",
+                    "README.md:4: missing relative destination: 'missing/after.md'",
+                ],
+                findings,
+            )
+
     def test_dense_inline_links_keep_crlf_unicode_and_final_line_positions(self):
         # Hundreds of links formerly recounted the entire Markdown prefix.
         # Assert the unchanged diagnostic contract, not a timing threshold.
