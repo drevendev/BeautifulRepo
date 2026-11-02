@@ -64,6 +64,7 @@ HTML_BLOCK_345_STARTS = (
 )
 # Exact GFM type-6 tag names (not arbitrary inline tags such as <a>).
 # Type 6 may interrupt a paragraph; its content is raw HTML until a blank line.
+# GFM whitespace after a tag includes VT/FF; CR/LF are parsed as line endings.
 TYPE6_BLOCK_TAGS = (
     "address|article|aside|base|basefont|blockquote|body|caption|center|"
     "col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|"
@@ -73,7 +74,7 @@ TYPE6_BLOCK_TAGS = (
     "title|tr|track|ul"
 )
 TYPE6_HTML_BLOCK_OPEN_RE = re.compile(
-    rf"^ {{0,3}}</?(?:{TYPE6_BLOCK_TAGS})(?=[ \t]|/?>|$)", re.IGNORECASE
+    rf"^ {{0,3}}</?(?:{TYPE6_BLOCK_TAGS})(?=[ \t\v\f]|/?>|$)", re.IGNORECASE
 )
 MARKDOWN_WHITESPACE = " \t\r\n"
 # cmark-gfm stops reading a bare link destination at its 33rd unclosed '(' (see
