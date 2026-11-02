@@ -570,9 +570,9 @@ class DocsLinksTests(unittest.TestCase):
 
 
     def test_nested_multiline_destinations_preserve_lines_and_order(self):
-        # Open brackets are visited in source order, but a nested inner link's
-        # destination can precede the outer link's destination. Preserve the
-        # original diagnostics even when link offsets are not monotonic.
+        # GFM prohibits nested ordinary links: the successfully parsed inner
+        # link wins. Preserve its physical destination line and keep following
+        # destinations in order under CRLF and Unicode.
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "README.md").write_bytes(
@@ -589,7 +589,6 @@ class DocsLinksTests(unittest.TestCase):
             ]
             self.assertEqual(
                 [
-                    "README.md:3: missing relative destination: 'missing/outer.md'",
                     "README.md:2: missing relative destination: 'missing/inner.md'",
                     "README.md:4: missing relative destination: 'missing/after.md'",
                 ],
@@ -693,16 +692,17 @@ class DocsLinksTests(unittest.TestCase):
             source = Path(tmp) / "README.md"
             source.write_bytes(
                 ("Ω [Outer\r\n"
-                 "[Inner](missing/inner.md)\r\n"
-                 "](missing/outer.md)\r\n").encode("utf-8")
+                 "plain text\r\n"
+                 "](missing/outer.md)\r\n"
+                 "[Inner](missing/inner.md)\r\n").encode("utf-8")
             )
             self.assertEqual(
                 [(1, 3, "missing/outer.md", 3),
-                 (2, 1, "missing/inner.md", 2)],
+                 (4, 1, "missing/inner.md", 4)],
                 [tuple(link) for link in module["iter_markdown_locations"](source)],
             )
             self.assertEqual(
-                [(3, "missing/outer.md"), (2, "missing/inner.md")],
+                [(3, "missing/outer.md"), (4, "missing/inner.md")],
                 list(module["iter_markdown_destinations"](source)),
             )
 

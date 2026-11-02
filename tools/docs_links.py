@@ -1102,6 +1102,24 @@ def _iter_reference_uses(masked: str, definitions: dict[str, str]):
         yield lineno, destination
 
 
+def _interval_coverage(intervals):
+    """Index half-open source spans for bounded O(log n) containment tests."""
+    starts = []
+    furthest_ends = []
+    furthest = -1
+    for start, end in sorted(intervals):
+        starts.append(start)
+        furthest = max(furthest, end)
+        furthest_ends.append(furthest)
+    return starts, furthest_ends
+
+
+def _interval_contains(index, position):
+    starts, furthest_ends = index
+    previous = bisect_right(starts, position) - 1
+    return previous >= 0 and furthest_ends[previous] > position
+
+
 def iter_markdown_locations(path: Path):
     """Yield link-use source anchors without changing the legacy checker.
 
@@ -1122,17 +1140,76 @@ def iter_markdown_locations(path: Path):
         block_end = separator.start() if separator is not None else len(visible)
         block = visible[block_start:block_end]
 
+        # Parse candidates once and track the end of their link text and
+        # destination so nested source syntax can be resolved without recursion.
+        candidates = []
         for origin, position in _iter_inline_link_candidates(block):
             parsed = _parse_destination(block, position)
-            if parsed is not None:
-                destination, _ = parsed
-                source_offset = block_start + origin
-                source_line = bisect_right(line_starts, source_offset)
-                source_column = source_offset - line_starts[source_line - 1] + 1
-                diagnostic_line = bisect_right(line_starts, block_start + position)
-                yield MarkdownLinkLocation(
-                    source_line, source_column, destination, diagnostic_line
-                )
+            if parsed is None:
+                continue
+            destination, end = parsed
+            opener = position - 1
+            while opener >= 0 and block[opener] in MARKDOWN_WHITESPACE:
+                opener -= 1
+            close = opener - 1
+            candidates.append(
+                (origin, position, close, end, destination, block[origin] == "!")
+            )
+
+        # Image alt text is literal even if it contains link-like syntax.
+        # Decide ordinary-link precedence *before* indexing destinations:
+        # a discarded outer link has no live destination, so its trailing
+        # destination-looking text must not mask independently valid links.
+        image_text_spans = _interval_coverage(
+            (origin + 1, close)
+            for origin, _, close, _, _, image in candidates if image
+        )
+        # An image destination is literal syntax, not link text. Exclude
+        # apparent ordinary links within it *before* nesting precedence:
+        # otherwise a fake link inside the image destination can incorrectly
+        # suppress the enclosing live ordinary link.
+        image_destination_spans = _interval_coverage(
+            (close + 1, end)
+            for origin, _, close, end, _, image in candidates
+            if image and not _interval_contains(image_text_spans, origin)
+        )
+        ordinary_opens = sorted(
+            origin for origin, _, _, _, _, image in candidates
+            if not image
+            and not _interval_contains(image_text_spans, origin)
+            and not _interval_contains(image_destination_spans, origin)
+        )
+        suppressed_ordinary = set()
+        for origin, _, close, _, _, image in candidates:
+            if (image or _interval_contains(image_text_spans, origin)
+                    or _interval_contains(image_destination_spans, origin)):
+                continue
+            next_link = bisect_right(ordinary_opens, origin)
+            if (next_link < len(ordinary_opens)
+                    and ordinary_opens[next_link] < close):
+                # GFM forbids an ordinary link containing a successful
+                # ordinary inner link, but permits images in its link text.
+                suppressed_ordinary.add(origin)
+
+        destination_spans = _interval_coverage(
+            (close + 1, end)
+            for origin, _, close, end, _, image in candidates
+            if (image or origin not in suppressed_ordinary)
+            and not _interval_contains(image_text_spans, origin)
+            and not _interval_contains(image_destination_spans, origin)
+        )
+        for origin, position, _close, _, destination, image in candidates:
+            if (_interval_contains(destination_spans, origin)
+                    or _interval_contains(image_text_spans, origin)
+                    or (not image and origin in suppressed_ordinary)):
+                continue
+            source_offset = block_start + origin
+            source_line = bisect_right(line_starts, source_offset)
+            source_column = source_offset - line_starts[source_line - 1] + 1
+            diagnostic_line = bisect_right(line_starts, block_start + position)
+            yield MarkdownLinkLocation(
+                source_line, source_column, destination, diagnostic_line
+            )
 
         if separator is None:
             break

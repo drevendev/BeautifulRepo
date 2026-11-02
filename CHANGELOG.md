@@ -414,6 +414,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Respect GFM nesting precedence in the offline Markdown link checker: a valid
+  inner ordinary link suppresses an invalid outer link, while an image inside
+  a link remains valid. Ignore link-like syntax in parsed image alt text and
+  inline destinations; preserve failed-inner recovery and existing source
+  anchors and CLI output (#246; GFM reviewed 2026-11-02).
+
 - Reject U+200B zero-width space, U+2060 word joiner and embedded U+FEFF
   in both inputs to the exact-hash README preview/approval helpers. These
   invisible characters can conceal a change in terminal diffs; ordinary
