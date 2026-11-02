@@ -43,7 +43,7 @@ class NestedInlineLinksTests(unittest.TestCase):
             "[Outer [inner](inner.md)](assets/[side](side.md))\\n"
         )
         self.assertEqual(
-            [(1, 8, "inner.md", 1), (1, 33, "side.md", 1)], links
+            [(1, 8, "inner.md", 1), (1, 34, "side.md", 1)], links
         )
         self.assertEqual([(1, "inner.md"), (1, "side.md")], legacy)
         self.assertEqual(1, cli.returncode)
