@@ -394,6 +394,13 @@ keep their original themed headings.
   state, not reusable BeautifulRepo product examples. Ignore future local Crab files;
   public guidance and issue history remain available.
 
+### Changed
+
+- Avoid repeated source-prefix scans when reporting inline Markdown link line
+  numbers. The scanner now advances a monotonic newline cursor across each
+  document, preserving default diagnostic text and link ordering, including
+  CRLF, Unicode and masked examples (issue #240).
+
 ### Fixed
 
 - Reject U+200B zero-width space, U+2060 word joiner and embedded U+FEFF
