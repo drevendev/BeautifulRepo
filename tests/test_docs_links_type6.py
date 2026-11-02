@@ -59,6 +59,43 @@ class Type6HtmlBlockTests(unittest.TestCase):
         self.assertNotIn("missing-before-tab-blank.md", result.stderr)
         self.assertIn("README.md:4: missing relative destination: 'missing-after-tab-blank.md'", result.stderr)
 
+    def test_gfm_vertical_tab_and_form_feed_start_type6_blocks(self):
+        # GFM §2.1 includes VT/FF in whitespace; use bytes, not text-mode
+        # writes, so the exact control characters survive on Windows too.
+        for separator in ("\v", "\f"):
+            with self.subTest(separator=repr(separator)):
+                result = self.check(
+                    "<div" + separator + ">\n"
+                    "[Raw](missing-inside-html.md)\n"
+                    "\n"
+                    "[Visible](missing-after-blank.md)\n"
+                )
+                self.assertEqual(1, result.returncode, result.stderr)
+                self.assertNotIn("missing-inside-html.md", result.stderr)
+                self.assertIn(
+                    "README.md:4: missing relative destination: 'missing-after-blank.md'",
+                    result.stderr,
+                )
+
+    def test_vertical_tab_and_form_feed_do_not_end_type6_blocks(self):
+        # The type-6 terminator is a *blank line*, which permits spaces/tabs
+        # only. A line with VT or FF remains part of the raw HTML block.
+        for separator in ("\v", "\f"):
+            with self.subTest(separator=repr(separator)):
+                result = self.check(
+                    "<div>\n"
+                    + separator + "\n"
+                    "[Raw](missing-before-blank.md)\n"
+                    "\n"
+                    "[Visible](missing-after-blank.md)\n"
+                )
+                self.assertEqual(1, result.returncode, result.stderr)
+                self.assertNotIn("missing-before-blank.md", result.stderr)
+                self.assertIn(
+                    "README.md:5: missing relative destination: 'missing-after-blank.md'",
+                    result.stderr,
+                )
+
     def test_type6_at_end_of_file_does_not_report_raw_links(self):
         result = self.check("<div>\n[Raw](missing-at-eof.md)\n</div>")
         self.assertEqual(0, result.returncode, result.stderr)
