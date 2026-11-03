@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "beautifulrepo",
   "version": "0.3.0-dev.0",
-  "description": "Audit repository onboarding, preview gated README improvements, or draft unpublished release notes from local evidence.",
+  "description": "Audit repository onboarding, preview gated README fixes, review trust and policy surfaces, and draft unpublished release notes from local evidence.",
   "author": {
     "name": "Dreven",
     "url": "https://github.com/drevendev"
@@ -20,8 +20,8 @@
     "com.openai": {
       "interface": {
         "displayName": "BeautifulRepo",
-        "shortDescription": "Audit onboarding, plan README fixes or draft Git release notes.",
-        "longDescription": "Audit README, links and onboarding with local read-only tools, preview a scoped README diff with explicit approval before edits, or draft unpublished release notes from local Git history. Standalone tools do not make network requests; agent sessions may send repository context to the configured model provider. No workflow publishes changes, and unverified output or badges are not asserted.",
+        "shortDescription": "Audit onboarding, plan README fixes, review trust surfaces or draft release notes.",
+        "longDescription": "Audit README, links and onboarding with local read-only tools, preview a scoped README diff with approval before edits, review licence, contribution, security and conduct trust surfaces, or draft unpublished release notes from local Git history. Standalone tools do not make network requests; agent sessions may send repository context to the configured model provider. No workflow publishes changes, and unverified output or badges are not asserted.",
         "developerName": "Dreven",
         "category": "Developer Tools",
         "capabilities": [
