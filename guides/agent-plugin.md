@@ -102,9 +102,9 @@ vendored or archived Markdown, it asks before excluding them.
 ## Improve a README (development version only)
 
 The `improve-readme` skill on `master` is **not included in the pinned
-`v0.2.0` release**. Use the **pinned four-skill development candidate above** instead of an unpinned
-`master` checkout when reproducing tests. These are candidate skills, not
-stable v0.2.0 capabilities.
+`v0.2.0` release**. Use the **pinned four-skill development candidate above**
+instead of unpinned `master` when reproducing tests. These are candidate
+skills, not stable v0.2.0 capabilities.
 Ask to improve a README or invoke `/beautifulrepo:improve-readme` (Claude Code)
 or `$improve-readme` (Codex). It selects a first-success template, gathers
 read-only local evidence and proposes an **exact file list and unified diff**.
@@ -149,8 +149,9 @@ release-note drafting or runtime skill activation has yet been verified.**
 
 The `trust-surfaces` skill is part of the **pinned four-skill development
 candidate above**, not the stable `v0.2.0` release. From that candidate use
-`/beautifulrepo:trust-surfaces` (Claude Code) or `$trust-surfaces` (Codex). It checks licence decisions,
-CONTRIBUTING, SECURITY and conduct against the actual source and known
+`/beautifulrepo:trust-surfaces` (Claude Code) or `$trust-surfaces` (Codex).
+It checks licence decisions, CONTRIBUTING, SECURITY and conduct against
+actual source and known
 reporting routes. It never picks a licence or claims a GitHub private inbox
 is enabled merely because SECURITY.md exists. An unavailable reporting
 route stays a **private draft**, not a publishable policy. The skill proposes
