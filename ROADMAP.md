@@ -87,47 +87,52 @@ These linked resources are repository source files. Tagged versions are listed o
 the [Releases page](https://github.com/drevendev/BeautifulRepo/releases). There is
 no installable package.
 
-## Current work: verify agents, finish real cases and test visuals
+## Current work: verify the four-skill candidate and demonstrate real use
 
-This section reflects issue states inspected **2026-10-28**. It is not a
-promise of a release date or evidence that unrun manual tests passed.
-For live status, follow the linked GitHub issues.
+This section reflects issue/source inspection on **2026-11-03**. It is not
+a release date or evidence of passing model tests. Consult the linked GitHub
+issues for their live status.
 
-- **Agent behavior** ([#86](https://github.com/drevendev/BeautifulRepo/issues/86)):
-  the pinned `v0.2.0` release includes `audit-repo`, while
-  `improve-readme` ([#70](https://github.com/drevendev/BeautifulRepo/issues/70))
-  and `draft-release-notes` ([#72](https://github.com/drevendev/BeautifulRepo/issues/72))
-  remain development-only skills. The `trust-surfaces` implementation issue
-  [#71](https://github.com/drevendev/BeautifulRepo/issues/71) is closed, but
-  that does **not** establish real-agent reliability. Synthetic
-  [fixture and model evaluations](https://github.com/drevendev/BeautifulRepo/issues/74)
-  still need authorized execution and evidence; static CI is not a model test.
+- **Four-skill plugin candidate** ([#257](https://github.com/drevendev/BeautifulRepo/issues/257)):
+  the published `v0.2.0` plugin has **only** `audit-repo`. The [exact
+  four-skill development candidate](guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate)
+  is pinned to `9b3e43fd8502` (`0.3.0-dev.0`). Source/CI tests
+  do not verify successful *fresh install*, skill discovery or model behavior
+  in Claude Code and Codex. The [manual matrix](evals/manual-smoke.md),
+  [fixture infrastructure](https://github.com/drevendev/BeautifulRepo/issues/74)
+  and [independent tester invitation](https://github.com/drevendev/BeautifulRepo/issues/258)
+  cover the remaining positive, negative and hostile cases. No stable
+  four-skill release is claimed.
 - **Real before/after cases**
   ([#88](https://github.com/drevendev/BeautifulRepo/issues/88)):
   the [repeatable procedure](case-studies/README.md) and
-  [PatchPitch case](case-studies/patchpitch.md) are published. Remaining
-  candidates must keep before/after revisions, observed commands and actual
-  PR evidence; their separate target repositories are **not** writable as
-  part of BeautifulRepo maintenance.
+  [PatchPitch case](case-studies/patchpitch.md) are published. Additional
+  case studies need exact before/after revisions, observed first-run commands
+  and authenticated PR evidence. Changes to other repositories are outside
+  BeautifulRepo's writable scope.
+- **Launch-first-minute evidence**
+  ([#254](https://github.com/drevendev/BeautifulRepo/issues/254)):
+  README now leads with the offline audit, a reproducible synthetic before/after
+  and a revision-pinned real audit result. The remaining evidence-led visual
+  showcase, manual rendering observations and launch readiness must be verified
+  separately; no external promotion is implied.
 - **Visual accessibility evidence**
   ([#16](https://github.com/drevendev/BeautifulRepo/issues/16)):
-  alternative README entrances, source-bound design briefs and the
-  [GitHub-rendered acceptance checklist](checklists/visual-accessibility-acceptance.md)
-  exist. Actual light/dark, 320 px reflow, 400% zoom, keyboard and screen-reader
-  results still require a completed manual evidence receipt; a passing source
-  check cannot supply one.
-- **Historical event labels**
+  alternative entrances, design briefs and the
+  [manual checklist](checklists/visual-accessibility-acceptance.md) exist.
+  Complete keyboard, screen-reader, real 400% zoom and light/dark observations
+  are **not** certified by structural checks.
+- **Native historical label**
   ([#100](https://github.com/drevendev/BeautifulRepo/issues/100)):
-  the public Hacktoberfest 2026 guidance already disclaims PR reward credit.
-  The outdated native label description remains a separate owner decision,
-  with the requested post-event review **after 2026-11-01**.
+  public Hacktoberfest 2026 guidance already disclaims PR reward credit;
+  the remaining provider-side `hacktoberfest` label issue is separate from
+  the public documentation. Do not infer participation from an old label.
 
-The [private/internal repository guidance](guides/private-repositories.md) and
-[confidentiality checklist](checklists/confidentiality.md) are already published
-([#87](https://github.com/drevendev/BeautifulRepo/issues/87) closed).
-The [repository self-check](https://github.com/drevendev/BeautifulRepo/issues/85)
-and [readiness review](https://github.com/drevendev/BeautifulRepo/issues/33)
-are likewise completed; do not list them as pending work.
+The [private/internal repository guidance](guides/private-repositories.md),
+[confidentiality checklist](checklists/confidentiality.md) and repository
+self-check are published. The proposed [local MCP server](https://github.com/drevendev/BeautifulRepo/issues/255)
+is a **separate future workstream**, not part of the installed four-skill
+candidate or a prerequisite for the plugin release.
 
 ## Later: evidence-backed extensions
 
