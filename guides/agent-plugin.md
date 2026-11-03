@@ -102,7 +102,9 @@ vendored or archived Markdown, it asks before excluding them.
 ## Improve a README (development version only)
 
 The `improve-readme` skill on `master` is **not included in the pinned
-`v0.2.0` release**. Install from a reviewed checkout or `master` to try it.
+`v0.2.0` release**. Use the **pinned four-skill development candidate above**
+instead of unpinned `master` when reproducing tests. These are candidate
+skills, not stable v0.2.0 capabilities.
 Ask to improve a README or invoke `/beautifulrepo:improve-readme` (Claude Code)
 or `$improve-readme` (Codex). It selects a first-success template, gathers
 read-only local evidence and proposes an **exact file list and unified diff**.
@@ -120,8 +122,9 @@ See the [agent-eval runbook](../evals/README.md) and
 
 The `draft-release-notes` skill is being developed on `master`; it is **not**
 part of the pinned `v0.2.0` plugin release above. To try it, install from
-unpinned `master` or a local checkout rather than expecting it from
-`v0.2.0`. Review the source and the agent's model-provider data controls first.
+the **pinned four-skill development candidate above** rather than expecting
+it from `v0.2.0`. Review the source and the agent's model-provider data
+controls first.
 
 Ask "draft unreleased release notes from the local Git history", or use
 `/beautifulrepo:draft-release-notes` in Claude Code and
@@ -144,10 +147,11 @@ release-note drafting or runtime skill activation has yet been verified.**
 
 ## Review trust surfaces (development version only)
 
-The `trust-surfaces` skill on `master` is **not in the pinned `v0.2.0` release**.
-Use `/beautifulrepo:trust-surfaces` (Claude Code) or `$trust-surfaces`
-(Codex) from a reviewed development checkout. It checks licence decisions,
-CONTRIBUTING, SECURITY and conduct against the actual source and known
+The `trust-surfaces` skill is part of the **pinned four-skill development
+candidate above**, not the stable `v0.2.0` release. From that candidate use
+`/beautifulrepo:trust-surfaces` (Claude Code) or `$trust-surfaces` (Codex).
+It checks licence decisions, CONTRIBUTING, SECURITY and conduct against
+actual source and known
 reporting routes. It never picks a licence or claims a GitHub private inbox
 is enabled merely because SECURITY.md exists. An unavailable reporting
 route stays a **private draft**, not a publishable policy. The skill proposes

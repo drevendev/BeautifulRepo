@@ -45,6 +45,22 @@ class PluginManifestTests(unittest.TestCase):
         self.assertEqual(claude_market["plugins"][0]["source"], "./")
         self.assertEqual(codex_market["plugins"][0]["source"], {"source": "local", "path": "./"})
 
+    def test_descriptions_cover_the_four_candidate_skills(self):
+        claude = load(".claude-plugin/plugin.json")
+        portable = load("plugin.json")
+        marketplace = load(".claude-plugin/marketplace.json")["plugins"][0]
+        self.assertEqual(claude["description"], portable["description"])
+        descriptions = {
+            "shared manifest": portable["description"],
+            "Codex short": portable["extensions"]["com.openai"]["interface"]["shortDescription"],
+            "Codex long": portable["extensions"]["com.openai"]["interface"]["longDescription"],
+            "Claude marketplace": marketplace["description"],
+        }
+        for label, description in descriptions.items():
+            with self.subTest(description=label):
+                for capability in ("audit", "readme", "trust", "release"):
+                    self.assertIn(capability, description.lower())
+
     def test_manifest_versions_are_valid(self):
         for path in (".claude-plugin/plugin.json", "plugin.json"):
             version = load(path)["version"]
