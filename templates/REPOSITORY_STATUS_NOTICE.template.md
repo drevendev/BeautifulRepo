@@ -1,5 +1,12 @@
 # Repository status notice — choose ONE state
 
+Copy **only the blockquoted notice** from either PAUSED or PRE-ARCHIVE into
+your repository's README, near its beginning. Do not copy this template's
+headings, instructional comments or final guidance link. Remove every
+`[placeholder]` and verify the displayed notice in its destination file.
+Keep a link only if it resolves **from the destination README**, not from
+this template's location inside BeautifulRepo.
+
 <!-- Template only. Replace every [placeholder] before publishing.
      Do not claim archival before checking the live GitHub archived flag.
      Choose PAUSED or PRE-ARCHIVE, not both. No invented contact addresses. -->
@@ -41,5 +48,7 @@ the repository page. Because content becomes read-only, do not promise
 to modify this notice afterwards. If a final post-archive edit is essential,
 it requires an authorized unarchive/edit/archive cycle.
 
-See [the retirement recipe](../guides/repository-retirement.md) for
-the state distinctions, final evidence receipt and official sources.
+For context, consult BeautifulRepo's
+[repository retirement guide](https://github.com/drevendev/BeautifulRepo/blob/master/guides/repository-retirement.md).
+This reference is **outside the copyable notice**; omit it unless it genuinely
+helps readers of the destination repository.

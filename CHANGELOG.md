@@ -426,6 +426,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Make the reusable repository pause/archive notice safe to paste into an
+  unrelated README: copy only one state, resolve links from the destination,
+  and use a full URL for the template's own guide reference. Add structural
+  tests to prevent source-directory-dependent template links (GitHub README
+  relative links reviewed 2026-11-03).
+
 - Reject hard-linked fixture and read-receipt inputs in the offline agent-eval
   Read receipt checker instead of reading possible external aliases. This
   preserves exact-byte matching for ordinary synthetic evidence but is not
