@@ -1,7 +1,9 @@
 # Use BeautifulRepo from Claude Code or Codex
 
-BeautifulRepo ships as **one plugin** for Claude Code and Codex. The
-`audit-repo` skill audits a local repository the way this handbook does:
+BeautifulRepo uses **one plugin** for Claude Code and Codex. The released
+`v0.2.0` contains `audit-repo` only; a pinned development candidate contains
+four skills but **has not passed real-agent acceptance**. The `audit-repo`
+skill audits a local repository the way this handbook does:
 
 - It runs `repo_audit.py`, `docs_links.py` and `html_navigation.py` from the installed
   plugin against the target.
@@ -14,7 +16,7 @@ session may still transfer repository context to the configured model provider.
 Review approved data controls before inspecting private code. See the
 [agent ground rules](agent-safety.md).
 
-## Install
+## Install the released audit skill (v0.2.0)
 
 You need Python 3.11 or newer on `PATH`.
 
@@ -35,8 +37,55 @@ codex plugin add beautifulrepo@beautifulrepo
 Restart the agent session afterwards so it loads the skill.
 
 These commands pin release `v0.2.0`, the first release that contains the plugin.
-Leave out `@v0.2.0` or `--ref v0.2.0` to follow `master` instead, for example
-while working on the plugin.
+Leaving out the pin follows mutable `master`; **do not use an unpinned
+checkout as evidence for a tested release candidate**.
+
+## Try all four skills from a pinned development candidate
+
+The source candidate at [commit `9b3e43fd8502`](https://github.com/drevendev/BeautifulRepo/tree/9b3e43fd8502bce8bcddc76728db7cfa28a436a8)
+contains `audit-repo`, `improve-readme`, `trust-surfaces` and
+`draft-release-notes` (manifest version `0.3.0-dev.0`). It is **not a
+stable v0.3.0 release**. The following commands come from the current official
+[Claude Code CLI reference](https://code.claude.com/docs/en/plugins/cli-reference)
+and [Codex plugin guide](https://developers.openai.com/plugins/build/plugins),
+but **fresh GitHub-source installation and actual model invocation have not
+been confirmed** at this revision. Treat installation errors as test results,
+not as proof of success.
+
+Start with a clean, disposable test environment. If `beautifulrepo` is already
+configured, inspect it first rather than overwriting valued marketplace settings.
+You need Python 3.11+ and Git. Try one host, from a regular terminal:
+
+**Claude Code — test the immutable commit:**
+
+```bash
+claude plugin marketplace add drevendev/BeautifulRepo@9b3e43fd8502bce8bcddc76728db7cfa28a436a8
+claude plugin install beautifulrepo@beautifulrepo
+claude plugin list
+claude plugin details beautifulrepo
+```
+
+**Codex — test the same immutable commit:**
+
+```bash
+codex plugin marketplace add drevendev/BeautifulRepo --ref 9b3e43fd8502bce8bcddc76728db7cfa28a436a8
+codex plugin marketplace list
+codex plugin add beautifulrepo@beautifulrepo
+```
+
+Restart the client. Check the *installed copy* of `skills/` for all four named
+`SKILL.md` files and confirm they correspond to the pinned commit before a
+model test. For a low-risk first test use a **disposable synthetic target**,
+never a private repository with unapproved provider data controls. Follow the
+[revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/9b3e43fd8502bce8bcddc76728db7cfa28a436a8/evals/manual-smoke.md).
+Actual skill selection, file reads, tool calls, permission decisions and
+before/after target snapshots must be observed; static CI and plugin manifests
+cannot verify them. Results (including failures or INCONCLUSIVE outcomes) go to
+[tester issue #258](https://github.com/drevendev/BeautifulRepo/issues/258);
+release acceptance is tracked in [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
+The proposed [MCP server #255](https://github.com/drevendev/BeautifulRepo/issues/255)
+is separate and **not installed** by these commands. No model evaluation or
+release publication is automatic.
 
 ## Use
 
