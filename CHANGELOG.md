@@ -420,6 +420,8 @@ keep their original themed headings.
 
 ### Fixed
 
+- Fail closed when a synthetic agent-eval snapshot target contains hard-linked regular files, including aliases created after capture, instead of accepting an unchanged-byte snapshot. The check covers only the selected target and does not prevent outside writes or replace sandboxing (related to #74).
+
 - Respect GFM nesting precedence in the offline Markdown link checker: a valid
   inner ordinary link suppresses an invalid outer link, while an image inside
   a link remains valid. Ignore link-like syntax in parsed image alt text and
