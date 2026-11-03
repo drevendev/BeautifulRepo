@@ -254,5 +254,47 @@ class BalancedReferenceUseTests(unittest.TestCase):
 
 
 
+    def test_inline_syntax_inside_reference_image_alt_is_literal(self):
+        line = "![alt [fake](fake.md)][image] [real](real.md)"
+        locations, legacy, cli = self.inspect(
+            line + "\n\n[image]: logo.svg\n"
+        )
+        expected = [
+            (1, 1, "logo.svg", 1),
+            (1, line.index("[real]") + 1, "real.md", 1),
+        ]
+        self.assertEqual(expected, locations)
+        self.assertEqual([(1, "logo.svg"), (1, "real.md")], legacy)
+        self.assertIn("'logo.svg'", cli.stderr)
+        self.assertIn("'real.md'", cli.stderr)
+        self.assertNotIn("'fake.md'", cli.stderr)
+
+    def test_reference_image_alt_inside_full_reference_ignores_inline_link(self):
+        line = "[Page ![alt [fake](fake.md)][image]][page]"
+        locations, _, cli = self.inspect(
+            line + "\n\n[image]: logo.svg\n[page]: page.md\n"
+        )
+        self.assertEqual(
+            [(1, 1, "page.md", 1),
+             (1, line.index("![alt") + 1, "logo.svg", 1)],
+            locations,
+        )
+        self.assertIn("'page.md'", cli.stderr)
+        self.assertIn("'logo.svg'", cli.stderr)
+        self.assertNotIn("'fake.md'", cli.stderr)
+
+    def test_unresolved_reference_image_does_not_hide_real_inline_link(self):
+        # An unresolved image is literal Markdown; its inner link stays live.
+        line = "![alt [fake](fake.md)][unknown] [real](real.md)"
+        locations, _, cli = self.inspect(line + "\n")
+        self.assertEqual(
+            [(1, line.index("[fake]") + 1, "fake.md", 1),
+             (1, line.index("[real]") + 1, "real.md", 1)],
+            locations,
+        )
+        self.assertIn("'fake.md'", cli.stderr)
+        self.assertIn("'real.md'", cli.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
