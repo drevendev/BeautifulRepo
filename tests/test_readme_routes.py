@@ -33,6 +33,49 @@ class ReaderRoutesTests(unittest.TestCase):
         self.assertIn("from the repository root", top)
         self.assertIn("not a schema validator or a hosted service", " ".join(top.split()))
 
+    def test_first_screen_leads_with_the_real_audit_and_discloses_limits(self):
+        section = README.split("## Working proof\n", 1)[1].split(
+            "\n## Start here", 1
+        )[0]
+        self.assertLess(section.index("python -I tools/repo_audit.py ."),
+                        section.index("python examples/cli-starter/rowcount.py"))
+        self.assertIn("python examples/repository-audit/demo.py", section)
+        self.assertIn("python -I tools/repo_audit.py ../your-repository --fail-on never",
+                      section)
+        self.assertIn("guides/adopting-the-checks.md", section)
+        self.assertIn("not a beauty score", section)
+        self.assertIn("invalid paths or", section)
+        self.assertIn("fictional", section)
+
+    def test_first_screen_before_after_numbers_match_real_demo(self):
+        import json
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "examples/repository-audit/demo.py")],
+            cwd=ROOT, capture_output=True, text=True, timeout=30, check=True,
+        )
+        reports = json.loads(result.stdout)
+        section = README.split("## Working proof\n", 1)[1].split(
+            "\n## Start here", 1
+        )[0]
+        for label, counts in (
+            ("before", (0, 4, 1)),
+            ("after", (0, 1, 1)),
+        ):
+            with self.subTest(label=label):
+                summary = reports[label]["summary"]
+                self.assertEqual(
+                    (summary["error"], summary["warning"], summary["info"]), counts
+                )
+                expected_line = (
+                    "before: 0 errors, 4 warnings, 1 informational finding"
+                    if label == "before"
+                    else "after:  0 errors, 1 warning,  1 informational finding"
+                )
+                self.assertIn(expected_line, section)
+
     def test_detailed_handbook_remains_complete_but_not_duplicate_table(self):
         section = README.split("## Explore the handbook\n", 1)[1].split(
             "\n## Principles", 1

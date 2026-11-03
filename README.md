@@ -1,7 +1,7 @@
 <div align="center">
   <h1>✨ BeautifulRepo</h1>
-  <p><strong>Make your repository easy to understand, pleasant to explore, and worth contributing to.</strong></p>
-  <p>Practical patterns, templates, examples, and tiny offline tools for maintainers who want the repository itself to feel finished.</p>
+  <p><strong>Catch concrete README and local-documentation problems before a new contributor does.</strong></p>
+  <p>Dependency-free offline checks, reproducible examples and practical templates for repositories worth exploring.</p>
 </div>
 
 <p align="center">
@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="#working-proof">Working proof</a> ·
+  <a href="#working-proof">Run an audit</a> ·
   <a href="#start-here">Start here</a> ·
   <a href="examples/README.md">Working examples</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
@@ -25,16 +25,66 @@
 
 ## Working proof
 
-**A real checkout command, not a concept image.** The tested
-[Rowcount starter](examples/cli-starter/README.md) reads a bundled CSV fixture
-locally. You need **Python 3.11+** and Git. Get a checkout:
+**Catch concrete README and local-documentation problems before a new contributor does.**
+BeautifulRepo's main product is a set of **read-only, offline documentation
+checks**, backed by a practical handbook. They report specific observations,
+not a beauty score. You need **Python 3.11+** and Git; no third-party Python
+packages are installed.
+
+Clone BeautifulRepo once, then run its actual audit from the repository root:
 
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
+python -I tools/repo_audit.py .
 ```
 
-Then, from the repository root:
+The output identifies findings by severity, rule ID and file, followed by a
+summary; exact counts depend on the checked-out revision. The default exit
+status is 0 unless an **error** is reported. A 0 exit status does **not**
+mean the README is good or every warning has been resolved.
+See the [rule reference](guides/audit-rule-reference.md) for supported checks.
+
+**Reproduce a visible before/after:** this bundled demonstration uses two
+**fictional** README versions in a disposable temporary directory:
+
+```bash
+python examples/repository-audit/demo.py
+```
+
+It prints JSON. The summary, checked by the example's regression tests, is:
+
+```text
+before: 0 errors, 4 warnings, 1 informational finding
+after:  0 errors, 1 warning,  1 informational finding
+```
+
+The fixes remove a placeholder, a skipped heading level and an empty-header
+layout table. The missing-license warning and optional contribution-guide
+information remain: a lower count is **not** a correctness certificate.
+[Inspect the fixture and findings](examples/repository-audit/README.md).
+
+**Check your own local checkout**, from the BeautifulRepo root, with its path
+as a sibling directory (replace `your-repository`):
+
+```bash
+python -I tools/repo_audit.py ../your-repository --fail-on never
+```
+
+This advisory mode reports findings without failing for them; invalid paths or
+incomplete scans still exit 2. For a threshold that fails on warnings, replace
+`never` with `warning`. The audit does not execute the target or fetch URLs.
+Use [the audit guide](guides/repository-audit.md) for formats and boundaries,
+[relative Markdown links](tools/README.md#relative-documentation-link-checker)
+and [HTML navigation checks](tools/README.md#html-navigation-and-fragment-checker)
+for additional bounded diagnostics. To run those checks on pull requests,
+use the [SHA-pinned v0.2.0 GitHub Action recipe](guides/adopting-the-checks.md);
+newer `master`-only inputs are **not** included in that release.
+
+### A separate runnable CLI starter
+
+The tested [Rowcount starter](examples/cli-starter/README.md) shows how a
+small repository can present a first success. From the repository root:
 
 ```bash
 python examples/cli-starter/rowcount.py examples/cli-starter/sample.csv
@@ -47,23 +97,17 @@ Data rows: 3
 ```
 
 The [input CSV](examples/cli-starter/sample.csv) and
-[Python implementation](examples/cli-starter/rowcount.py) are available to inspect.
-This is a deliberately small count of data records, not a schema validator or a
-hosted service. No package installation or network access is required.
-CI runs the examples and checks on Ubuntu (Python 3.11 and 3.14) and Windows
-(Python 3.14); macOS is not tested.
+[Python implementation](examples/cli-starter/rowcount.py) are available to
+inspect. This is deliberately a small count of data records, not a schema
+validator or a hosted service. No package installation or network access
+is required. CI runs the examples and checks on Ubuntu (Python 3.11 and
+3.14) and Windows (Python 3.14); macOS is not tested.
 
 For a real application of this approach to BeautifulRepo itself, see the
 [README before/after case](case-studies/readme-first-success-case.md): fixed
 revisions, a clean-clone run, horizontal reflow observations at three emulated
 widths, and contrast measured only for light at 1280 px and dark at 375 px.
 Keyboard navigation, real 400% zoom and screen readers remain untested.
-
-For an actual **before/after documentation diagnostic**, run
-`python examples/repository-audit/demo.py` from the same root. Its
-[test-backed walkthrough](examples/repository-audit/README.md) shows four
-warnings becoming one after README fixes; the fictional input is disclosed,
-and unresolved license/contribution observations remain visible.
 
 For real repository revisions, the [offline audit comparison](guides/audit-before-after.md)
 reads two saved entry-point audit reports and lists changed rule counts and
@@ -116,9 +160,8 @@ or tested CLI.**
 
 The [design-intent brief](examples/readme-visuals/DESIGN_INTENT.md) explains
 why the light/dark illustrations fit that imagined reader, what was rejected,
-and how to replace them with evidence from a real product. For a genuinely
-runnable result, use the Rowcount command in
-[Working proof](#working-proof) instead.
+and how to replace them with evidence from a real product. For genuinely runnable results, use the [offline audit](#working-proof)
+or the separate [Rowcount starter](examples/cli-starter/README.md).
 
 ## This repository checks itself
 
