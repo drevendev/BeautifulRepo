@@ -1068,32 +1068,214 @@ def _extract_reference_definitions(masked: str):
     return definitions, "".join(remaining)
 
 
+def _balanced_reference_candidates(visible: str, definitions: dict[str, str]):
+    """Find bounded bracketed reference uses without destination masking.
+
+    The same linear delimiter pass is shared by the raw-text precedence
+    preflight and the masked final reference scan.
+    """
+    opened = []
+    starts = []
+    closing = {}
+    delimiter = bytearray(len(visible))
+    position = 0
+    while position < len(visible):
+        char = visible[position]
+        if (char == "\\" and position + 1 < len(visible)
+                and visible[position + 1] in string.punctuation):
+            position += 2
+            continue
+        if char == "[":
+            opened.append(position)
+            starts.append(position)
+            delimiter[position] = 1
+        elif char == "]":
+            delimiter[position] = 1
+            if opened:
+                closing[opened.pop()] = position
+        position += 1
+
+    prefix = [0]
+    for marked in delimiter:
+        prefix.append(prefix[-1] + marked)
+
+    # (origin, opener, text-end, explicit-label opener, target, is-image)
+    candidates = []
+    consumed_labels = set()
+    for start in starts:
+        close = closing.get(start)
+        if close is None:
+            continue
+        tail = close + 1
+        if tail < len(visible) and visible[tail] == "(":
+            # The established inline scanner owns these candidates.
+            continue
+
+        # A link label is bounded to 999 characters. Long balanced link
+        # *text* is still valid when a separate short explicit label exists.
+        text = (
+            visible[start + 1:close]
+            if close - start <= 1000 and prefix[start + 1] == prefix[close]
+            else None
+        )
+        label_end = closing.get(tail) if tail < len(visible) and visible[tail] == "[" else None
+        explicit = (
+            label_end is not None
+            and label_end - tail <= 1000
+            and prefix[tail + 1] == prefix[label_end]
+        )
+        if explicit:
+            explicit_label = visible[tail + 1:label_end]
+            label = explicit_label if explicit_label else text
+        else:
+            label = text
+        if not label or not label.strip():
+            continue
+        destination = definitions.get(_normalize_reference_label(label))
+        if destination is None:
+            continue
+
+        origin = start
+        if start and visible[start - 1] == "!" and not _is_backslash_escaped(visible, start - 1):
+            origin -= 1
+        candidates.append((origin, start, close, tail if explicit else None,
+                           destination, origin != start))
+        if explicit:
+            consumed_labels.add(tail)
+    return candidates, consumed_labels
+
+
 def _iter_reference_locations(masked: str, definitions: dict[str, str]):
-    """Yield (line, source-character column, destination) for reference uses."""
+    """Yield one-based locations for bounded balanced reference-link uses.
+
+    Link text can contain balanced brackets; reference *labels* remain flat.
+    One pass pairs delimiters, and prefix counts avoid rescanning deep text.
+    """
     for lineno, raw_line in enumerate(split_markdown_lines(masked), 1):
         line = raw_line.rstrip("\r\n")
-        # An inline destination can itself contain brackets. Avoid treating
-        # those as shortcut references to a separate definition.
         active = list(line)
-        for start in _iter_inline_link_starts(line):
-            parsed = _parse_destination(line, start)
-            if parsed is not None:
-                _, end = parsed
-                for index in range(start, min(end, len(active))):
-                    active[index] = " "
+        inline_image_alt = []
+        inline_ordinary = []
+        inline_destinations = []
+        inline_candidates = []
+        for origin, destination_start in _iter_inline_link_candidates(line):
+            parsed = _parse_destination(line, destination_start)
+            if parsed is None:
+                continue
+            _, end = parsed
+            cursor = destination_start - 1
+            while cursor >= 0 and line[cursor] in MARKDOWN_WHITESPACE:
+                cursor -= 1
+            close = cursor - 1
+            inline_candidates.append(
+                (origin, destination_start, close, end, line[origin] == "!")
+            )
+
+        # Only *surviving* inline destinations are literal. A syntactically
+        # parseable outer link with a successful nested ordinary link is not
+        # live; its destination-looking tail may contain real references.
+        # Apply the same image exemptions and ordinary nesting precedence as
+        # the inline-location pass before blanking any reference-use source.
+        image_alts = _interval_coverage(
+            (origin + 2, close)
+            for origin, _, close, _, image in inline_candidates if image
+        )
+        image_dests = _interval_coverage(
+            (close + 1, end)
+            for origin, _, close, end, image in inline_candidates
+            if image and not _interval_contains(image_alts, origin)
+        )
+        ordinary_origins = sorted(
+            origin for origin, _, _, _, image in inline_candidates
+            if not image and not _interval_contains(image_alts, origin)
+            and not _interval_contains(image_dests, origin)
+        )
+        # A nested live reference also invalidates an enclosing ordinary
+        # inline link. Discover it from link text BEFORE masking destinations;
+        # otherwise the outer link's now-literal destination can lose real
+        # references. Ignore reference-looking text in image alt/destinations.
+        raw_candidates, raw_labels = _balanced_reference_candidates(line, definitions)
+        raw_ref_image_spans = _interval_coverage(
+            (origin + 2, close)
+            for origin, _, close, _, _, image in raw_candidates if image
+        )
+        raw_reference_starts = sorted(
+            start for origin, start, _, _, _, image in raw_candidates
+            if not image and start not in raw_labels
+            and not _interval_contains(image_alts, origin)
+            and not _interval_contains(image_dests, origin)
+            and not _interval_contains(raw_ref_image_spans, origin)
+        )
+        for origin, destination_start, close, end, image in inline_candidates:
+            if (_interval_contains(image_alts, origin)
+                    or _interval_contains(image_dests, origin)):
+                continue
+            if not image:
+                nested = bisect_right(ordinary_origins, origin)
+                if (nested < len(ordinary_origins)
+                        and ordinary_origins[nested] < close):
+                    continue
+                nested_reference = bisect_right(raw_reference_starts, origin)
+                if (nested_reference < len(raw_reference_starts)
+                        and raw_reference_starts[nested_reference] < close):
+                    continue
+                inline_ordinary.append(origin)
+            inline_destinations.append((destination_start, end))
+            for index in range(destination_start, min(end, len(active))):
+                active[index] = " "
+            if image:
+                inline_image_alt.append((origin + 2, close))
+        for start, end in inline_image_alt:
+            for index in range(start, end):
+                active[index] = " "
+
         visible = "".join(active)
-        for match in REFERENCE_USE_RE.finditer(visible):
-            if (_is_backslash_escaped(visible, match.start())
-                    or (match.start() > 0 and visible[match.start() - 1] == "[")):
+        candidates, consumed_labels = _balanced_reference_candidates(visible, definitions)
+
+        # GFM allows image references inside ordinary links, but not a live
+        # ordinary reference link inside another ordinary reference link.
+        image_spans = _interval_coverage(
+            (origin + 2, close)
+            for origin, _, close, _, _, image in candidates if image
+        )
+        # Link kinds share nesting precedence: an inline ordinary link
+        # invalidates a surrounding reference link, but image alt text and
+        # destinations cannot introduce live nested links.
+        inline_destination_spans = _interval_coverage(inline_destinations)
+        inline_alt_spans = _interval_coverage(inline_image_alt)
+        ordinary_starts = sorted(
+            [
+                start for origin, start, _, _, _, image in candidates
+                if not image and start not in consumed_labels
+                and not _interval_contains(image_spans, origin)
+            ] + [
+                origin for origin in inline_ordinary
+                if not _interval_contains(image_spans, origin)
+                and not _interval_contains(inline_alt_spans, origin)
+                and not _interval_contains(inline_destination_spans, origin)
+            ]
+        )
+        survivors = []
+        for candidate in candidates:
+            origin, start, close, _, _, image = candidate
+            if _interval_contains(image_spans, origin):
                 continue
-            if (match.group("label") is None and match.end() < len(visible)
-                    and visible[match.end()] in "(["):
-                # Inline link or nested bracket syntax, not a shortcut.
-                continue
-            label = match.group("label") or match.group("text")
-            destination = definitions.get(_normalize_reference_label(label))
-            if destination is not None:
-                yield lineno, match.start() + 1, destination
+            if not image:
+                inner = bisect_right(ordinary_starts, start)
+                if inner < len(ordinary_starts) and ordinary_starts[inner] < close:
+                    continue
+            survivors.append(candidate)
+
+        # A live full reference consumes its second [label] token. When an
+        # outer reference loses to a nested link, its trailing [label] may
+        # instead become an independent shortcut reference.
+        live_labels = {
+            label_start for _, _, _, label_start, _, _ in survivors
+            if label_start is not None
+        }
+        for origin, start, _, _, destination, _ in survivors:
+            if start not in live_labels:
+                yield lineno, origin + 1, destination
 
 
 def _iter_reference_uses(masked: str, definitions: dict[str, str]):
@@ -1134,6 +1316,38 @@ def iter_markdown_locations(path: Path):
     # index supports out-of-order nested links and the legacy destination line.
     line_starts = [0]
     line_starts.extend(match.end() for match in re.finditer("\n", visible))
+    reference_uses = list(_iter_reference_locations(visible, definitions))
+    reference_link_offsets = sorted(
+        line_starts[line - 1] + column - 1
+        for line, column, _ in reference_uses
+        if visible[line_starts[line - 1] + column - 1] != "!"
+    )
+
+    # Reference-style image alt text is literal as well. Derive its spans
+    # from surviving image uses, not merely image-shaped source candidates:
+    # an unresolved image must not hide ordinary links in literal text.
+    reference_image_uses = {}
+    for line, column, destination in reference_uses:
+        source_offset = line_starts[line - 1] + column - 1
+        if visible[source_offset] == "!":
+            reference_image_uses.setdefault(line, set()).add(
+                (column - 1, destination)
+            )
+    reference_image_alt_regions = []
+    if reference_image_uses:
+        for line, raw_line in enumerate(split_markdown_lines(visible), 1):
+            if line not in reference_image_uses:
+                continue
+            candidates_for_line, _ = _balanced_reference_candidates(
+                raw_line.rstrip("\r\n"), definitions
+            )
+            for origin, start, close, _, destination, image in candidates_for_line:
+                if image and (origin, destination) in reference_image_uses[line]:
+                    offset = line_starts[line - 1]
+                    reference_image_alt_regions.append(
+                        (offset + start + 1, offset + close)
+                    )
+    reference_image_alt_spans = _interval_coverage(reference_image_alt_regions)
     block_start = 0
     separators = list(BLANK_LINE_RE.finditer(visible))
     for separator in separators + [None]:
@@ -1144,6 +1358,11 @@ def iter_markdown_locations(path: Path):
         # destination so nested source syntax can be resolved without recursion.
         candidates = []
         for origin, position in _iter_inline_link_candidates(block):
+            # The image-alt case is shared by inline and reference images.
+            # Filter before precedence/masking so fake nested links cannot
+            # suppress legitimate links outside the image.
+            if _interval_contains(reference_image_alt_spans, block_start + origin):
+                continue
             parsed = _parse_destination(block, position)
             if parsed is None:
                 continue
@@ -1198,11 +1417,18 @@ def iter_markdown_locations(path: Path):
             and not _interval_contains(image_text_spans, origin)
             and not _interval_contains(image_destination_spans, origin)
         )
-        for origin, position, _close, _, destination, image in candidates:
+        for origin, position, close, _, destination, image in candidates:
             if (_interval_contains(destination_spans, origin)
                     or _interval_contains(image_text_spans, origin)
                     or (not image and origin in suppressed_ordinary)):
                 continue
+            if not image:
+                # A valid reference link nested in inline link text wins,
+                # just as a nested inline link wins over an outer reference.
+                inner = bisect_right(reference_link_offsets, block_start + origin)
+                if (inner < len(reference_link_offsets)
+                        and reference_link_offsets[inner] < block_start + close):
+                    continue
             source_offset = block_start + origin
             source_line = bisect_right(line_starts, source_offset)
             source_column = source_offset - line_starts[source_line - 1] + 1
@@ -1215,7 +1441,7 @@ def iter_markdown_locations(path: Path):
             break
         block_start = separator.end()
 
-    for lineno, column, destination in _iter_reference_locations(visible, definitions):
+    for lineno, column, destination in reference_uses:
         yield MarkdownLinkLocation(lineno, column, destination, lineno)
 
 

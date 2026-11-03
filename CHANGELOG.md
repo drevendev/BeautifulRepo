@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Recognize balanced nested bracket text in full Markdown reference links
+  without recursive scanning, preserving single-line reference source anchors,
+  legacy CLI diagnostics, explicit-label consumption, ordinary-link precedence
+  and images in link text. Collapsed/shortcut labels remain flat; the checker
+  is not a full GFM renderer (#245; GFM links reviewed 2026-11-02).
+
 - Recognize a bounded GFM reference-definition continuation in the offline
   Markdown link checker: a destination on the next physical line, an optional
   title on the following line, and first-definition precedence. Reject blank,
