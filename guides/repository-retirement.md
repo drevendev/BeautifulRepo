@@ -101,13 +101,13 @@ This promises a response, omits prerequisites and does not show evidence.
 > security intake is confirmed. Please do not post sensitive details in
 > public issues. This repository has **not** been archived on GitHub.
 
-**Only after an authorized archive actually succeeds**, update the notice to
-say GitHub-archived (if the notice can still be edited, do so **before** the
-archive operation) and verify the repository's archived status independently.
-Never promise an edit after archiving: GitHub requires unarchiving first.
-If a maintained fork exists, include it only after checking the destination
-and the new maintainer's consent; a fork is not automatically an endorsed
-successor.
+**Before** an authorized archive, change the paused notice to truthful
+future-facing language such as "This repository is being prepared for archival."
+**After** the owner archives it, verify the GitHub archived flag. GitHub makes
+the README read-only, so do not promise to change the notice afterward; that
+would require a separate authorized unarchive. If a maintained fork exists,
+link it only after checking the destination and the new maintainer's consent;
+a fork is not automatically an endorsed successor.
 
 ## Acceptance receipt to leave behind
 
