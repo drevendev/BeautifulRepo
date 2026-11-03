@@ -2,7 +2,7 @@
 
 <!-- Template only. Replace every [placeholder] before publishing.
      Do not claim archival before checking the live GitHub archived flag.
-     Choose PAUSED or ARCHIVED, not both. No invented contact addresses. -->
+     Choose PAUSED or PRE-ARCHIVE, not both. No invented contact addresses. -->
 
 ## PAUSED — use while the repository is NOT archived
 
