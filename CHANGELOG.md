@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed repository pause/archive decision recipe with a reusable
+  notice, last-known verification receipt and explicit separation between
+  paused maintenance and GitHub's read-only archive setting. No repository
+  was archived and no provider/admin settings were changed (GitHub and Open
+  Source Guides reviewed 2026-11-03).
+
 - Recognize balanced nested bracket text in full Markdown reference links
   without recursive scanning, preserving single-line reference source anchors,
   legacy CLI diagnostics, explicit-label consumption, ordinary-link precedence

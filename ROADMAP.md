@@ -54,6 +54,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   a clearly fictional broken-link repair example, contributor and maintainer
   acceptance steps, and no implied assignments or review guarantees.
 
+- [Repository pause and archive recipe](guides/repository-retirement.md) and
+  [reusable status notice](templates/REPOSITORY_STATUS_NOTICE.template.md),
+  distinguishing an unmaintained but writable repo from a GitHub-archived
+  read-only repo and retaining last-verified evidence without inventing support.
 - [Maintainer handoff recipe](guides/maintainer-handoff.md), with a fictional
   one-maintainer pause notice, responsibility checklist and real checkout commands.
 
