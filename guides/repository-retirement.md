@@ -50,11 +50,13 @@ the software is safe, current, or reproducible.
    backup/retention requirements; archiving is not a substitute for backups.
 6. **Prepare and review the notice.** Adapt the
    [archive/maintenance notice template](../templates/REPOSITORY_STATUS_NOTICE.template.md).
-   Remove all bracketed placeholders, link it near the README top, and review
-   the rendered narrow-screen view. Use the **paused** version for a hiatus,
-   or **pre-archive** wording when an authorized archival is about to happen.
-   GitHub's banner supplies the confirmed archived status afterward; the
-   README cannot be edited without unarchiving.
+   Copy **only one blockquoted notice**, not the template's heading,
+   comments or explanatory source link, into the target README near its top.
+   Remove all bracketed placeholders, check any links from their **new file
+   location**, and review the rendered narrow-screen view. Use the **paused**
+   version for a hiatus, or **pre-archive** wording when an authorized
+   archival is about to happen. GitHub's banner supplies the confirmed archived
+   status afterward; the README cannot be edited without unarchiving.
 
 For a local checkout, these are **read-only Git identity/working-tree checks**,
 not software tests:
@@ -63,6 +65,12 @@ not software tests:
 git rev-parse --verify HEAD
 git status --short
 ```
+
+After pasting into another repository, inspect the **destination README**
+and click any retained links there. GitHub resolves relative Markdown links
+from the containing file, not from the template they were copied from; a
+`../guides/...` link that works under BeautifulRepo's `templates/` directory
+can point to nowhere from an unrelated root README.
 
 Record the results and date *when actually run*. A dirty working tree means
 the displayed SHA does not describe every local file; do not claim it does.
@@ -132,6 +140,9 @@ Reviewed **2026-11-03**:
   unarchival requirement.
 - [GitHub: Archiving a GitHub repository](https://docs.github.com/en/repositories/archiving-a-github-repository)
   distinguishes repository archival, citation and backups.
+- [GitHub: About README files](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes)
+  specifies that relative Markdown destinations resolve from the containing file,
+  which matters when copying a template into another repository.
 - [Open Source Guides: Best Practices for Maintainers](https://opensource.guide/best-practices/)
   discusses honest availability, documenting expectations and making space
   for a successor.
