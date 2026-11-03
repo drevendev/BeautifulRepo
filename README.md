@@ -81,6 +81,25 @@ for additional bounded diagnostics. To run those checks on pull requests,
 use the [SHA-pinned v0.2.0 GitHub Action recipe](guides/adopting-the-checks.md);
 newer `master`-only inputs are **not** included in that release.
 
+**Recorded result on a real repository (not the fictional demo):**
+On 2026-10-23, the v0.2.0 audit pinned to
+[`4f06f26`](https://github.com/drevendev/BeautifulRepo/commit/4f06f26ccef6e8b28d77c71633482b7a1a68518a)
+was run against two fixed revisions of
+[PatchPitch](case-studies/patchpitch.md):
+
+- [Before `1424fc8`](https://github.com/drevendev/PatchPitch/tree/1424fc8fbfef82a5cd473272843e0c5cdc097b36):
+  **0 errors, 0 warnings, 1 informational finding** (`contributing.missing`).
+- [After `43284a7`](https://github.com/drevendev/PatchPitch/tree/43284a7286ead07d37ff32b8206ac4000856fd04):
+  **0 errors, 0 warnings, 0 informational findings**.
+
+These are the recorded audit summaries from the
+[revision-pinned case study](case-studies/patchpitch.md), **not a fresh run**
+or a measure of reader satisfaction. The audit noticed the new contribution
+document; it did **not** detect the more consequential README first-run
+improvement, which was separately verified without a local AI model.
+The case also records unresolved text-contrast concerns. A clean audit
+cannot certify a good first-run experience.
+
 ### A separate runnable CLI starter
 
 The tested [Rowcount starter](examples/cli-starter/README.md) shows how a

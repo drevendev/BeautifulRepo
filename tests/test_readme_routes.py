@@ -76,6 +76,35 @@ class ReaderRoutesTests(unittest.TestCase):
                 )
                 self.assertIn(expected_line, section)
 
+    def test_real_repository_audit_proof_is_pinned_and_candid(self):
+        """Do not silently detach homepage evidence from the original case."""
+        case = (ROOT / "case-studies/patchpitch.md").read_text(encoding="utf-8")
+        top = README.split("## Working proof\n", 1)[1].split(
+            "\n## Start here", 1
+        )[0]
+        self.assertIn("Recorded result on a real repository", top)
+        for revision in (
+            "1424fc8fbfef82a5cd473272843e0c5cdc097b36",
+            "43284a7286ead07d37ff32b8206ac4000856fd04",
+            "4f06f26ccef6e8b28d77c71633482b7a1a68518a",
+        ):
+            with self.subTest(revision=revision):
+                self.assertIn(revision, top)
+                self.assertIn(revision, case)
+        top_flat = " ".join(top.split())
+        case_flat = " ".join(case.split())
+        for finding in (
+            "0 errors, 0 warnings, 1 informational finding",
+            "0 errors, 0 warnings, 0 informational findings",
+            "contributing.missing",
+        ):
+            with self.subTest(finding=finding):
+                self.assertIn(finding, top_flat)
+                self.assertIn(finding, case_flat)
+        self.assertIn("not a fresh run", top)
+        self.assertIn("did **not** detect", top)
+        self.assertIn("unresolved text-contrast concerns", top)
+
     def test_detailed_handbook_remains_complete_but_not_duplicate_table(self):
         section = README.split("## Explore the handbook\n", 1)[1].split(
             "\n## Principles", 1
