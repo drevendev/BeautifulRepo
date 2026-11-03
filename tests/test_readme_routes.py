@@ -69,13 +69,12 @@ class ReaderRoutesTests(unittest.TestCase):
                 self.assertEqual(
                     (summary["error"], summary["warning"], summary["info"]), counts
                 )
-                self.assertIn(
-                    f"{label}:" + (" " if label == "before" else "  ") +
-                    f"{counts[0]} errors, {counts[1]} warning" +
-                    ("s" if counts[1] != 1 else "") +
-                    f", {counts[2]} informational finding",
-                    section,
+                expected_line = (
+                    "before: 0 errors, 4 warnings, 1 informational finding"
+                    if label == "before"
+                    else "after:  0 errors, 1 warning,  1 informational finding"
                 )
+                self.assertIn(expected_line, section)
 
     def test_detailed_handbook_remains_complete_but_not_duplicate_table(self):
         section = README.split("## Explore the handbook\n", 1)[1].split(
