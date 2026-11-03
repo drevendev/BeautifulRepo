@@ -78,6 +78,10 @@ def inventory(root: Path) -> dict[str, dict[str, str]]:
             elif stat.S_ISDIR(mode):
                 found[key] = {"kind": "directory", "mode": f"{stat.S_IMODE(mode):04o}"}
             elif stat.S_ISREG(mode):
+                # A hard link can alias a file outside the disposable target.
+                # It is not a symlink, so reject it before reading/hash capture.
+                if info.st_nlink > 1:
+                    raise ValueError(f"hard-linked file: {key}")
                 digest = hashlib.sha256()
                 with entry.open("rb") as stream:
                     for chunk in iter(lambda: stream.read(131072), b""):
