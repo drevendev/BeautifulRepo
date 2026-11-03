@@ -259,12 +259,14 @@ class BalancedReferenceUseTests(unittest.TestCase):
         locations, legacy, cli = self.inspect(
             line + "\n\n[image]: logo.svg\n"
         )
+        # The existing API yields inline locations before reference uses,
+        # independently of their left-to-right source positions.
         expected = [
-            (1, 1, "logo.svg", 1),
             (1, line.index("[real]") + 1, "real.md", 1),
+            (1, 1, "logo.svg", 1),
         ]
         self.assertEqual(expected, locations)
-        self.assertEqual([(1, "logo.svg"), (1, "real.md")], legacy)
+        self.assertEqual([(1, "real.md"), (1, "logo.svg")], legacy)
         self.assertIn("'logo.svg'", cli.stderr)
         self.assertIn("'real.md'", cli.stderr)
         self.assertNotIn("'fake.md'", cli.stderr)
