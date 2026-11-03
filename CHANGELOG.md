@@ -379,6 +379,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Clarify released `v0.2.0` audit-only plugin instructions versus the
+  immutable four-skill `0.3.0-dev.0` testing candidate, with exact Claude
+  Code/Codex trial commands, fresh-install and model-testing caveats, a
+  revision-pinned smoke matrix, and separate MCP scope. Update the public
+  roadmap to match source and issue evidence as of 2026-11-03; no host
+  acceptance or stable release is claimed (#257, #258).
+
 - Bring a revision-pinned real PatchPitch audit before/after into the README's
   working proof, distinct from the fictional demo. Record the single detected
   contribution-document change and the more important first-run improvement the
