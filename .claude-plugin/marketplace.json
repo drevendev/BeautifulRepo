@@ -11,7 +11,7 @@
     {
       "name": "beautifulrepo",
       "source": "./",
-      "description": "Audit a repository with BeautifulRepo's local, read-only Python checks and agent-guided documentation checklists.",
+      "description": "Audit docs, preview gated README edits, review trust policies and draft unreleased notes with local tools.",
       "category": "productivity",
       "keywords": ["readme", "documentation", "repository-audit"]
     }
