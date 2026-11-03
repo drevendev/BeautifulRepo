@@ -116,12 +116,13 @@ issues for their live status.
   and a revision-pinned real audit result. The remaining evidence-led visual
   showcase, manual rendering observations and launch readiness must be verified
   separately; no external promotion is implied.
-- **Visual accessibility evidence**
-  ([#16](https://github.com/drevendev/BeautifulRepo/issues/16)):
-  alternative entrances, design briefs and the
-  [manual checklist](checklists/visual-accessibility-acceptance.md) exist.
-  Complete keyboard, screen-reader, real 400% zoom and light/dark observations
-  are **not** certified by structural checks.
+- **Visual verification boundaries:** the presentation work in
+  [#16](https://github.com/drevendev/BeautifulRepo/issues/16) is **closed**,
+  with alternative entrances, design briefs and a
+  [manual acceptance checklist](checklists/visual-accessibility-acceptance.md).
+  Structural tests alone still do not certify complete keyboard, screen-reader,
+  real 400% zoom or light/dark accessibility behavior; those claims need
+  separately recorded manual evidence.
 - **Native historical label**
   ([#100](https://github.com/drevendev/BeautifulRepo/issues/100)):
   public Hacktoberfest 2026 guidance already disclaims PR reward credit;
