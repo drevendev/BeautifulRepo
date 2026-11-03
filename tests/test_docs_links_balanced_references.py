@@ -177,5 +177,37 @@ class BalancedReferenceUseTests(unittest.TestCase):
         )
 
 
+    def test_invalid_outer_inline_tail_exposes_live_reference(self):
+        # A successful inner link cancels the outer inline link. Its
+        # destination-looking tail is literal text containing a live ref.
+        line = "[outer [inner](inner.md)](assets/[side][ref])"
+        locations, legacy, cli = self.inspect(
+            line + "\n\n[ref]: side.md\n"
+        )
+        self.assertEqual(
+            [(1, line.index("[inner]") + 1, "inner.md", 1),
+             (1, line.index("[side]") + 1, "side.md", 1)],
+            locations,
+        )
+        self.assertEqual([(1, "inner.md"), (1, "side.md")], legacy)
+        self.assertIn("'inner.md'", cli.stderr)
+        self.assertIn("'side.md'", cli.stderr)
+        self.assertNotIn("assets/[side][ref]", cli.stderr)
+
+    def test_live_inline_and_image_destinations_mask_reference_lookalikes(self):
+        # A live inline destination and a live image destination both
+        # keep their bracket-looking path text literal, not a reference.
+        line = "[valid](assets/[side][ref]) ![badge](assets/[side][ref])"
+        locations, _, cli = self.inspect(
+            line + "\n\n[ref]: side.md\n"
+        )
+        self.assertEqual(
+            [(1, 1, "assets/[side][ref]", 1),
+             (1, line.index("![badge]") + 1, "assets/[side][ref]", 1)],
+            locations,
+        )
+        self.assertNotIn("'side.md'", cli.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
