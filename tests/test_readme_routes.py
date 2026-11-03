@@ -79,8 +79,8 @@ class ReaderRoutesTests(unittest.TestCase):
     def test_real_repository_audit_proof_is_pinned_and_candid(self):
         """Do not silently detach homepage evidence from the original case."""
         case = (ROOT / "case-studies/patchpitch.md").read_text(encoding="utf-8")
-        top = README.split("## Working proof\\n", 1)[1].split(
-            "\\n## Start here", 1
+        top = README.split("## Working proof\n", 1)[1].split(
+            "\n## Start here", 1
         )[0]
         self.assertIn("Recorded result on a real repository", top)
         for revision in (
