@@ -151,9 +151,13 @@ python -I tools/agent_eval_snapshot.py verify "$WORK/target" --baseline "$WORK/b
 
 The snapshot reports changes **inside its selected target**, not files
 outside it, network access, shell invocations, or what the model saw. It
-does not prevent writes. On Windows, junctions and unsupported reparse
-points fail closed; a sandbox is still needed. Do not commit baselines,
-model transcripts or private paths.
+does not prevent writes. On Windows, junctions and unsupported reparse points fail closed. Regular
+files with more than one hard link are also rejected before reading: an
+apparently ordinary target file could alias data outside the disposable
+fixture, or acquire such an alias after capture without changing its bytes.
+Use a real copied fixture, not a hard-link farm (`cp -al`), and keep a
+sandbox; the snapshot is not a filesystem access boundary. Do not commit
+baselines, model transcripts or private paths.
 
 ## One result per case and agent
 
