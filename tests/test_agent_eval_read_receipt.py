@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -88,6 +89,41 @@ class ReceiptTests(unittest.TestCase):
         result = self.run_checker({"format": 1, "reads": [self.item(content="first\nsecond\n")]})
         self.assertEqual(1, result.returncode)
         self.assertIn("INCONCLUSIVE", result.stdout)
+
+    def test_hard_linked_fixture_fails_before_reading(self):
+        external = self.home / "external-fixture.md"
+        try:
+            os.link(self.fixture, external)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        self.assertFalse(self.fixture.is_symlink())
+        self.assertGreater(self.fixture.stat().st_nlink, 1)
+        result = self.run_checker({"format": 1, "reads": [self.item()]})
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("fixture must not be a hard-linked file", result.stderr)
+        self.assertNotIn("CONTENT_MATCH", result.stdout)
+
+    def test_hard_linked_receipt_fails_before_parsing(self):
+        self.assertEqual(0, self.run_checker(
+            {"format": 1, "reads": [self.item()]}).returncode)
+        external = self.home / "external-receipt.json"
+        try:
+            os.link(self.receipt, external)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        self.assertFalse(self.receipt.is_symlink())
+        self.assertGreater(self.receipt.stat().st_nlink, 1)
+        # Invoke the existing receipt directly; do not rewrite its hard link.
+        result = subprocess.run([
+            sys.executable, "-I", str(TOOL),
+            "--fixture", str(self.fixture),
+            "--observed-path", self.path,
+            "--receipt", str(self.receipt),
+        ], cwd=self.home, capture_output=True, text=True, timeout=30,
+            check=False)
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("receipt must not be a hard-linked file", result.stderr)
+        self.assertNotIn("CONTENT_MATCH", result.stdout)
 
     def test_symlink_fixture_fails_closed(self):
         link = self.home / "link.md"

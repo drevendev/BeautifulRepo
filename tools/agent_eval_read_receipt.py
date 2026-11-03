@@ -27,7 +27,12 @@ def _unique_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
 def _text_file(path: Path, label: str) -> str:
     if path.is_symlink() or not path.is_file():
         raise ValueError(f"{label} must be a regular non-symlink file")
-    if path.stat().st_size > MAX_BYTES:
+    info = path.stat()
+    # Hard links can alias files outside the selected synthetic evidence set.
+    # This check is conservative, not a race-resistant filesystem boundary.
+    if info.st_nlink > 1:
+        raise ValueError(f"{label} must not be a hard-linked file")
+    if info.st_size > MAX_BYTES:
         raise ValueError(f"{label} exceeds {MAX_BYTES} bytes")
     data = path.read_bytes()
     if len(data) > MAX_BYTES:
