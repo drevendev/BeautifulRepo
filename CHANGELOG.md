@@ -379,6 +379,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Align Claude Code and Codex plugin descriptions, the Claude marketplace
+  listing and manifest tests with all four development-candidate skills,
+  including `trust-surfaces`. Direct testing instructions to the immutable
+  four-skill candidate rather than mutable `master`; this documents discovery
+  only and does not claim real-agent acceptance or a stable release (#257, #258).
+
 - Clarify released `v0.2.0` audit-only plugin instructions versus the
   immutable four-skill `0.3.0-dev.0` testing candidate, with exact Claude
   Code/Codex trial commands, fresh-install and model-testing caveats, a
