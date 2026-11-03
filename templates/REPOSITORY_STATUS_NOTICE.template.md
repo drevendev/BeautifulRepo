@@ -21,7 +21,7 @@
 >
 > This repository has **not** been archived on GitHub.
 
-## ARCHIVED — prepare before owner-authorized archival
+## PRE-ARCHIVE — prepare while the repository is still writable
 
 > **Maintenance ended [YYYY-MM-DD].** This repository is being
 > prepared for GitHub archival. After the owner confirms archival,
