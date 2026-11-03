@@ -420,6 +420,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject hard-linked fixture and read-receipt inputs in the offline agent-eval
+  Read receipt checker instead of reading possible external aliases. This
+  preserves exact-byte matching for ordinary synthetic evidence but is not
+  a race-resistant filesystem boundary or model-behavior proof (#74).
+
 - Fail closed when a synthetic agent-eval snapshot target contains hard-linked regular files, including aliases created after capture, instead of accepting an unchanged-byte snapshot. The check covers only the selected target and does not prevent outside writes or replace sandboxing (related to #74).
 
 - Respect GFM nesting precedence in the offline Markdown link checker: a valid
