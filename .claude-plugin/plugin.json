@@ -1,7 +1,7 @@
 {
   "name": "beautifulrepo",
   "version": "0.3.0-dev.0",
-  "description": "Audit repository onboarding, preview gated README improvements, or draft unpublished release notes from local evidence.",
+  "description": "Audit repository onboarding, preview gated README fixes, review trust and policy surfaces, and draft unpublished release notes from local evidence.",
   "author": {
     "name": "Dreven",
     "url": "https://github.com/drevendev"
