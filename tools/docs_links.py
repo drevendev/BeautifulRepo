@@ -1068,6 +1068,83 @@ def _extract_reference_definitions(masked: str):
     return definitions, "".join(remaining)
 
 
+def _balanced_reference_candidates(visible: str, definitions: dict[str, str]):
+    """Find bounded bracketed reference uses without destination masking.
+
+    The same linear delimiter pass is shared by the raw-text precedence
+    preflight and the masked final reference scan.
+    """
+    opened = []
+    starts = []
+    closing = {}
+    delimiter = bytearray(len(visible))
+    position = 0
+    while position < len(visible):
+        char = visible[position]
+        if (char == "\\" and position + 1 < len(visible)
+                and visible[position + 1] in string.punctuation):
+            position += 2
+            continue
+        if char == "[":
+            opened.append(position)
+            starts.append(position)
+            delimiter[position] = 1
+        elif char == "]":
+            delimiter[position] = 1
+            if opened:
+                closing[opened.pop()] = position
+        position += 1
+
+    prefix = [0]
+    for marked in delimiter:
+        prefix.append(prefix[-1] + marked)
+
+    # (origin, opener, text-end, explicit-label opener, target, is-image)
+    candidates = []
+    consumed_labels = set()
+    for start in starts:
+        close = closing.get(start)
+        if close is None:
+            continue
+        tail = close + 1
+        if tail < len(visible) and visible[tail] == "(":
+            # The established inline scanner owns these candidates.
+            continue
+
+        # A link label is bounded to 999 characters. Long balanced link
+        # *text* is still valid when a separate short explicit label exists.
+        text = (
+            visible[start + 1:close]
+            if close - start <= 1000 and prefix[start + 1] == prefix[close]
+            else None
+        )
+        label_end = closing.get(tail) if tail < len(visible) and visible[tail] == "[" else None
+        explicit = (
+            label_end is not None
+            and label_end - tail <= 1000
+            and prefix[tail + 1] == prefix[label_end]
+        )
+        if explicit:
+            explicit_label = visible[tail + 1:label_end]
+            label = explicit_label if explicit_label else text
+        else:
+            label = text
+        if not label or not label.strip():
+            continue
+        destination = definitions.get(_normalize_reference_label(label))
+        if destination is None:
+            continue
+
+        origin = start
+        if start and visible[start - 1] == "!" and not _is_backslash_escaped(visible, start - 1):
+            origin -= 1
+        candidates.append((origin, start, close, tail if explicit else None,
+                           destination, origin != start))
+        if explicit:
+            consumed_labels.add(tail)
+    return candidates, consumed_labels
+
+
 def _iter_reference_locations(masked: str, definitions: dict[str, str]):
     """Yield one-based locations for bounded balanced reference-link uses.
 
@@ -1113,6 +1190,22 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
             if not image and not _interval_contains(image_alts, origin)
             and not _interval_contains(image_dests, origin)
         )
+        # A nested live reference also invalidates an enclosing ordinary
+        # inline link. Discover it from link text BEFORE masking destinations;
+        # otherwise the outer link's now-literal destination can lose real
+        # references. Ignore reference-looking text in image alt/destinations.
+        raw_candidates, raw_labels = _balanced_reference_candidates(line, definitions)
+        raw_ref_image_spans = _interval_coverage(
+            (origin + 2, close)
+            for origin, _, close, _, _, image in raw_candidates if image
+        )
+        raw_reference_starts = sorted(
+            start for origin, start, _, _, _, image in raw_candidates
+            if not image and start not in raw_labels
+            and not _interval_contains(image_alts, origin)
+            and not _interval_contains(image_dests, origin)
+            and not _interval_contains(raw_ref_image_spans, origin)
+        )
         for origin, destination_start, close, end, image in inline_candidates:
             if (_interval_contains(image_alts, origin)
                     or _interval_contains(image_dests, origin)):
@@ -1121,6 +1214,10 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
                 nested = bisect_right(ordinary_origins, origin)
                 if (nested < len(ordinary_origins)
                         and ordinary_origins[nested] < close):
+                    continue
+                nested_reference = bisect_right(raw_reference_starts, origin)
+                if (nested_reference < len(raw_reference_starts)
+                        and raw_reference_starts[nested_reference] < close):
                     continue
                 inline_ordinary.append(origin)
             inline_destinations.append((destination_start, end))
@@ -1133,74 +1230,7 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
                 active[index] = " "
 
         visible = "".join(active)
-        opened = []
-        starts = []
-        closing = {}
-        delimiter = bytearray(len(visible))
-        position = 0
-        while position < len(visible):
-            char = visible[position]
-            if (char == "\\" and position + 1 < len(visible)
-                    and visible[position + 1] in string.punctuation):
-                position += 2
-                continue
-            if char == "[":
-                opened.append(position)
-                starts.append(position)
-                delimiter[position] = 1
-            elif char == "]":
-                delimiter[position] = 1
-                if opened:
-                    closing[opened.pop()] = position
-            position += 1
-
-        prefix = [0]
-        for marked in delimiter:
-            prefix.append(prefix[-1] + marked)
-
-        # (origin, opener, text-end, explicit-label opener, target, is-image)
-        candidates = []
-        consumed_labels = set()
-        for start in starts:
-            close = closing.get(start)
-            if close is None:
-                continue
-            tail = close + 1
-            if tail < len(visible) and visible[tail] == "(":
-                # The established inline scanner owns these candidates.
-                continue
-
-            # A link label is bounded to 999 characters. Long balanced link
-            # *text* is still valid when a separate short explicit label exists.
-            text = (
-                visible[start + 1:close]
-                if close - start <= 1000 and prefix[start + 1] == prefix[close]
-                else None
-            )
-            label_end = closing.get(tail) if tail < len(visible) and visible[tail] == "[" else None
-            explicit = (
-                label_end is not None
-                and label_end - tail <= 1000
-                and prefix[tail + 1] == prefix[label_end]
-            )
-            if explicit:
-                explicit_label = visible[tail + 1:label_end]
-                label = explicit_label if explicit_label else text
-            else:
-                label = text
-            if not label or not label.strip():
-                continue
-            destination = definitions.get(_normalize_reference_label(label))
-            if destination is None:
-                continue
-
-            origin = start
-            if start and visible[start - 1] == "!" and not _is_backslash_escaped(visible, start - 1):
-                origin -= 1
-            candidates.append((origin, start, close, tail if explicit else None,
-                               destination, origin != start))
-            if explicit:
-                consumed_labels.add(tail)
+        candidates, consumed_labels = _balanced_reference_candidates(visible, definitions)
 
         # GFM allows image references inside ordinary links, but not a live
         # ordinary reference link inside another ordinary reference link.
