@@ -56,7 +56,11 @@ python -I tools/agent_eval_read_receipt.py \
 Exit **0** prints `CONTENT_MATCH` with the fixture SHA-256; exit **1** means
 `INCONCLUSIVE` (no exact matching Read result, path mismatch, or missing/
 changed/truncated content); exit **2** means malformed or unreadable evidence.
-The checker does not run a model or execute target code. Its input is **not**
+The checker refuses hard-linked fixture and receipt files, which might alias
+files outside the intended synthetic evidence set. This is a conservative
+preflight, **not** a race-resistant filesystem boundary or proof that a
+transcript is authentic. It does not run a model or execute target code.
+Its input is **not**
 automatically exported from Claude/Codex: the operator must inspect the
 original full provider trace, preserve the real tool-result text when
 normalizing it, and establish the observed path. A hand-authored JSON receipt
