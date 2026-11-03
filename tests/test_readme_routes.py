@@ -34,8 +34,8 @@ class ReaderRoutesTests(unittest.TestCase):
         self.assertIn("not a schema validator or a hosted service", " ".join(top.split()))
 
     def test_first_screen_leads_with_the_real_audit_and_discloses_limits(self):
-        section = README.split("## Working proof\\n", 1)[1].split(
-            "\\n## Start here", 1
+        section = README.split("## Working proof\n", 1)[1].split(
+            "\n## Start here", 1
         )[0]
         self.assertLess(section.index("python -I tools/repo_audit.py ."),
                         section.index("python examples/cli-starter/rowcount.py"))
@@ -57,8 +57,8 @@ class ReaderRoutesTests(unittest.TestCase):
             cwd=ROOT, capture_output=True, text=True, timeout=30, check=True,
         )
         reports = json.loads(result.stdout)
-        section = README.split("## Working proof\\n", 1)[1].split(
-            "\\n## Start here", 1
+        section = README.split("## Working proof\n", 1)[1].split(
+            "\n## Start here", 1
         )[0]
         for label, counts in (
             ("before", (0, 4, 1)),
