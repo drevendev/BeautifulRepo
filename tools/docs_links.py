@@ -1080,23 +1080,54 @@ def _iter_reference_locations(masked: str, definitions: dict[str, str]):
         inline_image_alt = []
         inline_ordinary = []
         inline_destinations = []
-        # Hide inline destinations and inline-image alt text without shifting
-        # source coordinates. Neither can introduce another live reference.
+        inline_candidates = []
         for origin, destination_start in _iter_inline_link_candidates(line):
             parsed = _parse_destination(line, destination_start)
             if parsed is None:
                 continue
             _, end = parsed
-            inline_destinations.append((destination_start, end))
-            if line[origin] != "!":
+            cursor = destination_start - 1
+            while cursor >= 0 and line[cursor] in MARKDOWN_WHITESPACE:
+                cursor -= 1
+            close = cursor - 1
+            inline_candidates.append(
+                (origin, destination_start, close, end, line[origin] == "!")
+            )
+
+        # Only *surviving* inline destinations are literal. A syntactically
+        # parseable outer link with a successful nested ordinary link is not
+        # live; its destination-looking tail may contain real references.
+        # Apply the same image exemptions and ordinary nesting precedence as
+        # the inline-location pass before blanking any reference-use source.
+        image_alts = _interval_coverage(
+            (origin + 2, close)
+            for origin, _, close, _, image in inline_candidates if image
+        )
+        image_dests = _interval_coverage(
+            (close + 1, end)
+            for origin, _, close, end, image in inline_candidates
+            if image and not _interval_contains(image_alts, origin)
+        )
+        ordinary_origins = sorted(
+            origin for origin, _, _, _, image in inline_candidates
+            if not image and not _interval_contains(image_alts, origin)
+            and not _interval_contains(image_dests, origin)
+        )
+        for origin, destination_start, close, end, image in inline_candidates:
+            if (_interval_contains(image_alts, origin)
+                    or _interval_contains(image_dests, origin)):
+                continue
+            if not image:
+                nested = bisect_right(ordinary_origins, origin)
+                if (nested < len(ordinary_origins)
+                        and ordinary_origins[nested] < close):
+                    continue
                 inline_ordinary.append(origin)
+            inline_destinations.append((destination_start, end))
             for index in range(destination_start, min(end, len(active))):
                 active[index] = " "
-            if line[origin] == "!":
-                cursor = destination_start - 1
-                while cursor >= 0 and line[cursor] in MARKDOWN_WHITESPACE:
-                    cursor -= 1
-                inline_image_alt.append((origin + 2, cursor - 1))
+            if image:
+                inline_image_alt.append((origin + 2, close))
         for start, end in inline_image_alt:
             for index in range(start, end):
                 active[index] = " "
