@@ -1322,6 +1322,32 @@ def iter_markdown_locations(path: Path):
         for line, column, _ in reference_uses
         if visible[line_starts[line - 1] + column - 1] != "!"
     )
+
+    # Reference-style image alt text is literal as well. Derive its spans
+    # from surviving image uses, not merely image-shaped source candidates:
+    # an unresolved image must not hide ordinary links in literal text.
+    reference_image_uses = {}
+    for line, column, destination in reference_uses:
+        source_offset = line_starts[line - 1] + column - 1
+        if visible[source_offset] == "!":
+            reference_image_uses.setdefault(line, set()).add(
+                (column - 1, destination)
+            )
+    reference_image_alt_regions = []
+    if reference_image_uses:
+        for line, raw_line in enumerate(split_markdown_lines(visible), 1):
+            if line not in reference_image_uses:
+                continue
+            candidates_for_line, _ = _balanced_reference_candidates(
+                raw_line.rstrip("\r\n"), definitions
+            )
+            for origin, start, close, _, destination, image in candidates_for_line:
+                if image and (origin, destination) in reference_image_uses[line]:
+                    offset = line_starts[line - 1]
+                    reference_image_alt_regions.append(
+                        (offset + start + 1, offset + close)
+                    )
+    reference_image_alt_spans = _interval_coverage(reference_image_alt_regions)
     block_start = 0
     separators = list(BLANK_LINE_RE.finditer(visible))
     for separator in separators + [None]:
@@ -1332,6 +1358,11 @@ def iter_markdown_locations(path: Path):
         # destination so nested source syntax can be resolved without recursion.
         candidates = []
         for origin, position in _iter_inline_link_candidates(block):
+            # The image-alt case is shared by inline and reference images.
+            # Filter before precedence/masking so fake nested links cannot
+            # suppress legitimate links outside the image.
+            if _interval_contains(reference_image_alt_spans, block_start + origin):
+                continue
             parsed = _parse_destination(block, position)
             if parsed is None:
                 continue
