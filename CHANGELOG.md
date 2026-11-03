@@ -379,6 +379,11 @@ keep their original themed headings.
 
 ### Changed
 
+- Bring a revision-pinned real PatchPitch audit before/after into the README's
+  working proof, distinct from the fictional demo. Record the single detected
+  contribution-document change and the more important first-run improvement the
+  structural audit did not detect; retain links to the full observed case (#254).
+
 - Make the README first visit lead with the actual offline repository audit,
   a runnable synthetic before/after, a local-repository command, honest exit
   semantics and the reviewed SHA-pinned Action recipe. Keep the Rowcount
