@@ -145,6 +145,33 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(1, self.run_tool("verify").returncode)
 
 
+    def test_hard_link_to_external_file_is_rejected_on_capture(self):
+        external = self.home / "external.txt"
+        external.write_text("synthetic outside data", encoding="utf-8")
+        alias = self.target / "alias.txt"
+        try:
+            os.link(external, alias)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        self.assertFalse(alias.is_symlink())
+        self.assertGreater(alias.lstat().st_nlink, 1)
+        result = self.run_tool("capture")
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("hard-linked file: alias.txt", result.stderr)
+        self.assertFalse(self.baseline.exists())
+
+    def test_hard_link_added_after_capture_invalidates_unchanged_result(self):
+        self.assertEqual(0, self.run_tool("capture").returncode)
+        outside = self.home / "later-alias.txt"
+        try:
+            os.link(self.target / "README.md", outside)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        result = self.run_tool("verify")
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("hard-linked file: README.md", result.stderr)
+        self.assertNotIn("UNCHANGED", result.stdout)
+
     def test_windows_junction_root_is_rejected_before_resolution(self):
         """A junction selected as the target itself must not escape the fixture."""
         import importlib.util
