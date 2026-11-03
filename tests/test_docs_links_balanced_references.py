@@ -209,5 +209,50 @@ class BalancedReferenceUseTests(unittest.TestCase):
         self.assertNotIn("'side.md'", cli.stderr)
 
 
+    def test_nested_reference_invalidates_outer_inline_and_exposes_tail(self):
+        # GFM: a successful inner reference link cancels the outer inline
+        # link, so its destination-looking tail contains a real reference.
+        line = "[outer [inner][child]](assets/[side][ref])"
+        locations, legacy, cli = self.inspect(
+            line + "\n\n[child]: inner.md\n[ref]: side.md\n"
+        )
+        self.assertEqual(
+            [(1, line.index("[inner]") + 1, "inner.md", 1),
+             (1, line.index("[side]") + 1, "side.md", 1)],
+            locations,
+        )
+        self.assertEqual([(1, "inner.md"), (1, "side.md")], legacy)
+        self.assertIn("'inner.md'", cli.stderr)
+        self.assertIn("'side.md'", cli.stderr)
+        self.assertNotIn("assets/[side][ref]", cli.stderr)
+
+    def test_balanced_nested_reference_also_invalidates_outer_inline(self):
+        line = "[outer [nested [deep]][child]](assets/[side][ref])"
+        locations, _, cli = self.inspect(
+            line + "\n\n[child]: inner.md\n[ref]: side.md\n"
+        )
+        self.assertEqual(
+            [(1, line.index("[nested") + 1, "inner.md", 1),
+             (1, line.index("[side]") + 1, "side.md", 1)],
+            locations,
+        )
+        self.assertIn("'inner.md'", cli.stderr)
+        self.assertIn("'side.md'", cli.stderr)
+
+    def test_nested_reference_image_keeps_outer_inline_destination_literal(self):
+        line = "[outer ![badge][image]](assets/[side][ref])"
+        locations, _, cli = self.inspect(
+            line + "\n\n[image]: badge.svg\n[ref]: side.md\n"
+        )
+        self.assertEqual(
+            [(1, 1, "assets/[side][ref]", 1),
+             (1, line.index("![badge]") + 1, "badge.svg", 1)],
+            locations,
+        )
+        self.assertIn("'badge.svg'", cli.stderr)
+        self.assertNotIn("'side.md'", cli.stderr)
+
+
+
 if __name__ == "__main__":
     unittest.main()
