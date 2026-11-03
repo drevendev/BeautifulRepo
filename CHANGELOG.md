@@ -11,6 +11,13 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Changed
+
+- Make the README first visit lead with the actual offline repository audit,
+  a runnable synthetic before/after, a local-repository command, honest exit
+  semantics and the reviewed SHA-pinned Action recipe. Keep the Rowcount
+  example as a separate starter rather than the headline product (#254).
+
 ### Added
 
 - Add a source-backed repository pause/archive decision recipe with a reusable
@@ -378,11 +385,6 @@ keep their original themed headings.
   for ideas only, and the known tool caveats (#80).
 
 ### Changed
-
-- Make the README first visit lead with the actual offline repository audit,
-  a runnable synthetic before/after, a local-repository command, honest exit
-  semantics and the reviewed SHA-pinned Action recipe. Keep the Rowcount
-  example as a separate starter rather than the headline product (#254).
 
 - Avoid repeated source-prefix scans when reporting inline Markdown link line
   numbers. The scanner now indexes source line starts once per document and
