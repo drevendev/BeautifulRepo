@@ -51,8 +51,10 @@ the software is safe, current, or reproducible.
 6. **Prepare and review the notice.** Adapt the
    [archive/maintenance notice template](../templates/REPOSITORY_STATUS_NOTICE.template.md).
    Remove all bracketed placeholders, link it near the README top, and review
-   the rendered narrow-screen view. Use the **paused** version until GitHub's
-   actual archive status changes.
+   the rendered narrow-screen view. Use the **paused** version for a hiatus,
+   or **pre-archive** wording when an authorized archival is about to happen.
+   GitHub's banner supplies the confirmed archived status afterward; the
+   README cannot be edited without unarchiving.
 
 For a local checkout, these are **read-only Git identity/working-tree checks**,
 not software tests:
