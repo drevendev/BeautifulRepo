@@ -37,11 +37,13 @@ class ReaderRoutesTests(unittest.TestCase):
         section = README.split("## Working proof\n", 1)[1].split(
             "\n## Start here", 1
         )[0]
-        self.assertLess(section.index("python -I tools/repo_audit.py ."),
+        self.assertLess(section.index("python -I tools/audit_bundle.py ."),
                         section.index("python examples/cli-starter/rowcount.py"))
         self.assertIn("python examples/repository-audit/demo.py", section)
-        self.assertIn("python -I tools/repo_audit.py ../your-repository --fail-on never",
+        self.assertIn("python -I examples/combined-audit/demo.py", section)
+        self.assertIn("python -I tools/audit_bundle.py ../your-repository --fail-on never",
                       section)
+        self.assertIn("broken local links still fail", " ".join(section.split()))
         self.assertIn("guides/adopting-the-checks.md", section)
         self.assertIn("not a beauty score", section)
         self.assertIn("invalid paths or", section)
