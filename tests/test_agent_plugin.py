@@ -81,6 +81,9 @@ class PluginManifestTests(unittest.TestCase):
         self.assertEqual(len(linked), 1, "need one matching immutable source link")
         self.assertEqual(claude, codex)
         self.assertEqual(claude, linked)
+        roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+        roadmap_pins = re.findall(r"is pinned to `([a-f0-9]{40})`", roadmap)
+        self.assertEqual(roadmap_pins, claude, "roadmap candidate must match installed candidate")
         self.assertIn(
             f"https://github.com/drevendev/BeautifulRepo/blob/{claude[0]}/evals/manual-smoke.md",
             guide,

@@ -467,6 +467,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Keep the roadmap's four-skill candidate SHA aligned with the immutable
+  Claude Code and Codex installation examples. Extend the plugin contract
+  test to catch stale public navigation pins instead of silently directing
+  testers to a different source revision (#257, #258).
+
 - Make the reusable repository pause/archive notice safe to paste into an
   unrelated README: copy only one state, resolve links from the destination,
   and use a full URL for the template's own guide reference. Add structural
