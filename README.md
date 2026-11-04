@@ -84,7 +84,7 @@ The demo verifies those observations and leaves its fixtures byte-identical
 after each audit.
 The optional HTML file shows a responsive side-by-side comparison of the
 **actual synthetic** before/after diagnostics; open it locally in a browser.
-It is not a screenshot or evidence of real user adoption. This is not evidence of improved real-user experience.
+It is not a screenshot, real-repository repair or evidence of user adoption.
 
 **Check your own local checkout**, from the BeautifulRepo root, with its path
 as a sibling directory (replace `your-repository`):
