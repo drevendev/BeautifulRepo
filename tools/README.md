@@ -24,6 +24,10 @@ installing packages:
 python -I tools/audit_bundle.py ../your-repository --format json
 ```
 
+For an offline, browsable HTML view, run
+`python -I tools/audit_bundle.py ../your-repository --format html > audit-report.html`.
+The HTML contains no scripts or remote assets; review paths before sharing.
+
 It preserves native findings and reports incomplete checks instead of silently
 passing them. It imports fixed checked-in checker modules; no child processes are launched. This is a local CLI, **not** an MCP server or a beauty score.
 

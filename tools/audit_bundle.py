@@ -7,6 +7,7 @@ concurrent filesystem changes. No processes or network clients are launched.
 from __future__ import annotations
 
 import argparse
+from html import escape
 import importlib.util
 import json
 from pathlib import Path
@@ -156,10 +157,97 @@ def render_text(result: dict) -> str:
     return "\n".join(_one_terminal_line(line) for line in lines) + "\n"
 
 
+def render_html(result: dict) -> str:
+    """Render a standalone offline report, escaping all source diagnostics."""
+    def safe(value: object) -> str:
+        escaped = escape(_one_terminal_line(str(value)), quote=True)
+        # ASCII output also works with narrow Windows terminal encodings.
+        return escaped.encode("ascii", "xmlcharrefreplace").decode("ascii")
+
+    status = {
+        0: "Threshold clear (warnings may remain)",
+        1: "Findings require attention",
+        2: "Incomplete evidence; do not treat this as a pass",
+    }[result["exit_code"]]
+    parts = [
+        "<!doctype html>",
+        '<html lang="en"><head><meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        "<title>BeautifulRepo offline audit</title>",
+        "<style>",
+        ":root { color-scheme: light dark; font-family: system-ui, sans-serif; }",
+        "body { max-width: 72ch; margin: 0 auto; padding: 1.25rem; line-height: 1.6; }",
+        "section { border: 1px solid #8888; border-radius: .5rem; "
+        "padding: 1rem; margin: 1rem 0; }",
+        "code { overflow-wrap: anywhere; white-space: pre-wrap; }",
+        "li { margin: .75rem 0; }",
+        "</style></head><body><main>",
+        "<h1>BeautifulRepo combined offline audit</h1>",
+        "<p>Source-level evidence, not a repository quality score.</p>",
+        f"<p><strong>Exit {result['exit_code']}: {safe(status)}</strong></p>",
+    ]
+    for name in CHECKERS:
+        item = result["checks"][name]
+        parts.extend((
+            f'<section aria-labelledby="{name}">',
+            f'<h2 id="{name}">{safe(name.replace("_", " ").title())}</h2>',
+            f"<p>Checker state: <strong>{safe(item['state'])}</strong></p>",
+        ))
+        if item["state"] != "complete":
+            parts.append(f"<p>Incomplete: {safe(item['reason'])}</p>")
+        elif name == "entry_points":
+            report = item["report"]
+            counts = report["summary"]
+            parts.append(
+                f"<p>{counts['error']} errors, {counts['warning']} warnings, "
+                f"{counts['info']} informational findings.</p>"
+            )
+            if report["findings"]:
+                parts.append("<ul>")
+                for finding in report["findings"]:
+                    location = str(finding["path"])
+                    if finding["line"]:
+                        location += f":{finding['line']}"
+                    parts.append(
+                        "<li><strong>" + safe(finding["severity"]).upper()
+                        + " [" + safe(finding["rule_id"]) + "]</strong> "
+                        + "<code>" + safe(location) + "</code>"
+                        + "<p>" + safe(finding["message"]) + "</p>"
+                        + "<p>Next: " + safe(finding["remediation"]) + "</p></li>"
+                    )
+                parts.append("</ul>")
+            else:
+                parts.append("<p>No entry-point findings reported.</p>")
+        else:
+            parts.append(
+                f"<p>Checker exit {item['exit_code']}; "
+                f"{item['checked_destinations']} local destinations across "
+                f"{item['inspected_markdown_files']} Markdown files.</p>"
+            )
+            if item["diagnostics"]:
+                parts.append("<ul>")
+                parts.extend(
+                    "<li><code>" + safe(line) + "</code></li>"
+                    for line in item["diagnostics"]
+                )
+                parts.append("</ul>")
+            else:
+                parts.append("<p>No local-link diagnostics reported.</p>")
+        parts.append("</section>")
+    parts.extend((
+        "<p>" + safe(result["coverage"]) + "</p>",
+        "<p>Static local report with no scripts or remote assets. "
+        "Paths and diagnostics may be sensitive; review before sharing. "
+        "A browser view is not an accessibility certification.</p>",
+        "</main></body></html>",
+    ))
+    return "\n".join(parts) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", help="stable local repository directory to inspect")
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--format", choices=("text", "json", "html"), default="text")
     parser.add_argument("--fail-on", choices=("error", "warning", "never"), default="error",
                         help="entry-point threshold; local link errors always fail")
     parser.add_argument("--exclude", action="append", default=[], metavar="GLOB",
@@ -175,6 +263,8 @@ def main(argv: list[str] | None = None) -> int:
                               exclude=tuple(args.exclude))
     if args.format == "json":
         print(json.dumps(result, sort_keys=True, indent=2, ensure_ascii=True))
+    elif args.format == "html":
+        print(render_html(result), end="")
     else:
         print(render_text(result), end="")
     return code

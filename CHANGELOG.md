@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add optional standalone HTML output to the three-checker combined audit,
+  preserving native evidence and exit codes with semantic headings, escaped
+  source diagnostics and no remote assets or JavaScript. This is a local
+  source report, not rendered accessibility certification (#254).
+
 - Add a disposable, actually executed three-checker before/after example for a
   broken local Markdown link. The script invokes the combined audit on two
   synthetic checkouts, verifies no checker writes and rejects incomplete or

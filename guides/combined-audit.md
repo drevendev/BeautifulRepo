@@ -19,6 +19,21 @@ python -I tools/audit_bundle.py ../your-repository
 python -I tools/audit_bundle.py ../your-repository --format json
 ```
 
+For an optional **standalone HTML report** from the same three checks, redirect
+stdout **outside** the target checkout:
+
+```bash
+python -I tools/audit_bundle.py ../your-repository --format html > audit-report.html
+```
+
+This retains exit codes 0/1/2 even when redirecting stdout. It creates one
+local HTML document with semantic headings and lists, browser light/dark
+system colors, no scripts, and no external assets or web requests. Path and
+diagnostic strings (including terminal control characters) are escaped, but
+**filenames and messages may still be sensitive**. This is a source-evidence
+view, not a manual browser/accessibility certification. Invalid roots produce
+only stderr with exit 2, so check status before sharing.
+
 The default entry-point threshold is `error`. Use `--fail-on warning` to
 include entry-point warnings in the exit status, or `--fail-on never` for an
 advisory entry-point review. **Neither option suppresses broken local links**
