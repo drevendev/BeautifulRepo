@@ -36,14 +36,17 @@ Clone BeautifulRepo once, then run its actual audit from the repository root:
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-python -I tools/repo_audit.py .
+python -I tools/audit_bundle.py .
 ```
 
-The output identifies findings by severity, rule ID and file, followed by a
-summary; exact counts depend on the checked-out revision. The default exit
-status is 0 unless an **error** is reported. A 0 exit status does **not**
-mean the README is good or every warning has been resolved.
-See the [rule reference](guides/audit-rule-reference.md) for supported checks.
+This **runs all three real checks**: repository entry points, relative Markdown
+links and local HTML/fragment navigation. It prints specific findings, their
+source locations and a summary rather than a beauty score. Exit **0** means
+all checks completed without threshold-reaching findings (warnings may remain);
+**1** means a broken local link or a selected audit threshold was reached;
+**2** means evidence was incomplete. A clean result cannot certify a good README.
+See the [combined audit guide](guides/combined-audit.md) and
+[rule reference](guides/audit-rule-reference.md) for exact scope and limits.
 
 **Reproduce a visible before/after:** this bundled demonstration uses two
 **fictional** README versions in a disposable temporary directory:
@@ -67,22 +70,33 @@ layout table. The missing-license warning and optional contribution-guide
 information remain: a lower count is **not** a correctness certificate.
 [Inspect the fixture and findings](examples/repository-audit/README.md).
 
+**See the missing-link check too.** The [three-checker synthetic demo](examples/combined-audit/README.md)
+uses the *actual combined audit* on disposable before/after checkouts:
+
+```bash
+python -I examples/combined-audit/demo.py
+```
+
+Before the fix, both local link checkers report `docs/setup.md` missing;
+after changing the fictional README link to an existing guide, both clear.
+The demo verifies those observations and leaves its fixtures byte-identical
+after each audit. This is not evidence of improved real-user experience.
+
 **Check your own local checkout**, from the BeautifulRepo root, with its path
 as a sibling directory (replace `your-repository`):
 
 ```bash
-python -I tools/repo_audit.py ../your-repository --fail-on never
+python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
-This advisory mode reports findings without failing for them; invalid paths or
-incomplete scans still exit 2. For a threshold that fails on warnings, replace
-`never` with `warning`. The audit does not execute the target or fetch URLs.
-Use [the audit guide](guides/repository-audit.md) for formats and boundaries,
-[relative Markdown links](tools/README.md#relative-documentation-link-checker)
-and [HTML navigation checks](tools/README.md#html-navigation-and-fragment-checker)
-for additional bounded diagnostics. To run those checks on pull requests,
-use the [SHA-pinned v0.2.0 GitHub Action recipe](guides/adopting-the-checks.md);
-newer `master`-only inputs are **not** included in that release.
+The `never` setting makes **entry-point findings advisory**, but broken
+local links still fail (exit 1); invalid paths or incomplete scans exit 2.
+For a threshold that fails on entry-point warnings, use `--fail-on warning`.
+The audit does not execute the target or fetch external URLs.
+See the [combined audit guide](guides/combined-audit.md) for formats and boundaries.
+To run the checks on pull requests, use the
+[SHA-pinned v0.2.0 GitHub Action recipe](guides/adopting-the-checks.md);
+the combined CLI is **current-source only** and is not in that release.
 
 **Recorded result on a real repository (not the fictional demo):**
 On 2026-10-23, the v0.2.0 audit pinned to
