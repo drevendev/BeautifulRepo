@@ -61,6 +61,31 @@ class PluginManifestTests(unittest.TestCase):
                 for capability in ("audit", "readme", "trust", "release"):
                     self.assertIn(capability, description.lower())
 
+    def test_development_install_examples_share_one_immutable_candidate(self):
+        """Keep Claude/Codex and the manual matrix pinned to one actual commit."""
+        guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
+        claude = re.findall(
+            r"(?m)^claude plugin marketplace add drevendev/BeautifulRepo@([a-f0-9]{40})$",
+            guide,
+        )
+        codex = re.findall(
+            r"(?m)^codex plugin marketplace add drevendev/BeautifulRepo --ref ([a-f0-9]{40})$",
+            guide,
+        )
+        linked = re.findall(
+            r"https://github\.com/drevendev/BeautifulRepo/tree/([a-f0-9]{40})",
+            guide,
+        )
+        self.assertEqual(len(claude), 1, "need one full-SHA Claude dev installer")
+        self.assertEqual(len(codex), 1, "need one full-SHA Codex dev installer")
+        self.assertEqual(len(linked), 1, "need one matching immutable source link")
+        self.assertEqual(claude, codex)
+        self.assertEqual(claude, linked)
+        self.assertIn(
+            f"https://github.com/drevendev/BeautifulRepo/blob/{claude[0]}/evals/manual-smoke.md",
+            guide,
+        )
+
     def test_manifest_versions_are_valid(self):
         for path in (".claude-plugin/plugin.json", "plugin.json"):
             version = load(path)["version"]

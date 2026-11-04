@@ -391,6 +391,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Repin the unreleased four-skill development test instructions to a single
+  immutable commit that includes the latest manifest discovery fix and
+  bounded evaluation snapshots. Add a regression that checks Claude Code,
+  Codex and the manual smoke-matrix link use the same 40-character SHA.
+  This is packaging/test guidance, **not** real-model acceptance or a release (#257).
+
 - Align Claude Code and Codex plugin descriptions, the Claude marketplace
   listing and manifest tests with all four development-candidate skills,
   including `trust-surfaces`. Direct testing instructions to the immutable
