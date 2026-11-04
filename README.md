@@ -49,10 +49,12 @@ See the [rule reference](guides/audit-rule-reference.md) for supported checks.
 **fictional** README versions in a disposable temporary directory:
 
 ```bash
-python examples/repository-audit/demo.py
+python examples/repository-audit/demo.py --format text
 ```
 
-It prints JSON. The summary, checked by the example's regression tests, is:
+This text view shows each rule, its source location and what remains after
+editing the disposable fictional README. Omit `--format text` for the
+machine-readable JSON demonstration. The summary, checked by the example's regression tests, is:
 
 ```text
 before: 0 errors, 4 warnings, 1 informational finding

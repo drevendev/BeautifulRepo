@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Give the existing fictional repository-audit demonstration an opt-in
+  human-readable before/after transcript with real rule IDs, source locations
+  and remaining observations. Preserve its default JSON regression contract;
+  text mode is a reproducible synthetic showcase, not a real-user result or
+  accessibility score (#254).
+
 - Bound disposable agent-eval snapshots to 5,000 entries, 16 MiB per file and
   64 MiB total during capture and verification, including actual bytes hashed
   if a file grows after stat. Oversized fixtures fail closed rather than
