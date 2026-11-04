@@ -42,10 +42,14 @@ checkout as evidence for a tested release candidate**.
 
 ## Try all four skills from a pinned development candidate
 
-The source candidate at [commit `9b3e43fd8502`](https://github.com/drevendev/BeautifulRepo/tree/9b3e43fd8502bce8bcddc76728db7cfa28a436a8)
+The source candidate at [commit `a6ff79ee137d2`](https://github.com/drevendev/BeautifulRepo/tree/a6ff79ee137d2eee8517792ba693c2854d51ed48)
 contains `audit-repo`, `improve-readme`, `trust-surfaces` and
 `draft-release-notes` (manifest version `0.3.0-dev.0`). It is **not a
-stable v0.3.0 release**. The following commands come from the current official
+stable v0.3.0 release**.
+This candidate includes the four-skill manifest discovery correction (#261),
+the bounded synthetic snapshot helper (#262) and the readable audit demo (#263).
+Earlier candidate `9b3e43fd8502` remains inspectable, but its results must **not**
+be treated as tests of this newer commit; record the exact SHA for every run. The following commands come from the current official
 [Claude Code CLI reference](https://code.claude.com/docs/en/plugins/cli-reference)
 and [Codex plugin guide](https://developers.openai.com/plugins/build/plugins),
 but **fresh GitHub-source installation and actual model invocation have not
@@ -59,7 +63,7 @@ You need Python 3.11+ and Git. Try one host, from a regular terminal:
 **Claude Code — test the immutable commit:**
 
 ```bash
-claude plugin marketplace add drevendev/BeautifulRepo@9b3e43fd8502bce8bcddc76728db7cfa28a436a8
+claude plugin marketplace add drevendev/BeautifulRepo@a6ff79ee137d2eee8517792ba693c2854d51ed48
 claude plugin install beautifulrepo@beautifulrepo
 claude plugin list
 claude plugin details beautifulrepo
@@ -68,7 +72,7 @@ claude plugin details beautifulrepo
 **Codex — test the same immutable commit:**
 
 ```bash
-codex plugin marketplace add drevendev/BeautifulRepo --ref 9b3e43fd8502bce8bcddc76728db7cfa28a436a8
+codex plugin marketplace add drevendev/BeautifulRepo --ref a6ff79ee137d2eee8517792ba693c2854d51ed48
 codex plugin marketplace list
 codex plugin add beautifulrepo@beautifulrepo
 ```
@@ -77,7 +81,7 @@ Restart the client. Check the *installed copy* of `skills/` for all four named
 `SKILL.md` files and confirm they correspond to the pinned commit before a
 model test. For a low-risk first test use a **disposable synthetic target**,
 never a private repository with unapproved provider data controls. Follow the
-[revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/9b3e43fd8502bce8bcddc76728db7cfa28a436a8/evals/manual-smoke.md).
+[revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/a6ff79ee137d2eee8517792ba693c2854d51ed48/evals/manual-smoke.md).
 Actual skill selection, file reads, tool calls, permission decisions and
 before/after target snapshots must be observed; static CI and plugin manifests
 cannot verify them. Results (including failures or INCONCLUSIVE outcomes) go to
