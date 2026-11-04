@@ -31,8 +31,9 @@ local HTML document with semantic headings and lists, browser light/dark
 system colors, no scripts, and no external assets or web requests. Path and
 diagnostic strings (including terminal control characters) are escaped, but
 **filenames and messages may still be sensitive**. This is a source-evidence
-view, not a manual browser/accessibility certification. Invalid roots produce
-only stderr with exit 2, so check status before sharing.
+view, not a manual browser/accessibility certification. Invalid roots emit
+stderr and exit 2 with no HTML; a shell redirect may still create an **empty**
+report file. Check the exit status and content before sharing.
 
 The default entry-point threshold is `error`. Use `--fail-on warning` to
 include entry-point warnings in the exit status, or `--fail-on never` for an
