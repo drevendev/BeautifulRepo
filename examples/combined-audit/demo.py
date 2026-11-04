@@ -146,8 +146,11 @@ def html_report(result: dict) -> str:
         "article section { border-top: 1px solid #8888; margin-top: 1.2rem; }",
         "code { overflow-wrap: anywhere; white-space: pre-wrap; }",
         "li { margin: .5rem 0; }",
+        ".outcome { border-inline-start: .3rem solid currentColor; "
+        "padding: .25rem 0 .25rem .75rem; }",
         "</style></head><body><main>",
         "<h1>One broken link, two independent checkers</h1>",
+        '<p><a href="#after-title">Jump to after repair</a></p>',
         "<p><strong>Synthetic Pocket Trails fixture.</strong> These are "
         "observations from BeautifulRepo's actual offline checkers on "
         "disposable local directories. No real repository was repaired.</p>",
@@ -156,9 +159,19 @@ def html_report(result: dict) -> str:
     for label in ("before", "after"):
         report = result["reports"][label]
         title = "Before repair" if label == "before" else "After repair"
+        local_checks_passing = sum(
+            report["checks"][checker]["exit_code"] == 0
+            for checker in LINK_CHECKS
+        )
+        outcome_title = (
+            "Before: missing local link found."
+            if label == "before" else "After: link corrected."
+        )
         parts.extend((
             f'<article aria-labelledby="{label}-title">',
             f'<h2 id="{label}-title">{title}</h2>',
+            f'<p class="outcome"><strong>{outcome_title}</strong> '
+            f'{local_checks_passing}/{len(LINK_CHECKS)} local-link checks pass.</p>',
             f"<p><strong>Combined audit exit {report['exit_code']}</strong></p>",
         ))
         for checker in ("entry_points", "markdown_links", "html_navigation"):

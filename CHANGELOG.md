@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Make the synthetic three-checker HTML comparison readable at first glance:
+  show passing local-link checker counts in each state and add a keyboard-accessible
+  jump to the after section for long mobile reports. Existing checker observations,
+  read-only behavior and other report formats remain unchanged (#254).
+
 - Give the reproducible three-checker demo an optional responsive standalone
   HTML before/after comparison from its actual synthetic findings. It keeps
   the original read-only audit, escaped diagnostics and explicit limitations;
