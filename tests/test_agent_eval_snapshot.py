@@ -47,6 +47,36 @@ class SnapshotTests(unittest.TestCase):
         repeated = self.run_tool("capture")
         self.assertEqual(2, repeated.returncode)
 
+    def test_oversized_sparse_file_fails_closed_on_capture_and_verify(self):
+        self.assertEqual(0, self.run_tool("capture").returncode)
+        large = self.target / "large.bin"
+        with large.open("wb") as stream:
+            stream.truncate(16 * 1024 * 1024 + 1)
+        verified = self.run_tool("verify")
+        self.assertEqual(2, verified.returncode, verified.stdout + verified.stderr)
+        self.assertIn("file exceeds", verified.stderr)
+        self.assertNotIn("UNCHANGED", verified.stdout)
+        self.baseline.unlink()
+        captured = self.run_tool("capture")
+        self.assertEqual(2, captured.returncode, captured.stdout + captured.stderr)
+        self.assertIn("file exceeds", captured.stderr)
+        self.assertFalse(self.baseline.exists())
+
+    def test_total_byte_and_entry_budgets_fail_closed(self):
+        import importlib.util
+        from unittest import mock
+
+        spec = importlib.util.spec_from_file_location("agent_eval_snapshot_bounds", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with mock.patch.object(module, "MAX_TOTAL_BYTES", 1):
+            with self.assertRaisesRegex(ValueError, "target files exceed"):
+                module.inventory(self.target)
+        with mock.patch.object(module, "MAX_ENTRIES", 2):
+            with self.assertRaisesRegex(ValueError, "too many target entries"):
+                module.inventory(self.target)
+        self.assertFalse(self.baseline.exists())
+
     def test_permission_only_changes_are_detected_on_posix(self):
         if os.name != "posix":
             self.skipTest("POSIX mode bits are required for this regression")

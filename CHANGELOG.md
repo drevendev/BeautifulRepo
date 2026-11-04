@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Bound disposable agent-eval snapshots to 5,000 entries, 16 MiB per file and
+  64 MiB total during capture and verification, including actual bytes hashed
+  if a file grows after stat. Oversized fixtures fail closed rather than
+  reporting an unchanged target. This is not a sandbox or a race-resistant
+  filesystem boundary (#74).
+
 - Add a source-backed repository pause/archive decision recipe with a reusable
   notice, last-known verification receipt and explicit separation between
   paused maintenance and GitHub's read-only archive setting. No repository
