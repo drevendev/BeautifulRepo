@@ -115,7 +115,7 @@ def run_bundle(root: Path, *, fail_on: str = "error") -> tuple[dict, int]:
         "schema_version": 1,
         "checks": results,
         "exit_code": status,
-        "coverage": "Offline source inspection; not rendered, network, security or accessibility verification.",
+        "coverage": "Offline source-level inspection; not rendered, network, security or accessibility verification.",
     }, status
 
 
