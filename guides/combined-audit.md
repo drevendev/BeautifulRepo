@@ -24,12 +24,25 @@ include entry-point warnings in the exit status, or `--fail-on never` for an
 advisory entry-point review. **Neither option suppresses broken local links**
 reported by either link checker.
 
+When a repository contains vendored or generated Markdown sources that should
+not be audited, repeat `--exclude GLOB` to skip their sources in **both link
+checkers**. The syntax follows the underlying local link checkers, matching
+root-relative file or directory paths; excluded files remain valid destinations
+from included documentation. This option does **not** change entry-point checks:
+
+```bash
+python -I tools/audit_bundle.py ../your-repository --exclude vendor --exclude "build/**"
+```
+
+Review exclusions carefully: they reduce link-check coverage, not findings
+inside the entry-point audit. The JSON per-checker source counts show the scope.
+
 - Exit **0**: all three checkers completed and the chosen threshold was clear.
   Warnings and information can still appear.
 - Exit **1**: one or both link checkers found issues, or the entry-point
   threshold was reached. Inspect the actual rule and source location.
 - Exit **2**: incomplete evidence (invalid root, failed checker, output
-  overflow, or timeout). Treat the entire combined result as **inconclusive**,
+  overflow). Treat the entire combined result as **inconclusive**,
   even if another checker completed.
 
 The JSON report is deterministic for the same stable checkout and tool

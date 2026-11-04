@@ -56,12 +56,12 @@ def load_checker(name: str):
     return module
 
 
-def check_once(name: str, root: Path) -> dict:
+def check_once(name: str, root: Path, *, exclude: tuple[str, ...] = ()) -> dict:
     module = load_checker(name)
     if name == "entry_points":
         report = module.audit_repository(root)
         return {"state": "complete", "exit_code": 0, "report": report}
-    errors, destinations, files = module.check_repo(root)
+    errors, destinations, files = module.check_repo(root, exclude)
     return {
         "state": "complete", "exit_code": 1 if errors else 0,
         "diagnostics": errors,
@@ -78,13 +78,14 @@ def bounded(record: dict) -> dict:
     return record
 
 
-def run_bundle(root: Path, *, fail_on: str = "error") -> tuple[dict, int]:
+def run_bundle(root: Path, *, fail_on: str = "error",
+               exclude: tuple[str, ...] = ()) -> tuple[dict, int]:
     results: dict = {}
     incomplete = False
     failed = False
     for name in CHECKERS:
         try:
-            record = bounded(check_once(name, root))
+            record = bounded(check_once(name, root, exclude=exclude))
             if record["state"] == "complete" and name == "entry_points":
                 report = record["report"]
                 if (not isinstance(report, dict) or report.get("schema_version") != 1
@@ -151,13 +152,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument("--fail-on", choices=("error", "warning", "never"), default="error",
                         help="entry-point threshold; local link errors always fail")
+    parser.add_argument("--exclude", action="append", default=[], metavar="GLOB",
+                        help="skip matching Markdown sources in both link checkers; "
+                             "does not affect the entry-point audit")
     args = parser.parse_args(argv)
     try:
         root = checked_root(args.root)
     except ValueError as exc:
         print(f"audit_bundle: {exc}", file=sys.stderr)
         return 2
-    result, code = run_bundle(root, fail_on=args.fail_on)
+    result, code = run_bundle(root, fail_on=args.fail_on,
+                              exclude=tuple(args.exclude))
     if args.format == "json":
         print(json.dumps(result, sort_keys=True, indent=2, ensure_ascii=True))
     else:
