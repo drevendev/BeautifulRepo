@@ -69,6 +69,13 @@ certification, a Markdown renderer, or a hosted scanner. It cannot detect
 whether external websites are reachable or whether an agent will transmit
 tool results to a model provider.
 
+In the human-readable report, unprintable Unicode control/format characters
+from filenames or diagnostics are escaped on the same physical line (for
+example, a newline becomes \u000a and an ANSI escape becomes \u001b).
+Ordinary printable Unicode is preserved. JSON mode still uses its native
+string encoding. This prevents a source filename from forging extra terminal
+report lines; it does not make hostile filesystem traversal safe.
+
 Reports can contain filenames, link targets and other project-sensitive
 details. Review before sharing; avoid running on confidential material
 without understanding that exposure. The wrapper does not create files

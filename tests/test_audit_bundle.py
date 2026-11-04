@@ -138,6 +138,47 @@ class AuditBundleTests(unittest.TestCase):
         self.assertEqual(2, code)
         self.assertEqual("incomplete", result["checks"]["entry_points"]["state"])
 
+    def test_text_mode_escapes_terminal_controls_in_filenames_and_diagnostics(self):
+        # Reproducible on Windows too: no platform-specific filenames needed.
+        report = {
+            "schema_version": 1,
+            "checks": {
+                "entry_points": {
+                    "state": "complete", "exit_code": 0,
+                    "report": {
+                        "findings": [{
+                            "path": "README\n\x1b[31m.md", "line": 4,
+                            "severity": "warning", "rule_id": "readme.placeholder",
+                            "message": "Untrusted\rname", "remediation": "Review\u202e text",
+                        }],
+                        "summary": {"error": 0, "warning": 1, "info": 0},
+                    },
+                },
+                "markdown_links": {
+                    "state": "complete", "exit_code": 1, "checked_destinations": 1,
+                    "inspected_markdown_files": 1,
+                    "diagnostics": ["docs/a\x1b[2J.md\nFORGED: broken"],
+                },
+                "html_navigation": {
+                    "state": "complete", "exit_code": 0, "checked_destinations": 0,
+                    "inspected_markdown_files": 1, "diagnostics": [],
+                },
+            },
+            "exit_code": 1,
+            "coverage": "Offline source-level inspection.",
+        }
+        output = bundle.render_text(report)
+        self.assertNotIn("\x1b", output)
+        self.assertNotIn("\r", output)
+        self.assertNotIn("\u202e", output)
+        self.assertIn(r"README\u000a\u001b[31m.md:4", output)
+        self.assertIn(r"Untrusted\u000dname", output)
+        self.assertIn(r"Review\u202e text", output)
+        self.assertIn(r"docs/a\u001b[2J.md\u000aFORGED: broken", output)
+        self.assertIn("\n\nmarkdown_links: complete", output)
+        self.assertIn("\n\nExit 1: 0=threshold clear", output)
+        self.assertEqual("Safe café 😀", bundle._one_terminal_line("Safe café 😀"))
+
     def test_text_output_preserves_specific_rules_and_limitations(self):
         self.write("README.md", "# Fixture\n\nTODO: check this.\n")
         result = self.invoke("--fail-on", "warning")

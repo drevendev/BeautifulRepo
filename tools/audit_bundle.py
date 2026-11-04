@@ -120,11 +120,21 @@ def run_bundle(root: Path, *, fail_on: str = "error",
     }, status
 
 
+def _one_terminal_line(value: str) -> str:
+    """Escape untrusted control/format characters in human-readable output."""
+    return "".join(
+        char if char.isprintable() else
+        (f"\\u{ord(char):04x}" if ord(char) <= 0xFFFF
+         else f"\\U{ord(char):08x}")
+        for char in value
+    )
+
+
 def render_text(result: dict) -> str:
     lines = ["BeautifulRepo combined offline audit (no score)"]
     for name in CHECKERS:
         item = result["checks"][name]
-        lines.append(f"\n{name}: {item['state']} (checker exit {item['exit_code']})")
+        lines.extend(("", f"{name}: {item['state']} (checker exit {item['exit_code']})"))
         if item["state"] != "complete":
             lines.append("  Incomplete: " + item["reason"])
         elif name == "entry_points":
@@ -141,9 +151,9 @@ def render_text(result: dict) -> str:
             lines.append(f"  Checked {item['checked_destinations']} local destinations "
                          f"across {item['inspected_markdown_files']} Markdown files.")
             lines.extend("  " + diagnostic for diagnostic in item["diagnostics"])
-    lines.append(f"\nExit {result['exit_code']}: 0=threshold clear, 1=findings, 2=incomplete.")
+    lines.extend(("", f"Exit {result['exit_code']}: 0=threshold clear, 1=findings, 2=incomplete."))
     lines.append(result["coverage"])
-    return "\n".join(lines) + "\n"
+    return "\n".join(_one_terminal_line(line) for line in lines) + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:
