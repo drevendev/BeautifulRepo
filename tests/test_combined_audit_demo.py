@@ -50,5 +50,39 @@ class CombinedAuditDemoTests(unittest.TestCase):
         self.assertIn("not a real repository improvement", completed.stdout)
 
 
+    def test_html_is_real_synthetic_before_after_evidence(self):
+        completed = self.invoke("--format", "html")
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        self.assertTrue(completed.stdout.startswith("<!doctype html>"))
+        for phrase in ("Synthetic Pocket Trails fixture", "Before repair",
+                       "After repair", "Combined audit exit 1",
+                       "Combined audit exit 0", "docs/setup.md",
+                       "Markdown Links", "Html Navigation",
+                       "No findings from this checker.",
+                       "No real repository was repaired."):
+            self.assertIn(phrase, completed.stdout)
+        self.assertIn('class="reports"', completed.stdout)
+        self.assertNotIn("<script", completed.stdout.lower())
+        self.assertNotIn("http://", completed.stdout)
+        self.assertNotIn("https://", completed.stdout)
+
+    def test_html_escapes_hostile_diagnostic(self):
+        import importlib.util
+        module_spec = importlib.util.spec_from_file_location("combined_demo", DEMO)
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+        completed = self.invoke("--format", "json")
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        result = json.loads(completed.stdout)
+        result["reports"]["before"]["checks"]["markdown_links"]["diagnostics"].append(
+            "<script>alert(1)</script>\u202e\nfake checker PASS"
+        )
+        page = module.html_report(result)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
+        self.assertNotIn("<script>", page)
+        self.assertIn(r"\u202e\u000a", page)
+        self.assertNotIn("\u202e", page)
+
+
 if __name__ == "__main__":
     unittest.main()
