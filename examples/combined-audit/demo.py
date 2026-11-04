@@ -118,9 +118,99 @@ def text_report(result: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+
+def html_report(result: dict) -> str:
+    """Render a responsive comparison of the real synthetic checker observations."""
+    from html import escape
+
+    def safe(value: object) -> str:
+        # Prevent control and format characters from forging report content.
+        printable = "".join(
+            char if char.isprintable() else f"\\u{ord(char):04x}"
+            for char in str(value)
+        )
+        return escape(printable, quote=True)
+
+    parts = [
+        "<!doctype html>",
+        '<html lang="en"><head><meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        "<title>Pocket Trails | BeautifulRepo before/after audit</title>",
+        "<style>",
+        ":root { color-scheme: light dark; font-family: system-ui, sans-serif; }",
+        "body { max-width: 78rem; margin: auto; padding: clamp(1rem, 3vw, 2rem); "
+        "line-height: 1.55; }",
+        ".reports { display: grid; gap: 1.25rem; }",
+        "@media (min-width: 55rem) { .reports { "
+        "grid-template-columns: repeat(2, minmax(0, 1fr)); } }",
+        "article { border: 1px solid #8888; border-radius: .65rem; "
+        "padding: 1.25rem; min-width: 0; }",
+        "article section { border-top: 1px solid #8888; margin-top: 1.2rem; }",
+        "code { overflow-wrap: anywhere; white-space: pre-wrap; }",
+        "li { margin: .5rem 0; }",
+        "</style></head><body><main>",
+        "<h1>One broken link, two independent checkers</h1>",
+        "<p><strong>Synthetic Pocket Trails fixture.</strong> These are "
+        "observations from BeautifulRepo's actual offline checkers on "
+        "disposable local directories. No real repository was repaired.</p>",
+        '<div class="reports">',
+    ]
+    for label in ("before", "after"):
+        report = result["reports"][label]
+        title = "Before repair" if label == "before" else "After repair"
+        parts.extend((
+            f'<article aria-labelledby="{label}-title">',
+            f'<h2 id="{label}-title">{title}</h2>',
+            f"<p><strong>Combined audit exit {report['exit_code']}</strong></p>",
+        ))
+        for checker in ("entry_points", "markdown_links", "html_navigation"):
+            item = report["checks"][checker]
+            parts.extend((
+                "<section>",
+                f"<h3>{safe(checker.replace('_', ' ').title())}</h3>",
+                f"<p>State: {safe(item['state'])}; "
+                f"checker exit {item['exit_code']}.</p>",
+            ))
+            if checker == "entry_points":
+                summary = item["report"]["summary"]
+                parts.append(
+                    f"<p>{summary['error']} errors, {summary['warning']} warnings, "
+                    f"{summary['info']} informational findings.</p>"
+                )
+                entries = [
+                    f"{finding['severity']} [{finding['rule_id']}] "
+                    f"{finding['path']}: {finding['message']} "
+                    f"Next: {finding['remediation']}"
+                    for finding in item["report"]["findings"]
+                ]
+            else:
+                parts.append(
+                    f"<p>{item['inspected_markdown_files']} Markdown files inspected; "
+                    f"{item['checked_destinations']} local destinations checked.</p>"
+                )
+                entries = item["diagnostics"]
+            if entries:
+                parts.append("<ul>")
+                parts.extend(f"<li><code>{safe(entry)}</code></li>" for entry in entries)
+                parts.append("</ul>")
+            else:
+                parts.append("<p>No findings from this checker.</p>")
+            parts.append("</section>")
+        parts.append("</article>")
+    parts.extend((
+        "</div>",
+        f"<p>{safe(result['verification'])}</p>",
+        "<p>This example does not check external URLs, rendered GitHub Markdown, "
+        "accessibility conformance or real-user outcomes. Review audit paths and "
+        "diagnostics before sharing any report from your own repository.</p>",
+        "</main></body></html>",
+    ))
+    return "\n".join(parts) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--format", choices=("text", "json", "html"), default="text")
     args = parser.parse_args(argv)
     try:
         result = demonstrate()
@@ -129,6 +219,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if args.format == "json":
         print(json.dumps(result, indent=2, sort_keys=True, ensure_ascii=True))
+    elif args.format == "html":
+        print(html_report(result), end="")
     else:
         print(text_report(result), end="")
     return 0
