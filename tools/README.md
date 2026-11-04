@@ -14,6 +14,19 @@ python -m unittest discover -s tests -v
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
 repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 
+## All three checks in one local run
+
+Run the [combined offline audit](../guides/combined-audit.md) to invoke the
+entry-point, Markdown destination and HTML/fragment checkers together without
+installing packages:
+
+```bash
+python -I tools/audit_bundle.py ../your-repository --format json
+```
+
+It preserves native findings and reports incomplete checks instead of silently
+passing them. This is a local CLI, **not** an MCP server or a beauty score.
+
 ## Preview a proposed README without writing it
 
 Given an **already prepared** candidate README file outside the target, inspect a
