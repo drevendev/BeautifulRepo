@@ -472,6 +472,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Escape unprintable control/format characters in the combined audit's text
+  findings and link diagnostics, without hiding ordinary Unicode or changing
+  its JSON report. Keep each observation on one physical terminal line so
+  a surprising local filename cannot inject forged report lines.
+
 - Keep the roadmap's four-skill candidate SHA aligned with the immutable
   Claude Code and Codex installation examples. Extend the plugin contract
   test to catch stale public navigation pins instead of silently directing
