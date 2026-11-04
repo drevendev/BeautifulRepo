@@ -86,7 +86,7 @@ class AuditBundleTests(unittest.TestCase):
 
     def test_repeated_excludes_skip_only_matching_link_sources(self):
         # Imported documentation can contain intentionally unresolved local links.
-        self.write("vendor/broken.md", "# Vendored\\n\\n[No target](missing.md)\\n")
+        self.write("vendor/broken.md", "# Vendored\n\n[No target](missing.md)\n")
         unfiltered = self.invoke("--format", "json")
         self.assertEqual(1, unfiltered.returncode, unfiltered.stderr)
         plain = json.loads(unfiltered.stdout)
