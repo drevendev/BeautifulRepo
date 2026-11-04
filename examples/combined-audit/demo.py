@@ -117,8 +117,6 @@ def text_report(result: dict) -> str:
                   "rendering test or accessibility certificate."))
     return "\n".join(lines) + "\n"
 
-
-
 def html_report(result: dict) -> str:
     """Render a responsive comparison of the real synthetic checker observations."""
     from html import escape
