@@ -59,9 +59,15 @@ class CombinedAuditDemoTests(unittest.TestCase):
                        "Combined audit exit 0", "docs/setup.md",
                        "Markdown Links", "Html Navigation",
                        "No findings from this checker.",
-                       "No real repository was repaired."):
+                       "No real repository was repaired.",
+                       "Before: missing local link found.",
+                       "After: link corrected.",
+                       "0/2 local-link checks pass.",
+                       "2/2 local-link checks pass."):
             self.assertIn(phrase, completed.stdout)
         self.assertIn('class="reports"', completed.stdout)
+        self.assertIn('href="#after-title"', completed.stdout)
+        self.assertIn('id="after-title"', completed.stdout)
         self.assertNotIn("<script", completed.stdout.lower())
         self.assertNotIn("http://", completed.stdout)
         self.assertNotIn("https://", completed.stdout)
