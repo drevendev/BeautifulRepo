@@ -13,8 +13,9 @@ DEMO = ROOT / "examples" / "combined-audit" / "demo.py"
 
 class CombinedAuditDemoTests(unittest.TestCase):
     def invoke(self, *arguments):
+        # Windows redirects use a locale code page unless UTF-8 mode is explicit.
         return subprocess.run(
-            [sys.executable, "-I", str(DEMO), *arguments],
+            [sys.executable, "-I", "-X", "utf8", str(DEMO), *arguments],
             cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
             timeout=180, check=False,
         )
