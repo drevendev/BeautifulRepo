@@ -12,7 +12,7 @@ python -I examples/combined-audit/demo.py --format json
 python -I examples/combined-audit/demo.py --format html > pocket-trails-audit.html
 ```
 
-The HTML option produces a **responsive, self-contained before/after page** from the same real checker observations on synthetic fixtures. Open `pocket-trails-audit.html` locally to inspect it. No JavaScript, remote assets or invented screenshot is used. Shell redirection writes the HTML in your current working directory, **not inside a checked fixture**; it may create an empty file if the demo fails. Check the command exit status before sharing. Outputs from real projects can contain sensitive source paths.
+The HTML option produces a **responsive, self-contained before/after page** from the same real checker observations on synthetic fixtures. A visible outcome line states how many of the two local-link checks pass in each state; the **Jump to after repair** link skips the long before-report on mobile and is reachable by keyboard. Open `pocket-trails-audit.html` locally to inspect it. No JavaScript, remote assets or invented screenshot is used. Shell redirection writes the HTML in your current working directory, **not inside a checked fixture**; it may create an empty file if the demo fails. Check the command exit status before sharing. Outputs from real projects can contain sensitive source paths.
 
 The demo creates two disposable local directories. Each contains a README,
 LICENSE, CONTRIBUTING.md and a guide. The *before* README links to
