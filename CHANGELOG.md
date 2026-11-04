@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Allow the combined offline audit to forward repeatable `--exclude GLOB`
+  source filters to both local Markdown/HTML link checkers while leaving
+  entry-point checks unchanged. Add a mixed vendored-source CLI regression
+  and document the coverage reduction; no time limit is implied.
+
 - Give the existing fictional repository-audit demonstration an opt-in
   human-readable before/after transcript with real rule IDs, source locations
   and remaining observations. Preserve its default JSON regression contract;
