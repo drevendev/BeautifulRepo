@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add a disposable, actually executed three-checker before/after example for a
+  broken local Markdown link. The script invokes the combined audit on two
+  synthetic checkouts, verifies no checker writes and rejects incomplete or
+  unexpected findings; README now starts with the combined source-only audit
+  and links to the reproducible demonstration (#254). This is not a live-user
+  result, full Markdown renderer or v0.2.0 Action capability.
+
 - Allow the combined offline audit to forward repeatable `--exclude GLOB`
   source filters to both local Markdown/HTML link checkers while leaving
   entry-point checks unchanged. Add a mixed vendored-source CLI regression
