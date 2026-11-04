@@ -15,6 +15,10 @@ import stat
 import sys
 
 VERSION = 2
+# Bounds apply to disposable fixtures, not general-purpose repository backups.
+MAX_ENTRIES = 5_000
+MAX_FILE_BYTES = 16 * 1024 * 1024
+MAX_TOTAL_BYTES = 64 * 1024 * 1024
 
 
 def reject_duplicate_json_members(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -54,6 +58,7 @@ def baseline_path(path: Path, root: Path) -> Path:
 def inventory(root: Path) -> dict[str, dict[str, str]]:
     """Walk entries without traversing directory symlinks or running target code."""
     found = {".": {"kind": "directory", "mode": f"{stat.S_IMODE(root.lstat().st_mode):04o}"}}
+    total_bytes = 0
 
     def fail_on_unreadable_directory(exc: OSError) -> None:
         # os.walk otherwise silently skips unreadable directories: false green.
@@ -62,9 +67,14 @@ def inventory(root: Path) -> dict[str, dict[str, str]]:
     for parent, dirs, files in os.walk(
             root, topdown=True, followlinks=False,
             onerror=fail_on_unreadable_directory):
+        # Fail before sorting an oversized single directory's entries.
+        if len(dirs) + len(files) > MAX_ENTRIES:
+            raise ValueError(f"too many target entries (limit {MAX_ENTRIES})")
         dirs.sort()
         files.sort()
         for name in sorted([*dirs, *files]):
+            if len(found) >= MAX_ENTRIES:
+                raise ValueError(f"too many target entries (limit {MAX_ENTRIES})")
             entry = Path(parent) / name
             key = entry.relative_to(root).as_posix()
             info = entry.lstat()
@@ -82,10 +92,22 @@ def inventory(root: Path) -> dict[str, dict[str, str]]:
                 # It is not a symlink, so reject it before reading/hash capture.
                 if info.st_nlink > 1:
                     raise ValueError(f"hard-linked file: {key}")
+                if info.st_size > MAX_FILE_BYTES:
+                    raise ValueError(f"file exceeds {MAX_FILE_BYTES} bytes: {key}")
+                if total_bytes + info.st_size > MAX_TOTAL_BYTES:
+                    raise ValueError(f"target files exceed {MAX_TOTAL_BYTES} bytes")
                 digest = hashlib.sha256()
+                read_bytes = 0
                 with entry.open("rb") as stream:
                     for chunk in iter(lambda: stream.read(131072), b""):
+                        read_bytes += len(chunk)
+                        # Detect growth after lstat, too; never hash unlimited bytes.
+                        if read_bytes > MAX_FILE_BYTES:
+                            raise ValueError(f"file exceeds {MAX_FILE_BYTES} bytes: {key}")
+                        if total_bytes + read_bytes > MAX_TOTAL_BYTES:
+                            raise ValueError(f"target files exceed {MAX_TOTAL_BYTES} bytes")
                         digest.update(chunk)
+                total_bytes += read_bytes
                 found[key] = {"kind": "file", "sha256": digest.hexdigest(),
                               "mode": f"{stat.S_IMODE(mode):04o}"}
             else:
