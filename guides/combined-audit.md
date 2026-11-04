@@ -36,19 +36,18 @@ The JSON report is deterministic for the same stable checkout and tool
 revision. It has `schema_version: 1`, an `exit_code`, a `coverage` warning,
 and separate `checks`: `entry_points`, `markdown_links`, and
 `html_navigation`. The entry-point result contains its unchanged nested
-`repo_audit.py` report; link results retain their native stdout and
-stderr diagnostics. A `state: incomplete` entry has a generic reason
+`repo_audit.py` report; link results retain their native diagnostics and inspected-source counts. A `state: incomplete` entry has a generic reason
 instead of pretending an unrun or truncated check passed.
 
 ## Boundaries and privacy
 
-The wrapper starts only three fixed, checked-in Python scripts using
-`python -I -X utf8`, without a shell and without running code from the
-target. Each invocation has a 20-second timeout, with 128 KiB accepted
-from each output stream; an excess is **incomplete**, never silently
-truncated into a success. Output spools to operating-system temporary
-files, so these limits are **not** a hard disk-usage quota. The individual
-link checkers retain their own documented scan limits and syntax gaps.
+The wrapper imports only the three fixed, checked-in Python checker modules,
+never the target project. It launches **no subprocesses or network clients**.
+Per-checker structured results are capped at 128 KiB; an excess is
+**incomplete**, never silently truncated into a success. This is a returned
+result cap, **not** a time, memory or filesystem-usage bound. The individual
+checkers retain their own documented scan limits and syntax gaps. Use a stable,
+ordinary local checkout, not an adversarial filesystem.
 
 All three tools read repository-owned files locally. None intentionally
 fetches remote links. This wrapper is **not** a security boundary against a

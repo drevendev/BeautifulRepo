@@ -25,7 +25,7 @@ python -I tools/audit_bundle.py ../your-repository --format json
 ```
 
 It preserves native findings and reports incomplete checks instead of silently
-passing them. This is a local CLI, **not** an MCP server or a beauty score.
+passing them. It imports fixed checked-in checker modules; no child processes are launched. This is a local CLI, **not** an MCP server or a beauty score.
 
 ## Preview a proposed README without writing it
 

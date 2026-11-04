@@ -97,21 +97,22 @@ class AuditBundleTests(unittest.TestCase):
         self.assertEqual(2, redirected.returncode)
         self.assertEqual("", redirected.stdout)
 
-    def test_timeout_output_overflow_and_checker_failure_are_incomplete(self):
-        for outcome in (
-            (None, "", "", "checker exceeded the 20-second execution limit"),
-            (0, "", "", "checker output exceeded the 128-KiB per-stream limit"),
-            (2, "", "bad root", None),
-        ):
-            with self.subTest(outcome=outcome), patch.object(bundle, "capture_command", return_value=outcome):
-                result, code = bundle.run_bundle(self.repo)
-                self.assertEqual(2, code)
-                self.assertEqual(2, result["exit_code"])
-                self.assertTrue(all(item["state"] == "incomplete"
-                                    for item in result["checks"].values()))
+    def test_output_overflow_and_checker_failure_are_incomplete(self):
+        oversized = {"state": "complete", "exit_code": 0,
+                     "diagnostics": ["x" * (bundle.RESULT_LIMIT + 1)]}
+        self.assertEqual("incomplete", bundle.bounded(oversized)["state"])
+        with patch.object(bundle, "check_once", side_effect=RuntimeError("private diagnostic")):
+            result, code = bundle.run_bundle(self.repo)
+        self.assertEqual(2, code)
+        self.assertEqual(2, result["exit_code"])
+        self.assertTrue(all(item["state"] == "incomplete"
+                            for item in result["checks"].values()))
+        self.assertNotIn("private diagnostic", json.dumps(result))
 
     def test_invalid_audit_payload_is_not_silently_passed(self):
-        with patch.object(bundle, "capture_command", return_value=(0, '{"schema_version":1}', "", None)):
+        with patch.object(bundle, "check_once", return_value={
+            "state": "complete", "exit_code": 0, "report": {"schema_version": 1}
+        }):
             result, code = bundle.run_bundle(self.repo)
         self.assertEqual(2, code)
         self.assertEqual("incomplete", result["checks"]["entry_points"]["state"])
