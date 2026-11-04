@@ -92,6 +92,7 @@ class AuditBundleTests(unittest.TestCase):
         plain = json.loads(unfiltered.stdout)
         for name in ("markdown_links", "html_navigation"):
             self.assertEqual(1, plain["checks"][name]["exit_code"])
+            self.assertEqual(4, plain["checks"][name]["inspected_markdown_files"])
 
         filtered = self.invoke("--format", "json", "--exclude", "*.unused",
                                "--exclude", "vendor")
@@ -100,7 +101,7 @@ class AuditBundleTests(unittest.TestCase):
         for name in ("markdown_links", "html_navigation"):
             self.assertEqual(0, payload["checks"][name]["exit_code"])
             self.assertEqual("complete", payload["checks"][name]["state"])
-            self.assertEqual(2, payload["checks"][name]["inspected_markdown_files"])
+            self.assertEqual(3, payload["checks"][name]["inspected_markdown_files"])
         # Excluding Markdown from link scans does not suppress the entry-point audit.
         self.assertEqual("complete", payload["checks"]["entry_points"]["state"])
 
