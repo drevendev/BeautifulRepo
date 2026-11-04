@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Give the reproducible three-checker demo an optional responsive standalone
+  HTML before/after comparison from its actual synthetic findings. It keeps
+  the original read-only audit, escaped diagnostics and explicit limitations;
+  add output and hostile-text regressions (#254).
+
 - Add optional standalone HTML output to the three-checker combined audit,
   preserving native evidence and exit codes with semantic headings, escaped
   source diagnostics and no remote assets or JavaScript. This is a local
