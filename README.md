@@ -54,7 +54,8 @@ python examples/repository-audit/demo.py --format text
 
 This text view shows each rule, its source location and what remains after
 editing the disposable fictional README. Omit `--format text` for the
-machine-readable JSON demonstration. The summary, checked by the example's regression tests, is:
+machine-readable JSON demonstration. The summary, checked by the example's
+regression tests, is:
 
 ```text
 before: 0 errors, 4 warnings, 1 informational finding
