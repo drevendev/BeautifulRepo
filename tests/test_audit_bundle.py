@@ -84,6 +84,26 @@ class AuditBundleTests(unittest.TestCase):
         report = json.loads(strict.stdout)["checks"]["entry_points"]["report"]
         self.assertTrue(any(item["rule_id"] == "readme.placeholder" for item in report["findings"]))
 
+    def test_repeated_excludes_skip_only_matching_link_sources(self):
+        # Imported documentation can contain intentionally unresolved local links.
+        self.write("vendor/broken.md", "# Vendored\\n\\n[No target](missing.md)\\n")
+        unfiltered = self.invoke("--format", "json")
+        self.assertEqual(1, unfiltered.returncode, unfiltered.stderr)
+        plain = json.loads(unfiltered.stdout)
+        for name in ("markdown_links", "html_navigation"):
+            self.assertEqual(1, plain["checks"][name]["exit_code"])
+
+        filtered = self.invoke("--format", "json", "--exclude", "*.unused",
+                               "--exclude", "vendor")
+        self.assertEqual(0, filtered.returncode, filtered.stderr)
+        payload = json.loads(filtered.stdout)
+        for name in ("markdown_links", "html_navigation"):
+            self.assertEqual(0, payload["checks"][name]["exit_code"])
+            self.assertEqual("complete", payload["checks"][name]["state"])
+            self.assertEqual(2, payload["checks"][name]["inspected_markdown_files"])
+        # Excluding Markdown from link scans does not suppress the entry-point audit.
+        self.assertEqual("complete", payload["checks"]["entry_points"]["state"])
+
     def test_invalid_root_and_symlink_root_fail_without_json_claim(self):
         missing = self.invoke("--format", "json", root=self.repo / "not-found")
         self.assertEqual(2, missing.returncode)
