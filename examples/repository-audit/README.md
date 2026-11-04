@@ -8,10 +8,18 @@ From the BeautifulRepo root:
 
 ```bash
 python examples/repository-audit/demo.py
+# Or read each observed rule, source location and before/after difference:
+python examples/repository-audit/demo.py --format text
 ```
 
+The default JSON output preserves the regression-test contract. The opt-in text
+view lists actual findings from the same offline auditor, including file/line
+locations, which rules are no longer reported and which remain. Its plain
+output can be captured in a real terminal demonstration; **no screen recording
+is claimed here**.
+
 The demonstration creates one temporary directory, writes two fictional README variants
-there in sequence, audits each, prints JSON, and removes the temporary directory.
+there in sequence, audits each, prints the selected format, and removes the temporary directory.
 Only this demonstration writes its disposable fixture; the audit tool itself is read-only.
 
 ## Before

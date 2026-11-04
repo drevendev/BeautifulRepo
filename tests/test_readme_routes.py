@@ -76,6 +76,31 @@ class ReaderRoutesTests(unittest.TestCase):
                 )
                 self.assertIn(expected_line, section)
 
+    def test_demo_text_mode_exposes_observed_rules_without_a_score(self):
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "examples/repository-audit/demo.py"),
+             "--format", "text"],
+            cwd=ROOT, capture_output=True, text=True, timeout=30, check=True,
+        )
+        output = result.stdout
+        self.assertIn("Synthetic README before/after", output)
+        self.assertIn("BEFORE: 0 error(s), 4 warning(s), 1 info", output)
+        self.assertIn("AFTER: 0 error(s), 1 warning(s), 1 info", output)
+        self.assertIn("README.md:", output)
+        for rule in (
+            "readme.placeholder", "heading.skipped_level", "license.missing",
+            "contributing.missing",
+        ):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, output)
+        self.assertIn("Not reported after the fictional edit:", output)
+        self.assertIn("Still reported: contributing.missing, license.missing", output)
+        self.assertIn("do not prove readability", output)
+        self.assertNotIn("\x1b", output)  # easily capturable plain text
+
     def test_real_repository_audit_proof_is_pinned_and_candid(self):
         """Do not silently detach homepage evidence from the original case."""
         case = (ROOT / "case-studies/patchpitch.md").read_text(encoding="utf-8")
