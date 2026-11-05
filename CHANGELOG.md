@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add an optional reproducible Chromium/Playwright WebM walkthrough of the source-verified **fictional** three-checker HTML report. The recorder validates synthetic markers, uses an offline browser context, refuses to overwrite recordings, and has no impact on normal audit dependencies or CI; offline tests cover input boundaries and scroll behavior. A recording is not an executed terminal session, actual user visit, or accessibility certification (related to #254).
+
 - Include an `evidence.md` text companion in synthetic Chrome capture artifacts: source checkout, observed before/after markers, image header dimensions, and SHA-256 hashes. Add a dependency-free generator and fail-closed tests; labels are authored-content descriptions, not pixel/mobile/accessibility certification (related to #254).
 
 - Put source-derived before/after checker counts above the longer README diff
