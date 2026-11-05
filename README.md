@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="SHOWCASE.md">See the before/after</a> ·
   <a href="#working-proof">Run an audit</a> ·
   <a href="#start-here">Start here</a> ·
   <a href="examples/README.md">Working examples</a> ·
@@ -24,6 +25,12 @@
 > **Beautiful is not “more decoration.”** A strong repository reduces the time from landing on the page to understanding the result, trying it, trusting it, and knowing how to contribute.
 
 ## Working proof
+
+**See the result first:** the [text-first Pocket Trails showcase](SHOWCASE.md)
+shows the source-derived fix, exact checker exits and a reproducible
+command before you run anything on your own checkout. The example is
+synthetic; the [PatchPitch case study](case-studies/patchpitch.md) uses real
+repository revisions and clearly states what the audit missed.
 
 **Catch concrete README and local-documentation problems before a new contributor does.**
 BeautifulRepo's main product is a set of **read-only, offline documentation
