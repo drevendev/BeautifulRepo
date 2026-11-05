@@ -77,7 +77,7 @@ def capture(browser: str, html: str, output_dir: Path,
     if any((output_dir / name).exists() for name in filenames):
         raise RuntimeError("refusing to overwrite an existing report or screenshot")
 
-    # Stage beside the destination to keep Windows cross-volume moves safe.
+    # Stage beside the destination and copy with exclusive creation on publish.
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
             prefix="beautifulrepo-capture-", dir=output_dir.parent) as temporary:
