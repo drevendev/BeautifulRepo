@@ -150,7 +150,12 @@ def html_report(result: dict) -> str:
     def diff_html(value: object) -> str:
         """Keep the exact unified diff and label changed lines beyond color alone."""
         rows = []
-        for line in str(value).splitlines():
+        # Split only on literal LF; Unicode line separators must reach safe()
+        # and be escaped rather than silently becoming forged diff rows.
+        lines = str(value).split("\n")
+        if lines and not lines[-1]:
+            lines.pop()
+        for line in lines:
             if line.startswith(("--- ", "+++ ", "@@ ")):
                 style, label = "diff-meta", ""
             elif line.startswith("-"):
