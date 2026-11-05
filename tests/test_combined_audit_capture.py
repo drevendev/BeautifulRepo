@@ -55,6 +55,9 @@ class CombinedAuditCaptureTests(unittest.TestCase):
             self.assertTrue(any("--window-size=390,844" in c for c in calls))
             for args in calls:
                 self.assertIn("--disable-background-networking", args)
+                screenshot = next(a.split("=", 1)[1] for a in args
+                                  if a.startswith("--screenshot="))
+                self.assertEqual(output.parent, Path(screenshot).parent.parent)
                 self.assertTrue(args[-1].startswith("file://"))
             with self.assertRaisesRegex(RuntimeError, "refusing to overwrite"):
                 capture.capture("chromium", html, output, ("desktop",))
