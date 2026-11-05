@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Put source-derived before/after checker counts above the longer README diff
+  in the HTML audit showcase. The compact overview reads the same report
+  values as the detailed diagnostics; a regression rejects hard-coded counts.
+  Narrow first-screen captures now show both outcomes without claiming
+  actual-device or user acceptance (Related: #254).
+
 - Add an opt-in GitHub Actions Chrome capture workflow for the fictional
   Pocket Trails audit demo. PR changes to the demo/checkers and manual runs
   can publish source-verified HTML plus real desktop/mobile PNGs as a

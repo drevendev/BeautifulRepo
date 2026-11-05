@@ -79,6 +79,12 @@ class CombinedAuditDemoTests(unittest.TestCase):
                        "2/2 local-link checks pass."):
             self.assertIn(phrase, completed.stdout)
         self.assertIn('id="repair-heading"', completed.stdout)
+        self.assertIn('id="overview-heading"', completed.stdout)
+        self.assertIn('class="overview-grid"', completed.stdout)
+        self.assertIn("Before:</strong> 0/2 local-link checks pass", completed.stdout)
+        self.assertIn("After:</strong> 2/2 local-link checks pass", completed.stdout)
+        self.assertLess(completed.stdout.index('id="overview-heading"'),
+                        completed.stdout.index('id="repair-heading"'))
         self.assertIn("\n-Read the [setup guide](docs/setup.md)", completed.stdout)
         self.assertIn("\n+Read the [setup guide](docs/guide.md)", completed.stdout)
         self.assertIn('class="reports"', completed.stdout)
@@ -87,6 +93,23 @@ class CombinedAuditDemoTests(unittest.TestCase):
         self.assertNotIn("<script", completed.stdout.lower())
         self.assertNotIn("http://", completed.stdout)
         self.assertNotIn("https://", completed.stdout)
+
+    def test_html_overview_uses_current_report_values(self):
+        import importlib.util
+        module_spec = importlib.util.spec_from_file_location("combined_demo", DEMO)
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+        completed = self.invoke("--format", "json")
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        result = json.loads(completed.stdout)
+        # Modify one in-memory checker outcome to reject hard-coded captions.
+        result["reports"]["before"]["checks"]["markdown_links"]["exit_code"] = 0
+        html = module.html_report(result)
+        overview = html.split(
+            '<section aria-labelledby="overview-heading">', 1
+        )[1].split("</section>", 1)[0]
+        self.assertIn("Before:</strong> 1/2 local-link checks pass", overview)
+        self.assertNotIn("Before:</strong> 0/2 local-link checks pass", overview)
 
     def test_html_escapes_hostile_diagnostic(self):
         import importlib.util
