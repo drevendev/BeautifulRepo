@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 from pathlib import Path
 import subprocess
@@ -77,6 +78,11 @@ def demonstrate() -> dict:
         before, after = root / "before", root / "after"
         make_fixture(before, broken=True)
         make_fixture(after, broken=False)
+        repair_diff = "".join(difflib.unified_diff(
+            (before / "README.md").read_text(encoding="utf-8").splitlines(keepends=True),
+            (after / "README.md").read_text(encoding="utf-8").splitlines(keepends=True),
+            fromfile="before/README.md", tofile="after/README.md",
+        ))
         results = {"before": run_audit(before), "after": run_audit(after)}
     for label, expected in (("before", 1), ("after", 0)):
         result = results[label]
@@ -90,13 +96,25 @@ def demonstrate() -> dict:
         if (broken["exit_code"] != 1 or fixed["exit_code"] != 0
                 or not any("docs/setup.md" in line for line in broken["diagnostics"])):
             raise RuntimeError(f"{checker} did not reproduce the expected link repair")
+    changed_lines = [
+        line for line in repair_diff.splitlines()
+        if line.startswith(("+", "-")) and not line.startswith(("+++", "---"))
+    ]
+    if changed_lines != [
+        "-Read the [setup guide](docs/setup.md) to begin.",
+        "+Read the [setup guide](docs/guide.md) to begin.",
+    ]:
+        raise RuntimeError("the fictional README repair is not one verified link edit")
     return {"fixture_kind": "synthetic", "reports": results,
+            "repair_diff": repair_diff,
             "verification": "Both link checkers found the missing path before and cleared after; no fixture writes by the audit."}
 
 
 def text_report(result: dict) -> str:
     lines = ["Synthetic Pocket Trails — real BeautifulRepo combined audit output",
              "The repair changes one README link to an existing local guide."]
+    lines.extend(("\nExact fictional README repair (unified diff):",
+                  result["repair_diff"].rstrip("\n")))
     for label in ("before", "after"):
         report = result["reports"][label]
         lines.append(f"\n{label.upper()}: combined exit {report['exit_code']}")
@@ -129,6 +147,10 @@ def html_report(result: dict) -> str:
         )
         return escape(printable, quote=True)
 
+    def safe_multiline(value: object) -> str:
+        # Preserve the diff's line structure in <pre>, escaping each line.
+        return "\n".join(safe(line) for line in str(value).split("\n"))
+
     parts = [
         "<!doctype html>",
         '<html lang="en"><head><meta charset="utf-8">',
@@ -145,6 +167,8 @@ def html_report(result: dict) -> str:
         "padding: 1.25rem; min-width: 0; }",
         "article section { border-top: 1px solid #8888; margin-top: 1.2rem; }",
         "code { overflow-wrap: anywhere; white-space: pre-wrap; }",
+        "pre { padding: 1rem; border: 1px solid #8888; border-radius: .5rem; "
+        "overflow-wrap: anywhere; white-space: pre-wrap; }",
         "li { margin: .5rem 0; }",
         ".outcome { border-inline-start: .3rem solid currentColor; "
         "padding: .25rem 0 .25rem .75rem; }",
@@ -154,6 +178,12 @@ def html_report(result: dict) -> str:
         "<p><strong>Synthetic Pocket Trails fixture.</strong> These are "
         "observations from BeautifulRepo's actual offline checkers on "
         "disposable local directories. No real repository was repaired.</p>",
+        '<section aria-labelledby="repair-heading">',
+        '<h2 id="repair-heading">The exact fictional README change</h2>',
+        '<p>Source-derived unified diff from the two fixture READMEs, not an edit '
+        'to an outside repository.</p>',
+        f'<pre><code>{safe_multiline(result["repair_diff"])}</code></pre>',
+        '</section>',
         '<div class="reports">',
     ]
     for label in ("before", "after"):
