@@ -76,7 +76,7 @@ class CombinedAuditCaptureTests(unittest.TestCase):
             def fake_chromium(args, **kwargs):
                 target = next(a.split("=", 1)[1] for a in args
                               if a.startswith("--screenshot="))
-                Path(target).write_bytes(capture.PNG_SIGNATURE + b"\\0" * 48)
+                Path(target).write_bytes(capture.PNG_SIGNATURE + b"\0" * 48)
                 return subprocess.CompletedProcess(args, 0, "", "")
 
             actual_publish = capture._publish_exclusive
