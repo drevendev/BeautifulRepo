@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Include an `evidence.md` text companion in synthetic Chrome capture artifacts: source checkout, observed before/after markers, image header dimensions, and SHA-256 hashes. Add a dependency-free generator and fail-closed tests; labels are authored-content descriptions, not pixel/mobile/accessibility certification (related to #254).
+
 - Put source-derived before/after checker counts above the longer README diff
   in the HTML audit showcase. The compact overview reads the same report
   values as the detailed diagnostics; a regression rejects hard-coded counts.
