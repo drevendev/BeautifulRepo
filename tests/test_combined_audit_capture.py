@@ -27,8 +27,11 @@ class CombinedAuditCaptureTests(unittest.TestCase):
         self.assertIn("+Read the [setup guide](docs/guide.md)", html)
 
     def test_stages_report_and_two_pngs_without_overwriting(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        # Use a relative destination: the documented ../output must yield
+        # absolute file:// URLs even on Windows.
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as tmp:
             output = Path(tmp) / "shots"
+            relative_output = output.relative_to(Path.cwd())
             calls = []
 
             def fake_chromium(args, **kwargs):
@@ -40,7 +43,7 @@ class CombinedAuditCaptureTests(unittest.TestCase):
 
             html = "<!doctype html><html><body>fixture</body></html>\n"
             with patch.object(capture.subprocess, "run", side_effect=fake_chromium):
-                paths = capture.capture("chromium", html, output,
+                paths = capture.capture("chromium", html, relative_output,
                                         ("desktop", "mobile"))
             self.assertEqual(
                 {output / "report.html", output / "desktop.png",
@@ -60,7 +63,7 @@ class CombinedAuditCaptureTests(unittest.TestCase):
                 self.assertEqual(output.parent, Path(screenshot).parent.parent)
                 self.assertTrue(args[-1].startswith("file://"))
             with self.assertRaisesRegex(RuntimeError, "refusing to overwrite"):
-                capture.capture("chromium", html, output, ("desktop",))
+                capture.capture("chromium", html, relative_output, ("desktop",))
             self.assertEqual(html, (output / "report.html").read_text("utf-8"))
 
     def test_failed_browser_leaves_no_partial_public_outputs(self):
