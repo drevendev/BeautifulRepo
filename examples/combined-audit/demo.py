@@ -172,12 +172,37 @@ def html_report(result: dict) -> str:
         "li { margin: .5rem 0; }",
         ".outcome { border-inline-start: .3rem solid currentColor; "
         "padding: .25rem 0 .25rem .75rem; }",
+        ".overview-grid { display: grid; gap: .75rem; }",
+        "@media (min-width: 35rem) { .overview-grid { "
+        "grid-template-columns: repeat(2, minmax(0, 1fr)); } }",
+        ".overview-item { margin: 0; border: 1px solid #8888; "
+        "border-radius: .5rem; padding: .75rem; }",
         "</style></head><body><main>",
         "<h1>One broken link, two independent checkers</h1>",
-        '<p><a href="#after-title">Jump to after repair</a></p>',
         "<p><strong>Synthetic Pocket Trails fixture.</strong> These are "
         "observations from BeautifulRepo's actual offline checkers on "
         "disposable local directories. No real repository was repaired.</p>",
+        '<section aria-labelledby="overview-heading">',
+        '<h2 id="overview-heading">Before and after at a glance</h2>',
+        '<div class="overview-grid">',
+    ]
+    # Put observed outcomes above the long diff for first-screen readers.
+    # The detailed report below uses the same check result dictionaries.
+    for label in ("before", "after"):
+        report = result["reports"][label]
+        local_checks_passing = sum(
+            report["checks"][checker]["exit_code"] == 0
+            for checker in LINK_CHECKS
+        )
+        parts.append(
+            f'<p class="overview-item"><strong>{label.title()}:</strong> '
+            f'{local_checks_passing}/{len(LINK_CHECKS)} local-link checks pass; '
+            f'combined audit exit {report["exit_code"]}.</p>'
+        )
+    parts.extend((
+        '</div>',
+        '</section>',
+        '<p><a href="#after-title">Jump to after repair</a></p>',
         '<section aria-labelledby="repair-heading">',
         '<h2 id="repair-heading">The exact fictional README change</h2>',
         '<p>Source-derived unified diff from the two fixture READMEs, not an edit '
@@ -185,7 +210,7 @@ def html_report(result: dict) -> str:
         f'<pre><code>{safe_multiline(result["repair_diff"])}</code></pre>',
         '</section>',
         '<div class="reports">',
-    ]
+    ))
     for label in ("before", "after"):
         report = result["reports"][label]
         title = "Before repair" if label == "before" else "After repair"
