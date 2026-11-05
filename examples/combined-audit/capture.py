@@ -53,6 +53,9 @@ def render_demo() -> str:
 def capture(browser: str, html: str, output_dir: Path,
             views: tuple[str, ...]) -> list[Path]:
     """Stage all files, then publish them only after every screenshot succeeds."""
+    # tempfile may return a relative path when given a relative dir; file://
+    # screenshots require absolute paths, including the documented ../output.
+    output_dir = output_dir.expanduser().resolve(strict=False)
     filenames = ["report.html", *(f"{name}.png" for name in views)]
     if output_dir.exists() and not output_dir.is_dir():
         raise RuntimeError("output directory path is a file")
