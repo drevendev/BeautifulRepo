@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Add an optional Chromium/Chrome screenshot capture for the existing
+  reproducible *synthetic* three-checker HTML demo. It executes the genuine
+  local fixture audit, stages the browser-rendered desktop/mobile PNGs and
+  source HTML, and refuses to replace existing outputs. Regression tests
+  cover source-backed generation and browser-failure handling. The browser is
+  not a required Python dependency; captures are not real-user, device or
+  accessibility acceptance (Related: #254).
+
 - Display the exact source-derived one-line README repair as a unified diff
   alongside real synthetic checker results in text, JSON and HTML demo output.
   The change is checked against both disposable fixtures and HTML-escaped;
