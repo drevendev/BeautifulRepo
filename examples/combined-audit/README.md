@@ -94,6 +94,20 @@ pull requests that change the demo/checkers or this workflow. To reproduce on
 `master`, open GitHub Actions → **Synthetic audit browser evidence** →
 **Run workflow**. No screenshots are committed automatically.
 
+The artifact also contains `evidence.md`, a **source-labeled text alternative**
+with the checked-out commit, the before/after result, actual PNG header
+dimensions and SHA-256 hashes for the HTML and both images. Generate the same
+companion locally, after the capture, with:
+
+```bash
+python -I examples/combined-audit/evidence.py ../beautifulrepo-audit-capture
+```
+
+The companion checks expected synthetic HTML markers and PNG headers, but
+does **not** decode the pixels or prove the displayed layout. It refuses to
+replace an existing `evidence.md`. Its checksums help recipients identify
+matching bytes, not certify independent provenance or real user outcomes.
+
 Download the artifact from the **specific successful run**, then **inspect both
 images manually** before citing them. A green job proves the browser produced
 PNG files from the synthetic report; it does not prove the requested window

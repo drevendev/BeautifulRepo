@@ -99,7 +99,9 @@ PNG captures without touching the audited fixtures. The
 [capture walkthrough](examples/combined-audit/README.md#capture-actual-browser-screenshots-optional)
 explains exact limits: these are synthetic screenshots, not mobile-device,
 accessibility or real-user evidence. Neither the audit nor its tests require
-Chromium.
+Chromium. The optional Chrome workflow also creates a checksummed
+[text companion](examples/combined-audit/README.md#reproduce-screenshots-in-github-actions-synthetic-only)
+for those synthetic screenshots; its description is not pixel verification.
 
 **Check your own local checkout**, from the BeautifulRepo root, with its path
 as a sibling directory (replace `your-repository`):
