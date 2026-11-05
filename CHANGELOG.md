@@ -11,13 +11,6 @@ keep their original themed headings.
 
 ## [Unreleased]
 
-### Changed
-
-- Make the fictional broken-link audit's HTML diff easier to scan: distinguish added
-  and removed lines in light/dark themes while retaining literal +/- prefixes,
-  assistive text labels, and escaped source content. This is authored formatting,
-  not a screen-reader or contrast-certification claim (#254).
-
 ### Added
 
 - Include an `evidence.md` text companion in synthetic Chrome capture artifacts: source checkout, observed before/after markers, image header dimensions, and SHA-256 hashes. Add a dependency-free generator and fail-closed tests; labels are authored-content descriptions, not pixel/mobile/accessibility certification (related to #254).
@@ -452,6 +445,12 @@ keep their original themed headings.
   for ideas only, and the known tool caveats (#80).
 
 ### Changed
+
+- Make the fictional broken-link audit's HTML diff easier to scan: distinguish added
+  and removed lines in light/dark themes while retaining literal +/- prefixes,
+  assistive text labels, and escaped source content. This is authored formatting,
+  not a screen-reader or contrast-certification claim (#254).
+
 
 - Repin the unreleased four-skill development test instructions to a single
   immutable commit that includes the latest manifest discovery fix and
