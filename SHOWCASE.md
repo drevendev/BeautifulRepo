@@ -102,9 +102,11 @@ The same checked-in synthetic HTML can be rendered in an actual installed
 Chromium/Chrome browser. The [capture instructions](examples/combined-audit/README.md#capture-actual-browser-screenshots-optional)
 produce a desktop PNG, a narrow-window PNG and an HTML report. The optional
 [recording instructions](examples/combined-audit/README.md#record-a-browser-walkthrough-optional-synthetic-only)
-produce a real WebM scroll recording, provided Playwright, its video encoder
-and a browser are installed separately. Normal audits need none of those
-dependencies. The [seven-day GitHub Actions artifact](examples/combined-audit/README.md#reproduce-screenshots-in-github-actions-synthetic-only)
+produce a real WebM scroll recording and, with `--captions`, an optional
+source-backed WebVTT descriptive track for the **silent** fixed scroll,
+provided Playwright, its video encoder and a browser are installed separately.
+The track has not been verified in a published player. Normal audits need
+none of those dependencies. The [seven-day GitHub Actions artifact](examples/combined-audit/README.md#reproduce-screenshots-in-github-actions-synthetic-only)
 is **expiring**, not a permanent public video. No video file is claimed
 to be published by this page.
 

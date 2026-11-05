@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add an optional, exclusively created WebVTT descriptive track to the silent synthetic Chromium walkthrough, with fixed-timeline/source-claim tests and clear partial-kit handling. Captions are authored observations, not spoken subtitles or validated playback accessibility (related to #254).
+
 - Verify the public one-minute audit path in fresh-checkout Linux/Windows CI steps, and add an external-target subprocess regression for paths with spaces, broken-to-fixed links, precise exits and no target writes. This is CI evidence, not independent user or device acceptance (related to #254).
 
 - Publish a durable, text-first Pocket Trails before/after showcase with the exact synthetic README diff, checker outcomes, copyable first run, limits and an honest distinction between optional expiring media artifacts and permanent documentation (#254).
