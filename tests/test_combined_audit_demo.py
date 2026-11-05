@@ -125,14 +125,16 @@ class CombinedAuditDemoTests(unittest.TestCase):
         result["reports"]["before"]["checks"]["markdown_links"]["diagnostics"].append(
             "<script>alert(1)</script>\u202e\nfake checker PASS"
         )
-        result["repair_diff"] += "\n<img src=x onerror=alert(1)>\u202e\n"
+        result["repair_diff"] += "\n<img src=x onerror=alert(1)>\u202e\u2028spoofed row\n"
         page = module.html_report(result)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
         self.assertIn("&lt;img src=x onerror=alert(1)&gt;", page)
         self.assertNotIn("<script>", page)
         self.assertIn('class="diff-line diff-context">&lt;img src=x onerror=alert(1)&gt;', page)
         self.assertIn(r"\u202e", page)
+        self.assertIn(r"\u2028", page)
         self.assertNotIn("\u202e", page)
+        self.assertNotIn("\u2028", page)
 
 
 if __name__ == "__main__":
