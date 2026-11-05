@@ -3,6 +3,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 RECORDER = Path(__file__).resolve().parents[1] / "examples" / "combined-audit" / "record.py"
 _spec = importlib.util.spec_from_file_location("br_showcase_record", RECORDER)
@@ -61,6 +62,67 @@ class RecordingPreparationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "end in .webm"):
                 recorder.record(valid_report(), "/missing/browser",
                                 Path(directory) / "video.mp4")
+
+    def test_descriptive_captions_have_bounded_22_second_timeline(self):
+        vtt = recorder.DESCRIPTIVE_VTT
+        self.assertTrue(vtt.startswith("WEBVTT\n"))
+        self.assertEqual(vtt.count(" --> "), 5)
+        for item in (
+            "00:00:00.000 --> 00:00:03.000",
+            "00:00:03.000 --> 00:00:11.000",
+            "00:00:11.000 --> 00:00:14.000",
+            "00:00:14.000 --> 00:00:19.000",
+            "00:00:19.000 --> 00:00:22.000",
+        ):
+            self.assertIn(item, vtt)
+        self.assertIn("docs/setup.md", vtt)
+        self.assertIn("docs/guide.md", vtt)
+        self.assertIn("fictional", vtt)
+        self.assertIn("not speech subtitles", vtt)
+
+    def test_caption_publication_is_exclusive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "walkthrough.vtt"
+            recorder.write_captions(target)
+            original = target.read_bytes()
+            self.assertIn(b"WEBVTT", original)
+            with self.assertRaisesRegex(ValueError, "refusing to overwrite"):
+                recorder.write_captions(target)
+            self.assertEqual(original, target.read_bytes())
+            with self.assertRaisesRegex(ValueError, "end in .vtt"):
+                recorder.write_captions(Path(directory) / "wrong.txt")
+
+    def test_existing_captions_stop_recording_before_browser_launch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            html = root / "report.html"
+            html.write_text(valid_report(), encoding="utf-8")
+            captions = root / "walkthrough.vtt"
+            captions.write_text("previous", encoding="utf-8")
+            with mock.patch.object(recorder, "record") as recording:
+                result = recorder.main([
+                    "--input", str(html), "--output", str(root / "video.webm"),
+                    "--captions", str(captions), "--browser", "missing-chrome",
+                ])
+            self.assertEqual(result, 2)
+            recording.assert_not_called()
+            self.assertEqual("previous", captions.read_text(encoding="utf-8"))
+
+    def test_failed_browser_does_not_create_caption_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            html = root / "report.html"
+            html.write_text(valid_report(), encoding="utf-8")
+            captions = root / "walkthrough.vtt"
+            with (mock.patch.object(recorder.shutil, "which", return_value="/fake/chrome"),
+                  mock.patch.object(recorder, "record",
+                                    side_effect=RuntimeError("browser failure"))):
+                result = recorder.main([
+                    "--input", str(html), "--output", str(root / "video.webm"),
+                    "--captions", str(captions), "--browser", "fake",
+                ])
+            self.assertEqual(result, 2)
+            self.assertFalse(captions.exists())
 
 
 if __name__ == "__main__":

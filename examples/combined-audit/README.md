@@ -95,7 +95,8 @@ recorder never installs them.
 ```bash
 python -I examples/combined-audit/record.py \
   --input ../beautifulrepo-audit-capture/report.html \
-  --output ../beautifulrepo-audit-capture/walkthrough.webm
+  --output ../beautifulrepo-audit-capture/walkthrough.webm \
+  --captions ../beautifulrepo-audit-capture/walkthrough.vtt
 ```
 
 The helper opens only the validated, local **synthetic** HTML string in a
@@ -104,13 +105,21 @@ both checker reports and returns to the top. The planned motion is about
 22 seconds at a 1280×720 browser viewport; encoding may add time. It does not
 audit live repositories, record a terminal command being executed, prove a
 real person's interaction, test assistive technology, or capture a real phone.
-The video has no narration or captions; use the companion `evidence.md`
-for a text explanation and write time-coded captions before distributing it
-where accessibility or platform rules require them.
+The video has **no narration**. With `--captions`, the recorder writes
+an **authored, time-coded WebVTT descriptive text track** for its fixed 22-second
+synthetic scroll. This is not a transcription of spoken audio. Pair
+`walkthrough.vtt` with the WebM in a compatible player; the source-backed
+`evidence.md` remains a longer text alternative. Review actual video timing,
+text readability and playback support before distribution. This does not
+certify screen-reader or player accessibility.
 
-The tool refuses to overwrite an existing video, rejects unmatched report
-markers and active HTML embedding tags, and blocks network requests in the
-browser context. This does not turn arbitrary HTML into a safe input: use only
+The tool refuses to overwrite an existing video **or caption track**, rejects
+unmatched report markers and active HTML embedding tags, and blocks network
+requests in the browser context. If caption publication fails after the video
+succeeds, the video may remain alone: inspect paths before retrying and do
+not overwrite existing media.
+
+This does not turn arbitrary HTML into a safe input: use only
 the generated, disposable fixture report, never confidential or third-party
 HTML. The optional video is not automatically published or attached to CI.
 The test suite checks input boundaries and the planned scroll, **not actual

@@ -24,6 +24,28 @@ MARKERS = (
 VIEWPORT = (1280, 720)
 FRAME_RATE = 15
 
+# Fixed, authored descriptions for the silent synthetic 22-second video.
+# Not speech subtitles or independently verified player accessibility.
+DESCRIPTIVE_VTT = """WEBVTT
+
+NOTE Silent synthetic browser demonstration; descriptive text, not speech subtitles.
+
+00:00:00.000 --> 00:00:03.000
+Synthetic Pocket Trails example. Before: zero of two local-link checks pass. After: two of two pass.
+
+00:00:03.000 --> 00:00:11.000
+The before report finds a broken README link to docs/setup.md.
+
+00:00:11.000 --> 00:00:14.000
+The fixed README links to the existing docs/guide.md instead.
+
+00:00:14.000 --> 00:00:19.000
+The after report clears both local-link findings. Entry-point warnings are separate.
+
+00:00:19.000 --> 00:00:22.000
+This is a fictional, reproducible fixture, not a real repository repair.
+"""
+
 
 def validate_report(source: str) -> None:
     """Reject inputs other than the expected standalone synthetic checker report."""
@@ -106,6 +128,24 @@ def record(html: str, browser_path: str, output: Path) -> None:
                            "browser and Playwright video-encoder installation") from exc
 
 
+
+def validate_caption_output(output: Path) -> None:
+    """Preflight the optional sidecar without replacing existing files."""
+    if output.suffix.lower() != ".vtt":
+        raise ValueError("caption output file must end in .vtt")
+    if not output.parent.is_dir():
+        raise ValueError("caption output parent directory must already exist")
+    if output.exists():
+        raise ValueError("refusing to overwrite existing caption track")
+
+
+def write_captions(output: Path) -> None:
+    """Use exclusive creation so concurrent files are never replaced."""
+    validate_caption_output(output)
+    with output.open("x", encoding="utf-8", newline="\n") as target:
+        target.write(DESCRIPTIVE_VTT)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, type=Path,
@@ -114,10 +154,14 @@ def main(argv: list[str] | None = None) -> int:
                         help="new WebM recording filename")
     parser.add_argument("--browser",
                         help="path/name of an installed Chrome/Chromium executable")
+    parser.add_argument("--captions", type=Path,
+                        help="optional new .vtt descriptive track for this silent synthetic recording")
     args = parser.parse_args(argv)
     try:
         html = args.input.read_text(encoding="utf-8")
         validate_report(html)
+        if args.captions is not None:
+            validate_caption_output(args.captions)
         browser = shutil.which(args.browser) if args.browser else (
             shutil.which("chromium") or shutil.which("google-chrome")
             or shutil.which("chromium-browser")
@@ -125,10 +169,16 @@ def main(argv: list[str] | None = None) -> int:
         if browser is None:
             raise RuntimeError("installed Chrome/Chromium not found; use --browser PATH")
         record(html, browser, args.output)
+        if args.captions is not None:
+            write_captions(args.captions)
     except (OSError, ValueError, RuntimeError) as exc:
-        print(f"Recording incomplete: {exc}", file=sys.stderr)
+        print(f"Recording/caption kit incomplete: {exc}. "
+              "If video was already created, inspect it before retrying.",
+              file=sys.stderr)
         return 2
     print(args.output)
+    if args.captions is not None:
+        print(args.captions)
     print("Real Chromium recording of a FIXED SYNTHETIC HTML report. "
           "Not a live audit, user session, or accessibility test.")
     return 0
