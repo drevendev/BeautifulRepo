@@ -446,6 +446,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Make the fictional broken-link audit's HTML diff easier to scan: distinguish added
+  and removed lines in light/dark themes while retaining literal +/- prefixes,
+  assistive text labels, and escaped source content. This is authored formatting,
+  not a screen-reader or contrast-certification claim (#254).
+
+
 - Repin the unreleased four-skill development test instructions to a single
   immutable commit that includes the latest manifest discovery fix and
   bounded evaluation snapshots. Add a regression that checks Claude Code,
