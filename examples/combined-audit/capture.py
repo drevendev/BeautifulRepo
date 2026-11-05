@@ -50,6 +50,21 @@ def render_demo() -> str:
     return html
 
 
+
+def _publish_exclusive(staged: Path, destination: Path) -> None:
+    """Publish without replacing a file created by a concurrent writer."""
+    try:
+        # 'xb' uses exclusive creation: a previous existence check alone
+        # cannot prevent Path.replace() from destroying a racing writer's data.
+        with destination.open("xb") as target:
+            with staged.open("rb") as source:
+                shutil.copyfileobj(source, target)
+    except FileExistsError as exc:
+        raise RuntimeError(
+            f"output appeared during capture; refusing to overwrite: {destination.name}"
+        ) from exc
+
+
 def capture(browser: str, html: str, output_dir: Path,
             views: tuple[str, ...]) -> list[Path]:
     """Stage all files, then publish them only after every screenshot succeeds."""
@@ -100,7 +115,7 @@ def capture(browser: str, html: str, output_dir: Path,
         written = []
         for name in filenames:
             destination = output_dir / name
-            (staging / name).replace(destination)
+            _publish_exclusive(staging / name, destination)
             written.append(destination)
         return written
 
