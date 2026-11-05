@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Display the exact source-derived one-line README repair as a unified diff
+  alongside real synthetic checker results in text, JSON and HTML demo output.
+  The change is checked against both disposable fixtures and HTML-escaped;
+  no outside repository is modified (#254).
+
 - Make the synthetic three-checker HTML comparison readable at first glance:
   show passing local-link checker counts in each state and add a keyboard-accessible
   jump to the after section for long mobile reports. Existing checker observations,

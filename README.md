@@ -82,8 +82,9 @@ Before the fix, both local link checkers report `docs/setup.md` missing;
 after changing the fictional README link to an existing guide, both clear.
 The demo verifies those observations and leaves its fixtures byte-identical
 after each audit.
-The optional HTML file shows a responsive side-by-side comparison of the
-**actual synthetic** before/after diagnostics; open it locally in a browser.
+The optional HTML file shows the **actual synthetic** before/after diagnostics
+and a source-derived unified diff of the one-line README repair; open it locally
+in a browser.
 It is not a screenshot, real-repository repair or evidence of user adoption.
 
 **Check your own local checkout**, from the BeautifulRepo root, with its path

@@ -37,6 +37,17 @@ class CombinedAuditDemoTests(unittest.TestCase):
             self.assertIn("docs/setup.md", "\n".join(before["diagnostics"]))
             self.assertFalse(after["diagnostics"])
         self.assertIn("no fixture writes", payload["verification"])
+        changed_lines = [
+            line for line in payload["repair_diff"].splitlines()
+            if line.startswith(("+", "-")) and not line.startswith(("+++", "---"))
+        ]
+        self.assertEqual([
+            "-Read the [setup guide](docs/setup.md) to begin.",
+            "+Read the [setup guide](docs/guide.md) to begin.",
+        ], changed_lines)
+        self.assertTrue(payload["repair_diff"].startswith(
+            "--- before/README.md\n+++ after/README.md\n"
+        ))
 
     def test_readable_example_is_explicitly_synthetic_and_shows_both_checks(self):
         completed = self.invoke()
@@ -47,6 +58,8 @@ class CombinedAuditDemoTests(unittest.TestCase):
         self.assertIn("markdown_links: exit 1", completed.stdout)
         self.assertIn("html_navigation: exit 1", completed.stdout)
         self.assertIn("docs/setup.md", completed.stdout)
+        self.assertIn("Exact fictional README repair (unified diff)", completed.stdout)
+        self.assertIn("+Read the [setup guide](docs/guide.md)", completed.stdout)
         self.assertIn("not a real repository improvement", completed.stdout)
 
 
@@ -65,6 +78,9 @@ class CombinedAuditDemoTests(unittest.TestCase):
                        "0/2 local-link checks pass.",
                        "2/2 local-link checks pass."):
             self.assertIn(phrase, completed.stdout)
+        self.assertIn('id="repair-heading"', completed.stdout)
+        self.assertIn("\n-Read the [setup guide](docs/setup.md)", completed.stdout)
+        self.assertIn("\n+Read the [setup guide](docs/guide.md)", completed.stdout)
         self.assertIn('class="reports"', completed.stdout)
         self.assertIn('href="#after-title"', completed.stdout)
         self.assertIn('id="after-title"', completed.stdout)
@@ -83,8 +99,10 @@ class CombinedAuditDemoTests(unittest.TestCase):
         result["reports"]["before"]["checks"]["markdown_links"]["diagnostics"].append(
             "<script>alert(1)</script>\u202e\nfake checker PASS"
         )
+        result["repair_diff"] += "\n<img src=x onerror=alert(1)>\u202e\n"
         page = module.html_report(result)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
+        self.assertIn("&lt;img src=x onerror=alert(1)&gt;", page)
         self.assertNotIn("<script>", page)
         self.assertIn(r"\u202e\u000a", page)
         self.assertNotIn("\u202e", page)
