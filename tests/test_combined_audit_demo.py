@@ -85,8 +85,11 @@ class CombinedAuditDemoTests(unittest.TestCase):
         self.assertIn("After:</strong> 2/2 local-link checks pass", completed.stdout)
         self.assertLess(completed.stdout.index('id="overview-heading"'),
                         completed.stdout.index('id="repair-heading"'))
-        self.assertIn("\n-Read the [setup guide](docs/setup.md)", completed.stdout)
-        self.assertIn("\n+Read the [setup guide](docs/guide.md)", completed.stdout)
+        self.assertIn('<span class="sr-only">Removed line: </span>-Read the [setup guide](docs/setup.md)', completed.stdout)
+        self.assertIn('<span class="sr-only">Added line: </span>+Read the [setup guide](docs/guide.md)', completed.stdout)
+        self.assertIn('class="diff-line diff-removed"', completed.stdout)
+        self.assertIn('class="diff-line diff-added"', completed.stdout)
+        self.assertIn("prefers-color-scheme: dark", completed.stdout)
         self.assertIn('class="reports"', completed.stdout)
         self.assertIn('href="#after-title"', completed.stdout)
         self.assertIn('id="after-title"', completed.stdout)
@@ -127,7 +130,8 @@ class CombinedAuditDemoTests(unittest.TestCase):
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
         self.assertIn("&lt;img src=x onerror=alert(1)&gt;", page)
         self.assertNotIn("<script>", page)
-        self.assertIn(r"\u202e\u000a", page)
+        self.assertIn('class="diff-line diff-context">&lt;img src=x onerror=alert(1)&gt;', page)
+        self.assertIn(r"\u202e", page)
         self.assertNotIn("\u202e", page)
 
 

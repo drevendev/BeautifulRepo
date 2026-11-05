@@ -147,9 +147,20 @@ def html_report(result: dict) -> str:
         )
         return escape(printable, quote=True)
 
-    def safe_multiline(value: object) -> str:
-        # Preserve the diff's line structure in <pre>, escaping each line.
-        return "\n".join(safe(line) for line in str(value).split("\n"))
+    def diff_html(value: object) -> str:
+        """Keep the exact unified diff and label changed lines beyond color alone."""
+        rows = []
+        for line in str(value).splitlines():
+            if line.startswith(("--- ", "+++ ", "@@ ")):
+                style, label = "diff-meta", ""
+            elif line.startswith("-"):
+                style, label = "diff-removed", '<span class="sr-only">Removed line: </span>'
+            elif line.startswith("+"):
+                style, label = "diff-added", '<span class="sr-only">Added line: </span>'
+            else:
+                style, label = "diff-context", ""
+            rows.append(f'<span class="diff-line {style}">{label}{safe(line)}</span>')
+        return "".join(rows)
 
     parts = [
         "<!doctype html>",
@@ -169,6 +180,18 @@ def html_report(result: dict) -> str:
         "code { overflow-wrap: anywhere; white-space: pre-wrap; }",
         "pre { padding: 1rem; border: 1px solid #8888; border-radius: .5rem; "
         "overflow-wrap: anywhere; white-space: pre-wrap; }",
+        ".readme-diff { padding: .5rem 0; }",
+        ".diff-line { display: block; padding: .12rem .75rem; }",
+        ".diff-removed { background: #fff0ee; border-inline-start: .25rem solid #a32525; }",
+        ".diff-added { background: #e7f5ea; border-inline-start: .25rem solid #17642b; }",
+        ".diff-meta { color: #4d5662; }",
+        "@media (prefers-color-scheme: dark) {",
+        ".diff-removed { background: #3d2222; border-inline-start-color: #f6a09b; }",
+        ".diff-added { background: #1b3929; border-inline-start-color: #94dfaf; }",
+        ".diff-meta { color: #b9c2cc; }",
+        "}",
+        ".sr-only { position: absolute; width: 1px; height: 1px; padding: 0; "
+        "margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }",
         "li { margin: .5rem 0; }",
         ".outcome { border-inline-start: .3rem solid currentColor; "
         "padding: .25rem 0 .25rem .75rem; }",
@@ -207,7 +230,7 @@ def html_report(result: dict) -> str:
         '<h2 id="repair-heading">The exact fictional README change</h2>',
         '<p>Source-derived unified diff from the two fixture READMEs, not an edit '
         'to an outside repository.</p>',
-        f'<pre><code>{safe_multiline(result["repair_diff"])}</code></pre>',
+        f'<pre class="readme-diff"><code>{diff_html(result["repair_diff"])}</code></pre>',
         '</section>',
         '<div class="reports">',
     ))
