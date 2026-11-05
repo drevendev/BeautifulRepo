@@ -61,6 +61,12 @@ jobs:
               print(f"{name} actual screenshot: {width}x{height}, {len(png)} bytes")
           print("Synthetic checker output verified; visual/accessibility acceptance is manual.")
           PY
+      - name: Generate checked source-and-image evidence companion
+        shell: bash
+        run: |
+          python -I examples/combined-audit/evidence.py \
+            "$RUNNER_TEMP/beautifulrepo-audit-capture" \
+            --revision "$(git rev-parse HEAD)"
       - name: Upload reviewable synthetic evidence
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 ref inspected 2026-10-30
         with:
