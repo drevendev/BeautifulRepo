@@ -65,8 +65,10 @@ then opens the resulting local HTML with the installed headless browser. The
 output directory receives `report.html`, `desktop.png` (requested 1280×900 window)
 and `mobile.png` (requested 390×844 window). Use `--view desktop` or
 `--browser PATH` if needed. Existing files are **not overwritten**. Both screenshots are staged before
-publication, so a **browser rendering failure** publishes none; a late disk or
-permissions error during the final moves can still leave partial output. No Python browser package or
+publication, so a **browser rendering failure** publishes none. Final publication uses
+exclusive file creation, so a competing writer's file is **never replaced**;
+a concurrent destination or a late disk/permissions error can still leave
+partial output already published. No Python browser package or
 browser auto-installation is performed.
 
 These are **real browser-rendered screenshots of synthetic test data**, not
