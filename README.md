@@ -87,6 +87,20 @@ and a source-derived unified diff of the one-line README repair; open it locally
 in a browser.
 It is not a screenshot, real-repository repair or evidence of user adoption.
 
+For an **actual browser-rendered screenshot of that synthetic report**, with
+Chromium/Chrome installed locally (optional), run:
+
+```bash
+python -I examples/combined-audit/capture.py --output-dir ../beautifulrepo-audit-capture
+```
+
+This saves the generated `report.html` and requested desktop/mobile
+PNG captures without touching the audited fixtures. The
+[capture walkthrough](examples/combined-audit/README.md#capture-actual-browser-screenshots-optional)
+explains exact limits: these are synthetic screenshots, not mobile-device,
+accessibility or real-user evidence. Neither the audit nor its tests require
+Chromium.
+
 **Check your own local checkout**, from the BeautifulRepo root, with its path
 as a sibling directory (replace `your-repository`):
 
