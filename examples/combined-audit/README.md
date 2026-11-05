@@ -126,6 +126,33 @@ The test suite checks input boundaries and the planned scroll, **not actual
 Playwright availability or visual acceptance**. Manually watch the output,
 confirm its source revision, and label it synthetic before public reuse.
 
+
+#### Inspect WebM + descriptive captions together (optional)
+
+After recording both files, create a **local HTML playback page** with the
+standard library (no player package or network required):
+
+```bash
+python -I examples/combined-audit/playback.py \
+  --video ../beautifulrepo-audit-capture/walkthrough.webm \
+  --captions ../beautifulrepo-audit-capture/walkthrough.vtt
+```
+
+Open `../beautifulrepo-audit-capture/walkthrough-player.html` in a browser.
+The native video controls display the real WebM; its descriptive WebVTT is
+embedded as a data URL to avoid separate file-origin caption restrictions.
+The page also includes a visible text alternative with timed descriptions.
+The source media are never rewritten and an existing player HTML is not
+overwritten. This validates WebM header and basic WebVTT structure, **not**
+media decoding, exact caption synchronization, accessibility, or third-party
+player compatibility. The browser must support WebM and HTML text tracks.
+If local-file playback is blocked by browser policy, serve *only the
+synthetic capture directory* locally with
+`python -m http.server 8765 --bind 127.0.0.1` and open the player at
+`http://127.0.0.1:8765/walkthrough-player.html`.
+Do not expose that directory on a public network.
+The generated file is a **local acceptance aid**, not a permanently hosted video.
+
 ### Reproduce screenshots in GitHub Actions (synthetic only)
 
 The opt-in [browser evidence workflow](../../.github/workflows/showcase-capture.yml)

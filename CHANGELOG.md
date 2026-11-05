@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a dependency-free local playback companion for the real synthetic WebM and authored WebVTT: responsive native video controls, embedded descriptive captions, a timed text alternative, media-header/cue validation and exclusive publication. Offline tests validate the generated page; actual browser/player accessibility remains a manual check (related to #254).
+
 - Add an optional, exclusively created WebVTT descriptive track to the silent synthetic Chromium walkthrough, with fixed-timeline/source-claim tests and clear partial-kit handling. Captions are authored observations, not spoken subtitles or validated playback accessibility (related to #254).
 
 - Verify the public one-minute audit path in fresh-checkout Linux/Windows CI steps, and add an external-target subprocess regression for paths with spaces, broken-to-fixed links, precise exits and no target writes. This is CI evidence, not independent user or device acceptance (related to #254).
