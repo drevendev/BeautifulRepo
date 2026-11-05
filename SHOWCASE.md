@@ -79,6 +79,23 @@ To adopt checks in a PR, use the [SHA-pinned v0.2.0 Action recipe](guides/adopti
 The combined wrapper is **current-source only**, not part of the released
 v0.2.0 Action.
 
+### First-visit checkout verification
+
+The [Quality workflow](.github/workflows/quality.yml) executes the two
+documented first-visit commands **directly after a fresh GitHub checkout**
+on Linux (Python 3.11 and 3.14) and Windows (Python 3.14), before the
+larger test suite. Separate workflow steps preserve the failure of either
+command. This is a repeatable CI acceptance path, **not** proof that a
+reader on an untested machine can clone or operate the tool.
+
+A [subprocess regression](tests/test_first_visit.py) also calls the public
+`audit_bundle.py` CLI against a **separate temporary repository with
+spaces in its path**. It verifies that a missing local link fails **both**
+link checkers despite `--fail-on never`, that replacing the link clears
+both, and that neither scan changes the target bytes. Review the status
+of the **current revision's** CI run; a workflow definition alone is not
+evidence of a passing run.
+
 ## Optional browser captures and video
 
 The same checked-in synthetic HTML can be rendered in an actual installed

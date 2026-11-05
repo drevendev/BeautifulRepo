@@ -34,6 +34,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Show selected interpreter
         run: python --version
+      # These are the exact public first-visit commands, run after fresh checkout
+      # on both Linux and Windows. Keep separate steps so either exit fails CI.
+      - name: Reproduce the first-minute synthetic repair
+        run: python -I examples/combined-audit/demo.py
+      - name: Audit the freshly checked-out repository
+        run: python -I tools/audit_bundle.py . --fail-on never
       - name: Run the unit tests
         run: python -m unittest discover -s tests -v
       - name: Check catalog metadata and generated view
