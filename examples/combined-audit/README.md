@@ -12,34 +12,6 @@ python -I examples/combined-audit/demo.py --format json
 python -I examples/combined-audit/demo.py --format html > pocket-trails-audit.html
 ```
 
-## Capture actual browser screenshots (optional)
-
-With **Chromium or Chrome already installed**, run the checked-in capture helper
-from the BeautifulRepo root:
-
-```bash
-python -I examples/combined-audit/capture.py --output-dir ../beautifulrepo-audit-capture
-```
-
-It first executes the **real combined checkers** via this disposable demo,
-then opens the resulting local HTML with the installed headless browser. The
-output directory receives `report.html`, `desktop.png` (requested 1280×900 window)
-and `mobile.png` (requested 390×844 window). Use `--view desktop` or
-`--browser PATH` if needed. Existing files are **not overwritten**;
-a failed capture does not publish partial files. No Python browser package or
-browser auto-installation is performed.
-
-These are **real browser-rendered screenshots of synthetic test data**, not
-screenshots of a real repository, a real phone, or a recorded user session.
-Window-size flags alone do not establish actual viewport geometry, mobile
-behavior, focus order, accessibility or dark-theme acceptance. Review the PNGs
-visually and compare them with `report.html` before publishing.
-The Python demo itself makes no network requests; browser flags reduce
-background activity but **do not guarantee a network-air-gapped browser**.
-Do not use this capture recipe to open untrusted or private project HTML.
-The screenshot helper is optional: the existing CLI and CI checks require
-no browser.
-
 The HTML option produces a **responsive, self-contained before/after page** from the same real checker observations on synthetic fixtures. It also displays the *actual unified diff* of the two temporary README files: one broken local link is replaced with an existing destination. The diff is derived from the fixtures, not an illustrative screenshot. A visible outcome line states how many of the two local-link checks pass in each state; the **Jump to after repair** link skips the long before-report on mobile and is reachable by keyboard. Open `pocket-trails-audit.html` locally to inspect it. No JavaScript, remote assets or invented screenshot is used. Shell redirection writes the HTML in your current working directory, **not inside a checked fixture**; it may create an empty file if the demo fails. Check the command exit status before sharing. Outputs from real projects can contain sensitive source paths.
 
 The demo creates two disposable local directories. Each contains a README,
@@ -78,3 +50,31 @@ python -I tools/audit_bundle.py ../your-repository --format json
 
 It is a read-only, local source inspection, not a sandbox for hostile files.
 See [the limitations and exit-code guide](../../guides/combined-audit.md).
+
+## Capture actual browser screenshots (optional)
+
+With **Chromium or Chrome already installed**, run the checked-in capture helper
+from the BeautifulRepo root:
+
+```bash
+python -I examples/combined-audit/capture.py --output-dir ../beautifulrepo-audit-capture
+```
+
+It first executes the **real combined checkers** via this disposable demo,
+then opens the resulting local HTML with the installed headless browser. The
+output directory receives `report.html`, `desktop.png` (requested 1280×900 window)
+and `mobile.png` (requested 390×844 window). Use `--view desktop` or
+`--browser PATH` if needed. Existing files are **not overwritten**;
+a failed capture does not publish partial files. No Python browser package or
+browser auto-installation is performed.
+
+These are **real browser-rendered screenshots of synthetic test data**, not
+screenshots of a real repository, a real phone, or a recorded user session.
+Window-size flags alone do not establish actual viewport geometry, mobile
+behavior, focus order, accessibility or dark-theme acceptance. Review the PNGs
+visually and compare them with `report.html` before publishing.
+The Python demo itself makes no network requests; browser flags reduce
+background activity but **do not guarantee a network-air-gapped browser**.
+Do not use this capture recipe to open untrusted or private project HTML.
+The screenshot helper is optional: the existing CLI and CI checks require
+no browser.
