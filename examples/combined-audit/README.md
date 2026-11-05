@@ -81,3 +81,23 @@ background activity but **do not guarantee a network-air-gapped browser**.
 Do not use this capture recipe to open untrusted or private project HTML.
 The screenshot helper is optional: the existing CLI and CI checks require
 no browser.
+
+### Reproduce screenshots in GitHub Actions (synthetic only)
+
+The opt-in [browser evidence workflow](../../.github/workflows/showcase-capture.yml)
+runs the same checked-in capture helper on an Ubuntu runner with Chrome. It
+checks the generated HTML for the observed before/after diagnostics, reads the
+**actual PNG dimensions**, and attaches `report.html`, `desktop.png` and
+`mobile.png` together as the short-lived
+`pocket-trails-synthetic-browser-capture` workflow artifact. It also runs on
+pull requests that change the demo/checkers or this workflow. To reproduce on
+`master`, open GitHub Actions → **Synthetic audit browser evidence** →
+**Run workflow**. No screenshots are committed automatically.
+
+Download the artifact from the **specific successful run**, then **inspect both
+images manually** before citing them. A green job proves the browser produced
+PNG files from the synthetic report; it does not prove the requested window
+size was the effective mobile viewport, that layouts are accessible, or that
+any real repository was improved. Workflow artifacts expire after seven days.
+The workflow uses only read-only repository access and pinned Actions; it does
+not publish a release, push to another repository, or execute an audited target.
