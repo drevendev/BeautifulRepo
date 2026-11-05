@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add an opt-in GitHub Actions Chrome capture workflow for the fictional
+  Pocket Trails audit demo. PR changes to the demo/checkers and manual runs
+  can publish source-verified HTML plus real desktop/mobile PNGs as a
+  **seven-day, expiring** workflow artifact; no screenshots are committed
+  automatically. Synthetic browser evidence is not a mobile-device,
+  accessibility or real-repository acceptance result (Related: #254).
+
 - Add an optional Chromium/Chrome screenshot capture for the existing
   reproducible *synthetic* three-checker HTML demo. It executes the genuine
   local fixture audit, stages the browser-rendered desktop/mobile PNGs and
