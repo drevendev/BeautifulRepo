@@ -66,6 +66,36 @@ class CombinedAuditCaptureTests(unittest.TestCase):
                 capture.capture("chromium", html, relative_output, ("desktop",))
             self.assertEqual(html, (output / "report.html").read_text("utf-8"))
 
+    def test_competing_destination_after_preflight_is_never_overwritten(self):
+        # Simulate another process creating desktop.png *after* both
+        # existence checks, immediately before the exclusive publish.
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "shots"
+            competitor = b"data from a concurrent writer"
+
+            def fake_chromium(args, **kwargs):
+                target = next(a.split("=", 1)[1] for a in args
+                              if a.startswith("--screenshot="))
+                Path(target).write_bytes(capture.PNG_SIGNATURE + b"\\0" * 48)
+                return subprocess.CompletedProcess(args, 0, "", "")
+
+            actual_publish = capture._publish_exclusive
+
+            def race_after_preflight(staged, destination):
+                if destination.name == "desktop.png":
+                    destination.write_bytes(competitor)
+                return actual_publish(staged, destination)
+
+            with patch.object(capture.subprocess, "run", side_effect=fake_chromium):
+                with patch.object(capture, "_publish_exclusive",
+                                  side_effect=race_after_preflight):
+                    with self.assertRaisesRegex(RuntimeError, "refusing to overwrite"):
+                        capture.capture("chromium", "<!doctype html>", output,
+                                        ("desktop",))
+            self.assertEqual(competitor, (output / "desktop.png").read_bytes())
+            # Late publication failures can leave already-published artifacts.
+            self.assertTrue((output / "report.html").exists())
+
     def test_failed_browser_leaves_no_partial_public_outputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "shots"
