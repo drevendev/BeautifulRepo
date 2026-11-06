@@ -88,6 +88,11 @@ Restart the client. Check the *installed copy* of `skills/` for all four named
 model test. For a low-risk first test use a **disposable synthetic target**,
 never a private repository with unapproved provider data controls. Follow the
 [revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/cf8ac81ddabb5e2006913e65a2f980ef201baf5c/evals/manual-smoke.md).
+**Historical-link caveat:** that immutable matrix links relatively to the
+plugin guide *as it existed in the pinned commit*, where the installer still
+references the superseded `a6ff79ee` candidate. For a `cf8ac81` trial, use
+the full-SHA installation commands **on this page** and verify the installed
+copy against the `cf8ac81` source, not the old guide or mutable `master`.
 Actual skill selection, file reads, tool calls, permission decisions and
 before/after target snapshots must be observed; static CI and plugin manifests
 cannot verify them. Results (including failures or INCONCLUSIVE outcomes) go to
