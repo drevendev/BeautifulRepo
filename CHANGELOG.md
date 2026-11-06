@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Put the reviewed v0.2.0 SHA-pinned GitHub Action workflow directly in the
+  README first-visit navigation and quick-start path, with clear separation
+  from unreleased combined-audit CLI and Action inputs (#254).
+
 - Publish a permanent Pocket Trails **synthetic** Chromium media kit (MP4,
   WebM, extracted still, authored descriptive WebVTT, local player and complete
   text alternative), linked from the README and SHOWCASE. Preserve original
