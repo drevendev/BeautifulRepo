@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Publish a permanent Pocket Trails **synthetic** Chromium media kit (MP4,
+  WebM, extracted still, authored descriptive WebVTT, local player and complete
+  text alternative), linked from the README and SHOWCASE. Preserve original
+  media hashes and clearly distinguish earlier recording evidence from current
+  audit CI and unverified screen-reader/final-URL playback (#254).
+
 - Add a dependency-free local playback companion for the real synthetic WebM and authored WebVTT: responsive native video controls, embedded descriptive captions, a timed text alternative, media-header/cue validation and exclusive publication. Offline tests validate the generated page; actual browser/player accessibility remains a manual check (related to #254).
 
 - Add an optional, exclusively created WebVTT descriptive track to the silent synthetic Chromium walkthrough, with fixed-timeline/source-claim tests and clear partial-kit handling. Captions are authored observations, not spoken subtitles or validated playback accessibility (related to #254).

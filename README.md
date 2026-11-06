@@ -28,7 +28,13 @@
 
 **See the result first:** the [text-first Pocket Trails showcase](SHOWCASE.md)
 shows the source-derived fix, exact checker exits and a reproducible
-command before you run anything on your own checkout. The example is
+command before you run anything on your own checkout.
+The same synthetic result now has a [permanent public browser recording, still
+and descriptive captions](showcase/pocket-trails/README.md); these are actual
+Chromium-captured pixels, not a real-user or external-repository experiment.
+
+[![Synthetic Pocket Trails audit: before zero of two local-link checks pass; after two of two pass. The README changes docs/setup.md to docs/guide.md.](showcase/pocket-trails/pocket-trails-still.png)](SHOWCASE.md)
+ The example is
 synthetic; the [PatchPitch case study](case-studies/patchpitch.md) uses real
 repository revisions and clearly states what the audit missed.
 
