@@ -65,6 +65,28 @@ client-specific configuration):
 Windows uses its own absolute `python.exe` and drive-qualified paths.
 Do not infer Windows acceptance from this example.
 
+## Automated SDK protocol smoke (not host acceptance)
+
+An opt-in [real-protocol smoke script](../integrations/mcp_protocol_smoke.py)
+and [focused GitHub Actions workflow](../.github/workflows/mcp-protocol.yml)
+install the pinned `mcp==2.3.0` SDK in a disposable CI environment,
+launch the actual server over stdio and verify negotiated protocol version,
+`tools/list`, all three `tools/call` responses against the direct offline
+checkers, and unchanged healthy/broken synthetic fixture files. Run locally
+with the optional SDK installed:
+
+```sh
+python -I -B integrations/mcp_protocol_smoke.py
+```
+
+The workflow runs on MCP/tool changes and is additional evidence, **not**
+an invented repository protection gate. Record the actual CI output/version
+before claiming a PASS. A successful smoke is not a clean install from an
+immutable public commit, not legacy-client compatibility, and **not** a
+Claude Code/Codex host session, model invocation, or external-user trial.
+See [#255](https://github.com/drevendev/BeautifulRepo/issues/255) for
+the remaining acceptance requirements.
+
 ## Check and grade before release
 
 Run source-level adapter regressions with the ordinary repository test suite:
