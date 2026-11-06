@@ -153,6 +153,14 @@ synthetic capture directory* locally with
 Do not expose that directory on a public network.
 The generated file is a **local acceptance aid**, not a permanently hosted video.
 
+### Permanent public Pocket Trails capture
+
+A [23.52-second Chromium recording, extracted still, optional WebM, WebVTT
+visual descriptions and full text alternative](../../showcase/pocket-trails/README.md)
+are checked into the repository. This preserved earlier-run media is **synthetic**;
+it does not prove an actual user session or current-checkout browser acceptance.
+The short-lived CI capture described next remains a distinct reproduction path.
+
 ### Reproduce screenshots in GitHub Actions (synthetic only)
 
 The opt-in [browser evidence workflow](../../.github/workflows/showcase-capture.yml)

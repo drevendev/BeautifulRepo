@@ -1,0 +1,18 @@
+WEBVTT
+
+NOTE Silent synthetic Chromium capture; these are visual descriptions, not spoken subtitles.
+
+00:00:00.000 --> 00:00:03.000
+Pocket Trails (fictional): link checks improve 0/2 → 2/2.
+
+00:00:03.000 --> 00:00:11.000
+The README link changes: docs/setup.md → docs/guide.md.
+
+00:00:11.000 --> 00:00:14.000
+Before: broken links. After: both checks pass.
+
+00:00:14.000 --> 00:00:19.000
+The view returns to the before/after overview.
+
+00:00:19.000 --> 00:00:23.520
+Synthetic demo; no external repository was repaired.

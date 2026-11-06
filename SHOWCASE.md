@@ -107,8 +107,20 @@ source-backed WebVTT descriptive track for the **silent** fixed scroll,
 provided Playwright, its video encoder and a browser are installed separately.
 A [local offline playback companion](examples/combined-audit/README.md#inspect-webm--descriptive-captions-together-optional) can now pair the real WebM with its embedded WebVTT and a visible text alternative; browser playback and accessibility still need manual acceptance. Normal audits need
 none of those dependencies. The [seven-day GitHub Actions artifact](examples/combined-audit/README.md#reproduce-screenshots-in-github-actions-synthetic-only)
-is **expiring**, not a permanent public video. No video file is claimed
-to be published by this page.
+is **expiring**, unlike the permanent repository-hosted capture below.
+
+### Permanent synthetic media (real Chromium pixels)
+
+[![Synthetic Pocket Trails audit: before zero of two local-link checks pass; after two of two pass, with a one-line README link repair.](showcase/pocket-trails/pocket-trails-still.png)](showcase/pocket-trails/README.md)
+
+[Watch the 23.52-second MP4 capture](showcase/pocket-trails/pocket-trails.mp4),
+[open the WebM](showcase/pocket-trails/pocket-trails.webm),
+[read the WebVTT descriptions](showcase/pocket-trails/pocket-trails.vtt),
+or [get the full text alternative and local player](showcase/pocket-trails/README.md).
+The saved video records an **earlier, fictional browser report**, not a fresh
+checkout of this release, a live CLI session or independent accessibility
+acceptance. Keep the five media files together for local HTML playback; GitHub's
+source view does not guarantee rendered video controls or captions.
 
 **Text alternative for the visuals:** a heading says "One broken link,
 two independent checkers"; the first overview reads "Before: 0/2
