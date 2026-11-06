@@ -192,6 +192,15 @@ The layout is one source for both agents:
 There is intentionally no `.codex-plugin/plugin.json`. `tests/test_agent_plugin.py`
 keeps the names and versions in agreement.
 
+The current development `plugin.json` declares
+`extensions.com.openai.requires_local_executor: true` because these skills
+need access to a **local** Git checkout and Python/Git tools. This follows the
+[official desktop-only plugin packaging guidance](https://developers.openai.com/plugins/deploy/desktop-only)
+(reviewed 2026-11-06). It does **not** install a plugin, grant filesystem
+permissions, verify real model execution, or add an MCP server. The pinned
+`v0.2.0` tag and `a6ff79ee` four-skill test candidate are immutable earlier
+trees: do not attribute this new flag to either of them.
+
 ## Fixture-based checks (not model evaluations)
 
 The checked-in [agent fixture repositories](../tests/fixtures/agent-repos) cover four
