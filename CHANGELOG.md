@@ -548,6 +548,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Resolve the portable Agent Skills handbook root from the directory containing
+  each `SKILL.md` (`../..`), not ambiguously from the file path itself.
+  Align all four skills and add a source-level regression for the documented
+  relative layout. This is not evidence of host installation or model behavior
+  (related to #257).
+
 - Repin the unreleased four-skill Claude Code/Codex trial to immutable commit
   `cf8ac81ddabb5e2006913e65a2f980ef201baf5c`, which includes the desktop local-executor manifest correction.
   Keep the install commands, manual matrix and roadmap on the same revision;

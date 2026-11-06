@@ -31,7 +31,8 @@ Follow `guides/agent-safety.md` in the BeautifulRepo root (`R`, below).
 `templates/RELEASE_NOTES.template.md`.
 
 In Claude Code, use `${CLAUDE_PLUGIN_ROOT}` only if it was substituted by
-the host. Otherwise resolve `R` as two directories above this SKILL.md.
+the host. Otherwise, start from the **directory containing** this `SKILL.md`
+(`R/skills/draft-release-notes/`) and go up two levels (`../..`) to reach `R`.
 If any required file is missing, stop and report the missing installation
 rather than downloading code or improvising its behavior.
 

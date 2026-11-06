@@ -31,8 +31,10 @@ proposed diff, **not** a published policy or legal advice.
 
 ## 1. Determine the installed handbook `R` and target `T`
 
-`R` is the directory two levels above this SKILL.md or the host-expanded
-${CLAUDE_PLUGIN_ROOT}. Require `guides/agent-safety.md`,
+Use the host-expanded `${CLAUDE_PLUGIN_ROOT}` when available. Otherwise,
+start from the **directory containing** this `SKILL.md`
+(`R/skills/trust-surfaces/`) and go up two levels (`../..`) to reach `R`.
+Require `guides/agent-safety.md`,
 `guides/community-safety.md`, `guides/private-repositories.md`,
 `checklists/repository.md`, `checklists/confidentiality.md`,
 `templates/SECURITY.template.md`, and `tools/repo_audit.py`.
