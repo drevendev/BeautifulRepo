@@ -16,7 +16,7 @@ import types
 import unittest
 from unittest import mock
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "tools" / "mcp_server.py"
+MODULE_PATH = Path(__file__).resolve().parents[1] / "integrations" / "mcp_server.py"
 SPEC = importlib.util.spec_from_file_location("beautifulrepo_mcp_adapter", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 adapter = importlib.util.module_from_spec(SPEC)
