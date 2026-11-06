@@ -72,7 +72,12 @@ and [focused GitHub Actions workflow](../.github/workflows/mcp-protocol.yml)
 install the pinned `mcp==2.3.0` SDK in a disposable CI environment,
 launch the actual server over stdio and verify negotiated protocol version,
 `tools/list`, all three `tools/call` responses against the direct offline
-checkers, and unchanged healthy/broken synthetic fixture files. Run locally
+checkers, and unchanged healthy/broken synthetic fixture files. The smoke
+also exercises real-process refusal of relative, missing, home and filesystem
+roots, plus a symlink root where the platform permits creating one. While an
+MCP client stays connected, the test temporarily renames its synthetic target
+and requires **incomplete** results for all three tools; the directory is
+restored and its bytes rechecked. Run locally
 with the optional SDK installed:
 
 ```sh
@@ -81,9 +86,11 @@ python -I -B integrations/mcp_protocol_smoke.py
 
 The workflow runs on MCP/tool changes and is additional evidence, **not**
 an invented repository protection gate. Record the actual CI output/version
-before claiming a PASS. A successful smoke is not a clean install from an
-immutable public commit, not legacy-client compatibility, and **not** a
-Claude Code/Codex host session, model invocation, or external-user trial.
+before claiming a PASS. Denied-root checks do not prove defenses against
+concurrent filesystem replacement or hostile mounts, and missing-root tests
+do not measure a checker timeout. A successful smoke is not a clean install
+from an immutable public commit, not legacy-client compatibility, and **not**
+a Claude Code/Codex host session, model invocation, or external-user trial.
 See [#255](https://github.com/drevendev/BeautifulRepo/issues/255) for
 the remaining acceptance requirements.
 
