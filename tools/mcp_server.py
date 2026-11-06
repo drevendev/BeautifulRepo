@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 import stat
 import subprocess
@@ -51,7 +50,7 @@ def allowed_root(value: str) -> Path:
         if (not stat.S_ISDIR(info.st_mode) or stat.S_ISLNK(info.st_mode)
                 or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG):
             raise ValueError("allowed root must be an ordinary directory without redirects")
-    except (OSError, RuntimeError) as exc:
+    except (OSError, RuntimeError):
         raise ValueError("allowed root must be an existing readable directory") from None
     return resolved
 
