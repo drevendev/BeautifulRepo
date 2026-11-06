@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add a controlled three-arm Agent Skills comparison protocol: source-only
+  before state, identical ordinary no-plugin prompt and pinned installed-skill
+  prompt, with per-skill fixture choices, independent snapshots, observable
+  evidence and a shared scoring card. No model or host acceptance is claimed
+  (related to #257 and #74).
+
+
 - Put the reviewed v0.2.0 SHA-pinned GitHub Action workflow directly in the
   README first-visit navigation and quick-start path, with clear separation
   from unreleased combined-audit CLI and Action inputs (#254).

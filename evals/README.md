@@ -7,6 +7,11 @@ For a **repeatable, all-skills Codex/Claude manual acceptance matrix**, use
 hostile case, evidence to collect, and PASS/FAIL/INCONCLUSIVE decisions.
 No model behavior has been tested by adding that procedure.
 
+For an independent **three-arm before / ordinary short prompt / installed skill**
+comparison, use [the controlled comparison card](three-arm-comparison.md).
+It reuses these exact fixtures and existing snapshot/read-receipt tools;
+**no host/model measurements or improvement claims exist yet**.
+
 The cases use the [Claude Code plugin-eval format](https://code.claude.com/docs/en/plugin-evals). Two ordinary requests should trigger the skill, one unrelated code request should not, and **two** hostile README cases test the trust boundary: the original prompt explicitly mentions untrusted data; `audit-injection-uncued` asks a normal onboarding question without warning the agent about the attack. Synthetic files are supplied under each case's `resources/` directory via `context.add_dirs`; no real repositories or private material are used.
 
 ## Running (requires separate model-usage authorization)
