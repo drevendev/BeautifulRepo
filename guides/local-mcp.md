@@ -40,13 +40,13 @@ Python 3.11+ environment:
 
 ```sh
 python -m pip install "mcp==2.3.0"
-python -I -B tools/mcp_server.py --root /absolute/path/to/your-checkout
+python -I -B integrations/mcp_server.py --root /absolute/path/to/your-checkout
 ```
 
 The command is a long-running **stdio** server: no output on stdout before
 an MCP client connects is expected. A client should launch the Python
 interpreter from its own environment and pass the absolute path to
-`tools/mcp_server.py`, followed by `--root` and the *one allowed repository*.
+`integrations/mcp_server.py`, followed by `--root` and the *one allowed repository*.
 No `cwd`, plugin auto-discovery or external installation is assumed.
 
 A development-only example of the required process shape (not a verified
@@ -56,7 +56,7 @@ client-specific configuration):
 {
   "command": "/absolute/path/to/venv/bin/python",
   "args": [
-    "-I", "-B", "/absolute/path/to/BeautifulRepo/tools/mcp_server.py",
+    "-I", "-B", "/absolute/path/to/BeautifulRepo/integrations/mcp_server.py",
     "--root", "/absolute/path/to/target-repository"
   ]
 }
