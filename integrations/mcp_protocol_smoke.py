@@ -34,7 +34,7 @@ def snapshot(root: Path) -> dict[str, str]:
         for path in root.rglob("*") if path.is_file()
     }
 
-    
+
 def check_startup_refusals(root: Path) -> tuple[int, bool]:
     """Verify the actual server process refuses unsafe roots before MCP starts."""
     candidates = [
