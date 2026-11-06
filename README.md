@@ -14,6 +14,7 @@
 <p align="center">
   <a href="SHOWCASE.md">See the before/after</a> ·
   <a href="#working-proof">Run an audit</a> ·
+  <a href="guides/adopting-the-checks.md#add-it-to-a-workflow">Run checks on PRs</a> ·
   <a href="#start-here">Start here</a> ·
   <a href="examples/README.md">Working examples</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
@@ -60,6 +61,14 @@ all checks completed without threshold-reaching findings (warnings may remain);
 **2** means evidence was incomplete. A clean result cannot certify a good README.
 See the [combined audit guide](guides/combined-audit.md) and
 [rule reference](guides/audit-rule-reference.md) for exact scope and limits.
+
+**Want these checks on every pull request?** [Copy the SHA-pinned v0.2.0
+GitHub Actions workflow](guides/adopting-the-checks.md#add-it-to-a-workflow).
+It runs the released repository, Markdown-link and HTML-navigation checks in
+CI, without copying BeautifulRepo tools into your repository. The newer
+combined CLI (`audit_bundle.py`) and `audit-profile` Action input are
+**not included in that pin**. Its checks do not execute your project code,
+fetch external links or certify rendered accessibility.
 
 **Reproduce a visible before/after:** this bundled demonstration uses two
 **fictional** README versions in a disposable temporary directory:
@@ -128,9 +137,6 @@ local links still fail (exit 1); invalid paths or incomplete scans exit 2.
 For a threshold that fails on entry-point warnings, use `--fail-on warning`.
 The audit does not execute the target or fetch external URLs.
 See the [combined audit guide](guides/combined-audit.md) for formats and boundaries.
-To run the checks on pull requests, use the
-[SHA-pinned v0.2.0 GitHub Action recipe](guides/adopting-the-checks.md);
-the combined CLI is **current-source only** and is not in that release.
 
 **Recorded result on a real repository (not the fictional demo):**
 On 2026-10-23, the v0.2.0 audit pinned to
@@ -188,6 +194,7 @@ coverage without inventing a beauty score or claiming that warnings were fixed.
 | Your goal | First step | Visible result |
 | --- | --- | --- |
 | Diagnose an existing repository | Run the [offline audit](guides/repository-audit.md) and use the [repository checklist](checklists/repository.md) | Specific findings, not a beauty score |
+| Catch documentation regressions in PRs | [Copy the SHA-pinned GitHub Action example](guides/adopting-the-checks.md#add-it-to-a-workflow) | Three bounded source checks on each pull request |
 | Start a new one | Adapt the [README scaffold](templates/README.template.md) with the [first-success checklist](checklists/first-success.md) | A reproducible command and an honest scope |
 | Borrow a working example | Choose from [five starter types](examples/README.md) | Real source, tests and exact limitations |
 
