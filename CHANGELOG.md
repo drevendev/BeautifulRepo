@@ -538,6 +538,8 @@ keep their original themed headings.
 
 ### Fixed
 
+- Encode local WebM playback filenames as a single URL path segment before HTML escaping, preserving literal `#`, `?`, `%`, spaces, quotes, `&` and Unicode. Add URL-resolution regressions; full browser and assistive-technology acceptance remain separate (Related: #284, #254).
+
 - Escape unprintable control/format characters in the combined audit's text
   findings and link diagnostics, without hiding ordinary Unicode or changing
   its JSON report. Keep each observation on one physical terminal line so
