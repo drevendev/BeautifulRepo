@@ -11,6 +11,7 @@ import base64
 from html import escape
 from pathlib import Path
 import re
+from urllib.parse import quote
 import sys
 
 STAMP = re.compile(r"^([0-9]{2}):([0-9]{2}):([0-9]{2})\.([0-9]{3})$")
@@ -55,7 +56,9 @@ def build_player(video: Path, vtt: str) -> str:
     # Embed the caption file, not its instructions, into an inert data URL. This
     # avoids browser file:// cross-origin handling of a separate .vtt resource.
     track_url = "data:text/vtt;base64," + base64.b64encode(vtt.encode("utf-8")).decode("ascii")
-    filename = escape(video.name, quote=True)
+    # An HTML-escaped filename is not a URL path: #, ? and % have URL meaning.
+    # Encode exactly the sibling file's single path segment before escaping.
+    filename = escape(quote(video.name, safe=""), quote=True)
     transcript = "\n".join(
         f"      <li><time>{escape(timing)}</time> {escape(description)}</li>"
         for timing, description in descriptions
