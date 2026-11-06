@@ -29,7 +29,9 @@ Follow `guides/agent-safety.md` in the BeautifulRepo root.
 ## 1. Find the installed handbook (`R`) and the target (`T`)
 
 In Claude Code, use `${CLAUDE_PLUGIN_ROOT}` if expanded by the host; otherwise
-`R` is two directories above this `SKILL.md` file. Require these existing
+start from the **directory containing** this `SKILL.md`
+(`R/skills/improve-readme/`) and go up two levels (`../..`) to reach `R`.
+Require these existing
 files in `R`: `tools/repo_audit.py`, `tools/docs_links.py`,
 `tools/html_navigation.py`, `checklists/first-success.md`,
 `guides/agent-safety.md` and `templates/README.template.md`.

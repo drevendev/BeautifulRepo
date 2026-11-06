@@ -175,6 +175,15 @@ class SkillTests(unittest.TestCase):
                 self.assertIn("Do not use", fields["description"])
                 self.assertLess(len(body.splitlines()), 500)
 
+    def test_skill_root_discovery_is_relative_to_the_skill_directory(self):
+        """Portable fallback must walk from skills/<name>/, not the SKILL.md file."""
+        for path in self.skills():
+            with self.subTest(skill=path.parent.name):
+                self.assertEqual((path.parent / ".." / "..").resolve(), ROOT.resolve())
+                body = path.read_text(encoding="utf-8")
+                self.assertIn("directory containing", body)
+                self.assertIn("`../..`", body)
+
     def test_skills_reference_files_that_exist(self):
         for path in self.skills():
             text = path.read_text(encoding="utf-8")

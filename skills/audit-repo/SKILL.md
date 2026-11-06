@@ -32,7 +32,9 @@ In short:
 
 - In Claude Code, `R` is `${CLAUDE_PLUGIN_ROOT}`. If that text still reads as a literal
   `${...}` placeholder, it was not substituted; use the next rule.
-- Otherwise, `R` is two directories above this file (`R/skills/audit-repo/SKILL.md`).
+- Otherwise, start from the **directory containing** this `SKILL.md`
+(`R/skills/audit-repo/`) and go up two levels (`../..`) to reach `R`.
+Do not count upward from the `SKILL.md` file path itself.
 
 Confirm that `R/tools/repo_audit.py`, `R/tools/docs_links.py` and
 `R/tools/html_navigation.py` exist. If they don't, stop. Tell the user to install the
