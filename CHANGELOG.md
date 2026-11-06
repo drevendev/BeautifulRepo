@@ -544,6 +544,8 @@ keep their original themed headings.
 
 ### Fixed
 
+- Clarify that Codex's `plugin marketplace add` only registers a source: install the plugin separately from `/plugins`, not via the undocumented `codex plugin add` command. Align pinned release/development setup and update/remove guidance, with a contract test; real-host installation and four-skill acceptance remain unverified (Related: #257, #258).
+
 - Encode local WebM playback filenames as a single URL path segment before HTML escaping, preserving literal `#`, `?`, `%`, spaces, quotes, `&` and Unicode. Add URL-resolution regressions; full browser and assistive-technology acceptance remain separate (Related: #284, #254).
 
 - Escape unprintable control/format characters in the combined audit's text
