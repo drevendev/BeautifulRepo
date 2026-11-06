@@ -138,9 +138,12 @@ tracks real client and protocol acceptance.
 
 The [private/internal repository guidance](guides/private-repositories.md),
 [confidentiality checklist](checklists/confidentiality.md) and repository
-self-check are published. The proposed [local MCP server](https://github.com/drevendev/BeautifulRepo/issues/255)
-is a **separate future workstream**, not part of the installed four-skill
-candidate or a prerequisite for the plugin release.
+self-check are published. The experimental [local MCP adapter](guides/local-mcp.md)
+has its own optional real-stdio protocol smoke and negative-root checks, but
+it is **not yet independently host-verified or released**. Its remaining
+[acceptance work](https://github.com/drevendev/BeautifulRepo/issues/255)
+is separate from the four-skill plugin candidate, and MCP is not a prerequisite
+for that plugin release.
 
 ## Later: evidence-backed extensions
 
