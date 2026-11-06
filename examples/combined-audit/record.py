@@ -31,7 +31,7 @@ DESCRIPTIVE_VTT = """WEBVTT
 NOTE Silent synthetic browser demonstration; descriptive text, not speech subtitles.
 
 00:00:00.000 --> 00:00:03.000
-Synthetic Pocket Trails example. Before: zero of two local-link checks pass. After: two of two pass.
+Pocket Trails (fictional): links pass 0/2 → 2/2.
 
 00:00:03.000 --> 00:00:11.000
 The before report finds a broken README link to docs/setup.md.

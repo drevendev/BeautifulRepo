@@ -105,7 +105,7 @@ produce a desktop PNG, a narrow-window PNG and an HTML report. The optional
 produce a real WebM scroll recording and, with `--captions`, an optional
 source-backed WebVTT descriptive track for the **silent** fixed scroll,
 provided Playwright, its video encoder and a browser are installed separately.
-The track has not been verified in a published player. Normal audits need
+A [local offline playback companion](examples/combined-audit/README.md#inspect-webm--descriptive-captions-together-optional) can now pair the real WebM with its embedded WebVTT and a visible text alternative; browser playback and accessibility still need manual acceptance. Normal audits need
 none of those dependencies. The [seven-day GitHub Actions artifact](examples/combined-audit/README.md#reproduce-screenshots-in-github-actions-synthetic-only)
 is **expiring**, not a permanent public video. No video file is claimed
 to be published by this page.

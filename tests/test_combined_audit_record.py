@@ -75,6 +75,8 @@ class RecordingPreparationTests(unittest.TestCase):
             "00:00:19.000 --> 00:00:22.000",
         ):
             self.assertIn(item, vtt)
+        opening = vtt.split("00:00:00.000 --> 00:00:03.000\n", 1)[1].split("\n", 1)[0]
+        self.assertLessEqual(len(opening), 55)  # source-level reading-load guard
         self.assertIn("docs/setup.md", vtt)
         self.assertIn("docs/guide.md", vtt)
         self.assertIn("fictional", vtt)
