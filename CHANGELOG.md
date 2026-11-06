@@ -548,6 +548,14 @@ keep their original themed headings.
 
 ### Fixed
 
+- Mark the development four-skill portable plugin as requiring a local
+  executor (`requires_local_executor: true`) so a future desktop-only plugin
+  submission does not suggest browser-only repository audits. Add a manifest
+  regression and clarify that the historical pinned candidates are unchanged;
+  packaging metadata is not an actual Claude Code/Codex installation or
+  model-invocation result (official OpenAI desktop-only guidance reviewed
+  2026-11-06; related to #257).
+
 - Clarify that Codex's `plugin marketplace add` only registers a source: install the plugin separately from `/plugins`, not via the undocumented `codex plugin add` command. Align pinned release/development setup and update/remove guidance, with a contract test; real-host installation and four-skill acceptance remain unverified (Related: #257, #258).
 
 - Encode local WebM playback filenames as a single URL path segment before HTML escaping, preserving literal `#`, `?`, `%`, spaces, quotes, `&` and Unicode. Add URL-resolution regressions; full browser and assistive-technology acceptance remain separate (Related: #284, #254).
