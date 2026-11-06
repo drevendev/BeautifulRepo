@@ -548,6 +548,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Repin the unreleased four-skill Claude Code/Codex trial to immutable commit
+  `cf8ac81ddabb5e2006913e65a2f980ef201baf5c`, which includes the desktop local-executor manifest correction.
+  Keep the install commands, manual matrix and roadmap on the same revision;
+  6/6 source CI checks are green but actual host installation and model-driven
+  trials remain unverified (#257, #258).
+
 - Mark the development four-skill portable plugin as requiring a local
   executor (`requires_local_executor: true`) so a future desktop-only plugin
   submission does not suggest browser-only repository audits. Add a manifest

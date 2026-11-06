@@ -42,14 +42,19 @@ checkout as evidence for a tested release candidate**.
 
 ## Try all four skills from a pinned development candidate
 
-The source candidate at [commit `a6ff79ee137d2`](https://github.com/drevendev/BeautifulRepo/tree/a6ff79ee137d2eee8517792ba693c2854d51ed48)
+The source candidate at [commit `cf8ac81ddabb5`](https://github.com/drevendev/BeautifulRepo/tree/cf8ac81ddabb5e2006913e65a2f980ef201baf5c)
 contains `audit-repo`, `improve-readme`, `trust-surfaces` and
 `draft-release-notes` (manifest version `0.3.0-dev.0`). It is **not a
-stable v0.3.0 release**.
-This candidate includes the four-skill manifest discovery correction (#261),
-the bounded synthetic snapshot helper (#262) and the readable audit demo (#263).
-Earlier candidate `9b3e43fd8502` remains inspectable, but its results must **not**
-be treated as tests of this newer commit; record the exact SHA for every run. The following commands come from the current official
+stable v0.3.0 release**. Unlike the earlier `a6ff79ee137d2` trial tree,
+this revision includes the Codex desktop-only `requires_local_executor`
+manifest declaration, the documented plugin-browser installation flow, and
+the four-skill discovery, snapshot and synthetic-demo corrections.
+The [six source CI checks](https://github.com/drevendev/BeautifulRepo/actions/runs/42210225927)
+completed successfully on this exact commit on 2026-11-06; they are **not**
+evidence of successful plugin installation, skill discovery or model behavior.
+Earlier candidates `a6ff79ee137d2` and `9b3e43fd8502` remain inspectable,
+but their results must **not** be transferred to this candidate. Record the
+exact SHA for every run. The following commands come from the current official
 [Claude Code CLI reference](https://code.claude.com/docs/en/plugins/cli-reference)
 and [Codex plugin guide](https://developers.openai.com/plugins/build/plugins),
 but **fresh GitHub-source installation and actual model invocation have not
@@ -63,7 +68,7 @@ You need Python 3.11+ and Git. Try one host, from a regular terminal:
 **Claude Code — test the immutable commit:**
 
 ```bash
-claude plugin marketplace add drevendev/BeautifulRepo@a6ff79ee137d2eee8517792ba693c2854d51ed48
+claude plugin marketplace add drevendev/BeautifulRepo@cf8ac81ddabb5e2006913e65a2f980ef201baf5c
 claude plugin install beautifulrepo@beautifulrepo
 claude plugin list
 claude plugin details beautifulrepo
@@ -72,7 +77,7 @@ claude plugin details beautifulrepo
 **Codex — test the same immutable commit:**
 
 ```bash
-codex plugin marketplace add drevendev/BeautifulRepo --ref a6ff79ee137d2eee8517792ba693c2854d51ed48
+codex plugin marketplace add drevendev/BeautifulRepo --ref cf8ac81ddabb5e2006913e65a2f980ef201baf5c
 codex plugin marketplace list
 ```
 
@@ -82,7 +87,7 @@ Restart the client. Check the *installed copy* of `skills/` for all four named
 `SKILL.md` files and confirm they correspond to the pinned commit before a
 model test. For a low-risk first test use a **disposable synthetic target**,
 never a private repository with unapproved provider data controls. Follow the
-[revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/a6ff79ee137d2eee8517792ba693c2854d51ed48/evals/manual-smoke.md).
+[revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/cf8ac81ddabb5e2006913e65a2f980ef201baf5c/evals/manual-smoke.md).
 Actual skill selection, file reads, tool calls, permission decisions and
 before/after target snapshots must be observed; static CI and plugin manifests
 cannot verify them. Results (including failures or INCONCLUSIVE outcomes) go to
@@ -197,9 +202,9 @@ The current development `plugin.json` declares
 need access to a **local** Git checkout and Python/Git tools. This follows the
 [official desktop-only plugin packaging guidance](https://developers.openai.com/plugins/deploy/desktop-only)
 (reviewed 2026-11-06). It does **not** install a plugin, grant filesystem
-permissions, verify real model execution, or add an MCP server. The pinned
-`v0.2.0` tag and `a6ff79ee` four-skill test candidate are immutable earlier
-trees: do not attribute this new flag to either of them.
+permissions, verify real model execution, or add an MCP server. The stable
+`v0.2.0` tag and older `a6ff79ee` development tree are immutable and do
+not carry this flag; the pinned `cf8ac81` development candidate does.
 
 ## Fixture-based checks (not model evaluations)
 
