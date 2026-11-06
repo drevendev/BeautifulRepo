@@ -1,0 +1,33 @@
+name: MCP stdio protocol smoke (optional)
+on:
+  pull_request:
+    paths:
+      - 'integrations/**'
+      - 'tools/**'
+      - '.github/workflows/mcp-protocol.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'integrations/**'
+      - 'tools/**'
+      - '.github/workflows/mcp-protocol.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  protocol:
+    # Additional evidence, not a repository protection or release gate.
+    name: MCP stdio / Python 3.11
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 ref inspected 2026-10-29
+        with:
+          python-version: '3.11'
+      - name: Install optional pinned MCP Python SDK
+        run: python -m pip install "mcp==2.3.0"
+      - name: Negotiate stdio MCP, list tools, and compare synthetic results
+        run: python -I -B integrations/mcp_protocol_smoke.py
