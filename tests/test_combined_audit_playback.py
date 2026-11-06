@@ -1,10 +1,12 @@
 """Dependency-free regressions for the optional WebM+VTT playback companion."""
 import base64
+from html import unescape
 import importlib.util
 from pathlib import Path
 import re
 import tempfile
 import unittest
+from urllib.parse import quote, unquote, urlsplit
 
 PLAYER = Path(__file__).resolve().parents[1] / "examples" / "combined-audit" / "playback.py"
 _spec = importlib.util.spec_from_file_location("br_showcase_playback", PLAYER)
@@ -53,8 +55,32 @@ class PlaybackTests(unittest.TestCase):
         markup = player.build_player(Path('a" onload="evil.webm'), injected)
         self.assertNotIn("<script>alert", markup)
         self.assertIn("&lt;script&gt;", markup)
-        self.assertIn("&quot;", markup)
+        self.assertIn("%22", markup)
         self.assertNotIn('src="a" onload=', markup)
+
+    def test_media_urls_encode_reserved_characters_as_one_sibling_segment(self):
+        # Parsing the source URL must never turn a valid local filename into
+        # a fragment/query or reinterpret literal percent escapes.
+        for name in (
+            "with space.webm",
+            "with#hash.webm",
+            "with?query.webm",
+            "with%percent.webm",
+            'with"quote.webm',
+            "with&entity.webm",
+            "café.webm",
+        ):
+            with self.subTest(name=name):
+                markup = player.build_player(Path(name), VTT)
+                match = re.search(r'<source src="([^"]+)"', markup)
+                self.assertIsNotNone(match)
+                source_url = unescape(match[1])
+                self.assertEqual(source_url, quote(name, safe=""))
+                parsed = urlsplit(source_url)
+                self.assertEqual(parsed.query, "")
+                self.assertEqual(parsed.fragment, "")
+                self.assertEqual(unquote(parsed.path), name)
+                self.assertNotIn("/", parsed.path)
 
     def test_exclusive_creation_and_source_bytes_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
