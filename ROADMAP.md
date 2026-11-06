@@ -130,6 +130,12 @@ issues for their live status.
   the remaining provider-side `hacktoberfest` label issue is separate from
   the public documentation. Do not infer participation from an old label.
 
+**Experimental local MCP:** a [development-only stdio adapter](guides/local-mcp.md)
+wraps the existing three offline checkers behind a fixed, configured repository
+root, using the optional official Python SDK v2. This is not yet verified in
+Claude Code or Codex and is not a release announcement; [#255](https://github.com/drevendev/BeautifulRepo/issues/255)
+tracks real client and protocol acceptance.
+
 The [private/internal repository guidance](guides/private-repositories.md),
 [confidentiality checklist](checklists/confidentiality.md) and repository
 self-check are published. The proposed [local MCP server](https://github.com/drevendev/BeautifulRepo/issues/255)
