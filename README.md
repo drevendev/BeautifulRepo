@@ -194,7 +194,6 @@ coverage without inventing a beauty score or claiming that warnings were fixed.
 | Your goal | First step | Visible result |
 | --- | --- | --- |
 | Diagnose an existing repository | Run the [offline audit](guides/repository-audit.md) and use the [repository checklist](checklists/repository.md) | Specific findings, not a beauty score |
-| Catch documentation regressions in PRs | [Copy the SHA-pinned GitHub Action example](guides/adopting-the-checks.md#add-it-to-a-workflow) | Three bounded source checks on each pull request |
 | Start a new one | Adapt the [README scaffold](templates/README.template.md) with the [first-success checklist](checklists/first-success.md) | A reproducible command and an honest scope |
 | Borrow a working example | Choose from [five starter types](examples/README.md) | Real source, tests and exact limitations |
 
