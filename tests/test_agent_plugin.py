@@ -107,6 +107,11 @@ class PluginManifestTests(unittest.TestCase):
         heading = rf"(?m)^## \[v{re.escape(version)}\]\s+[—–-]\s+\d{{4}}-\d{{2}}-\d{{2}}\s*$"
         self.assertRegex(changelog, heading)
 
+    def test_local_tool_skills_require_a_desktop_executor(self):
+        """Public skills run local Python/Git; web-only execution cannot audit a checkout."""
+        manifest = load("plugin.json")
+        self.assertIs(manifest["extensions"]["com.openai"].get("requires_local_executor"), True)
+
     def test_codex_reads_only_the_portable_manifest(self):
         # A .codex-plugin/plugin.json overrides the portable one and has broken `codex plugin add`.
         self.assertFalse((ROOT / ".codex-plugin/plugin.json").exists())
