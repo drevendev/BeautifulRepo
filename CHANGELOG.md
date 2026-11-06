@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add an opt-in official SDK v2 stdio protocol smoke that launches the
+  local MCP adapter, records negotiated version and tool discovery, checks
+  three tool results against direct offline checker outputs for good and
+  broken synthetic repositories, and rejects target-file writes. A focused
+  CI workflow installs only the pinned optional SDK; this does not constitute
+  Claude Code/Codex or external-user acceptance (#255).
+
 - Add a development-only, optional local MCP stdio adapter exposing three existing offline checkers as root-bound, read-only tools using the official Python SDK v2; add stdlib path/timeout/receipt tests and explicit unverified Claude Code/Codex boundaries (#255).
 
 - Add a controlled three-arm Agent Skills comparison protocol: source-only
