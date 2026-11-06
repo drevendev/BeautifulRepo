@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a development-only, optional local MCP stdio adapter exposing three existing offline checkers as root-bound, read-only tools using the official Python SDK v2; add stdlib path/timeout/receipt tests and explicit unverified Claude Code/Codex boundaries (#255).
+
 - Add a controlled three-arm Agent Skills comparison protocol: source-only
   before state, identical ordinary no-plugin prompt and pinned installed-skill
   prompt, with per-skill fixture choices, independent snapshots, observable
