@@ -115,9 +115,26 @@ class PluginManifestTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("(guides/agent-plugin.md)", readme)
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        for command in ("claude plugin install beautifulrepo@beautifulrepo",
-                        "codex plugin add beautifulrepo@beautifulrepo"):
-            self.assertIn(command, guide)
+        self.assertIn("claude plugin install beautifulrepo@beautifulrepo", guide)
+        self.assertIn(
+            "codex plugin marketplace add drevendev/BeautifulRepo --ref v0.2.0",
+            guide,
+        )
+        self.assertIn("codex plugin marketplace list", guide)
+        self.assertIn("`/plugins`", guide)
+        self.assertIn("Install plugin", guide)
+
+    def test_codex_guide_distinguishes_marketplace_from_plugin_install(self):
+        guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
+        self.assertIn("registers a **source**, not an installed plugin", guide)
+        self.assertIn("**test procedure**", guide)
+        for unsupported_command in ("add", "remove", "update"):
+            with self.subTest(command=unsupported_command):
+                self.assertNotRegex(
+                    guide,
+                    rf"(?m)^\s*codex plugin {unsupported_command}\s",
+                    "Do not advertise an unverified Codex plugin-management command",
+                )
 
 
 class FrontmatterParserTests(unittest.TestCase):
