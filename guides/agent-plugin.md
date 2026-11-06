@@ -31,10 +31,10 @@ claude plugin install beautifulrepo@beautifulrepo
 
 ```bash
 codex plugin marketplace add drevendev/BeautifulRepo --ref v0.2.0
-codex plugin add beautifulrepo@beautifulrepo
+codex plugin marketplace list
 ```
 
-Restart the agent session afterwards so it loads the skill.
+For Codex, adding the pinned marketplace registers a **source**, not an installed plugin. Launch `codex`, open `/plugins`, find **BeautifulRepo** in that marketplace, select **Install plugin**, then start a new chat. This follows the [documented Codex plugin-browser flow](https://developers.openai.com/learn/developers-codex-plugin); actual installation of BeautifulRepo on a fresh Codex host remains unverified. In Claude Code, start a new session after installation.
 
 These commands pin release `v0.2.0`, the first release that contains the plugin.
 Leaving out the pin follows mutable `master`; **do not use an unpinned
@@ -74,8 +74,9 @@ claude plugin details beautifulrepo
 ```bash
 codex plugin marketplace add drevendev/BeautifulRepo --ref a6ff79ee137d2eee8517792ba693c2854d51ed48
 codex plugin marketplace list
-codex plugin add beautifulrepo@beautifulrepo
 ```
+
+On Codex, the marketplace commands above only register and list the **pinned source**. Launch `codex`, open `/plugins`, choose **BeautifulRepo** from that marketplace and select **Install plugin**; start a new chat. The previously documented `codex plugin add ...` command is not part of the [current official marketplace CLI reference](https://developers.openai.com/plugins/build/plugins), so it is not a verified installation path. These UI steps are also a **test procedure**, not a claimed successful BeautifulRepo installation.
 
 Restart the client. Check the *installed copy* of `skills/` for all four named
 `SKILL.md` files and confirm they correspond to the pinned commit before a
@@ -170,8 +171,8 @@ See [evals](../evals/README.md) and
 
 | | Claude Code | Codex |
 | --- | --- | --- |
-| Update | `claude plugin marketplace update beautifulrepo`, then `claude plugin update beautifulrepo@beautifulrepo` | `codex plugin marketplace upgrade beautifulrepo` |
-| Remove | `claude plugin uninstall beautifulrepo@beautifulrepo`, then `claude plugin marketplace remove beautifulrepo` | `codex plugin remove beautifulrepo@beautifulrepo`, then `codex plugin marketplace remove beautifulrepo` |
+| Update | `claude plugin marketplace update beautifulrepo`, then `claude plugin update beautifulrepo@beautifulrepo` | Refresh the source with `codex plugin marketplace upgrade beautifulrepo`; manage the installed plugin separately in `/plugins` (availability varies by host/version) |
+| Remove | `claude plugin uninstall beautifulrepo@beautifulrepo`, then `claude plugin marketplace remove beautifulrepo` | Manage the installed plugin in `/plugins`; when no longer needed, remove its source with `codex plugin marketplace remove beautifulrepo` |
 
 Restart the session after an update.
 
