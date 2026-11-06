@@ -89,14 +89,15 @@ no installable package.
 
 ## Current work: verify the four-skill candidate and demonstrate real use
 
-This section reflects issue/source inspection on **2026-11-04**. It is not
+This section reflects issue/source inspection on **2026-11-06**. It is not
 a release date or evidence of passing model tests. Consult the linked GitHub
 issues for their live status.
 
 - **Four-skill plugin candidate** ([#257](https://github.com/drevendev/BeautifulRepo/issues/257)):
   the published `v0.2.0` plugin has **only** `audit-repo`. The [exact
   four-skill development candidate](guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate)
-  is pinned to `a6ff79ee137d2eee8517792ba693c2854d51ed48` (`0.3.0-dev.0`). Source/CI tests
+  is pinned to `cf8ac81ddabb5e2006913e65a2f980ef201baf5c` (`0.3.0-dev.0`) and includes the
+  desktop-only local-executor declaration. Source/CI tests
   do not verify successful *fresh install*, skill discovery or model behavior
   in Claude Code and Codex. The [manual matrix](evals/manual-smoke.md),
   [fixture infrastructure](https://github.com/drevendev/BeautifulRepo/issues/74)
