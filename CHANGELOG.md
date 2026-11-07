@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a practical choice of **standalone offline CLI**, tagged one-skill
+  plugin, pinned four-skill development candidate and separately configured
+  experimental MCP in the plugin guide. State network/data and acceptance
+  boundaries before readers install a host integration; correct the outdated
+  description of the already-implemented MCP adapter (#255, #257).
+
 - Clarify that experimental manual Claude Code/Codex MCP configuration is
   separate from OpenAI Plugin Directory publication. Official rules reviewed
   2026-11-07 require partner allowlisting for desktop-only local MCP submissions
