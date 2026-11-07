@@ -2,8 +2,9 @@
 """Optional real-SDK MCP stdio smoke test (no LLM calls or remote services).
 
 Install mcp==2.3.0 in a disposable environment before running this script.
-It launches the actual local adapter, negotiates MCP, lists and calls all
-three tools on healthy/broken synthetic fixtures, and checks for target writes.
+It launches the actual local adapter, exercises both modern discovery and
+legacy initialize lifecycles, lists and calls all three tools on healthy/broken
+synthetic fixtures, and checks for target writes.
 It does NOT test Claude Code, Codex, or external-user installation.
 """
 from __future__ import annotations
@@ -71,16 +72,20 @@ def check_startup_refusals(root: Path) -> tuple[int, bool]:
     return len(candidates), symlink_tested
 
 
-async def probe(root: Path, *, broken: bool, exercise_missing_root: bool = False) -> str:
+async def probe(root: Path, *, broken: bool, mode: str,
+                exercise_missing_root: bool = False) -> str:
     params = StdioServerParameters(
         command=sys.executable,
         args=["-I", "-B", str(SERVER), "--root", str(root)],
     )
     before = snapshot(root)
-    async with Client(params) as client:
+    async with Client(params, mode=mode) as client:
         version = str(client.protocol_version)
-        if not version or version == "None":
-            raise AssertionError("no negotiated MCP version")
+        expected_version = {"auto": "2026-07-28", "legacy": "2025-11-25"}[mode]
+        if version != expected_version:
+            raise AssertionError(
+                f"{mode}: expected MCP {expected_version}, got {version}"
+            )
         listed = await client.list_tools()
         actual = {tool.name: tool for tool in listed.tools}
         if set(actual) != set(CHECKS):
@@ -135,19 +140,27 @@ async def main() -> None:
         )
         (root / "docs" / "guide.md").write_text("# Guide\n", encoding="utf-8")
         refusal_count, symlink_tested = check_startup_refusals(root)
-        healthy_version = await probe(root, broken=False, exercise_missing_root=True)
+        modern_healthy = await probe(
+            root, broken=False, mode="auto", exercise_missing_root=True
+        )
+        legacy_healthy = await probe(
+            root, broken=False, mode="legacy", exercise_missing_root=True
+        )
         (root / "README.md").write_text(
             "# Fixture\n\n[Broken](docs/missing.md)\n", encoding="utf-8"
         )
-        broken_version = await probe(root, broken=True)
-        if healthy_version != broken_version:
-            raise AssertionError("protocol version changed across identical client settings")
+        modern_broken = await probe(root, broken=True, mode="auto")
+        legacy_broken = await probe(root, broken=True, mode="legacy")
+        if modern_healthy != modern_broken or legacy_healthy != legacy_broken:
+            raise AssertionError("protocol version changed within an MCP lifecycle")
         print(
-            f"MCP stdio SDK smoke PASS; negotiated {healthy_version}; "
-            "3 tools listed and matched direct checkers on healthy/broken synthetic roots; "
+            f"MCP stdio SDK smoke PASS; modern discovery {modern_healthy}; "
+            f"legacy initialize {legacy_healthy}; "
+            "3 tools listed and matched direct checkers on healthy/broken synthetic roots "
+            "in both lifecycles; "
             f"fixture files unchanged; {refusal_count} unsafe startup roots refused "
             f"(symlink exercised: {symlink_tested}); missing root during an active "
-            "session returns incomplete evidence for all 3 tools. "
+            "session returns incomplete evidence for all 3 tools in both lifecycles. "
             "Not a Claude Code/Codex host test."
         )
 
