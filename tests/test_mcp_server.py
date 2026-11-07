@@ -82,17 +82,9 @@ class CheckerWrapperTests(unittest.TestCase):
         }
         return subprocess.CompletedProcess([], code, json.dumps(payload).encode(), b"")
 
-    @staticmethod
-    def fake_subprocess(response):
-        # Real subprocesses write into the supplied output handles.
-        def execute(cmd, **kwargs):
-            kwargs["stdout"].write(response.stdout)
-            kwargs["stderr"].write(response.stderr)
-            return subprocess.CompletedProcess(cmd, response.returncode)
-        return execute
-
     def test_fixed_command_and_native_diagnostics(self):
-        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(self.response())) as run:
+        with mock.patch.object(adapter, "_bounded_run",
+                               return_value=(1, self.response().stdout, None)) as run:
             report = adapter.run_check(self.root, "check_documentation_links")
         self.assertEqual(report["state"], "complete")
         self.assertEqual(report["exit_code"], 1)
@@ -102,42 +94,40 @@ class CheckerWrapperTests(unittest.TestCase):
             sys.executable, "-I", "-B", str(adapter.BUNDLE),
             str(self.root), "--format", "json", "--fail-on", "never",
         ])
-        self.assertIs(kwargs["stdin"], subprocess.DEVNULL)
-        self.assertIsNot(kwargs["stdout"], subprocess.PIPE)
-        self.assertIsNot(kwargs["stderr"], subprocess.PIPE)
-        self.assertTrue(hasattr(kwargs["stdout"], "fileno"))
-        self.assertEqual(kwargs["timeout"], adapter.TIMEOUT_SECONDS)
-        self.assertFalse(kwargs["check"])
-        self.assertNotIn("shell", kwargs)
+        self.assertEqual(kwargs, {})
 
     def test_timeout_is_incomplete_not_success(self):
-        with mock.patch.object(adapter.subprocess, "run", side_effect=subprocess.TimeoutExpired("audit", 1)):
+        with mock.patch.object(adapter, "_bounded_run",
+                               side_effect=subprocess.TimeoutExpired("audit", 1)):
             report = adapter.run_check(self.root, "audit_repository")
         self.assertEqual(report["state"], "incomplete")
         self.assertEqual(report["exit_code"], 2)
 
     def test_bad_output_is_incomplete(self):
-        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(subprocess.CompletedProcess([], 0, b"garbage", b""))):
+        with mock.patch.object(adapter, "_bounded_run",
+                               return_value=(0, b"garbage", None)):
             report = adapter.run_check(self.root, "check_html_navigation")
         self.assertEqual(report["state"], "incomplete")
         self.assertNotIn("evidence", report)
 
     def test_large_output_is_incomplete(self):
-        fake = subprocess.CompletedProcess([], 0, b"x" * (adapter.MAX_OUTPUT_BYTES + 1), b"")
-        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(fake)):
+        reason = "checker output exceeded the bounded response limit"
+        with mock.patch.object(adapter, "_bounded_run",
+                               return_value=(-9, b"", reason)):
             report = adapter.run_check(self.root, "check_html_navigation")
         self.assertEqual(report["state"], "incomplete")
+        self.assertEqual(report["reason"], reason)
 
     def test_large_stderr_is_incomplete_without_response_bytes(self):
-        fake = subprocess.CompletedProcess([], 0, b"{}", b"x" * (adapter.MAX_OUTPUT_BYTES + 1))
-        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(fake)):
+        with mock.patch.object(adapter, "_bounded_run",
+                               return_value=(-9, b"", "checker output exceeded the bounded response limit")):
             report = adapter.run_check(self.root, "audit_repository")
         self.assertEqual(report["state"], "incomplete")
         self.assertEqual(report["exit_code"], 2)
         self.assertNotIn("evidence", report)
 
     def test_rechecks_root_before_every_call(self):
-        with mock.patch.object(adapter.subprocess, "run") as run:
+        with mock.patch.object(adapter, "_bounded_run") as run:
             report = adapter.run_check(self.root / "missing", "audit_repository")
         self.assertEqual(report["state"], "incomplete")
         run.assert_not_called()
@@ -151,6 +141,40 @@ class CheckerWrapperTests(unittest.TestCase):
         self.assertTrue(any("missing" in str(item).lower()
                             for item in report["evidence"]["diagnostics"]), report)
         self.assertEqual((self.root / "README.md").read_bytes(), before)
+
+
+class BoundedCaptureTests(unittest.TestCase):
+    def test_short_stdout_and_stderr_are_drained(self):
+        code, output, reason = adapter._bounded_run([
+            sys.executable, "-I", "-c",
+            "import os; os.write(1, b'hello'); os.write(2, b'diagnostic')",
+        ])
+        self.assertEqual((code, output, reason), (0, b"hello", None))
+
+    def test_noisy_stdout_is_killed_before_end_of_sleep(self):
+        code, output, reason = adapter._bounded_run([
+            sys.executable, "-I", "-c",
+            "import os,time; os.write(1, b'x' * 1048576); time.sleep(5)",
+        ])
+        self.assertIsNotNone(code)
+        self.assertEqual(output, b"")
+        self.assertEqual(reason, "checker output exceeded the bounded response limit")
+
+    def test_noisy_stderr_is_killed_before_end_of_sleep(self):
+        code, output, reason = adapter._bounded_run([
+            sys.executable, "-I", "-c",
+            "import os,time; os.write(2, b'x' * 1048576); time.sleep(5)",
+        ])
+        self.assertIsNotNone(code)
+        self.assertEqual(output, b"")
+        self.assertEqual(reason, "checker output exceeded the bounded response limit")
+
+    def test_real_process_timeout(self):
+        with mock.patch.object(adapter, "TIMEOUT_SECONDS", 0.1):
+            with self.assertRaises(subprocess.TimeoutExpired):
+                adapter._bounded_run([
+                    sys.executable, "-I", "-c", "import time; time.sleep(5)",
+                ])
 
 
 class ToolSurfaceTests(unittest.TestCase):
