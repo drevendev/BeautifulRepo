@@ -60,7 +60,8 @@ do not substitute a floating branch and claim the results are reproducible.
 ### Reproduce an immutable development checkout (POSIX)
 
 This **source-checked procedure, reviewed 2026-11-07, has not passed a fresh
-Claude Code/Codex host installation**. Use a disposable environment. The following full commit is a `master` snapshot containing the **modern and
+Claude Code/Codex host installation**. Use a disposable environment. The
+following full commit is a `master` snapshot containing the **modern and
 legacy SDK smoke**, including the fail-closed missing-root regressions. The
 older `6c01779` checkout runs an earlier smoke **without the legacy mode**;
 using it cannot reproduce both protocol-lifecycle results. This commit is
