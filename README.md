@@ -61,7 +61,7 @@ and local HTML/fragment navigation. It reports findings and source locations
 without running target code or fetching external URLs. `--fail-on never`
 makes **entry-point findings advisory**, but broken local links still produce
 exit **1**; exit **0** means no threshold-reaching findings (warnings can
-remain), and exit **2** means incomplete evidence. For a stricter entry-point
+remain), and exit **2** means an invalid root or incomplete evidence. For a stricter entry-point
 threshold, use `--fail-on warning`. To audit BeautifulRepo itself instead,
 run `python -I tools/audit_bundle.py .` from this directory.
 A clean result cannot certify a good README. See the
