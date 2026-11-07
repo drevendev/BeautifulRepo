@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Exercise both the modern `server/discover` and legacy `initialize`
+  lifecycles in the optional real-SDK stdio smoke, checking all three tools on
+  healthy/broken synthetic roots and fail-closed missing-root behavior in each.
+  This is pinned-SDK compatibility evidence, **not** independent legacy-client
+  or Claude Code/Codex host acceptance (#255).
+
 - Document a reproducible, commit-pinned checkout and optional SDK preflight
   for the experimental MCP stdio adapter, with separate Claude Code and Codex
   registration, inspection and removal recipes using synthetic fixtures.
