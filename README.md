@@ -274,6 +274,12 @@ pinned to a reviewed commit. See [run the checks in your repository](guides/adop
 Coding agents can run the same audit through the BeautifulRepo plugin for
 Claude Code and Codex. See [use BeautifulRepo from an agent](guides/agent-plugin.md).
 
+The [experimental local MCP adapter](guides/local-mcp.md) is a **separate,
+optional** stdio interface to the same offline checks. Its
+[pinned checkout and host-specific trial recipes](guides/local-mcp.md#reproduce-an-immutable-development-checkout-posix)
+are available for Claude Code and Codex, but a configuration command or SDK
+smoke PASS does **not** establish a successful model-host installation.
+
 These tools do **not** claim to be a live-link crawler, complete GitHub Markdown renderer, security scanner, runtime accessibility certification, or repository beauty score. Manual judgement still matters.
 
 ## Explore the handbook
