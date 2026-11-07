@@ -595,6 +595,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Fix the experimental MCP install guide's immutable checkout: the former
+  `6c01779` pin contained only the earlier modern SDK smoke, while the guide
+  described both modern and legacy protocol checks. Pin the accepted
+  `331df37` tree with both smoke modes and missing-root regressions, without
+  claiming Claude Code or Codex host acceptance (related to #255).
+
 - Resolve the portable Agent Skills handbook root from the directory containing
   each `SKILL.md` (`../..`), not ambiguously from the file path itself.
   Align all four skills and add a source-level regression for the documented
