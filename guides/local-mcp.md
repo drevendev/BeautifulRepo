@@ -26,6 +26,28 @@ The child interpreter runs the fixed checked-in `audit_bundle.py` with
 The checkers do not execute target code or fetch external links. MCP clients
 and model hosts **may transmit returned findings to their providers**.
 
+## Local use versus directory distribution
+
+**Submission requirements reviewed 2026-11-07; no submission made.**
+Installing the experimental adapter with `claude mcp add` or
+`codex mcp add` is a **manual local configuration**, not a packaged,
+approved or published plugin. OpenAI's official
+[desktop-only plugin submission rules](https://developers.openai.com/plugins/deploy/desktop-only)
+currently limit **local stdio MCP submissions** to approved partners whose
+organization is allowlisted. The
+[plugin submission guide](https://developers.openai.com/plugins/deploy/submission)
+also says an MCP server cannot later be added to an **already submitted
+skills-only plugin** through a normal plugin update. These are **OpenAI
+Plugin Directory rules**, not proof that local CLI registration works, nor
+rules for an independent MCP Registry listing or Claude Code marketplace.
+
+For now, test this adapter separately from BeautifulRepo's four-skill
+development candidate. Do not promise a directory installation, a remote
+ChatGPT connection or that any existing skills-only package will
+automatically gain MCP tools. Publication, registration, eligibility checks
+and external submissions remain outside this development trial and require
+separate owner authorization.
+
 ## Install and connect (untested development instructions)
 
 The official [MCP Python SDK](https://py.sdk.modelcontextprotocol.io/) v2

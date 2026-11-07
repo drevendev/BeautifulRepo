@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Clarify that experimental manual Claude Code/Codex MCP configuration is
+  separate from OpenAI Plugin Directory publication. Official rules reviewed
+  2026-11-07 require partner allowlisting for desktop-only local MCP submissions
+  and do not permit adding MCP to an already submitted skills-only plugin.
+  No host acceptance, submission or release is claimed (related to #255).
+
 - Exercise both the modern `server/discover` and legacy `initialize`
   lifecycles in the optional real-SDK stdio smoke, checking all three tools on
   healthy/broken synthetic roots and fail-closed missing-root behavior in each.
