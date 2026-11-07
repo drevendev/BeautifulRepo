@@ -16,6 +16,35 @@ session may still transfer repository context to the configured model provider.
 Review approved data controls before inspecting private code. See the
 [agent ground rules](agent-safety.md).
 
+## Choose the smallest tool that fits
+
+You do **not** need to install an agent plugin or send repository content to a
+model provider merely to check local documentation:
+
+- **Just run the offline checks:** from a BeautifulRepo checkout, use
+  `python -I tools/audit_bundle.py .` (Python 3.11+, no third-party runtime
+  packages). For a different checkout use its explicit local path. This
+  checks entry points, relative Markdown links and local HTML navigation;
+  it is a source-level check, not a rendered-accessibility audit. See the
+  [combined audit guide](combined-audit.md).
+- **Ask an agent to audit a repository:** use the tagged **v0.2.0** plugin
+  below. That published version contains **only** `audit-repo`; a plugin
+  command completing does not prove the model selected the skill.
+- **Trial README improvements, trust surfaces or release-note drafts:** use
+  the **four-skill pinned development candidate** below. It has not passed
+  fresh, independent Claude Code/Codex host acceptance and is not a
+  published four-skill release. Follow the explicit edit-approval boundaries.
+- **Expose the three offline checkers as MCP tools:** follow the separate
+  [experimental local MCP guide](local-mcp.md). This opt-in stdio adapter
+  needs an optional pinned SDK and its own client registration. It is **not
+  installed by either plugin path above**. SDK-level protocol checks have
+  passed, but Claude Code/Codex host invocation has not been verified; no
+  stable MCP release is claimed.
+
+For private or internal repositories, check your model-provider data controls
+*before* choosing either agent-based route. The standalone Python checkers
+make no network requests, but agent sessions may transmit inspected content.
+
 ## Install the released audit skill (v0.2.0)
 
 You need Python 3.11 or newer on `PATH`.
@@ -98,9 +127,10 @@ before/after target snapshots must be observed; static CI and plugin manifests
 cannot verify them. Results (including failures or INCONCLUSIVE outcomes) go to
 [tester issue #258](https://github.com/drevendev/BeautifulRepo/issues/258);
 release acceptance is tracked in [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
-The proposed [MCP server #255](https://github.com/drevendev/BeautifulRepo/issues/255)
-is separate and **not installed** by these commands. No model evaluation or
-release publication is automatic.
+The [experimental local MCP adapter](local-mcp.md) is implemented
+separately and **not installed** by these plugin commands; its real-host
+acceptance is still open in [#255](https://github.com/drevendev/BeautifulRepo/issues/255).
+No model evaluation or release publication is automatic.
 
 ## Use
 
