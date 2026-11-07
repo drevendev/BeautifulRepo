@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Extend the opt-in real-SDK MCP stdio smoke with real-process refusal of
+  unsafe configured roots and fail-closed, incomplete tool responses when
+  a configured synthetic repository disappears during an active session.
+  Symlink refusal is exercised where the test OS permits symlink creation;
+  host-specific installation and concurrent filesystem races remain untested
+  (#255).
+
 - Add an opt-in official SDK v2 stdio protocol smoke that launches the
   local MCP adapter, records negotiated version and tool discovery, checks
   three tool results against direct offline checker outputs for good and
