@@ -513,6 +513,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Recheck the official GSoC 2026 timetable (November 7): distinguish past
+  application and contributor-submission deadlines from the November 9 mentor
+  evaluation, document the organizer's eligibility baseline, and refresh the
+  catalog only after inspecting primary sources. This does not establish 2027
+  dates or BeautifulRepo's eligibility.
+
 - Put a reader's **own repository** at the center of the README's first
   copy-pastable audit: clone BeautifulRepo as a sibling, scan the chosen
   checkout, and explain advisory entry-point findings versus failing

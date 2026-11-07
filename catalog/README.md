@@ -107,15 +107,15 @@ a tool was installed, a workflow was tested or a program accepted this project.
 
 <https://developers.google.com/open-source/gsoc/timeline>
 
-**program · reviewed 2026-10-03 · source-reviewed**
+**program · reviewed 2026-11-07 · source-reviewed**
 
 **Why:** Provides year-specific application and project milestones.
 
 **Apply:** Read the detailed year section before advising an application or mentoring plan.
 
-**Caveat:** 2026 application deadlines are past; 2027 dates and project eligibility are not asserted.
+**Caveat:** 2026 organization and contributor applications and final contributor submissions are closed; 2027 dates and BeautifulRepo eligibility are not asserted.
 
-**Coverage:** Detailed 2026 timeline inspected; generic summary is not used for dates.
+**Coverage:** Official detailed 2026 timeline re-read through November 9 mentor evaluation; no registration or eligibility verification.
 
 ## Hacktoberfest 2026
 
