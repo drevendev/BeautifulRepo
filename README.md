@@ -45,21 +45,27 @@ checks**, backed by a practical handbook. They report specific observations,
 not a beauty score. You need **Python 3.11+** and Git; no third-party Python
 packages are installed.
 
-Clone BeautifulRepo once, then run its actual audit from the repository root:
+**Audit your own checkout first.** From a directory containing your
+repository as `your-repository/` (replace that name with its real folder name),
+clone BeautifulRepo **beside** it and run:
 
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-python -I tools/audit_bundle.py .
+python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
-This **runs all three real checks**: repository entry points, relative Markdown
-links and local HTML/fragment navigation. It prints specific findings, their
-source locations and a summary rather than a beauty score. Exit **0** means
-all checks completed without threshold-reaching findings (warnings may remain);
-**1** means a broken local link or a selected audit threshold was reached;
-**2** means evidence was incomplete. A clean result cannot certify a good README.
-See the [combined audit guide](guides/combined-audit.md) and
+The command inspects **your repository**, not the BeautifulRepo checkout.
+It runs all three real checks: repository entry points, local Markdown links
+and local HTML/fragment navigation. It reports findings and source locations
+without running target code or fetching external URLs. `--fail-on never`
+makes **entry-point findings advisory**, but broken local links still produce
+exit **1**; exit **0** means no threshold-reaching findings (warnings can
+remain), and exit **2** means incomplete evidence. For a stricter entry-point
+threshold, use `--fail-on warning`. To audit BeautifulRepo itself instead,
+run `python -I tools/audit_bundle.py .` from this directory.
+A clean result cannot certify a good README. See the
+[combined audit guide](guides/combined-audit.md) and
 [rule reference](guides/audit-rule-reference.md) for exact scope and limits.
 
 **Want these checks on every pull request?** [Copy the SHA-pinned v0.2.0
@@ -124,19 +130,6 @@ accessibility or real-user evidence. Neither the audit nor its tests require
 Chromium. The optional Chrome workflow also creates a checksummed
 [text companion](examples/combined-audit/README.md#reproduce-screenshots-in-github-actions-synthetic-only)
 for those synthetic screenshots; its description is not pixel verification.
-
-**Check your own local checkout**, from the BeautifulRepo root, with its path
-as a sibling directory (replace `your-repository`):
-
-```bash
-python -I tools/audit_bundle.py ../your-repository --fail-on never
-```
-
-The `never` setting makes **entry-point findings advisory**, but broken
-local links still fail (exit 1); invalid paths or incomplete scans exit 2.
-For a threshold that fails on entry-point warnings, use `--fail-on warning`.
-The audit does not execute the target or fetch external URLs.
-See the [combined audit guide](guides/combined-audit.md) for formats and boundaries.
 
 **Recorded result on a real repository (not the fictional demo):**
 On 2026-10-23, the v0.2.0 audit pinned to
