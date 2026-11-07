@@ -12,7 +12,7 @@ from pathlib import Path
 import stat
 import subprocess
 import sys
-import tempfile
+import threading
 from typing import Any
 
 BUNDLE = Path(__file__).resolve().parents[1] / "tools" / "audit_bundle.py"
@@ -63,6 +63,60 @@ def incomplete(check: str, reason: str) -> dict[str, Any]:
     }
 
 
+def _bounded_run(cmd: list[str]) -> tuple[int, bytes, str | None]:
+    """Drain both child pipes concurrently, stopping output before RAM/disk growth."""
+    captured = [bytearray(), bytearray()]
+    overflow = threading.Event()
+    read_failed = threading.Event()
+    with subprocess.Popen(
+        cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as child:
+        def terminate() -> None:
+            if child.poll() is None:
+                try:
+                    child.kill()
+                except OSError:
+                    pass  # Child may have just exited.
+
+        def drain(pipe: Any, index: int) -> None:
+            try:
+                while True:
+                    chunk = pipe.read(64 * 1024)
+                    if not chunk:
+                        return
+                    if len(captured[index]) + len(chunk) > MAX_OUTPUT_BYTES:
+                        overflow.set()
+                        terminate()
+                        return
+                    captured[index].extend(chunk)
+            except (OSError, ValueError):
+                read_failed.set()
+                terminate()
+
+        readers = [
+            threading.Thread(target=drain, args=(pipe, index), daemon=True)
+            for index, pipe in enumerate((child.stdout, child.stderr))
+        ]
+        for reader in readers:
+            reader.start()
+        try:
+            child.wait(timeout=TIMEOUT_SECONDS)
+        except subprocess.TimeoutExpired:
+            terminate()
+            child.wait()
+            raise
+        finally:
+            # A stale descendant holding a pipe cannot stall the MCP server forever.
+            for reader in readers:
+                reader.join(timeout=1)
+        if read_failed.is_set() or any(reader.is_alive() for reader in readers):
+            return child.returncode, b"", "checker output could not be read safely"
+        if overflow.is_set():
+            return child.returncode, b"", "checker output exceeded the bounded response limit"
+        return child.returncode, bytes(captured[0]), None
+
+
 def run_check(root: Path, tool_name: str) -> dict[str, Any]:
     """Run only our fixed checker with a fixed argument vector; never target code."""
     check = CHECKS[tool_name]
@@ -76,33 +130,21 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
     cmd = [sys.executable, "-I", "-B", str(BUNDLE), str(fixed_root),
            "--format", "json", "--fail-on", "never"]
     try:
-        # PIPE + subprocess.run buffers all child output before we can check its
-        # size. Use temporary binary files so untrusted diagnostics cannot make
-        # the MCP process accumulate arbitrarily large output in RAM.
-        with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
-            completed = subprocess.run(
-                cmd, stdin=subprocess.DEVNULL, stdout=stdout_file,
-                stderr=stderr_file, timeout=TIMEOUT_SECONDS, check=False,
-            )
-            stdout_file.seek(0, 2)
-            stderr_file.seek(0, 2)
-            if (stdout_file.tell() > MAX_OUTPUT_BYTES
-                    or stderr_file.tell() > MAX_OUTPUT_BYTES):
-                return incomplete(check, "checker output exceeded the bounded response limit")
-            stdout_file.seek(0)
-            output = stdout_file.read(MAX_OUTPUT_BYTES + 1)
+        return_code, output, capture_error = _bounded_run(cmd)
+        if capture_error:
+            return incomplete(check, capture_error)
     except subprocess.TimeoutExpired:
         return incomplete(check, "offline checker timed out")
     except OSError:
         return incomplete(check, "offline checker could not be started")
 
-    if completed.returncode not in (0, 1, 2):
+    if return_code not in (0, 1, 2):
         return incomplete(check, "checker exited unexpectedly")
     try:
         result = json.loads(output.decode("utf-8"))
         record = result["checks"][check]
         if (result["schema_version"] != 1
-                or result["exit_code"] != completed.returncode
+                or result["exit_code"] != return_code
                 or record["state"] not in ("complete", "incomplete")
                 or type(record.get("exit_code")) not in (int, type(None))):
             raise ValueError("unexpected checker schema")
@@ -118,7 +160,7 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
     return {
         "checker": check, "state": record["state"],
         "exit_code": record["exit_code"], "evidence": record,
-        "bundle_exit_code": completed.returncode, "coverage": COVERAGE,
+        "bundle_exit_code": return_code, "coverage": COVERAGE,
     }
 
 
