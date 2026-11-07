@@ -61,10 +61,13 @@ do not substitute a floating branch and claim the results are reproducible.
 
 This **source-checked procedure, reviewed 2026-11-07, has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
-following full commit was on `master` after the tested stdio changes; it is
+following full commit is a `master` snapshot containing the **modern and
+legacy SDK smoke**, including the fail-closed missing-root regressions. The
+older `6c01779` checkout runs an earlier smoke **without the legacy mode**;
+using it cannot reproduce both protocol-lifecycle results. This commit is
 **not a released MCP version**:
 
-[BeautifulRepo `6c01779cce2ce7f63ceec15f762678c443086478`](https://github.com/drevendev/BeautifulRepo/commit/6c01779cce2ce7f63ceec15f762678c443086478).
+[BeautifulRepo `331df37acc2a764b55a9e88c34ac686eeddc6df6`](https://github.com/drevendev/BeautifulRepo/commit/331df37acc2a764b55a9e88c34ac686eeddc6df6).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -72,7 +75,7 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 6c01779cce2ce7f63ceec15f762678c443086478
+git checkout --detach 331df37acc2a764b55a9e88c34ac686eeddc6df6
 git rev-parse HEAD
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
