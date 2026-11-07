@@ -82,8 +82,17 @@ class CheckerWrapperTests(unittest.TestCase):
         }
         return subprocess.CompletedProcess([], code, json.dumps(payload).encode(), b"")
 
+    @staticmethod
+    def fake_subprocess(response):
+        # Real subprocesses write into the supplied output handles.
+        def execute(cmd, **kwargs):
+            kwargs["stdout"].write(response.stdout)
+            kwargs["stderr"].write(response.stderr)
+            return subprocess.CompletedProcess(cmd, response.returncode)
+        return execute
+
     def test_fixed_command_and_native_diagnostics(self):
-        with mock.patch.object(adapter.subprocess, "run", return_value=self.response()) as run:
+        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(self.response())) as run:
             report = adapter.run_check(self.root, "check_documentation_links")
         self.assertEqual(report["state"], "complete")
         self.assertEqual(report["exit_code"], 1)
@@ -94,6 +103,9 @@ class CheckerWrapperTests(unittest.TestCase):
             str(self.root), "--format", "json", "--fail-on", "never",
         ])
         self.assertIs(kwargs["stdin"], subprocess.DEVNULL)
+        self.assertIsNot(kwargs["stdout"], subprocess.PIPE)
+        self.assertIsNot(kwargs["stderr"], subprocess.PIPE)
+        self.assertTrue(hasattr(kwargs["stdout"], "fileno"))
         self.assertEqual(kwargs["timeout"], adapter.TIMEOUT_SECONDS)
         self.assertFalse(kwargs["check"])
         self.assertNotIn("shell", kwargs)
@@ -105,16 +117,24 @@ class CheckerWrapperTests(unittest.TestCase):
         self.assertEqual(report["exit_code"], 2)
 
     def test_bad_output_is_incomplete(self):
-        with mock.patch.object(adapter.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, b"garbage", b"")):
+        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(subprocess.CompletedProcess([], 0, b"garbage", b""))):
             report = adapter.run_check(self.root, "check_html_navigation")
         self.assertEqual(report["state"], "incomplete")
         self.assertNotIn("evidence", report)
 
     def test_large_output_is_incomplete(self):
         fake = subprocess.CompletedProcess([], 0, b"x" * (adapter.MAX_OUTPUT_BYTES + 1), b"")
-        with mock.patch.object(adapter.subprocess, "run", return_value=fake):
+        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(fake)):
             report = adapter.run_check(self.root, "check_html_navigation")
         self.assertEqual(report["state"], "incomplete")
+
+    def test_large_stderr_is_incomplete_without_response_bytes(self):
+        fake = subprocess.CompletedProcess([], 0, b"{}", b"x" * (adapter.MAX_OUTPUT_BYTES + 1))
+        with mock.patch.object(adapter.subprocess, "run", side_effect=self.fake_subprocess(fake)):
+            report = adapter.run_check(self.root, "audit_repository")
+        self.assertEqual(report["state"], "incomplete")
+        self.assertEqual(report["exit_code"], 2)
+        self.assertNotIn("evidence", report)
 
     def test_rechecks_root_before_every_call(self):
         with mock.patch.object(adapter.subprocess, "run") as run:

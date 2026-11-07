@@ -12,6 +12,7 @@ from pathlib import Path
 import stat
 import subprocess
 import sys
+import tempfile
 from typing import Any
 
 BUNDLE = Path(__file__).resolve().parents[1] / "tools" / "audit_bundle.py"
@@ -75,22 +76,30 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
     cmd = [sys.executable, "-I", "-B", str(BUNDLE), str(fixed_root),
            "--format", "json", "--fail-on", "never"]
     try:
-        completed = subprocess.run(
-            cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, timeout=TIMEOUT_SECONDS, check=False,
-        )
+        # PIPE + subprocess.run buffers all child output before we can check its
+        # size. Use temporary binary files so untrusted diagnostics cannot make
+        # the MCP process accumulate arbitrarily large output in RAM.
+        with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
+            completed = subprocess.run(
+                cmd, stdin=subprocess.DEVNULL, stdout=stdout_file,
+                stderr=stderr_file, timeout=TIMEOUT_SECONDS, check=False,
+            )
+            stdout_file.seek(0, 2)
+            stderr_file.seek(0, 2)
+            if (stdout_file.tell() > MAX_OUTPUT_BYTES
+                    or stderr_file.tell() > MAX_OUTPUT_BYTES):
+                return incomplete(check, "checker output exceeded the bounded response limit")
+            stdout_file.seek(0)
+            output = stdout_file.read(MAX_OUTPUT_BYTES + 1)
     except subprocess.TimeoutExpired:
         return incomplete(check, "offline checker timed out")
     except OSError:
         return incomplete(check, "offline checker could not be started")
 
-    if (len(completed.stdout) > MAX_OUTPUT_BYTES
-            or len(completed.stderr) > MAX_OUTPUT_BYTES):
-        return incomplete(check, "checker output exceeded the bounded response limit")
     if completed.returncode not in (0, 1, 2):
         return incomplete(check, "checker exited unexpectedly")
     try:
-        result = json.loads(completed.stdout.decode("utf-8"))
+        result = json.loads(output.decode("utf-8"))
         record = result["checks"][check]
         if (result["schema_version"] != 1
                 or result["exit_code"] != completed.returncode

@@ -595,6 +595,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Capture optional MCP checker stdout/stderr in temporary files, checking the
+  512 KiB per-stream limit **before** parsing instead of buffering unlimited
+  subprocess PIPE output in the MCP process memory. Add oversized stdout and
+  stderr regression cases. This reduces memory exposure, but does not impose
+  a temporary-disk quota or imply real Claude Code/Codex host acceptance (#255).
+
 - Fix the experimental MCP install guide's immutable checkout: the former
   `6c01779` pin contained only the earlier modern SDK smoke, while the guide
   described both modern and legacy protocol checks. Pin the accepted

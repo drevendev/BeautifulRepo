@@ -22,7 +22,12 @@ home and filesystem root directories; it rechecks the bound path on each tool
 call. This is **not** a sandbox against concurrent filesystem replacement,
 malicious OS-level mounts or secrets in ordinary repository documentation.
 The child interpreter runs the fixed checked-in `audit_bundle.py` with
-`-I -B`, a fixed argument vector, a 30-second timeout and bounded output.
+`-I -B`, a fixed argument vector, a 30-second timeout and a 512 KiB
+per-stream response limit. Child stdout/stderr are captured in temporary
+files rather than accumulated without limit in MCP process memory; output
+is checked before parsing. Temporary files are cleaned up after each call.
+This avoids unbounded **RAM** capture; it is not a disk-quota or filesystem
+exhaustion guarantee.
 The checkers do not execute target code or fetch external links. MCP clients
 and model hosts **may transmit returned findings to their providers**.
 
