@@ -11,6 +11,10 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Keep first-run offline audits read-only with respect to their own tool checkout: dynamically loading sibling checkers from `audit_bundle.py` or the standalone HTML-navigation CLI must not create `tools/__pycache__` when invoked with `python -I`. Add a fresh-copy subprocess regression; target-file read-only checks remain in place.
+
 ### Added
 
 - Add a practical choice of **standalone offline CLI**, tagged one-skill
