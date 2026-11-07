@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Document a reproducible, commit-pinned checkout and optional SDK preflight
+  for the experimental MCP stdio adapter, with separate Claude Code and Codex
+  registration, inspection and removal recipes using synthetic fixtures.
+  These instructions are source-reviewed but **not** successful real-host
+  installations or model tool-call evidence (related to #255).
+
 - Extend the opt-in real-SDK MCP stdio smoke with real-process refusal of
   unsafe configured roots and fail-closed, incomplete tool responses when
   a configured synthetic repository disappears during an active session.
