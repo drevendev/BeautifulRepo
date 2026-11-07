@@ -30,23 +30,26 @@ class ReaderRoutesTests(unittest.TestCase):
             "examples/cli-starter/sample.csv", top
         )
         self.assertIn("Data rows: 3", top)
-        self.assertIn("from the repository root", top)
+        self.assertIn("From the repository root:", top)
         self.assertIn("not a schema validator or a hosted service", " ".join(top.split()))
 
     def test_first_screen_leads_with_the_real_audit_and_discloses_limits(self):
         section = README.split("## Working proof\n", 1)[1].split(
             "\n## Start here", 1
         )[0]
-        self.assertLess(section.index("python -I tools/audit_bundle.py ."),
-                        section.index("python examples/cli-starter/rowcount.py"))
+        self.assertLess(
+            section.index("python -I tools/audit_bundle.py ../your-repository --fail-on never"),
+            section.index("python examples/cli-starter/rowcount.py"),
+        )
+        self.assertIn("To audit BeautifulRepo itself instead", section)
         self.assertIn("python examples/repository-audit/demo.py", section)
         self.assertIn("python -I examples/combined-audit/demo.py", section)
         self.assertIn("python -I tools/audit_bundle.py ../your-repository --fail-on never",
                       section)
-        self.assertIn("broken local links still fail", " ".join(section.split()))
+        self.assertIn("broken local links still produce exit **1**", " ".join(section.split()))
         self.assertIn("guides/adopting-the-checks.md", section)
         self.assertIn("not a beauty score", section)
-        self.assertIn("invalid paths or", section)
+        self.assertIn("invalid root or incomplete evidence", " ".join(section.split()))
         self.assertIn("fictional", section)
 
     def test_first_screen_before_after_numbers_match_real_demo(self):
