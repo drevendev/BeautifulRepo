@@ -63,7 +63,7 @@ class AuditBundleTests(unittest.TestCase):
         self.assertEqual(before, after)
 
     def test_one_checker_cli_is_independent_of_unrelated_failures(self):
-        self.write("README.md", "# Fixture\\n\\n[Broken](missing.md)\\n")
+        self.write("README.md", "# Fixture\n\n[Broken](missing.md)\n")
         for name, expected in (("entry_points", 0),
                                ("markdown_links", 1), ("html_navigation", 1)):
             with self.subTest(checker=name):
