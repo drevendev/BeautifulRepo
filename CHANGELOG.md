@@ -518,7 +518,6 @@ keep their original themed headings.
   checkout, and explain advisory entry-point findings versus failing
   broken links. The self-audit remains an optional command (#254).
 
-
 - Make the fictional broken-link audit's HTML diff easier to scan: distinguish added
   and removed lines in light/dark themes while retaining literal +/- prefixes,
   assistive text labels, and escaped source content. This is authored formatting,
