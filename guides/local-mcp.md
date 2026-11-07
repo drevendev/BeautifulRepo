@@ -23,11 +23,11 @@ call. This is **not** a sandbox against concurrent filesystem replacement,
 malicious OS-level mounts or secrets in ordinary repository documentation.
 The child interpreter runs the fixed checked-in `audit_bundle.py` with
 `-I -B`, a fixed argument vector, a 30-second timeout and a 512 KiB
-per-stream response limit. Child stdout/stderr are captured in temporary
-files rather than accumulated without limit in MCP process memory; output
-is checked before parsing. Temporary files are cleaned up after each call.
-This avoids unbounded **RAM** capture; it is not a disk-quota or filesystem
-exhaustion guarantee.
+per-stream response limit. Child stdout/stderr are drained concurrently through bounded pipes; if
+either stream exceeds 512 KiB the child is stopped rather than storing more
+output in memory or on disk. Evidence is checked before parsing. This fixes
+the former temporary-file disk-growth exposure; it does **not** turn the
+trusted-root adapter into a general filesystem or process sandbox.
 The checkers do not execute target code or fetch external links. MCP clients
 and model hosts **may transmit returned findings to their providers**.
 
