@@ -35,35 +35,105 @@ supporting legacy `initialize` clients. Version `2.3.0` was published to
 and the *BeautifulRepo Git commit* during an independent installation trial;
 do not substitute a floating branch and claim the results are reproducible.
 
-From an **explicitly pinned** BeautifulRepo checkout and a freshly created
-Python 3.11+ environment:
+### Reproduce an immutable development checkout (POSIX)
+
+This **source-checked procedure, reviewed 2026-11-07, has not passed a fresh
+Claude Code/Codex host installation**. Use a disposable environment. The
+following full commit was on `master` after the tested stdio changes; it is
+**not a released MCP version**:
+
+[BeautifulRepo `6c01779cce2ce7f63ceec15f762678c443086478`](https://github.com/drevendev/BeautifulRepo/commit/6c01779cce2ce7f63ceec15f762678c443086478).
+
+Run these commands from a writable **disposable parent directory** on
+macOS/Linux with Git and Python 3.11+ installed:
 
 ```sh
-python -m pip install "mcp==2.3.0"
-python -I -B integrations/mcp_server.py --root /absolute/path/to/your-checkout
+git clone https://github.com/drevendev/BeautifulRepo.git
+cd BeautifulRepo
+git checkout --detach 6c01779cce2ce7f63ceec15f762678c443086478
+git rev-parse HEAD
+python3 -m venv ../beautifulrepo-mcp-venv
+../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
+../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
+BR_PYTHON="$(cd ../beautifulrepo-mcp-venv/bin && pwd -P)/python"
+BR_SERVER="$(pwd -P)/integrations/mcp_server.py"
+BR_ROOT="$(pwd -P)/tests/fixtures/agent-repos/healthy"
 ```
 
-The command is a long-running **stdio** server: no output on stdout before
-an MCP client connects is expected. A client should launch the Python
-interpreter from its own environment and pass the absolute path to
-`integrations/mcp_server.py`, followed by `--root` and the *one allowed repository*.
-No `cwd`, plugin auto-discovery or external installation is assumed.
+Verify `git rev-parse HEAD` printed **exactly** the 40-character commit
+above; do not silently substitute a newer `master`. The smoke runs the
+real SDK **without a model** against temporary synthetic repositories. It
+requires package download for installation; run it only if you accept the
+environment/network implications. A smoke PASS validates protocol wiring,
+**not** either model host. The sample `BR_ROOT` is a checked-in **synthetic**
+fixture; replace it with the physical absolute path of a trusted, ordinary
+repository only after reviewing data-sharing implications. The three
+variables must be used in the same shell session, or replaced by their
+absolute values later. Avoid private repository data during initial tests.
 
-A development-only example of the required process shape (not a verified
-client-specific configuration):
+### Claude Code: local-scope stdio entry (host run unverified)
 
-```json
-{
-  "command": "/absolute/path/to/venv/bin/python",
-  "args": [
-    "-I", "-B", "/absolute/path/to/BeautifulRepo/integrations/mcp_server.py",
-    "--root", "/absolute/path/to/target-repository"
-  ]
-}
+The [official Claude Code MCP guide](https://code.claude.com/docs/en/mcp)
+documents `claude mcp add --transport stdio <name> -- <command> [args...]`
+and local scope. With the shell variables from the preceding block:
+
+```sh
+claude --version
+claude mcp add --scope local --transport stdio beautifulrepo-audit -- \
+  "$BR_PYTHON" -I -B "$BR_SERVER" --root "$BR_ROOT"
+claude mcp list
+claude mcp get beautifulrepo-audit
 ```
 
-Windows uses its own absolute `python.exe` and drive-qualified paths.
-Do not infer Windows acceptance from this example.
+Open **Claude Code** on that synthetic fixture and inspect `/mcp` for a
+connected server and the three named tools. A successful `add` or `list`
+alone is **only configuration evidence**. Actual acceptance still needs
+an observed `tools/list` and `tools/call` via the host, with the version,
+tool results, exact commit and file snapshot recorded. Model invocation may
+consume subscription usage or paid tokens; obtain appropriate authorization.
+
+Undo the **local** registration using
+`claude mcp remove beautifulrepo-audit --scope local` and close the host
+session. Do not commit a machine-specific `.mcp.json` to a public project
+or use `--scope project` to bypass workspace approval.
+
+### Codex CLI: stdio entry (host run unverified)
+
+The [Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)
+documents `codex mcp add <name> -- <command>` and a shared
+`~/.codex/config.toml` configuration for local Codex clients. With the
+same shell variables, in a **separate host trial**:
+
+```sh
+codex --version
+codex mcp add beautifulrepo-audit -- \
+  "$BR_PYTHON" -I -B "$BR_SERVER" --root "$BR_ROOT"
+codex mcp list
+codex mcp get beautifulrepo-audit
+```
+
+Start a new local Codex session and inspect `/mcp` for the configured
+server and tools. `codex mcp add` changes your user configuration:
+do **not** confuse this with a repository-scoped or cloud plugin install.
+Configuration visible in the CLI is not evidence of a host tool invocation.
+Record actual calls and `PASS/FAIL/INCONCLUSIVE` separately from the Claude
+Code run; do not use model calls without usage/cost authorization.
+Remove the entry with `codex mcp remove beautifulrepo-audit`.
+
+On **Windows**, use drive-qualified absolute `python.exe`, server and root
+paths, and the host's Windows command quoting. POSIX `bin/python` paths
+above do not apply. Neither Windows host setup nor a legacy
+`initialize` client lifecycle has been proven by these instructions.
+
+### Report a real host result
+
+Record host/CLI version, OS, Python and MCP SDK version, the **installed**
+Git SHA, the configured absolute root, actual discovered tool names,
+negotiated protocol version (if exposed), a healthy/broken synthetic call,
+whether any target file changed, raw error if present, and a result of
+`PASS`, `FAIL`, or `INCONCLUSIVE`. Review/redact paths and content before
+sharing a trace. See [#255](https://github.com/drevendev/BeautifulRepo/issues/255)
+for acceptance criteria. No claim of Claude Code or Codex host success is made here.
 
 ## Automated SDK protocol smoke (not host acceptance)
 
