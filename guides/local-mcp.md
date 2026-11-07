@@ -122,8 +122,10 @@ Remove the entry with `codex mcp remove beautifulrepo-audit`.
 
 On **Windows**, use drive-qualified absolute `python.exe`, server and root
 paths, and the host's Windows command quoting. POSIX `bin/python` paths
-above do not apply. Neither Windows host setup nor a legacy
-`initialize` client lifecycle has been proven by these instructions.
+above do not apply. Neither Windows host setup nor a real legacy model-host lifecycle has been
+proven by these instructions. The separate SDK smoke exercises a legacy
+`initialize` connection, which is **not** evidence of Claude Code/Codex
+using that lifecycle.
 
 ### Report a real host result
 
@@ -140,14 +142,17 @@ for acceptance criteria. No claim of Claude Code or Codex host success is made h
 An opt-in [real-protocol smoke script](../integrations/mcp_protocol_smoke.py)
 and [focused GitHub Actions workflow](../.github/workflows/mcp-protocol.yml)
 install the pinned `mcp==2.3.0` SDK in a disposable CI environment,
-launch the actual server over stdio and verify negotiated protocol version,
-`tools/list`, all three `tools/call` responses against the direct offline
-checkers, and unchanged healthy/broken synthetic fixture files. The smoke
+launch the actual server over stdio and check **both** protocol lifecycles:
+modern `server/discover` (`2026-07-28`, SDK `mode="auto"`) and legacy
+`initialize` (`2025-11-25`, SDK `mode="legacy"`). For each connection it
+checks the negotiated version, `tools/list`, all three `tools/call` results
+against direct offline checkers, and unchanged healthy/broken synthetic
+fixture files. The smoke
 also exercises real-process refusal of relative, missing, home and filesystem
 roots, plus a symlink root where the platform permits creating one. While an
 MCP client stays connected, the test temporarily renames its synthetic target
-and requires **incomplete** results for all three tools; the directory is
-restored and its bytes rechecked. Run locally
+and requires **incomplete** results for all three tools in both lifecycles; the
+directory is restored and its bytes rechecked. Run locally
 with the optional SDK installed:
 
 ```sh
@@ -158,9 +163,10 @@ The workflow runs on MCP/tool changes and is additional evidence, **not**
 an invented repository protection gate. Record the actual CI output/version
 before claiming a PASS. Denied-root checks do not prove defenses against
 concurrent filesystem replacement or hostile mounts, and missing-root tests
-do not measure a checker timeout. A successful smoke is not a clean install
-from an immutable public commit, not legacy-client compatibility, and **not**
-a Claude Code/Codex host session, model invocation, or external-user trial.
+do not measure a checker timeout. A successful smoke demonstrates only the **pinned Python SDK's own** modern
+and legacy stdio client modes, not compatibility with independently implemented
+older clients. It is not a clean install from an immutable public commit, a
+Claude Code/Codex host session, model invocation, or external-user trial.
 See [#255](https://github.com/drevendev/BeautifulRepo/issues/255) for
 the remaining acceptance requirements.
 
@@ -175,9 +181,10 @@ python -I tools/audit_bundle.py /absolute/path/to/synthetic-fixture --format jso
 
 Source-level tests check path refusal, fixed subprocess arguments, timeout
 behavior, incomplete evidence and one actual broken-link fixture. These are
-**not** protocol tests. For MCP acceptance, independently connect the SDK
-client and verify the negotiated protocol version, `tools/list`, and
-`tools/call` on a good and broken synthetic repository. Then connect actual
+**not** protocol tests. For MCP acceptance, confirm the SDK smoke passes for both protocol eras,
+including negotiated versions, `tools/list` and `tools/call` on good and
+broken synthetic repositories. This still does not verify a third-party
+legacy client. Then connect actual
 Claude Code and Codex hosts independently and record fresh install/discovery
 and real tool invocations; follow [issue #255](https://github.com/drevendev/BeautifulRepo/issues/255).
 Do not describe either client as supported until tested. Do not run paid model
