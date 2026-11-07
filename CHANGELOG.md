@@ -595,6 +595,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Bound the experimental MCP adapter's subprocess **during** output capture:
+  drain both pipes concurrently, stop an over-limit child and avoid growing
+  temporary files or memory before the 512 KiB per-stream check. Add real
+  stdout/stderr overflow and timeout regressions; host acceptance remains
+  unverified (#255).
+
 - Capture optional MCP checker stdout/stderr in temporary files, checking the
   512 KiB per-stream limit **before** parsing instead of buffering unlimited
   subprocess PIPE output in the MCP process memory. Add oversized stdout and
