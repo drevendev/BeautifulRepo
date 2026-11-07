@@ -11,6 +11,14 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Capture optional MCP checker stdout/stderr in temporary files, checking the
+  512 KiB per-stream limit **before** parsing instead of buffering unlimited
+  subprocess PIPE output in the MCP process memory. Add oversized stdout and
+  stderr regression cases. This reduces memory exposure, but does not impose
+  a temporary-disk quota or imply real Claude Code/Codex host acceptance (#255).
+
 ### Added
 
 - Add a practical choice of **standalone offline CLI**, tagged one-skill
