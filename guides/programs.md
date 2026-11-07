@@ -1,7 +1,7 @@
 # Programs, events and contributor readiness
 
-**Guide baseline checked: 2026-10-03.** Program-specific source rechecks are dated
-below. Refreshing one program does not revalidate the others. Rules are time-sensitive:
+**Guide first assembled: 2026-10-03.** Program-specific source rechecks are dated
+below; refreshing one program does not revalidate the other. Rules are time-sensitive:
 check the organizer's current pages before advising participation. Listing a program
 does not mean this repository is enrolled, accepted, eligible, sponsored or ready to
 mentor contributors.
@@ -42,12 +42,23 @@ award verification, organizer contact or test of any third-party contest rules.
 
 ## Google Summer of Code: prepare for mentorship, not a badge
 
-Use the [official program](https://summerofcode.withgoogle.com/) and its
-[year-specific timeline](https://developers.google.com/open-source/gsoc/timeline).
-The detailed 2026 timeline lists February 3 as the organization application deadline
-and March 31 as the contributor deadline; both precede this page's review date.
-Do not advertise an open application window based on a generic summary or a prior year.
-No 2027 dates are asserted here.
+**2026 source rechecked: 2026-11-07.** Use the
+[official program](https://summerofcode.withgoogle.com/) and its
+[detailed 2026 timeline](https://developers.google.com/open-source/gsoc/timeline).
+The organization application deadline was **February 3 at 18:00 UTC** and the
+contributor application deadline was **March 31 at 18:00 UTC**. The last extended
+contributor final-work/evaluation deadline was **November 2 at 18:00 UTC**;
+all three have passed as of this review. **November 9 at 18:00 UTC** is still
+scheduled for mentors' final evaluations of extended projects, **not** a new
+contributor application window. The page's automatic summary quotes different
+dates: rely on its explicit **2026 Timeline** instead. No 2027 dates are asserted.
+
+For mentoring organizations, Google's
+[January 19, 2026 announcement](https://opensource.googleblog.com/2026/01/mentor-org-applications-for-google-summer-of-code-2026-open-through-feb-3.html)
+listed an established project of at least **18 months**, an OSI-approved
+license, an active community prepared to mentor, and a credible project-ideas
+list among its requirements. An MIT license or a public GitHub repository alone
+cannot establish BeautifulRepo's eligibility, selection or mentorship capacity.
 
 **Preparation proposal:** before considering an application, develop a genuinely usable
 project, scoped project ideas, documented onboarding, review capacity and an honest mentor

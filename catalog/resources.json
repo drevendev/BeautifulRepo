@@ -92,9 +92,9 @@
       "url": "https://developers.google.com/open-source/gsoc/timeline",
       "why": "Provides year-specific application and project milestones.",
       "apply": "Read the detailed year section before advising an application or mentoring plan.",
-      "caveat": "2026 application deadlines are past; 2027 dates and project eligibility are not asserted.",
-      "coverage": "Detailed 2026 timeline inspected; generic summary is not used for dates.",
-      "reviewed_on": "2026-10-03",
+      "caveat": "2026 organization and contributor applications and final contributor submissions are closed; 2027 dates and BeautifulRepo eligibility are not asserted.",
+      "coverage": "Official detailed 2026 timeline re-read through November 9 mentor evaluation; no registration or eligibility verification.",
+      "reviewed_on": "2026-11-07",
       "evidence": "source-reviewed"
     },
     {
