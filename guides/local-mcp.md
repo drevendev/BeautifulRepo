@@ -23,7 +23,11 @@ call. This is **not** a sandbox against concurrent filesystem replacement,
 malicious OS-level mounts or secrets in ordinary repository documentation.
 The child interpreter runs the fixed checked-in `audit_bundle.py` with
 `-I -B`, a fixed argument vector, a 30-second timeout and a 512 KiB
-per-stream response limit. Child stdout/stderr are drained concurrently through bounded pipes; if
+per-stream response limit. Each MCP tool selects **only its own checker**
+(`--only entry_points`, `markdown_links` or `html_navigation`), rather
+than rerunning all three and potentially failing because an unrelated
+checker's diagnostics exhaust the response budget. The public combined
+CLI still runs all three by default. Child stdout/stderr are drained concurrently through bounded pipes; if
 either stream exceeds 512 KiB the child is stopped rather than storing more
 output in memory or on disk. Evidence is checked before parsing. This fixes
 the former temporary-file disk-growth exposure; it does **not** turn the

@@ -127,8 +127,10 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
         return incomplete(check, "configured repository root is no longer safe or available")
     if not BUNDLE.is_file():
         return incomplete(check, "checked-in bundle is unavailable")
+    # Invoke only the requested checker: unrelated noisy/failed checks must not
+    # exhaust this tool's output budget or turn its evidence incomplete.
     cmd = [sys.executable, "-I", "-B", str(BUNDLE), str(fixed_root),
-           "--format", "json", "--fail-on", "never"]
+           "--format", "json", "--fail-on", "never", "--only", check]
     try:
         return_code, output, capture_error = _bounded_run(cmd)
         if capture_error:

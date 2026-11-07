@@ -77,8 +77,7 @@ class CheckerWrapperTests(unittest.TestCase):
         }
         payload = {
             "schema_version": 1, "exit_code": code,
-            "checks": {"entry_points": entry, "markdown_links": link,
-                       "html_navigation": link},
+            "checks": {key: entry if key == "entry_points" else link},
         }
         return subprocess.CompletedProcess([], code, json.dumps(payload).encode(), b"")
 
@@ -93,6 +92,7 @@ class CheckerWrapperTests(unittest.TestCase):
         self.assertEqual(args[0], [
             sys.executable, "-I", "-B", str(adapter.BUNDLE),
             str(self.root), "--format", "json", "--fail-on", "never",
+            "--only", "markdown_links",
         ])
         self.assertEqual(kwargs, {})
 

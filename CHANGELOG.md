@@ -606,6 +606,14 @@ keep their original themed headings.
 
 ### Fixed
 
+- Isolate each experimental MCP tool's selected offline checker via the
+  combined audit's optional `--only` argument. An unrelated checker no
+  longer consumes that tool's output budget or changes its completion status;
+  the default three-checker CLI and its existing output remain unchanged.
+  Add CLI subprocess and adapter contract regressions (#255). This remains
+  SDK/source-level evidence, not Claude Code/Codex host acceptance.
+
+
 - Bound the experimental MCP adapter's subprocess **during** output capture:
   drain both pipes concurrently, stop an over-limit child and avoid growing
   temporary files or memory before the 512 KiB per-stream check. Add real

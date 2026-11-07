@@ -62,6 +62,37 @@ class AuditBundleTests(unittest.TestCase):
                  for p in self.repo.rglob("*") if p.is_file()}
         self.assertEqual(before, after)
 
+    def test_one_checker_cli_is_independent_of_unrelated_failures(self):
+        self.write("README.md", "# Fixture\n\n[Broken](missing.md)\n")
+        for name, expected in (("entry_points", 0),
+                               ("markdown_links", 1), ("html_navigation", 1)):
+            with self.subTest(checker=name):
+                result = self.invoke("--format", "json", "--only", name,
+                                     "--fail-on", "never")
+                self.assertEqual(expected, result.returncode, result.stderr)
+                payload = json.loads(result.stdout)
+                self.assertEqual({name}, set(payload["checks"]))
+                self.assertEqual(expected, payload["exit_code"])
+                self.assertEqual("complete", payload["checks"][name]["state"])
+
+        for format_name in ("text", "html"):
+            with self.subTest(format=format_name):
+                result = self.invoke("--format", format_name,
+                                     "--only", "entry_points")
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertNotIn("markdown_links:", result.stdout)
+                self.assertNotIn("html_navigation:", result.stdout)
+
+    def test_one_checker_does_not_invoke_other_checker_modules(self):
+        with patch.object(bundle, "check_once", wraps=bundle.check_once) as call:
+            report, code = bundle.run_bundle(self.repo, only="entry_points")
+        self.assertEqual(0, code)
+        self.assertEqual({"entry_points"}, set(report["checks"]))
+        self.assertEqual(1, call.call_count)
+        self.assertEqual("entry_points", call.call_args.args[0])
+        with self.assertRaisesRegex(ValueError, "unknown checker"):
+            bundle.run_bundle(self.repo, only="not_a_checker")
+
     def test_missing_link_reported_by_both_native_link_checkers(self):
         self.write("README.md", "# Fixture\n\n[Broken](missing.md)\n")
         result = self.invoke("--format", "json")

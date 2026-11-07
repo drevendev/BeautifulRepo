@@ -80,11 +80,14 @@ def bounded(record: dict) -> dict:
 
 
 def run_bundle(root: Path, *, fail_on: str = "error",
-               exclude: tuple[str, ...] = ()) -> tuple[dict, int]:
+               exclude: tuple[str, ...] = (), only: str | None = None) -> tuple[dict, int]:
+    if only is not None and only not in CHECKERS:
+        raise ValueError("unknown checker")
+    names = (only,) if only is not None else CHECKERS
     results: dict = {}
     incomplete = False
     failed = False
-    for name in CHECKERS:
+    for name in names:
         try:
             record = bounded(check_once(name, root, exclude=exclude))
             if record["state"] == "complete" and name == "entry_points":
@@ -134,6 +137,8 @@ def _one_terminal_line(value: str) -> str:
 def render_text(result: dict) -> str:
     lines = ["BeautifulRepo combined offline audit (no score)"]
     for name in CHECKERS:
+        if name not in result["checks"]:
+            continue
         item = result["checks"][name]
         lines.extend(("", f"{name}: {item['state']} (checker exit {item['exit_code']})"))
         if item["state"] != "complete":
@@ -187,6 +192,8 @@ def render_html(result: dict) -> str:
         f"<p><strong>Exit {result['exit_code']}: {safe(status)}</strong></p>",
     ]
     for name in CHECKERS:
+        if name not in result["checks"]:
+            continue
         item = result["checks"][name]
         parts.extend((
             f'<section aria-labelledby="{name}">',
@@ -248,6 +255,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", help="stable local repository directory to inspect")
     parser.add_argument("--format", choices=("text", "json", "html"), default="text")
+    parser.add_argument("--only", choices=CHECKERS,
+                        help="run one checker rather than all three (default)")
     parser.add_argument("--fail-on", choices=("error", "warning", "never"), default="error",
                         help="entry-point threshold; local link errors always fail")
     parser.add_argument("--exclude", action="append", default=[], metavar="GLOB",
@@ -260,7 +269,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"audit_bundle: {exc}", file=sys.stderr)
         return 2
     result, code = run_bundle(root, fail_on=args.fail_on,
-                              exclude=tuple(args.exclude))
+                              exclude=tuple(args.exclude), only=args.only)
     if args.format == "json":
         print(json.dumps(result, sort_keys=True, indent=2, ensure_ascii=True))
     elif args.format == "html":
