@@ -11,13 +11,26 @@ it does **not** invent a repository beauty score or replace the underlying tools
 
 ## First run
 
-Python 3.11+ and a **stable local checkout** are required. From a clone of
-BeautifulRepo, point the command at another local repository directory:
+Use Python **3.11+**, Git and a stable local target. From the **parent
+directory** containing your target as `your-repository/`, clone the tools
+beside it and check out a reviewed, immutable development snapshot:
 
 ```bash
-python -I tools/audit_bundle.py ../your-repository
+git clone https://github.com/drevendev/BeautifulRepo.git
+cd BeautifulRepo
+git checkout --detach 28530c997bf6e0df4406c271f77dd21482e40781
+python -I tools/audit_bundle.py ../your-repository --fail-on never
 python -I tools/audit_bundle.py ../your-repository --format json
 ```
+
+Replace `your-repository` with your real sibling folder. The detached pin
+ensures the commands use the same source revision rather than a moving
+`master` branch. It is **not** a new release: the released `v0.2.0`
+Action does not include `audit_bundle.py`. `git clone` fetches from
+GitHub; the Python checkers do not fetch external URLs or run target code.
+Inspect the exit status of each Python command before treating its output
+as complete. The local CI clone smoke exercises its tested branch HEAD,
+not an independently observed remote clone of this pin.
 
 
 ## Windows PowerShell first run
@@ -28,8 +41,12 @@ Run the same **read-only**, dependency-free checker in PowerShell:
 
 ```powershell
 git clone https://github.com/drevendev/BeautifulRepo.git
+if ($LASTEXITCODE -ne 0) { throw "Git clone failed" }
 Set-Location .\BeautifulRepo
+git checkout --detach 28530c997bf6e0df4406c271f77dd21482e40781
+if ($LASTEXITCODE -ne 0) { throw "Pinned checkout failed" }
 python --version
+if ($LASTEXITCODE -ne 0) { throw "Python not available" }
 python -I .\tools\audit_bundle.py ..\your-repository --fail-on never
 $LASTEXITCODE
 ```
@@ -44,8 +61,11 @@ findings advisory, not broken local links. If `python` is unavailable, install
 Python 3.11+ and ensure its command is on PATH; do not substitute a different
 unchecked interpreter or install packages into the target.
 
-This path is checked using a fresh **local** sibling Git clone in the Windows
-CI job; it is not an independent end-user PowerShell session. The audit
+The pinned checkout is a reviewed development snapshot, not a new stable
+release. This path is checked using a fresh **local** sibling Git clone of
+the CI source revision on Windows; the remote pinned-revision checkout and
+actual first-time end-user PowerShell session have not been independently
+observed. The audit
 does not edit either checkout. Do not run it on a sensitive private target
 without first reviewing what source paths and diagnostics its output reveals.
 
