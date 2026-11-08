@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import importlib.util
 import json
 from pathlib import Path
 import subprocess
@@ -21,11 +20,18 @@ import tempfile
 from mcp import Client, StdioServerParameters
 
 SERVER = Path(__file__).resolve().with_name("mcp_server.py")
-SPEC = importlib.util.spec_from_file_location("beautifulrepo_mcp_server", SERVER)
-assert SPEC is not None and SPEC.loader is not None
-adapter = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(adapter)
-CHECKS = adapter.CHECKS
+BUNDLE = SERVER.parents[1] / "tools" / "audit_bundle.py"
+# Intentionally do not import the adapter: expected routing must remain
+# independent, or a wrong MCP tool-to-checker mapping would pass both sides.
+CHECKS = {
+    "audit_repository": "entry_points",
+    "check_documentation_links": "markdown_links",
+    "check_html_navigation": "html_navigation",
+}
+COVERAGE = (
+    "Read-only offline source checks, not a rendered accessibility, security, "
+    "external-link, or repository-quality certification."
+)
 
 
 def direct_cli_receipt(root: Path, tool_name: str) -> tuple[dict, int]:
@@ -33,7 +39,7 @@ def direct_cli_receipt(root: Path, tool_name: str) -> tuple[dict, int]:
     check = CHECKS[tool_name]
     completed = subprocess.run(
         [
-            sys.executable, "-I", "-B", str(adapter.BUNDLE), str(root),
+            sys.executable, "-I", "-B", str(BUNDLE), str(root),
             "--format", "json", "--fail-on", "never", "--only", check,
         ],
         stdin=subprocess.DEVNULL,
@@ -147,9 +153,11 @@ async def probe(root: Path, *, broken: bool, mode: str,
             try:
                 for name, check in CHECKS.items():
                     response = await client.call_tool(name, {})
-                    expected = adapter.incomplete(
-                        check, "configured repository root is no longer safe or available"
-                    )
+                    expected = {
+                        "checker": check, "state": "incomplete", "exit_code": 2,
+                        "reason": "configured repository root is no longer safe or available",
+                        "coverage": COVERAGE,
+                    }
                     if response.is_error or response.structured_content != expected:
                         raise AssertionError(
                             f"{name}: lost root did not return incomplete evidence"
