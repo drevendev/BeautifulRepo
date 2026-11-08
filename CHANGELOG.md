@@ -613,6 +613,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Keep experimental MCP tool responses **incomplete** when a single-checker
+  bundle's exit status contradicts its claimed result. Preserve the bundled
+  128-KiB report-limit/failure reason without echoing arbitrary source text,
+  so host testers can distinguish a coverage limit from a clean run.
+  Added no-SDK regression cases; real Claude Code/Codex acceptance remains
+  unverified (related to #255).
+
 - Correct the reproducible experimental MCP host-trial checkout pin to the
   source revision with bounded child output, single-checker isolation and
   Markdown metadata preflight; fail early when the checked-out Git SHA differs.

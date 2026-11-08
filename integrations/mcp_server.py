@@ -219,7 +219,23 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
                 or type(record.get("exit_code")) not in (int, type(None))):
             raise ValueError("unexpected checker schema")
         if record["state"] == "incomplete":
-            return incomplete(check, "checker reported incomplete evidence")
+            # Only the bundled checker's two fixed, path-free reasons may be
+            # surfaced to a model host. Never forward arbitrary source text.
+            if return_code != 2 or record["exit_code"] is not None:
+                raise ValueError("inconsistent incomplete checker status")
+            reason = record.get("reason")
+            if reason not in (
+                    "checker result exceeded the 128-KiB limit",
+                    "checker failed before producing complete evidence"):
+                reason = "checker reported incomplete evidence"
+            return incomplete(check, reason)
+        # One --only checker was requested with --fail-on never. Mismatches
+        # must not yield a misleading complete/clean MCP tool response.
+        if (type(record["exit_code"]) is not int
+                or record["exit_code"] not in (0, 1)
+                or return_code != record["exit_code"]
+                or (check == "entry_points" and record["exit_code"] != 0)):
+            raise ValueError("inconsistent checker status")
         if check == "entry_points":
             if not isinstance(record.get("report"), dict):
                 raise ValueError("missing entry-point report")
