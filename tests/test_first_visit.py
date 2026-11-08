@@ -84,13 +84,13 @@ class FirstVisitTests(unittest.TestCase):
             target = parent / "your-repository"
             (target / "docs").mkdir(parents=True)
             (target / "README.md").write_text(
-                "# Sample project\\n\\nSee [setup](docs/missing.md).\\n",
+                "# Sample project\n\nSee [setup](docs/missing.md).\n",
                 encoding="utf-8",
             )
-            (target / "docs" / "guide.md").write_text("# Setup\\n", encoding="utf-8")
-            (target / "LICENSE").write_text("MIT License\\n", encoding="utf-8")
+            (target / "docs" / "guide.md").write_text("# Setup\n", encoding="utf-8")
+            (target / "LICENSE").write_text("MIT License\n", encoding="utf-8")
             (target / "CONTRIBUTING.md").write_text(
-                "# Contributing\\n", encoding="utf-8",
+                "# Contributing\n", encoding="utf-8",
             )
 
             source_head = subprocess.run(
@@ -133,7 +133,7 @@ class FirstVisitTests(unittest.TestCase):
 
             documented_command(1, "docs/missing.md")
             (target / "README.md").write_text(
-                "# Sample project\\n\\nSee [setup](docs/guide.md).\\n",
+                "# Sample project\n\nSee [setup](docs/guide.md).\n",
                 encoding="utf-8",
             )
             documented_command(0, "markdown_links: complete")
