@@ -28,7 +28,16 @@ except ImportError:
         assert _spec is not None and _spec.loader is not None
         docs_links = importlib.util.module_from_spec(_spec)
         sys.modules["docs_links"] = docs_links
-        _spec.loader.exec_module(docs_links)
+        # -I alone does not suppress sibling .pyc writes on first use.
+        _prior_bytecode = sys.dont_write_bytecode
+        sys.dont_write_bytecode = True
+        try:
+            _spec.loader.exec_module(docs_links)
+        except Exception:
+            sys.modules.pop("docs_links", None)
+            raise
+        finally:
+            sys.dont_write_bytecode = _prior_bytecode
 
 HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$")
 SETEXT_UNDERLINE = re.compile(r"^ {0,3}(?:=+|-{2,})[ \t]*$")

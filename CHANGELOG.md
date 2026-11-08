@@ -606,6 +606,8 @@ keep their original themed headings.
 
 ### Fixed
 
+- Keep first-run offline audits read-only with respect to their own tool checkout: dynamically loading sibling checkers from `audit_bundle.py` or the standalone HTML-navigation CLI must not create `tools/__pycache__` when invoked with `python -I`. Add a fresh-copy subprocess regression; target-file read-only checks remain in place.
+
 - Isolate each experimental MCP tool's selected offline checker via the
   combined audit's optional `--only` argument. An unrelated checker no
   longer consumes that tool's output budget or changes its completion status;

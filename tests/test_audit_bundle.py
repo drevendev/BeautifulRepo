@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -42,6 +43,31 @@ class AuditBundleTests(unittest.TestCase):
             cwd=self.repo, capture_output=True, text=True, encoding="utf-8",
             check=False, timeout=75,
         )
+
+    def test_isolated_entrypoints_do_not_write_bytecode_into_tool_checkout(self):
+        # -I isolates imports but does not imply -B. Exercise fresh source
+        # copies so pre-existing local caches cannot mask an incidental write.
+        with tempfile.TemporaryDirectory() as workspace:
+            tools = Path(workspace) / "tools"
+            tools.mkdir()
+            for name in ("audit_bundle.py", "repo_audit.py", "docs_links.py",
+                         "html_navigation.py"):
+                shutil.copyfile(ROOT / "tools" / name, tools / name)
+            for command in (
+                [str(tools / "audit_bundle.py"), str(self.repo), "--format", "json"],
+                [str(tools / "html_navigation.py"), "--root", str(self.repo)],
+            ):
+                with self.subTest(command=command[0]):
+                    outcome = subprocess.run(
+                        [sys.executable, "-I", *command], cwd=self.repo,
+                        capture_output=True, text=True, encoding="utf-8",
+                        check=False, timeout=75,
+                    )
+                    self.assertEqual(0, outcome.returncode, outcome.stderr)
+                    self.assertFalse(
+                        (tools / "__pycache__").exists(),
+                        "Read-only audit must not create a cache in its checkout",
+                    )
 
     def test_healthy_fixture_runs_all_native_checkers_and_has_no_target_writes(self):
         before = {p.relative_to(self.repo).as_posix():

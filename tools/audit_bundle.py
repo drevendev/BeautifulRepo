@@ -49,11 +49,17 @@ def load_checker(name: str):
         raise RuntimeError("checked-in checker module is unavailable")
     module = importlib.util.module_from_spec(spec)
     sys.modules[MODULES[name]] = module
+    # Isolated (-I) execution still writes __pycache__ for dynamically loaded
+    # sibling modules. An audit of this checkout must not modify it.
+    prior_bytecode = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
     try:
         spec.loader.exec_module(module)
     except Exception:
         sys.modules.pop(MODULES[name], None)
         raise
+    finally:
+        sys.dont_write_bytecode = prior_bytecode
     return module
 
 
