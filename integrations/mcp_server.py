@@ -63,7 +63,9 @@ def _bounded_source_tree(root: Path) -> bool:
                     visited += 1
                     if visited > MAX_WALK_ENTRIES:
                         return False
-                    info = entry.stat(follow_symlinks=False)
+                    # os.lstat consistently exposes Windows junction tags;
+                    # DirEntry.stat can omit reparse metadata on some versions.
+                    info = os.lstat(entry.path)
                     if (stat.S_ISDIR(info.st_mode)
                             and getattr(info, "st_reparse_tag", 0) != JUNCTION_TAG):
                         pending.append(Path(entry.path))
