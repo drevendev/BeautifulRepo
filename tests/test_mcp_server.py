@@ -132,6 +132,42 @@ class CheckerWrapperTests(unittest.TestCase):
         self.assertEqual(report["state"], "incomplete")
         run.assert_not_called()
 
+    def test_oversized_markdown_fails_before_checker_launch(self):
+        (self.root / "README.md").write_text("12345678", encoding="utf-8")
+        with mock.patch.object(adapter, "MAX_SOURCE_BYTES", 4):
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                result = adapter.run_check(self.root, "check_documentation_links")
+        self.assertEqual(result["state"], "incomplete")
+        self.assertEqual(result["exit_code"], 2)
+        run.assert_not_called()
+
+    def test_too_many_sources_fails_before_checker_launch(self):
+        (self.root / "one.md").write_text("one", encoding="utf-8")
+        (self.root / "two.markdown").write_text("two", encoding="utf-8")
+        with mock.patch.object(adapter, "MAX_MARKDOWN_SOURCES", 1):
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                result = adapter.run_check(self.root, "check_html_navigation")
+        self.assertEqual(result["state"], "incomplete")
+        run.assert_not_called()
+
+    def test_outside_markdown_symlink_fails_before_checker_launch(self):
+        with tempfile.TemporaryDirectory() as outside:
+            target = Path(outside) / "secret.txt"
+            target.write_text("synthetic", encoding="utf-8")
+            try:
+                (self.root / "linked.md").symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("file symlinks not available")
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                result = adapter.run_check(self.root, "check_documentation_links")
+            self.assertEqual(result["state"], "incomplete")
+            run.assert_not_called()
+
+    def test_ordinary_nested_markdown_passes_preflight(self):
+        (self.root / "nested").mkdir()
+        (self.root / "nested" / "guide.md").write_text("# Guide\n", encoding="utf-8")
+        self.assertTrue(adapter._bounded_source_tree(self.root))
+
     def test_real_bundle_reports_broken_link_without_target_edit(self):
         (self.root / "README.md").write_text("# Example\n\n[Guide](docs/missing.md)\n", encoding="utf-8")
         before = (self.root / "README.md").read_bytes()
