@@ -18,6 +18,18 @@ with its deliberately fictional, fully scoped issue example. Maintainers can
 adapt the [good-first-issue template](templates/GOOD_FIRST_ISSUE.template.md)
 without pretending that a labelled issue, reviewer or completion date exists.
 
+**Testing is also a contribution.** [Help wanted: independent Agent Skills trials
+(#258)](https://github.com/drevendev/BeautifulRepo/issues/258) invites one
+Claude Code **or** Codex installation and skill test with synthetic, disposable
+files. Please report the exact pinned candidate commit, client/OS version,
+observed tool calls, whether any target files changed, and PASS, FAIL or
+INCONCLUSIVE. An installation failure is useful evidence; a green CI badge or
+source-only inspection is not a model test. The four-skill bundle is still a
+development candidate (the stable `v0.2.0` plugin contains only `audit-repo`).
+The [plugin guide](guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate)
+explains setup and removal. Do not spend on model calls without approval or
+submit private repositories, secrets or unsanitized session transcripts.
+
 ## Ask a question
 
 Questions, ideas and stories about using BeautifulRepo belong in
