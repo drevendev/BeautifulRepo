@@ -166,11 +166,11 @@ class FirstVisitTests(unittest.TestCase):
             target = parent / "your-repository"
             (target / "docs").mkdir(parents=True)
             (target / "README.md").write_text(
-                "# Sample\\n\\nSee [setup](docs/missing.md).\\n", encoding="utf-8"
+                "# Sample\n\nSee [setup](docs/missing.md).\n", encoding="utf-8"
             )
-            (target / "docs" / "guide.md").write_text("# Setup\\n", encoding="utf-8")
-            (target / "LICENSE").write_text("MIT License\\n", encoding="utf-8")
-            (target / "CONTRIBUTING.md").write_text("# Contributing\\n", encoding="utf-8")
+            (target / "docs" / "guide.md").write_text("# Setup\n", encoding="utf-8")
+            (target / "LICENSE").write_text("MIT License\n", encoding="utf-8")
+            (target / "CONTRIBUTING.md").write_text("# Contributing\n", encoding="utf-8")
 
             clone = subprocess.run(
                 ["git", "clone", "--quiet", "--no-hardlinks",
@@ -203,7 +203,7 @@ class FirstVisitTests(unittest.TestCase):
                                  "PowerShell audit must not write the target")
                 if expected == 1:
                     (target / "README.md").write_text(
-                        "# Sample\\n\\nSee [setup](docs/guide.md).\\n",
+                        "# Sample\n\nSee [setup](docs/guide.md).\n",
                         encoding="utf-8",
                     )
 
