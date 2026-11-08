@@ -132,6 +132,64 @@ class CheckerWrapperTests(unittest.TestCase):
         self.assertEqual(report["state"], "incomplete")
         run.assert_not_called()
 
+    def test_oversized_markdown_fails_before_checker_launch(self):
+        (self.root / "README.md").write_text("12345678", encoding="utf-8")
+        with mock.patch.object(adapter, "MAX_SOURCE_BYTES", 4):
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                result = adapter.run_check(self.root, "check_documentation_links")
+        self.assertEqual(result["state"], "incomplete")
+        self.assertEqual(result["exit_code"], 2)
+        run.assert_not_called()
+
+    def test_too_many_sources_fails_before_checker_launch(self):
+        (self.root / "one.md").write_text("one", encoding="utf-8")
+        (self.root / "two.markdown").write_text("two", encoding="utf-8")
+        with mock.patch.object(adapter, "MAX_MARKDOWN_SOURCES", 1):
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                result = adapter.run_check(self.root, "check_html_navigation")
+        self.assertEqual(result["state"], "incomplete")
+        run.assert_not_called()
+
+    def test_outside_markdown_symlink_fails_before_checker_launch(self):
+        with tempfile.TemporaryDirectory() as outside:
+            target = Path(outside) / "secret.txt"
+            target.write_text("synthetic", encoding="utf-8")
+            try:
+                (self.root / "linked.md").symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("file symlinks not available")
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                result = adapter.run_check(self.root, "check_documentation_links")
+            self.assertEqual(result["state"], "incomplete")
+            run.assert_not_called()
+
+    def test_ordinary_nested_markdown_passes_preflight(self):
+        (self.root / "nested").mkdir()
+        (self.root / "nested" / "guide.md").write_text("# Guide\n", encoding="utf-8")
+        self.assertTrue(adapter._bounded_source_tree(self.root))
+
+    def test_junction_tagged_directory_is_not_traversed(self):
+        redirected = self.root / "junction-like"
+        redirected.mkdir()
+        (redirected / "oversized.md").write_text("12345678", encoding="utf-8")
+        real_lstat = adapter.os.lstat
+
+        def with_junction_metadata(path):
+            info = real_lstat(path)
+            if Path(path) == redirected:
+                return types.SimpleNamespace(
+                    st_mode=info.st_mode,
+                    st_size=info.st_size,
+                    st_reparse_tag=adapter.JUNCTION_TAG,
+                )
+            return info
+
+        # Simulate NTFS junction metadata without requiring elevated Windows
+        # privileges. DirEntry.stat may omit the tag; os.lstat must be used.
+        with mock.patch.object(adapter.os, "lstat", side_effect=with_junction_metadata):
+            with mock.patch.object(adapter, "MAX_SOURCE_BYTES", 4):
+                self.assertTrue(adapter._bounded_source_tree(self.root))
+
     def test_real_bundle_reports_broken_link_without_target_edit(self):
         (self.root / "README.md").write_text("# Example\n\n[Guide](docs/missing.md)\n", encoding="utf-8")
         before = (self.root / "README.md").read_bytes()

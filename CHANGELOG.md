@@ -608,6 +608,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Fail closed in the experimental MCP Markdown/HTML tools before scanning
+  unbounded or special Markdown sources. A metadata-only preflight caps
+  checkout entries, Markdown source count, per-file and total source bytes,
+  and scan time; oversized, unreadable or escaping sources return incomplete
+  evidence without launching a checker. The trusted-stable-root/race
+  limitation remains; standalone CLI behavior is unchanged (#255).
+
 - Keep first-run offline audits read-only with respect to their own tool checkout: dynamically loading sibling checkers from `audit_bundle.py` or the standalone HTML-navigation CLI must not create `tools/__pycache__` when invoked with `python -I`. Add a fresh-copy subprocess regression; target-file read-only checks remain in place.
 
 - Isolate each experimental MCP tool's selected offline checker via the

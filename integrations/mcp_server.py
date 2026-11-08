@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import stat
 import subprocess
 import sys
 import threading
+import time
 from typing import Any
 
 BUNDLE = Path(__file__).resolve().parents[1] / "tools" / "audit_bundle.py"
@@ -28,6 +30,70 @@ COVERAGE = (
     "Read-only offline source checks, not a rendered accessibility, security, "
     "external-link, or repository-quality certification."
 )
+
+
+
+MAX_MARKDOWN_SOURCES = 5000
+MAX_SOURCE_BYTES = 2 * 1024 * 1024
+MAX_TOTAL_MARKDOWN_BYTES = 32 * 1024 * 1024
+MAX_WALK_ENTRIES = 50000
+MAX_PREFLIGHT_SECONDS = 5
+
+
+def _bounded_source_tree(root: Path) -> bool:
+    """Fail closed on oversized/special Markdown sources before checker launch.
+
+    Metadata preflight for a stable, trusted checkout; not a sandbox against
+    concurrent filesystem changes. Never read target file contents here.
+    """
+    deadline = time.monotonic() + MAX_PREFLIGHT_SECONDS
+    pending = [root]
+    visited = markdown_files = total_bytes = 0
+    try:
+        while pending:
+            if time.monotonic() > deadline:
+                return False
+            with os.scandir(pending.pop()) as entries:
+                for entry in entries:
+                    if time.monotonic() > deadline:
+                        return False
+                    # Match the offline link checkers' unscanned dependency trees.
+                    if entry.name in (".git", "node_modules"):
+                        continue
+                    visited += 1
+                    if visited > MAX_WALK_ENTRIES:
+                        return False
+                    # os.lstat consistently exposes Windows junction tags;
+                    # DirEntry.stat can omit reparse metadata on some versions.
+                    info = os.lstat(entry.path)
+                    if (stat.S_ISDIR(info.st_mode)
+                            and getattr(info, "st_reparse_tag", 0) != JUNCTION_TAG):
+                        pending.append(Path(entry.path))
+                        continue
+                    if not entry.name.lower().endswith((".md", ".markdown")):
+                        continue
+                    if stat.S_ISREG(info.st_mode):
+                        size = info.st_size
+                    elif stat.S_ISLNK(info.st_mode):
+                        target = Path(entry.path).resolve(strict=True)
+                        if not target.is_relative_to(root) or not target.is_file():
+                            return False
+                        target_info = target.stat()
+                        if not stat.S_ISREG(target_info.st_mode):
+                            return False
+                        size = target_info.st_size
+                    else:
+                        # Never hand a Markdown-named FIFO/device to read_text().
+                        return False
+                    markdown_files += 1
+                    total_bytes += size
+                    if (markdown_files > MAX_MARKDOWN_SOURCES
+                            or size > MAX_SOURCE_BYTES
+                            or total_bytes > MAX_TOTAL_MARKDOWN_BYTES):
+                        return False
+    except (OSError, ValueError, RuntimeError):
+        return False
+    return True
 
 
 def allowed_root(value: str) -> Path:
@@ -125,6 +191,8 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
         fixed_root = allowed_root(str(root))
     except ValueError:
         return incomplete(check, "configured repository root is no longer safe or available")
+    if check in ("markdown_links", "html_navigation") and not _bounded_source_tree(fixed_root):
+        return incomplete(check, "repository document sources exceeded safe scan limits or could not be inspected")
     if not BUNDLE.is_file():
         return incomplete(check, "checked-in bundle is unavailable")
     # Invoke only the requested checker: unrelated noisy/failed checks must not
