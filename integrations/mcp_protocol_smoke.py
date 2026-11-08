@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -25,7 +26,31 @@ assert SPEC is not None and SPEC.loader is not None
 adapter = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(adapter)
 CHECKS = adapter.CHECKS
-run_check = adapter.run_check
+
+
+def direct_cli_receipt(root: Path, tool_name: str) -> tuple[dict, int]:
+    """Get independent source evidence from the real CLI, not run_check again."""
+    check = CHECKS[tool_name]
+    completed = subprocess.run(
+        [
+            sys.executable, "-I", "-B", str(adapter.BUNDLE), str(root),
+            "--format", "json", "--fail-on", "never", "--only", check,
+        ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=30,
+        check=False,
+    )
+    result = json.loads(completed.stdout.decode("utf-8"))
+    record = result["checks"][check]
+    if (result["schema_version"] != 1
+            or result["exit_code"] != completed.returncode
+            or completed.returncode not in (0, 1)
+            or record["state"] != "complete"
+            or record["exit_code"] != completed.returncode):
+        raise AssertionError(f"direct CLI returned inconsistent evidence for {check}")
+    return record, completed.returncode
 
 
 def snapshot(root: Path) -> dict[str, str]:
@@ -96,17 +121,24 @@ async def probe(root: Path, *, broken: bool, mode: str,
             response = await client.call_tool(name, {})
             if response.is_error:
                 raise AssertionError(f"MCP tool {name} failed: {response.content!r}")
-            expected = run_check(root, name)
-            if response.structured_content != expected:
+            # A second call to adapter.run_check would share the very logic
+            # under test and could let the same broken wrapper pass twice.
+            direct_record, direct_exit = direct_cli_receipt(root, name)
+            observed = response.structured_content
+            if (not isinstance(observed, dict)
+                    or observed.get("checker") != CHECKS[name]
+                    or observed.get("state") != "complete"
+                    or observed.get("evidence") != direct_record
+                    or observed.get("exit_code") != direct_exit
+                    or observed.get("bundle_exit_code") != direct_exit):
                 raise AssertionError(
-                    f"MCP result differs from CLI for {name}: "
-                    f"{response.structured_content!r} != {expected!r}"
+                    f"MCP tool evidence disagrees with independent CLI for {name}"
                 )
-            if expected["state"] != "complete":
-                raise AssertionError(f"incomplete fixture: {name}: {expected!r}")
-            if name == "check_documentation_links":
-                if expected["exit_code"] != (1 if broken else 0):
-                    raise AssertionError(f"incorrect broken-link result: {expected!r}")
+            expected_exit = 0 if name == "audit_repository" or not broken else 1
+            if direct_exit != expected_exit:
+                raise AssertionError(
+                    f"{name}: expected direct CLI exit {expected_exit}, got {direct_exit}"
+                )
         if exercise_missing_root:
             # The configured path must be revalidated on EACH tool invocation,
             # even while the real MCP process/client session remains connected.
@@ -156,7 +188,7 @@ async def main() -> None:
         print(
             f"MCP stdio SDK smoke PASS; modern discovery {modern_healthy}; "
             f"legacy initialize {legacy_healthy}; "
-            "3 tools listed and matched direct checkers on healthy/broken synthetic roots "
+            "3 tools listed and matched separate direct CLI bundle runs on healthy/broken synthetic roots "
             "in both lifecycles; "
             f"fixture files unchanged; {refusal_count} unsafe startup roots refused "
             f"(symlink exercised: {symlink_tested}); missing root during an active "

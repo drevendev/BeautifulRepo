@@ -613,6 +613,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Compare experimental MCP stdio tool receipts with **separate, direct CLI
+  bundle subprocesses**, rather than calling the same MCP adapter wrapper as
+  both implementation and test oracle. Check all three tools and native exit
+  codes on healthy and broken synthetic roots in modern and legacy SDK sessions.
+  This is still SDK-level evidence, not Claude Code/Codex host acceptance (#255).
+
 - Keep experimental MCP tool responses **incomplete** when a single-checker
   bundle's exit status contradicts its claimed result. Preserve the bundled
   128-KiB report-limit/failure reason without echoing arbitrary source text,
