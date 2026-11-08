@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Pin README and cross-platform combined-audit first-run commands to an
+  immutable, reviewed development commit instead of following the moving
+  `master` branch. Distinguish this from the v0.2.0 Action and fail early
+  on unsuccessful PowerShell setup. CI tests a local clone, not an external
+  fresh-install trial (related to #254).
+
 - Document the Windows PowerShell sibling-checkout first audit with explicit
   native exit-status handling, and exercise a broken-to-fixed local-link run
   from a fresh offline clone on the Windows CI runner (#254).
