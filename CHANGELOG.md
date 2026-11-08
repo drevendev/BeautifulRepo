@@ -613,6 +613,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Make the real-repository case-study procedure distinguish a pinned
+  `SECURITY.md` from GitHub's independently configured private vulnerability
+  reporting. Record the date, actual read-only API response and unknown/denied
+  states rather than inferring a safe reporting route from a policy file or
+  an API failure. GitHub REST/security guidance reviewed 2026-11-08
+  (related to #83 and #88).
+
 - Make the experimental MCP protocol smoke's tool-to-checker expectations,
   direct CLI path and missing-root receipts independent of the adapter under
   test. A swapped tool route can no longer make both the MCP response and its
