@@ -107,8 +107,8 @@ BR_ROOT="$(pwd -P)/tests/fixtures/agent-repos/healthy"
 
 The `test` command stops this POSIX procedure if the checkout is not
 **exactly** the 40-character commit above; do not silently substitute a
-newer `master`. The smoke runs the real SDK **without a model** against temporary synthetic repositories. It
-requires package download for installation; run it only if you accept the
+newer `master`. The smoke runs the real SDK **without a model** against
+temporary synthetic repositories. It requires package download for installation; run it only if you accept the
 environment/network implications. A smoke PASS validates protocol wiring,
 **not** either model host. The sample `BR_ROOT` is a checked-in **synthetic**
 fixture; replace it with the physical absolute path of a trusted, ordinary
