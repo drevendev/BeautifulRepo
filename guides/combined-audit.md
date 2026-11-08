@@ -19,6 +19,36 @@ python -I tools/audit_bundle.py ../your-repository
 python -I tools/audit_bundle.py ../your-repository --format json
 ```
 
+
+## Windows PowerShell first run
+
+From the **parent directory** containing `your-repository\` (rename that
+placeholder to the folder you actually own), clone BeautifulRepo beside it.
+Run the same **read-only**, dependency-free checker in PowerShell:
+
+```powershell
+git clone https://github.com/drevendev/BeautifulRepo.git
+Set-Location .\BeautifulRepo
+python --version
+python -I .\tools\audit_bundle.py ..\your-repository --fail-on never
+$LASTEXITCODE
+```
+
+Use Python **3.11 or later**. The final PowerShell expression prints the
+Python process status: **0** when the selected threshold is clear, **1** for
+broken local links or threshold-reaching findings, **2** for invalid roots or
+incomplete evidence. The result also ends with `Exit N:`. PowerShell does
+not automatically stop a session when a native command exits nonzero; do not
+interpret that as a passing audit. `--fail-on never` only makes *entry-point*
+findings advisory, not broken local links. If `python` is unavailable, install
+Python 3.11+ and ensure its command is on PATH; do not substitute a different
+unchecked interpreter or install packages into the target.
+
+This path is checked using a fresh **local** sibling Git clone in the Windows
+CI job; it is not an independent end-user PowerShell session. The audit
+does not edit either checkout. Do not run it on a sensitive private target
+without first reviewing what source paths and diagnostics its output reveals.
+
 For an optional **standalone HTML report** from the same three checks, redirect
 stdout **outside** the target checkout:
 
