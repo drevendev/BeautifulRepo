@@ -52,8 +52,15 @@ clone BeautifulRepo **beside** it and run:
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
+git checkout --detach 28530c997bf6e0df4406c271f77dd21482e40781
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
+
+The detached commit pins a reviewed **development checkout** containing the
+combined audit; it is not a new release or the older `v0.2.0` Action pin.
+Cloning needs network access; the audit itself does not. To adopt a newer
+revision, review and intentionally change the pin rather than silently
+running whatever is on `master`.
 
 For Windows, see the [PowerShell first-run commands](guides/combined-audit.md#windows-powershell-first-run), including how to inspect the native exit code.
 
