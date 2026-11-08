@@ -116,6 +116,46 @@ repository only after reviewing data-sharing implications. The three
 variables must be used in the same shell session, or replaced by their
 absolute values later. Avoid private repository data during initial tests.
 
+### Windows PowerShell: immutable source and SDK preflight (unverified host)
+
+The POSIX `bin/python` path above is **not** a Windows path. For an
+isolated PowerShell trial on Windows, use a Python **3.11+** launcher and
+Git. This example selects Python 3.11; if only a newer supported version
+is installed, change `py -3.11` to the installed launcher selection.
+These commands have **not** been executed in a Windows host in this
+project. The smoke is an SDK test, not Claude Code or Codex acceptance.
+
+Run in a disposable parent directory; PowerShell command failures are
+checked explicitly rather than assuming `$ErrorActionPreference` catches
+external program exit codes:
+
+```powershell
+$pin = '3c1040b164c7a477e8988631aaab47300da3f5f8'
+git clone https://github.com/drevendev/BeautifulRepo.git
+if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
+Set-Location BeautifulRepo
+git checkout --detach $pin
+if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
+$actual = (git rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $actual -ne $pin) { throw 'Unexpected Git SHA' }
+py -3.11 -m venv ..\beautifulrepo-mcp-venv
+if ($LASTEXITCODE -ne 0) { throw 'Venv creation failed' }
+$brPython = (Resolve-Path ..\beautifulrepo-mcp-venv\Scripts\python.exe).Path
+& $brPython -m pip install 'mcp==2.3.0'
+if ($LASTEXITCODE -ne 0) { throw 'SDK install failed' }
+& $brPython -I -B .\integrations\mcp_protocol_smoke.py
+if ($LASTEXITCODE -ne 0) { throw 'SDK smoke failed' }
+$brServer = (Resolve-Path .\integrations\mcp_server.py).Path
+$brRoot = (Resolve-Path .\tests\fixtures\agent-repos\healthy).Path
+```
+
+Keep the variables in the **same PowerShell session** for the host
+registration examples below. `Resolve-Path` returns drive-qualified
+absolute paths, including when the parent directory contains spaces.
+An SDK smoke success is **not** a host connection or model-tool-call PASS.
+Do not test on a confidential repository or assume a fresh install succeeds
+just because these source-reviewed commands are provided.
+
 ### Claude Code: local-scope stdio entry (host run unverified)
 
 The [official Claude Code MCP guide](https://code.claude.com/docs/en/mcp)
@@ -130,6 +170,17 @@ claude mcp list
 claude mcp get beautifulrepo-audit
 ```
 
+For a **Windows PowerShell** host trial, use the variables from the Windows
+preparation block instead of the POSIX environment variables:
+
+```powershell
+claude --version
+claude mcp add --scope local --transport stdio beautifulrepo-audit -- $brPython -I -B $brServer --root $brRoot
+claude mcp list
+claude mcp get beautifulrepo-audit
+```
+
+These are unverified host commands, not an observed installation.
 Open **Claude Code** on that synthetic fixture and inspect `/mcp` for a
 connected server and the three named tools. A successful `add` or `list`
 alone is **only configuration evidence**. Actual acceptance still needs
@@ -165,10 +216,18 @@ Record actual calls and `PASS/FAIL/INCONCLUSIVE` separately from the Claude
 Code run; do not use model calls without usage/cost authorization.
 Remove the entry with `codex mcp remove beautifulrepo-audit`.
 
-On **Windows**, use drive-qualified absolute `python.exe`, server and root
-paths, and the host's Windows command quoting. POSIX `bin/python` paths
-above do not apply. Neither Windows host setup nor a real legacy model-host lifecycle has been
-proven by these instructions. The separate SDK smoke exercises a legacy
+For a **Windows PowerShell** host trial, using the same `$brPython`,
+`$brServer`, and `$brRoot` variables from the Windows preparation block:
+
+```powershell
+codex --version
+codex mcp add beautifulrepo-audit -- $brPython -I -B $brServer --root $brRoot
+codex mcp list
+codex mcp get beautifulrepo-audit
+```
+
+Neither Windows host setup nor a real legacy model-host lifecycle has been
+verified here. The separate SDK smoke is **not** host acceptance. The separate SDK smoke exercises a legacy
 `initialize` connection, which is **not** evidence of Claude Code/Codex
 using that lifecycle.
 
