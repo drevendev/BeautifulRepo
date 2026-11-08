@@ -168,6 +168,28 @@ class CheckerWrapperTests(unittest.TestCase):
         (self.root / "nested" / "guide.md").write_text("# Guide\n", encoding="utf-8")
         self.assertTrue(adapter._bounded_source_tree(self.root))
 
+    def test_junction_tagged_directory_is_not_traversed(self):
+        redirected = self.root / "junction-like"
+        redirected.mkdir()
+        (redirected / "oversized.md").write_text("12345678", encoding="utf-8")
+        real_lstat = adapter.os.lstat
+
+        def with_junction_metadata(path):
+            info = real_lstat(path)
+            if Path(path) == redirected:
+                return types.SimpleNamespace(
+                    st_mode=info.st_mode,
+                    st_size=info.st_size,
+                    st_reparse_tag=adapter.JUNCTION_TAG,
+                )
+            return info
+
+        # Simulate NTFS junction metadata without requiring elevated Windows
+        # privileges. DirEntry.stat may omit the tag; os.lstat must be used.
+        with mock.patch.object(adapter.os, "lstat", side_effect=with_junction_metadata):
+            with mock.patch.object(adapter, "MAX_SOURCE_BYTES", 4):
+                self.assertTrue(adapter._bounded_source_tree(self.root))
+
     def test_real_bundle_reports_broken_link_without_target_edit(self):
         (self.root / "README.md").write_text("# Example\n\n[Guide](docs/missing.md)\n", encoding="utf-8")
         before = (self.root / "README.md").read_bytes()
