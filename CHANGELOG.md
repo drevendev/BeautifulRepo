@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Surface the existing independent four-skill Claude Code/Codex test request
+  (#258) from README and CONTRIBUTING, with a pinned development-candidate
+  guide, disposable synthetic fixture, reproducible PASS/FAIL/INCONCLUSIVE
+  reporting and model-cost/privacy cautions. This does not claim real-host
+  acceptance or a released four-skill plugin (related to #257 and #74).
+
 - Document an immutable **Windows PowerShell** setup and source-SHA check for the
   experimental local MCP adapter, including isolated SDK smoke and separate
   Claude Code/Codex CLI registration examples. Commands are source-reviewed,
