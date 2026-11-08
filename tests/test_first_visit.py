@@ -147,6 +147,8 @@ class FirstVisitTests(unittest.TestCase):
             self.assertEqual(0, checkout_status.returncode, checkout_status.stderr)
             self.assertEqual("", checkout_status.stdout,
                              "First audit must not change its tool checkout")
+            self.assertFalse((cloned_tools / "tools" / "__pycache__").exists(),
+                             "Ignored Python bytecode writes are not visible to git status")
 
 
 if __name__ == "__main__":
