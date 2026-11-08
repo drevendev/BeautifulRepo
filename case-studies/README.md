@@ -21,10 +21,33 @@ another repository without its owner's permission. The steps below are the minim
 ### 1. Snapshot "before"
 
 - The full commit SHA and the date of observation.
-- Metadata from `gh api repos/OWNER/REPO`: description, topics, homepage, licence.
-- Releases and tags (`gh release list`, `git tag`).
-- Whether private vulnerability reporting is enabled:
-  `gh api repos/OWNER/REPO/private-vulnerability-reporting`.
+- Repository metadata from `gh api repos/OWNER/REPO`: description, topics,
+  homepage and licence. Record the observation date separately: provider
+  metadata is **not pinned** by a Git commit.
+- Releases and tags (`gh release list`, `git tag`), distinguishing a Git
+  tag from an actual published GitHub Release.
+- The pinned tree's `SECURITY.md`, if any, and its actual reporting
+  instructions. A security policy does **not** establish that GitHub's
+  separate private-vulnerability-reporting feature is enabled.
+- For a dated, read-only check of that GitHub feature on a public repository,
+  use the documented `GET` endpoint with a GitHub CLI session. The `-i`
+  option prints the HTTP status line as well as the JSON response:
+
+  ```sh
+  gh api -i -H 'Accept: application/vnd.github+json' repos/OWNER/REPO/private-vulnerability-reporting
+  ```
+
+  Only an observed HTTP 200 response containing a boolean `enabled` value
+  supports recording **enabled** or **disabled**, and only as of that check.
+  Record the date and endpoint alongside the result. Authentication, API,
+  network or access failures are **unknown**, not evidence of disabled
+  reporting. Don't print tokens, probe with `PUT`/`DELETE`, invent an email
+  address, or file a sensitive vulnerability in a public issue. A missing
+  tracked policy also does not rule out an inherited security policy.
+  See [GitHub's REST endpoint](https://docs.github.com/en/rest/repos/repos#check-if-private-vulnerability-reporting-is-enabled-for-a-repository),
+  [private-reporting guidance](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately)
+  and [GitHub CLI `--include` reference](https://cli.github.com/manual/gh_api)
+  (all reviewed 2026-11-08).
 
 ### 2. Audit with pinned tools
 
@@ -105,7 +128,8 @@ was **not** tested. Link it from the table above.
 
 ## Before
 
-<metadata, releases, private reporting; tool output summary; checklist findings as
+<dated metadata, tags and releases, pinned security policy and observed/unknown
+private-reporting status; tool output summary; checklist findings as
 obstacle → reader → smallest fix → verification>
 
 ## Changes and trade-offs
