@@ -11,6 +11,15 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fail closed in the experimental MCP Markdown/HTML tools before scanning
+  unbounded or special Markdown sources. A metadata-only preflight caps
+  checkout entries, Markdown source count, per-file and total source bytes,
+  and scan time; oversized, unreadable or escaping sources return incomplete
+  evidence without launching a checker. The trusted-stable-root/race
+  limitation remains; standalone CLI behavior is unchanged (#255).
+
 ### Added
 
 - Exercise the README's real sibling-checkout first command from a fresh **local Git clone** at the exact CI source revision, without network access. Check broken-to-fixed link exits and verify that neither the target nor the cloned tool checkout changes. This strengthens reproducibility for #254; it is not an independent new-user or external-host trial.
