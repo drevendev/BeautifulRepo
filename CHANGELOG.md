@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Document an immutable **Windows PowerShell** setup and source-SHA check for the
+  experimental local MCP adapter, including isolated SDK smoke and separate
+  Claude Code/Codex CLI registration examples. Commands are source-reviewed,
+  **not** observed Windows host or model-invocation acceptance (related to #255).
+
 - Exercise the README's real sibling-checkout first command from a fresh **local Git clone** at the exact CI source revision, without network access. Check broken-to-fixed link exits and verify that neither the target nor the cloned tool checkout changes. This strengthens reproducibility for #254; it is not an independent new-user or external-host trial.
 
 - Add a practical choice of **standalone offline CLI**, tagged one-skill
