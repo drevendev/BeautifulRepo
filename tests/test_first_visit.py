@@ -151,5 +151,71 @@ class FirstVisitTests(unittest.TestCase):
                              "Ignored Python bytecode writes are not visible to git status")
 
 
+
+    @unittest.skipUnless(sys.platform == "win32", "PowerShell smoke runs on Windows")
+    def test_powershell_first_audit_from_sibling_clone(self):
+        # Verify the documented native-command exit status, not just that
+        # PowerShell can display an audit report. No network is required.
+        if not (ROOT / ".git").exists():
+            self.skipTest("source is not a Git checkout")
+        import shutil
+        self.assertIsNotNone(shutil.which("pwsh"), "Windows CI needs PowerShell 7")
+        with tempfile.TemporaryDirectory(prefix="beautifulrepo-ps-first-visit-") as tmp:
+            parent = Path(tmp)
+            clone_root = parent / "BeautifulRepo"
+            target = parent / "your-repository"
+            (target / "docs").mkdir(parents=True)
+            (target / "README.md").write_text(
+                "# Sample\\n\\nSee [setup](docs/missing.md).\\n", encoding="utf-8"
+            )
+            (target / "docs" / "guide.md").write_text("# Setup\\n", encoding="utf-8")
+            (target / "LICENSE").write_text("MIT License\\n", encoding="utf-8")
+            (target / "CONTRIBUTING.md").write_text("# Contributing\\n", encoding="utf-8")
+
+            clone = subprocess.run(
+                ["git", "clone", "--quiet", "--no-hardlinks",
+                 str(ROOT), str(clone_root)],
+                capture_output=True, text=True, encoding="utf-8",
+                timeout=120, check=False,
+            )
+            self.assertEqual(0, clone.returncode, clone.stderr)
+            safe_path = str(clone_root).replace("'", "''")
+            script = (
+                f"Set-Location -LiteralPath '{safe_path}'; "
+                "& python -I .\\tools\\audit_bundle.py "
+                "..\\your-repository --fail-on never; "
+                "exit $LASTEXITCODE"
+            )
+
+            for expected, marker in [(1, "docs/missing.md"),
+                                     (0, "markdown_links: complete")]:
+                before = file_snapshot(target)
+                completed = subprocess.run(
+                    ["pwsh", "-NoProfile", "-NonInteractive", "-Command", script],
+                    cwd=parent, capture_output=True, text=True, encoding="utf-8",
+                    timeout=90, check=False,
+                )
+                self.assertEqual(expected, completed.returncode,
+                                 completed.stdout + completed.stderr)
+                self.assertIn(marker, completed.stdout)
+                self.assertIn(f"Exit {expected}:", completed.stdout)
+                self.assertEqual(before, file_snapshot(target),
+                                 "PowerShell audit must not write the target")
+                if expected == 1:
+                    (target / "README.md").write_text(
+                        "# Sample\\n\\nSee [setup](docs/guide.md).\\n",
+                        encoding="utf-8",
+                    )
+
+            status = subprocess.run(
+                ["git", "-C", str(clone_root), "status", "--porcelain",
+                 "--untracked-files=all"],
+                capture_output=True, text=True, encoding="utf-8",
+                timeout=20, check=False,
+            )
+            self.assertEqual(0, status.returncode, status.stderr)
+            self.assertEqual("", status.stdout, "PowerShell audit changed tools")
+            self.assertFalse((clone_root / "tools" / "__pycache__").exists())
+
 if __name__ == "__main__":
     unittest.main()
