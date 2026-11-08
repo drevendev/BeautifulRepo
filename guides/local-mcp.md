@@ -77,15 +77,17 @@ do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
 
-This **source-checked procedure, reviewed 2026-11-07, has not passed a fresh
+This **source-checked procedure, refreshed 2026-11-08, has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
 following full commit is a `master` snapshot containing the **modern and
-legacy SDK smoke**, including the fail-closed missing-root regressions. The
-older `6c01779` checkout runs an earlier smoke **without the legacy mode**;
-using it cannot reproduce both protocol-lifecycle results. This commit is
+legacy SDK smoke**, missing-root regressions, bounded child output, isolated
+single-checker calls and the Markdown-source metadata preflight. The
+previously recommended `331df37` snapshot has the dual-lifecycle smoke but
+**does not contain these subsequent safety and isolation fixes**. The still
+older `6c01779` snapshot lacks the legacy smoke as well. This commit is
 **not a released MCP version**:
 
-[BeautifulRepo `331df37acc2a764b55a9e88c34ac686eeddc6df6`](https://github.com/drevendev/BeautifulRepo/commit/331df37acc2a764b55a9e88c34ac686eeddc6df6).
+[BeautifulRepo `3c1040b164c7a477e8988631aaab47300da3f5f8`](https://github.com/drevendev/BeautifulRepo/commit/3c1040b164c7a477e8988631aaab47300da3f5f8).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -93,8 +95,8 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 331df37acc2a764b55a9e88c34ac686eeddc6df6
-git rev-parse HEAD
+git checkout --detach 3c1040b164c7a477e8988631aaab47300da3f5f8
+test "$(git rev-parse HEAD)" = "3c1040b164c7a477e8988631aaab47300da3f5f8" || exit 1
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
 ../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
@@ -103,10 +105,10 @@ BR_SERVER="$(pwd -P)/integrations/mcp_server.py"
 BR_ROOT="$(pwd -P)/tests/fixtures/agent-repos/healthy"
 ```
 
-Verify `git rev-parse HEAD` printed **exactly** the 40-character commit
-above; do not silently substitute a newer `master`. The smoke runs the
-real SDK **without a model** against temporary synthetic repositories. It
-requires package download for installation; run it only if you accept the
+The `test` command stops this POSIX procedure if the checkout is not
+**exactly** the 40-character commit above; do not silently substitute a
+newer `master`. The smoke runs the real SDK **without a model** against
+temporary synthetic repositories. It requires package download for installation; run it only if you accept the
 environment/network implications. A smoke PASS validates protocol wiring,
 **not** either model host. The sample `BR_ROOT` is a checked-in **synthetic**
 fixture; replace it with the physical absolute path of a trusted, ordinary
