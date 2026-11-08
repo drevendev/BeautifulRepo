@@ -103,6 +103,62 @@ class CheckerWrapperTests(unittest.TestCase):
         self.assertEqual(report["state"], "incomplete")
         self.assertEqual(report["exit_code"], 2)
 
+    def test_bundled_incomplete_reason_is_actionable_and_path_free(self):
+        for checker_reason in (
+                "checker result exceeded the 128-KiB limit",
+                "checker failed before producing complete evidence"):
+            payload = {
+                "schema_version": 1, "exit_code": 2,
+                "checks": {"markdown_links": {
+                    "state": "incomplete", "exit_code": None,
+                    "reason": checker_reason,
+                }},
+            }
+            with self.subTest(checker_reason):
+                with mock.patch.object(adapter, "_bounded_run", return_value=(
+                        2, json.dumps(payload).encode("utf-8"), None)):
+                    result = adapter.run_check(self.root, "check_documentation_links")
+                self.assertEqual(result["state"], "incomplete")
+                self.assertEqual(result["exit_code"], 2)
+                self.assertEqual(result["reason"], checker_reason)
+                self.assertNotIn("evidence", result)
+
+    def test_unrecognized_incomplete_reason_is_not_leaked(self):
+        payload = {
+            "schema_version": 1, "exit_code": 2,
+            "checks": {"markdown_links": {
+                "state": "incomplete", "exit_code": None,
+                "reason": "private/path.md: untrusted message",
+            }},
+        }
+        with mock.patch.object(adapter, "_bounded_run", return_value=(
+                2, json.dumps(payload).encode("utf-8"), None)):
+            result = adapter.run_check(self.root, "check_documentation_links")
+        self.assertEqual(result["state"], "incomplete")
+        self.assertNotIn("private/path.md", result["reason"])
+
+    def test_inconsistent_bundle_and_checker_status_is_incomplete(self):
+        for bundle_exit, checker_exit, state in (
+                (0, 1, "complete"),
+                (2, 0, "complete"),
+                (2, 1, "complete"),
+                (1, None, "incomplete"),
+        ):
+            payload = {
+                "schema_version": 1, "exit_code": bundle_exit,
+                "checks": {"markdown_links": {
+                    "state": state, "exit_code": checker_exit,
+                    "diagnostics": [],
+                }},
+            }
+            with self.subTest((bundle_exit, checker_exit, state)):
+                with mock.patch.object(adapter, "_bounded_run", return_value=(
+                        bundle_exit, json.dumps(payload).encode("utf-8"), None)):
+                    result = adapter.run_check(self.root, "check_documentation_links")
+                self.assertEqual(result["state"], "incomplete")
+                self.assertEqual(result["exit_code"], 2)
+                self.assertNotIn("evidence", result)
+
     def test_bad_output_is_incomplete(self):
         with mock.patch.object(adapter, "_bounded_run",
                                return_value=(0, b"garbage", None)):
