@@ -30,10 +30,11 @@ another repository without its owner's permission. The steps below are the minim
   instructions. A security policy does **not** establish that GitHub's
   separate private-vulnerability-reporting feature is enabled.
 - For a dated, read-only check of that GitHub feature on a public repository,
-  use the documented `GET` endpoint with a GitHub CLI session:
-  
+  use the documented `GET` endpoint with a GitHub CLI session. The `-i`
+  option prints the HTTP status line as well as the JSON response:
+
   ```sh
-  gh api -H 'Accept: application/vnd.github+json' repos/OWNER/REPO/private-vulnerability-reporting
+  gh api -i -H 'Accept: application/vnd.github+json' repos/OWNER/REPO/private-vulnerability-reporting
   ```
 
   Only an observed HTTP 200 response containing a boolean `enabled` value
@@ -44,8 +45,9 @@ another repository without its owner's permission. The steps below are the minim
   address, or file a sensitive vulnerability in a public issue. A missing
   tracked policy also does not rule out an inherited security policy.
   See [GitHub's REST endpoint](https://docs.github.com/en/rest/repos/repos#check-if-private-vulnerability-reporting-is-enabled-for-a-repository)
-  and [private-reporting guidance](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately)
-  (both reviewed 2026-11-08).
+  [private-reporting guidance](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately)
+  and [GitHub CLI `--include` reference](https://cli.github.com/manual/gh_api)
+  (all reviewed 2026-11-08).
 
 ### 2. Audit with pinned tools
 
