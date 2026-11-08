@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Document the Windows PowerShell sibling-checkout first audit with explicit
+  native exit-status handling, and exercise a broken-to-fixed local-link run
+  from a fresh offline clone on the Windows CI runner (#254).
+
 - Surface the existing independent four-skill Claude Code/Codex test request
   (#258) from README and CONTRIBUTING, with a pinned development-candidate
   guide, disposable synthetic fixture, reproducible PASS/FAIL/INCONCLUSIVE
