@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Exercise the README's real sibling-checkout first command from a fresh **local Git clone** at the exact CI source revision, without network access. Check broken-to-fixed link exits and verify that neither the target nor the cloned tool checkout changes. This strengthens reproducibility for #254; it is not an independent new-user or external-host trial.
+
 - Add a practical choice of **standalone offline CLI**, tagged one-skill
   plugin, pinned four-skill development candidate and separately configured
   experimental MCP in the plugin guide. State network/data and acceptance
