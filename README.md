@@ -338,6 +338,15 @@ real-agent evaluations, additional before/after cases and manually verified visu
 accessibility. Private-repository guidance and the repository self-check are already
 published; passing static CI is not evidence of a live model or accessibility test.
 
+**Help test the agent skills without writing code:** [one independent Claude Code or
+Codex trial](https://github.com/drevendev/BeautifulRepo/issues/258) on a disposable
+synthetic repository is useful even when installation fails or the result is
+inconclusive. The released `v0.2.0` plugin includes only `audit-repo`; the
+four-skill bundle is a **pinned development candidate, not a stable release**.
+The [test instructions](guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate)
+explain the exact commit, evidence to record and model-provider/cost cautions.
+No stars, paid model runs or access to a private repository are requested.
+
 Suggestions and small improvements are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Ask questions in [Discussions](https://github.com/drevendev/BeautifulRepo/discussions). Please report accessibility barriers through [GitHub Issues](https://github.com/drevendev/BeautifulRepo/issues/new/choose), and follow the [community safety guidance](guides/community-safety.md) before posting sensitive material.
 
 Public documentation is maintained in English.
