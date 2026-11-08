@@ -227,9 +227,8 @@ codex mcp get beautifulrepo-audit
 ```
 
 Neither Windows host setup nor a real legacy model-host lifecycle has been
-verified here. The separate SDK smoke is **not** host acceptance. The separate SDK smoke exercises a legacy
-`initialize` connection, which is **not** evidence of Claude Code/Codex
-using that lifecycle.
+verified here. The separate SDK smoke exercises legacy `initialize` but is
+**not** evidence that Claude Code or Codex uses that lifecycle.
 
 ### Report a real host result
 
