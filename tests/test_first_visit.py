@@ -72,5 +72,82 @@ class FirstVisitTests(unittest.TestCase):
             self.check_checkout(target, expected_exit=0, missing=False)
 
 
+    def test_readme_first_audit_from_fresh_sibling_git_clone(self):
+        # A path-only subprocess smoke cannot catch errors in the documented
+        # "clone beside your repo, cd BeautifulRepo, run ../your-repository"
+        # route. Clone from the current checkout without requiring network.
+        if not (ROOT / ".git").exists():
+            self.skipTest("source is not a Git checkout (e.g. a source archive)")
+        with tempfile.TemporaryDirectory(prefix="beautifulrepo-clone-smoke-") as tmp:
+            parent = Path(tmp)
+            cloned_tools = parent / "BeautifulRepo"
+            target = parent / "your-repository"
+            (target / "docs").mkdir(parents=True)
+            (target / "README.md").write_text(
+                "# Sample project\\n\\nSee [setup](docs/missing.md).\\n",
+                encoding="utf-8",
+            )
+            (target / "docs" / "guide.md").write_text("# Setup\\n", encoding="utf-8")
+            (target / "LICENSE").write_text("MIT License\\n", encoding="utf-8")
+            (target / "CONTRIBUTING.md").write_text(
+                "# Contributing\\n", encoding="utf-8",
+            )
+
+            source_head = subprocess.run(
+                ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+                capture_output=True, text=True, encoding="utf-8", timeout=20,
+                check=False,
+            )
+            self.assertEqual(0, source_head.returncode, source_head.stderr)
+            clone = subprocess.run(
+                ["git", "clone", "--quiet", "--no-hardlinks",
+                 str(ROOT), str(cloned_tools)],
+                capture_output=True, text=True, encoding="utf-8", timeout=120,
+                check=False,
+            )
+            self.assertEqual(0, clone.returncode, clone.stderr)
+            cloned_head = subprocess.run(
+                ["git", "-C", str(cloned_tools), "rev-parse", "HEAD"],
+                capture_output=True, text=True, encoding="utf-8", timeout=20,
+                check=False,
+            )
+            self.assertEqual(0, cloned_head.returncode, cloned_head.stderr)
+            self.assertEqual(source_head.stdout.strip(), cloned_head.stdout.strip(),
+                             "First-run smoke must use this exact tested commit")
+            self.assertTrue((cloned_tools / "tools" / "audit_bundle.py").is_file())
+
+            def documented_command(expected_exit: int, link: str) -> None:
+                before = file_snapshot(target)
+                run = subprocess.run(
+                    [sys.executable, "-I", "tools/audit_bundle.py",
+                     "../your-repository", "--fail-on", "never"],
+                    cwd=cloned_tools, capture_output=True, text=True,
+                    encoding="utf-8", timeout=90, check=False,
+                )
+                self.assertEqual(expected_exit, run.returncode,
+                                 run.stdout + run.stderr)
+                self.assertIn(link, run.stdout)
+                self.assertIn(f"Exit {expected_exit}:", run.stdout)
+                self.assertEqual(before, file_snapshot(target),
+                                 "First audit must not change its target")
+
+            documented_command(1, "docs/missing.md")
+            (target / "README.md").write_text(
+                "# Sample project\\n\\nSee [setup](docs/guide.md).\\n",
+                encoding="utf-8",
+            )
+            documented_command(0, "markdown_links: complete")
+
+            checkout_status = subprocess.run(
+                ["git", "-C", str(cloned_tools), "status", "--porcelain",
+                 "--untracked-files=all"],
+                capture_output=True, text=True, encoding="utf-8", timeout=20,
+                check=False,
+            )
+            self.assertEqual(0, checkout_status.returncode, checkout_status.stderr)
+            self.assertEqual("", checkout_status.stdout,
+                             "First audit must not change its tool checkout")
+
+
 if __name__ == "__main__":
     unittest.main()
