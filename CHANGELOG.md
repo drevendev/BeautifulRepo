@@ -613,6 +613,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Make the experimental MCP protocol smoke's tool-to-checker expectations,
+  direct CLI path and missing-root receipts independent of the adapter under
+  test. A swapped tool route can no longer make both the MCP response and its
+  test oracle agree by sharing the same mapping. This is still real SDK-level
+  evidence, not Claude Code/Codex host acceptance (#255).
+
 - Compare experimental MCP stdio tool receipts with **separate, direct CLI
   bundle subprocesses**, rather than calling the same MCP adapter wrapper as
   both implementation and test oracle. Check all three tools and native exit
