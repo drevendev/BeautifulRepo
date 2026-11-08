@@ -608,6 +608,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Correct the reproducible experimental MCP host-trial checkout pin to the
+  source revision with bounded child output, single-checker isolation and
+  Markdown metadata preflight; fail early when the checked-out Git SHA differs.
+  The installation recipe remains untested in actual Claude Code/Codex hosts
+  (related to #255).
+
 - Fail closed in the experimental MCP Markdown/HTML tools before scanning
   unbounded or special Markdown sources. A metadata-only preflight caps
   checkout entries, Markdown source count, per-file and total source bytes,
