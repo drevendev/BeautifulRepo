@@ -55,6 +55,8 @@ cd BeautifulRepo
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
+For Windows, see the [PowerShell first-run commands](guides/combined-audit.md#windows-powershell-first-run), including how to inspect the native exit code.
+
 The command inspects **your repository**, not the BeautifulRepo checkout.
 It runs all three real checks: repository entry points, local Markdown links
 and local HTML/fragment navigation. It reports findings and source locations
