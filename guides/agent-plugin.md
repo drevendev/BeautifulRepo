@@ -132,6 +132,44 @@ separately and **not installed** by these plugin commands; its real-host
 acceptance is still open in [#255](https://github.com/drevendev/BeautifulRepo/issues/255).
 No model evaluation or release publication is automatic.
 
+## Verify cached skill definitions against the pinned commit (offline)
+
+A marketplace registration or source checkout is not proof that the host installed
+the expected four skill files. After installing the **development candidate**
+above, locate the actual installed plugin cache root reported by your host.
+Separately check out the full `cf8ac81ddabb5e2006913e65a2f980ef201baf5c`
+commit in a local Git working tree. Use the **actual cache location shown by
+the host**, not another copy of the source checkout. The two paths must be
+**different physical directories**: giving the same checkout twice (even
+through alternate path spellings) returns INCOMPLETE, never MATCH. Independently
+verify the source's Git origin and the host's cache location; a byte match
+cannot authenticate where either directory came from.
+
+From a **current BeautifulRepo toolkit checkout** (the verifier was added
+*after* the historical candidate and is not present at that SHA), run:
+
+```text
+python -I "/path/to/current-BeautifulRepo/scripts/plugin_install_verify.py" --source "/absolute/path/to/cf8ac81-source" --installed "/absolute/path/to/installed-plugin-cache" --expected-commit cf8ac81ddabb5e2006913e65a2f980ef201baf5c
+```
+
+Requires Python 3.11+ and local Git; the source must be at the repository top
+level, with `HEAD` equal to the supplied full SHA. Exit **0** means the installed
+four `SKILL.md` files match the **committed Git blobs** of that revision, exit
+**1** means at least one differs, and exit **2** means verification is incomplete
+(for example a missing directory, redirected file, or wrong source revision).
+The output is a bounded JSON receipt naming skills and differences, without
+publishing their contents. The verifier invokes local Git to read committed blobs, but runs no model,
+network or target code
+and does not edit either checkout. It does **not** support the one-skill
+`v0.2.0` release.
+
+A byte match is necessary evidence for this candidate, **not** evidence that
+Claude Code or Codex discovered, activated or invoked those files. Preserve
+actual host skill-selection traces, checker execution, synthetic target
+before/after snapshots and the independent review required by
+[#257](https://github.com/drevendev/BeautifulRepo/issues/257).
+Do not call this an external-user installation or real-model PASS.
+
 ## Use
 
 Ask in plain words, for example "audit this repository's README and onboarding", or
