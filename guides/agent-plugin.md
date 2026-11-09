@@ -149,7 +149,7 @@ From a **current BeautifulRepo toolkit checkout** (the verifier was added
 *after* the historical candidate and is not present at that SHA), run:
 
 ```text
-python -I "/path/to/current-BeautifulRepo/tools/plugin_install_verify.py" --source "/absolute/path/to/cf8ac81-source" --installed "/absolute/path/to/installed-plugin-cache" --expected-commit cf8ac81ddabb5e2006913e65a2f980ef201baf5c
+python -I "/path/to/current-BeautifulRepo/scripts/plugin_install_verify.py" --source "/absolute/path/to/cf8ac81-source" --installed "/absolute/path/to/installed-plugin-cache" --expected-commit cf8ac81ddabb5e2006913e65a2f980ef201baf5c
 ```
 
 Requires Python 3.11+ and local Git; the source must be at the repository top
@@ -158,7 +158,8 @@ four `SKILL.md` files match the **committed Git blobs** of that revision, exit
 **1** means at least one differs, and exit **2** means verification is incomplete
 (for example a missing directory, redirected file, or wrong source revision).
 The output is a bounded JSON receipt naming skills and differences, without
-publishing their contents. The verifier runs no model, network or target code
+publishing their contents. The verifier invokes local Git to read committed blobs, but runs no model,
+network or target code
 and does not edit either checkout. It does **not** support the one-skill
 `v0.2.0` release.
 
