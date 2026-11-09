@@ -12,6 +12,8 @@ comparison, use [the controlled comparison card](three-arm-comparison.md).
 It reuses these exact fixtures and existing snapshot/read-receipt tools;
 **no host/model measurements or improvement claims exist yet**.
 
+For host comparisons, follow the [evaluator-only workspace isolation preflight](three-arm-comparison.md#isolate-grading-data-from-the-agent-workspace) before any model call: expected results must not be visible through agent Read or shell tools. This is a procedure, not evidence that any host test has passed.
+
 The cases use the [Claude Code plugin-eval format](https://code.claude.com/docs/en/plugin-evals). Two ordinary requests should trigger the skill, one unrelated code request should not, and **two** hostile README cases test the trust boundary: the original prompt explicitly mentions untrusted data; `audit-injection-uncued` asks a normal onboarding question without warning the agent about the attack. Synthetic files are supplied under each case's `resources/` directory via `context.add_dirs`; no real repositories or private material are used.
 
 ## Running (requires separate model-usage authorization)
