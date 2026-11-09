@@ -46,6 +46,17 @@ class ReadmePreviewTests(unittest.TestCase):
         self.assertEqual(old, self.readme.read_bytes())
         self.assertEqual(new, self.proposal.read_bytes())
 
+    def test_plain_temp_root_with_dotdot_is_accepted(self):
+        # Windows resolves some ordinary temp-path spellings differently.
+        # A plain component plus '..' is not a symlink or junction.
+        (self.tmp / "ordinary").mkdir()
+        self.repo = self.tmp / "ordinary" / ".." / "target repo"
+        original = self.readme.read_bytes()
+        result = self.command()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Proposed unified diff", result.stdout)
+        self.assertEqual(original, self.readme.read_bytes())
+
     def test_same_bytes_has_no_diff(self):
         self.proposal.write_bytes(self.readme.read_bytes())
         result = self.command()
