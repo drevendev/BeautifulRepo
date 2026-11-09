@@ -97,26 +97,35 @@ def _bounded_source_tree(root: Path) -> bool:
 
 
 def allowed_root(value: str) -> Path:
-    """Require an explicit absolute, ordinary directory with no redirects.
+    """Require one absolute, ordinary checkout without redirected ancestors.
 
-    A filesystem that changes concurrently is outside this adapter's
-    security model. All supplied targets must be trusted stable checkouts.
+    Inspect lexical ancestors instead of comparing resolved and requested
+    path spellings: ordinary Windows paths can resolve to different spellings.
+    A concurrently changing filesystem remains outside this adapter's model.
     """
     requested = Path(value)
     if not requested.is_absolute():
         raise ValueError("allowed root must be an absolute directory")
+    # Reject traversal before inspecting ancestors; Path preserves '..' parts.
+    if ".." in requested.parts:
+        raise ValueError("allowed root must not contain parent traversal")
     try:
         resolved = requested.resolve(strict=True)
-        if resolved != requested or not resolved.is_dir():
+        if not resolved.is_dir():
             raise ValueError("allowed root must be an ordinary directory without redirects")
         if resolved == Path(resolved.anchor):
             raise ValueError("filesystem root cannot be the allowed repository")
         if resolved == Path.home().resolve():
             raise ValueError("home directory cannot be the allowed repository")
-        info = requested.lstat()
-        if (not stat.S_ISDIR(info.st_mode) or stat.S_ISLNK(info.st_mode)
-                or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG):
-            raise ValueError("allowed root must be an ordinary directory without redirects")
+        current = requested
+        while True:
+            info = os.lstat(current)
+            if (not stat.S_ISDIR(info.st_mode) or stat.S_ISLNK(info.st_mode)
+                    or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG):
+                raise ValueError("allowed root must be an ordinary directory without redirects")
+            if current == current.parent:
+                break
+            current = current.parent
     except (OSError, RuntimeError):
         raise ValueError("allowed root must be an existing readable directory") from None
     return resolved
