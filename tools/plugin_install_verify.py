@@ -113,6 +113,11 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
     for root in (source, installed):
         if not root.is_absolute() or not root.is_dir() or root.is_symlink():
             raise VerificationError("source and installed roots must be ordinary absolute directories")
+    try:
+        if source.samefile(installed):
+            raise VerificationError("source and installed must be distinct physical directories")
+    except OSError as exc:
+        raise VerificationError("cannot establish distinct source and installed directories") from exc
     actual_commit = _source_commit(source)
     if actual_commit != expected_commit:
         raise VerificationError("source checkout HEAD differs from the expected commit")
