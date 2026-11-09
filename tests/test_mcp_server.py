@@ -278,6 +278,28 @@ class CheckerWrapperTests(unittest.TestCase):
             self.assertEqual(linked.stat().st_nlink, 1)
             self.assertTrue(adapter._bounded_source_tree(self.root))
 
+    def test_non_markdown_hardlinked_entrypoints_are_refused(self):
+        with tempfile.TemporaryDirectory() as outside:
+            for name in ("LICENSE", "README.rst", "index.html"):
+                with self.subTest(name=name):
+                    original = Path(outside) / name
+                    original.write_text("synthetic outside file", encoding="utf-8")
+                    linked = self.root / name
+                    try:
+                        os.link(original, linked)
+                    except OSError:
+                        self.skipTest("hard links unavailable on this filesystem")
+                    self.assertGreater(linked.stat().st_nlink, 1)
+                    with mock.patch.object(adapter, "_bounded_run") as run:
+                        for tool_name in adapter.CHECKS:
+                            report = adapter.run_check(self.root, tool_name)
+                            self.assertEqual(report["state"], "incomplete")
+                            self.assertEqual(report["exit_code"], 2)
+                        run.assert_not_called()
+                    linked.unlink()
+                    self.assertEqual(original.stat().st_nlink, 1)
+                    self.assertTrue(adapter._bounded_source_tree(self.root))
+
     def test_ordinary_nested_markdown_passes_preflight(self):
         (self.root / "nested").mkdir()
         (self.root / "nested" / "guide.md").write_text("# Guide\n", encoding="utf-8")
