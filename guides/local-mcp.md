@@ -35,12 +35,14 @@ either stream exceeds 512 KiB the child is stopped rather than storing more
 output in memory or on disk. Evidence is checked before parsing. This fixes
 the former temporary-file disk-growth exposure; it does **not** turn the
 trusted-root adapter into a general filesystem or process sandbox.
-Before either link checker starts, the adapter also makes a metadata-only,
+Before any of the three checkers starts, the adapter also makes a metadata-only,
 fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
-like the link checkers and refuses Markdown-named devices or redirects outside
-the repository. A limit or unreadable source returns **incomplete evidence**
+like the link checkers and refuses Markdown-named devices, redirects outside
+the repository, and hard-linked Markdown files whose in-root names could alias
+files outside the checkout. Copy fixture documents rather than using hard
+links. A limit or unreadable source returns **incomplete evidence**
 (exit 2), not a clean audit. This is **not** a stable filesystem snapshot,
 concurrent-write protection or a general limit on non-Markdown contents;
 the standalone CLI has its own coverage boundaries.
