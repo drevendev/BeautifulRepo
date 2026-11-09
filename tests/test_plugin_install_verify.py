@@ -43,6 +43,19 @@ class PluginInstallVerificationTests(unittest.TestCase):
         self.assertEqual(result["state"], "match")
         self.assertIn("does not prove", result["limitations"])
 
+    def test_source_cannot_be_its_own_installed_cache_even_with_an_alias(self):
+        for installed in (self.source, self.source.parent / "source" / ".." / "source"):
+            with self.subTest(installed=str(installed)):
+                with self.assertRaisesRegex(verifier.VerificationError, "distinct physical"):
+                    verifier.verify(self.source, installed, self.sha)
+        result = subprocess.run(
+            [sys.executable, "-I", str(MODULE_PATH), "--source", str(self.source),
+             "--installed", str(self.source), "--expected-commit", self.sha],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["state"], "incomplete")
+
     def test_changed_install_reports_mismatch_without_writing(self):
         target = self.installed / "skills" / "audit-repo" / "SKILL.md"
         target.write_text("corrupted", encoding="utf-8")
