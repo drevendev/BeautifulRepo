@@ -31,6 +31,22 @@ The HTML contains no scripts or remote assets; review paths before sharing.
 It preserves native findings and reports incomplete checks instead of silently
 passing them. It imports fixed checked-in checker modules; no child processes are launched. This is a local CLI, **not** an MCP server or a beauty score.
 
+## Verify an installed four-skill plugin cache
+
+[plugin_install_verify.py](plugin_install_verify.py) compares the installed
+`audit-repo`, `improve-readme`, `trust-surfaces` and
+`draft-release-notes` `SKILL.md` bytes with their immutable committed Git
+blobs from a separately checked-out pinned source. It is read-only, uses
+Python 3.11+ and local Git, and reports JSON with exit 0 (match), 1
+(mismatch) or 2 (incomplete). It rejects missing/extra skill directories
+and redirecting skill file paths. This is for the **four-skill development
+candidate**, not the released v0.2.0 single-skill bundle.
+
+See the [Agent plugin verification procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
+for the full command, expected revision, separate cache/source paths and
+evidence limits. A matching cache does **not** verify that Claude Code or
+Codex actually installed, discovered, selected or invoked the skills.
+
 ## Preview a proposed README without writing it
 
 Given an **already prepared** candidate README file outside the target, inspect a
