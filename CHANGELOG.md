@@ -11,6 +11,13 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Validate each ancestor of the experimental MCP adapter's configured checkout
+  without comparing resolved and requested path spellings. Preserve rejection of
+  junctions, symlinks and `..` traversal while allowing normal Windows path
+  normalization (related to #255; host installation still unverified).
+
 ### Added
 
 - Verify the README and POSIX/PowerShell first-audit commit pins agree, then
