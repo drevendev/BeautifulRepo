@@ -656,7 +656,6 @@ keep their original themed headings.
   metadata. Add a synthetic outside-alias regression for all three tools
   (#255). This is metadata preflight, not a concurrent-filesystem sandbox.
 
-
 - Validate each ancestor of the experimental MCP adapter's configured checkout
   without comparing resolved and requested path spellings. Preserve rejection of
   junctions, symlinks and `..` traversal while allowing normal Windows path
