@@ -82,17 +82,18 @@ do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
 
-This **source-checked procedure, refreshed 2026-11-08, has not passed a fresh
+This **source-checked procedure, refreshed 2026-11-09, has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
 following full commit is a `master` snapshot containing the **modern and
 legacy SDK smoke**, missing-root regressions, bounded child output, isolated
-single-checker calls and the Markdown-source metadata preflight. The
-previously recommended `331df37` snapshot has the dual-lifecycle smoke but
-**does not contain these subsequent safety and isolation fixes**. The still
-older `6c01779` snapshot lacks the legacy smoke as well. This commit is
-**not a released MCP version**:
+single-checker calls and the metadata preflight that refuses hard-linked
+regular files across all three tools, including non-Markdown entry points.
+It incorporates the accepted [hard-link coverage fix](https://github.com/drevendev/BeautifulRepo/pull/324)
+missing from the earlier `3c1040` trial snapshot. The older `331df37`
+snapshot also lacks subsequent safety and isolation fixes; `6c01779`
+lacks the legacy smoke. This commit is **not a released MCP version**:
 
-[BeautifulRepo `3c1040b164c7a477e8988631aaab47300da3f5f8`](https://github.com/drevendev/BeautifulRepo/commit/3c1040b164c7a477e8988631aaab47300da3f5f8).
+[BeautifulRepo `8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2`](https://github.com/drevendev/BeautifulRepo/commit/8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -100,8 +101,8 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 3c1040b164c7a477e8988631aaab47300da3f5f8
-test "$(git rev-parse HEAD)" = "3c1040b164c7a477e8988631aaab47300da3f5f8" || exit 1
+git checkout --detach 8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2
+test "$(git rev-parse HEAD)" = "8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2" || exit 1
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
 ../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
@@ -135,7 +136,7 @@ checked explicitly rather than assuming `$ErrorActionPreference` catches
 external program exit codes:
 
 ```powershell
-$pin = '3c1040b164c7a477e8988631aaab47300da3f5f8'
+$pin = '8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2'
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
 Set-Location BeautifulRepo
