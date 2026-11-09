@@ -152,6 +152,95 @@ class FirstVisitTests(unittest.TestCase):
 
 
 
+    def test_documented_pin_runs_the_actual_first_audit_from_a_clean_clone(self):
+        # The current-HEAD clone smoke does not exercise the detached SHA that
+        # first-time readers actually copy from README/combined-audit.md.
+        import re
+
+        pattern = r"^git checkout --detach ([0-9a-f]{40})$"
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        guide = (ROOT / "guides" / "combined-audit.md").read_text(encoding="utf-8")
+        readme_pins = re.findall(pattern, readme, flags=re.MULTILINE)
+        guide_pins = re.findall(pattern, guide, flags=re.MULTILINE)
+        self.assertEqual(1, len(readme_pins), "README needs one first-audit pin")
+        self.assertEqual(2, len(guide_pins), "POSIX and PowerShell pins must agree")
+        pin = readme_pins[0]
+        self.assertEqual({pin}, set(guide_pins))
+        if not (ROOT / ".git").exists():
+            self.skipTest("source archive has no local Git history")
+
+        with tempfile.TemporaryDirectory(prefix="beautifulrepo-pinned-audit-") as tmp:
+            parent = Path(tmp)
+            checkout = parent / "BeautifulRepo"
+            target = parent / "your-repository"
+            (target / "docs").mkdir(parents=True)
+            (target / "README.md").write_text(
+                "# Sample\n\n[Installation](docs/missing.md)\n", encoding="utf-8",
+            )
+            (target / "docs" / "guide.md").write_text(
+                "# Installation\n", encoding="utf-8",
+            )
+            (target / "LICENSE").write_text("MIT License\n", encoding="utf-8")
+            (target / "CONTRIBUTING.md").write_text(
+                "# Contributing\n", encoding="utf-8",
+            )
+
+            for command in (
+                ["git", "clone", "--quiet", "--no-hardlinks", str(ROOT), str(checkout)],
+                ["git", "-C", str(checkout), "checkout", "--quiet", "--detach", pin],
+            ):
+                outcome = subprocess.run(
+                    command, capture_output=True, text=True, encoding="utf-8",
+                    timeout=120, check=False,
+                )
+                self.assertEqual(0, outcome.returncode,
+                                 f"{command}: {outcome.stderr}")
+
+            actual = subprocess.run(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"],
+                capture_output=True, text=True, encoding="utf-8",
+                timeout=20, check=False,
+            )
+            self.assertEqual(0, actual.returncode, actual.stderr)
+            self.assertEqual(pin, actual.stdout.strip())
+
+            for expected, missing in ((1, True), (0, False)):
+                if not missing:
+                    (target / "README.md").write_text(
+                        "# Sample\n\n[Installation](docs/guide.md)\n",
+                        encoding="utf-8",
+                    )
+                before = file_snapshot(target)
+                result = subprocess.run(
+                    [sys.executable, "-I", "tools/audit_bundle.py",
+                     "../your-repository", "--fail-on", "never",
+                     "--format", "json"],
+                    cwd=checkout, capture_output=True, text=True,
+                    encoding="utf-8", timeout=90, check=False,
+                )
+                self.assertEqual(expected, result.returncode,
+                                 result.stdout + result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(expected, report["exit_code"])
+                for name in LINK_CHECKS:
+                    check = report["checks"][name]
+                    self.assertEqual("complete", check["state"])
+                    self.assertEqual(expected, check["exit_code"])
+                self.assertEqual(before, file_snapshot(target),
+                                 "Pinned first audit changed the target")
+
+            clean = subprocess.run(
+                ["git", "-C", str(checkout), "status", "--porcelain",
+                 "--untracked-files=all"],
+                capture_output=True, text=True, encoding="utf-8",
+                timeout=20, check=False,
+            )
+            self.assertEqual(0, clean.returncode, clean.stderr)
+            self.assertEqual("", clean.stdout,
+                             "Pinned first audit changed its tool checkout")
+            self.assertFalse((checkout / "tools" / "__pycache__").exists())
+
+
     @unittest.skipUnless(sys.platform == "win32", "PowerShell smoke runs on Windows")
     def test_powershell_first_audit_from_sibling_clone(self):
         # Verify the documented native-command exit status, not just that
