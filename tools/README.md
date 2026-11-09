@@ -33,10 +33,11 @@ passing them. It imports fixed checked-in checker modules; no child processes ar
 
 ## Verify an installed four-skill plugin cache
 
-[plugin_install_verify.py](plugin_install_verify.py) compares the installed
+[plugin_install_verify.py](../scripts/plugin_install_verify.py) compares the installed
 `audit-repo`, `improve-readme`, `trust-surfaces` and
 `draft-release-notes` `SKILL.md` bytes with their immutable committed Git
-blobs from a separately checked-out pinned source. It is read-only, uses
+blobs from a separately checked-out pinned source. It is read-only, runs only
+local Git commands (unlike the no-subprocess audit checkers in `tools/`), uses
 Python 3.11+ and local Git, and reports JSON with exit 0 (match), 1
 (mismatch) or 2 (incomplete). It rejects missing/extra skill directories
 and redirecting skill file paths. This is for the **four-skill development
