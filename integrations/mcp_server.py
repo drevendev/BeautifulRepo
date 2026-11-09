@@ -41,10 +41,11 @@ MAX_PREFLIGHT_SECONDS = 5
 
 
 def _bounded_source_tree(root: Path) -> bool:
-    """Fail closed on oversized/special Markdown sources before checker launch.
+    """Fail closed on oversized, aliased or special Markdown source files.
 
     Metadata preflight for a stable, trusted checkout; not a sandbox against
     concurrent filesystem changes. Never read target file contents here.
+    Hard links can alias files outside the checkout without being symlinks.
     """
     deadline = time.monotonic() + MAX_PREFLIGHT_SECONDS
     pending = [root]
@@ -70,6 +71,11 @@ def _bounded_source_tree(root: Path) -> bool:
                             and getattr(info, "st_reparse_tag", 0) != JUNCTION_TAG):
                         pending.append(Path(entry.path))
                         continue
+                    # A non-Markdown entry point such as LICENSE or README.rst
+                    # can also be read by audit_repository. Fail closed for
+                    # *every* regular hard link, independent of extension.
+                    if stat.S_ISREG(info.st_mode) and info.st_nlink > 1:
+                        return False
                     if not entry.name.lower().endswith((".md", ".markdown")):
                         continue
                     if stat.S_ISREG(info.st_mode):
@@ -79,7 +85,8 @@ def _bounded_source_tree(root: Path) -> bool:
                         if not target.is_relative_to(root) or not target.is_file():
                             return False
                         target_info = target.stat()
-                        if not stat.S_ISREG(target_info.st_mode):
+                        if (not stat.S_ISREG(target_info.st_mode)
+                                or target_info.st_nlink > 1):
                             return False
                         size = target_info.st_size
                     else:
@@ -200,7 +207,9 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
         fixed_root = allowed_root(str(root))
     except ValueError:
         return incomplete(check, "configured repository root is no longer safe or available")
-    if check in ("markdown_links", "html_navigation") and not _bounded_source_tree(fixed_root):
+    # The entry-point audit reads Markdown too: it needs the same preflight as
+    # both link checkers so a hard-linked README cannot evade scope checks.
+    if not _bounded_source_tree(fixed_root):
         return incomplete(check, "repository document sources exceeded safe scan limits or could not be inspected")
     if not BUNDLE.is_file():
         return incomplete(check, "checked-in bundle is unavailable")

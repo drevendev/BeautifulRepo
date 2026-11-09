@@ -8,6 +8,7 @@ from __future__ import annotations
 import importlib.util
 import inspect
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -253,6 +254,51 @@ class CheckerWrapperTests(unittest.TestCase):
                 result = adapter.run_check(self.root, "check_documentation_links")
             self.assertEqual(result["state"], "incomplete")
             run.assert_not_called()
+
+    def test_hardlinked_outside_markdown_is_refused_by_every_tool(self):
+        with tempfile.TemporaryDirectory() as outside:
+            original = Path(outside) / "external.md"
+            original.write_text("# Synthetic outside file\n", encoding="utf-8")
+            linked = self.root / "README.md"
+            try:
+                os.link(original, linked)
+            except OSError:
+                self.skipTest("hard links unavailable on this filesystem")
+            self.assertGreater(linked.stat().st_nlink, 1)
+            self.assertFalse(adapter._bounded_source_tree(self.root))
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                for tool_name in adapter.CHECKS:
+                    with self.subTest(tool=tool_name):
+                        result = adapter.run_check(self.root, tool_name)
+                        self.assertEqual(result["state"], "incomplete")
+                        self.assertEqual(result["exit_code"], 2)
+                run.assert_not_called()
+            # Releasing the outside alias makes the same ordinary file safe.
+            original.unlink()
+            self.assertEqual(linked.stat().st_nlink, 1)
+            self.assertTrue(adapter._bounded_source_tree(self.root))
+
+    def test_non_markdown_hardlinked_entrypoints_are_refused(self):
+        with tempfile.TemporaryDirectory() as outside:
+            for name in ("LICENSE", "README.rst", "index.html"):
+                with self.subTest(name=name):
+                    original = Path(outside) / name
+                    original.write_text("synthetic outside file", encoding="utf-8")
+                    linked = self.root / name
+                    try:
+                        os.link(original, linked)
+                    except OSError:
+                        self.skipTest("hard links unavailable on this filesystem")
+                    self.assertGreater(linked.stat().st_nlink, 1)
+                    with mock.patch.object(adapter, "_bounded_run") as run:
+                        for tool_name in adapter.CHECKS:
+                            report = adapter.run_check(self.root, tool_name)
+                            self.assertEqual(report["state"], "incomplete")
+                            self.assertEqual(report["exit_code"], 2)
+                        run.assert_not_called()
+                    linked.unlink()
+                    self.assertEqual(original.stat().st_nlink, 1)
+                    self.assertTrue(adapter._bounded_source_tree(self.root))
 
     def test_ordinary_nested_markdown_passes_preflight(self):
         (self.root / "nested").mkdir()
