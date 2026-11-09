@@ -651,6 +651,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Fail closed on hard-linked Markdown sources before **any** experimental MCP
+  checker launches: hard links can alias out-of-root files without symlink
+  metadata. Add a synthetic outside-alias regression for all three tools
+  (#255). This is metadata preflight, not a concurrent-filesystem sandbox.
+
+
 - Validate each ancestor of the experimental MCP adapter's configured checkout
   without comparing resolved and requested path spellings. Preserve rejection of
   junctions, symlinks and `..` traversal while allowing normal Windows path
