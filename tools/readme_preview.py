@@ -89,16 +89,17 @@ def _diff(original: str, proposed: str) -> str:
 
 
 def validate_root(root: Path) -> None:
-    """Reject path redirects at the root or in its ancestors.
+    """Reject symlink/junction components without comparing path spellings.
 
-    abspath normalizes a relative spelling without following symlinks;
-    resolve() follows symlinks and Windows junctions. A mismatch means the
-    caller did not name the physical directory they are about to inspect.
+    Resolving an ordinary Windows path may change its spelling (for example
+    short names), so resolved-vs-absolute equality wrongly rejects real roots.
+    Inspect every lexical ancestor instead, including those before '..'.
     """
     try:
-        if _redirect(root) or not stat.S_ISDIR(root.lstat().st_mode):
+        lexical_root = root if root.is_absolute() else Path.cwd() / root
+        if _redirect(lexical_root) or not stat.S_ISDIR(lexical_root.lstat().st_mode):
             raise PreviewError("root: expected an ordinary, non-symlinked directory.")
-        if root.resolve(strict=True) != Path(os.path.abspath(root)):
+        if any(_redirect(parent) for parent in lexical_root.parents):
             raise PreviewError("root: symlinked or redirected parent directory.")
     except (OSError, RuntimeError) as exc:
         raise PreviewError("root: cannot inspect target directory.") from exc
