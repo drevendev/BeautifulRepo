@@ -208,7 +208,7 @@ async def check_external_document_aliases(root: Path) -> tuple[list[str], list[s
     A platform that cannot create a link is reported as untested, not PASS.
     """
     outside = root.parent / "synthetic-outside-source.txt"
-    expected_bytes = b"Synthetic outside document; not private data.\\n"
+    expected_bytes = b"Synthetic outside document; not private data."
     outside.write_bytes(expected_bytes)
     exercised: list[str] = []
     skipped: list[str] = []
