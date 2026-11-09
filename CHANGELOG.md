@@ -548,6 +548,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Repin the experimental MCP POSIX and PowerShell host-trial checkout
+  to the accepted source revision with fail-closed hard-link preflight for
+  all three tools. Test that the full commit link and both checkout routes
+  agree. This is reproducible source guidance, not a Claude Code/Codex
+  installation or model-invocation PASS (related to #255).
+
 - Require evaluator-only grading data and an actual agent-equivalent permission
   probe in the three-arm skill comparison preflight; identical disposable
   B/C fixtures alone do not establish isolation. No real Claude Code/Codex
