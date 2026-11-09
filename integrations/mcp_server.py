@@ -71,13 +71,14 @@ def _bounded_source_tree(root: Path) -> bool:
                             and getattr(info, "st_reparse_tag", 0) != JUNCTION_TAG):
                         pending.append(Path(entry.path))
                         continue
+                    # A non-Markdown entry point such as LICENSE or README.rst
+                    # can also be read by audit_repository. Fail closed for
+                    # *every* regular hard link, independent of extension.
+                    if stat.S_ISREG(info.st_mode) and info.st_nlink > 1:
+                        return False
                     if not entry.name.lower().endswith((".md", ".markdown")):
                         continue
                     if stat.S_ISREG(info.st_mode):
-                        # A hard link can expose an outside file under an in-root
-                        # name; unlike a symlink, resolving it cannot reveal that.
-                        if info.st_nlink > 1:
-                            return False
                         size = info.st_size
                     elif stat.S_ISLNK(info.st_mode):
                         target = Path(entry.path).resolve(strict=True)
