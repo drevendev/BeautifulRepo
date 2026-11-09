@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Exercise the experimental MCP adapter's outside-document alias refusals
+  through the pinned SDK's modern and legacy **real stdio** lifecycles: a
+  hard-linked non-Markdown `LICENSE` and an outside-pointing Markdown symlink
+  must give incomplete results from all three tools. Report platform fixture
+  skips instead of claiming a pass. This is synthetic protocol coverage, **not**
+  actual Claude Code/Codex or hostile-filesystem acceptance (related to #255).
+
 - Add an offline, read-only four-skill plugin-cache verifier that compares
   installed `SKILL.md` bytes with immutable pinned Git commit blobs,
   rejecting missing/extra/redirected skills and reporting explicit mismatch
