@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Verify the README and POSIX/PowerShell first-audit commit pins agree, then
+  exercise that **exact historical checkout** through a fresh local sibling Git
+  clone with broken-to-fixed synthetic links and no repository writes. CI fetches
+  history for this regression; it is not an independent remote-user install (#254).
+
 - Pin README and cross-platform combined-audit first-run commands to an
   immutable, reviewed development commit instead of following the moving
   `master` branch. Distinguish this from the v0.2.0 Action and fail early
