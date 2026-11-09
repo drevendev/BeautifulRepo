@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add an offline, read-only four-skill plugin-cache verifier that compares
+  installed `SKILL.md` bytes with immutable pinned Git commit blobs,
+  rejecting missing/extra/redirected skills and reporting explicit mismatch
+  versus incomplete evidence. Synthetic Git regressions cover stale and dirty
+  source checkouts. This is **not** host discovery or model acceptance
+  (related to #257).
+
 - Verify the README and POSIX/PowerShell first-audit commit pins agree, then
   exercise that **exact historical checkout** through a fresh local sibling Git
   clone with broken-to-fixed synthetic links and no repository writes. CI fetches
