@@ -58,6 +58,41 @@ class RootBoundaryTests(unittest.TestCase):
                 adapter.allowed_root(str(alias / "nested"))
 
 
+    def test_ordinary_nested_absolute_root_without_canonical_spelling_assumption(self):
+        with tempfile.TemporaryDirectory() as path:
+            # Exercise lexical parents too, not only a pre-resolved final path.
+            root = Path(path) / "normal" / "nested"
+            root.mkdir(parents=True)
+            self.assertEqual(adapter.allowed_root(str(root)), root.resolve())
+
+    def test_parent_traversal_still_rejected(self):
+        with tempfile.TemporaryDirectory() as path:
+            base = Path(path).resolve()
+            (base / "nested").mkdir()
+            with self.assertRaisesRegex(ValueError, "parent traversal"):
+                adapter.allowed_root(str(base / "nested" / ".."))
+
+    def test_junction_tagged_ancestor_is_rejected(self):
+        with tempfile.TemporaryDirectory() as path:
+            base = Path(path).resolve()
+            ancestor = base / "junction-like"
+            root = ancestor / "repo"
+            root.mkdir(parents=True)
+            real_lstat = adapter.os.lstat
+
+            def with_junction_metadata(candidate):
+                info = real_lstat(candidate)
+                if Path(candidate) == ancestor:
+                    return types.SimpleNamespace(
+                        st_mode=info.st_mode,
+                        st_reparse_tag=adapter.JUNCTION_TAG,
+                    )
+                return info
+
+            with mock.patch.object(adapter.os, "lstat", side_effect=with_junction_metadata):
+                with self.assertRaisesRegex(ValueError, "redirects"):
+                    adapter.allowed_root(str(root))
+
 class CheckerWrapperTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

@@ -634,6 +634,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Validate each ancestor of the experimental MCP adapter's configured checkout
+  without comparing resolved and requested path spellings. Preserve rejection of
+  junctions, symlinks and `..` traversal while allowing normal Windows path
+  normalization (related to #255; host installation still unverified).
+
 - Reject README preview/apply targets reached through a symlinked or redirected
   **parent directory**, not only aliases on the last root component. Shared
   root validation now fails closed before reading or replacing README.md;

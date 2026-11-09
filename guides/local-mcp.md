@@ -19,7 +19,10 @@ the server starts, so the model cannot select another directory.
 Only use a trusted, stable local checkout containing synthetic or otherwise
 approved documentation. The adapter rejects relative, missing, redirected,
 home and filesystem root directories; it rechecks the bound path on each tool
-call. This is **not** a sandbox against concurrent filesystem replacement,
+call. Root validation checks each directory ancestor for symlink/junction
+redirects rather than comparing resolved and requested path spellings, which
+can differ on ordinary Windows checkouts. Parent-traversal components remain
+invalid. This is **not** a sandbox against concurrent filesystem replacement,
 malicious OS-level mounts or secrets in ordinary repository documentation.
 The child interpreter runs the fixed checked-in `audit_bundle.py` with
 `-I -B`, a fixed argument vector, a 30-second timeout and a 512 KiB
