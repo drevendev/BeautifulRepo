@@ -39,6 +39,51 @@ who did not prepare the skill should evaluate sanitized outputs without
 seeing the arm labels where practical, and then inspect the actual traces.
 This does **not** make a same-account review independent approval.
 
+
+## Isolate grading data from the agent workspace
+
+**Preflight reviewed 2026-11-09:** The [OpenAI harness-aware plugin
+evaluation case study](https://developers.openai.com/cookbook/examples/partners/harness_aware_plugin_evals/harness_aware_plugin_evals)
+(2026-09-23) demonstrates a concrete confounder: an agent with shell access
+can read expected answers and even evaluator credentials when those files
+share its readable workspace. This is a test-design risk, **not** evidence
+that BeautifulRepo's current Claude Code or Codex fixtures have leaked.
+
+For each B/C pair, stage **only the selected synthetic target** in the
+client-facing workspace. Keep answer keys, graders, result files, raw
+transcripts, model credentials and snapshot baselines in an evaluator-only
+location. On Linux/WSL2, from the BeautifulRepo checkout, an operator can
+prepare the existing broken-onboarding fixture without invoking a model:
+
+```sh
+LAB=$(mktemp -d)
+mkdir "$LAB/arm-b" "$LAB/arm-c" "$LAB/evaluator"
+cp -R evals/audit-broken-onboarding/resources/. "$LAB/arm-b/"
+cp -R evals/audit-broken-onboarding/resources/. "$LAB/arm-c/"
+printf 'synthetic evaluator-only marker\n' > "$LAB/evaluator/do-not-expose.txt"
+cmp "$LAB/arm-b/README.md" "$LAB/arm-c/README.md"
+```
+
+Point each client at **its own arm**, not at `$LAB` or the repository
+containing `evals/`. These commands only stage files: **`cd`/a chosen
+working directory does not enforce access isolation**. Inspect the actual
+host sandbox, mounted directories, `Read`/shell permissions and installed
+plugin-root access before running either arm. The plugin must remain
+usable in C, but grading files and `$LAB/evaluator` must not be readable
+through the agent's tools. A trusted operator can probe access to the
+harmless marker under the **same filesystem policy** before the model run;
+an operator-side `cmp` is only a fixture-equality check, not a sandbox
+test. If these boundaries cannot be established, record **isolation
+unverified** and do not advertise the comparison as a blinded quality
+measurement. Keep B and C subject to the same target-file permissions.
+
+Grade outside the model-visible workspace **after** preserving actual
+tool-call traces and target snapshots. The stored answer key should not
+appear in the user prompt, model context, checked-in target, or model-readable
+files. Separate host execution and visibility evidence are still needed
+for every PASS; this preflight alone proves none of them.
+
+
 ## Select an existing case for each skill
 
 | Skill | Positive ordinary request and fixture | Essential observations |
