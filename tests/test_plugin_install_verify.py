@@ -71,6 +71,14 @@ class PluginInstallVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
             verifier.verify(self.source, self.installed, self.sha)
 
+    def test_dirty_source_matching_dirty_install_cannot_fake_pinned_match(self):
+        for root in (self.source, self.installed):
+            (root / "skills" / "audit-repo" / "SKILL.md").write_text(
+                "---\nname: audit-repo\n---\n# Modified after commit\n", encoding="utf-8")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "mismatch")
+        self.assertEqual(result["different_skill_definitions"], ["audit-repo"])
+
     def test_expected_commit_must_be_full_sha(self):
         with self.assertRaisesRegex(verifier.VerificationError, "full lowercase"):
             verifier.verify(self.source, self.installed, self.sha[:12])
