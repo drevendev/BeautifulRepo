@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -169,6 +170,75 @@ async def probe(root: Path, *, broken: bool, mode: str,
     return version
 
 
+async def probe_refused_alias(root: Path, *, mode: str, label: str) -> str:
+    """Check fail-closed tool results over the real SDK connection."""
+    params = StdioServerParameters(
+        command=sys.executable,
+        args=["-I", "-B", str(SERVER), "--root", str(root)],
+    )
+    before = snapshot(root)
+    async with Client(params, mode=mode) as client:
+        version = str(client.protocol_version)
+        expected_version = {"auto": "2026-07-28", "legacy": "2025-11-25"}[mode]
+        if version != expected_version:
+            raise AssertionError(f"{label}: {mode} negotiated {version}")
+        listed = {tool.name for tool in (await client.list_tools()).tools}
+        if listed != set(CHECKS):
+            raise AssertionError(f"{label}: unexpected tools: {sorted(listed)}")
+        for name, check in CHECKS.items():
+            response = await client.call_tool(name, {})
+            expected = {
+                "checker": check, "state": "incomplete", "exit_code": 2,
+                "reason": "repository document sources exceeded safe scan limits or could not be inspected",
+                "coverage": COVERAGE,
+            }
+            if response.is_error or response.structured_content != expected:
+                raise AssertionError(
+                    f"{label}: {mode} {name} did not refuse an external document alias"
+                )
+    if before != snapshot(root):
+        raise AssertionError(f"{label}: MCP tools changed fixture files")
+    return version
+
+
+async def check_external_document_aliases(root: Path) -> tuple[list[str], list[str]]:
+    """Probe a non-Markdown hard link and an outside Markdown symlink.
+
+    The outside file is synthetic and on the same temporary filesystem.
+    A platform that cannot create a link is reported as untested, not PASS.
+    """
+    outside = root.parent / "synthetic-outside-source.txt"
+    expected_bytes = b"Synthetic outside document; not private data.\\n"
+    outside.write_bytes(expected_bytes)
+    exercised: list[str] = []
+    skipped: list[str] = []
+    cases = (
+        ("hard-linked LICENSE", "LICENSE", "hard"),
+        ("outside Markdown symlink", "outside.md", "symlink"),
+    )
+    for label, name, kind in cases:
+        link = root / name
+        try:
+            if kind == "hard":
+                os.link(outside, link)
+            else:
+                link.symlink_to(outside)
+        except (OSError, NotImplementedError) as exc:
+            if os.name != "nt":
+                raise AssertionError(f"{label}: cannot create regression fixture") from exc
+            skipped.append(label)
+            continue
+        try:
+            for mode in ("auto", "legacy"):
+                await probe_refused_alias(root, mode=mode, label=label)
+            exercised.append(label)
+        finally:
+            link.unlink()
+    if outside.read_bytes() != expected_bytes:
+        raise AssertionError("outside synthetic document was modified")
+    return exercised, skipped
+
+
 async def main() -> None:
     with tempfile.TemporaryDirectory(prefix="beautifulrepo-mcp-") as tmp:
         workspace = Path(tmp).resolve()
@@ -193,6 +263,7 @@ async def main() -> None:
         legacy_broken = await probe(root, broken=True, mode="legacy")
         if modern_healthy != modern_broken or legacy_healthy != legacy_broken:
             raise AssertionError("protocol version changed within an MCP lifecycle")
+        aliases_exercised, aliases_skipped = await check_external_document_aliases(root)
         print(
             f"MCP stdio SDK smoke PASS; modern discovery {modern_healthy}; "
             f"legacy initialize {legacy_healthy}; "
@@ -200,7 +271,9 @@ async def main() -> None:
             "in both lifecycles; "
             f"fixture files unchanged; {refusal_count} unsafe startup roots refused "
             f"(symlink exercised: {symlink_tested}); missing root during an active "
-            "session returns incomplete evidence for all 3 tools in both lifecycles. "
+            "session returns incomplete evidence for all 3 tools in both lifecycles; "
+            f"outside-document aliases refused: {', '.join(aliases_exercised) or 'none'} "
+            f"(untested on this platform: {', '.join(aliases_skipped) or 'none'}). "
             "Not a Claude Code/Codex host test."
         )
 
