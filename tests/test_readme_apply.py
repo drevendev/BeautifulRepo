@@ -72,6 +72,16 @@ class ReadmeApplyTests(unittest.TestCase):
             self.assertEqual(0o644, stat.S_IMODE(self.readme.stat().st_mode))
         self.assert_clean()
 
+    def test_plain_temp_root_with_dotdot_is_accepted(self):
+        # An ordinary lexical '..' component must not look like a redirect.
+        (self.tmp / "ordinary").mkdir()
+        self.root = self.tmp / "ordinary" / ".." / "target repo"
+        proposal = self.proposal.read_bytes()
+        result = self.approved()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(proposal, self.readme.read_bytes())
+        self.assert_clean()
+
     def test_stale_original_rejected_with_no_write(self):
         old = self.readme.read_bytes()
         self.readme.write_bytes(b"# Edited by someone else\n")
