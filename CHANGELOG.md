@@ -548,6 +548,11 @@ keep their original themed headings.
 
 ### Changed
 
+- Require evaluator-only grading data and an actual agent-equivalent permission
+  probe in the three-arm skill comparison preflight; identical disposable
+  B/C fixtures alone do not establish isolation. No real Claude Code/Codex
+  isolation or model execution has been verified (related to #257, #258).
+
 - Extend pinned four-skill cache verification beyond `SKILL.md` to compare
   seven host-executed helper and shared safety-policy files against Git blobs.
   Modified helpers report MISMATCH; missing/redirected helpers report INCOMPLETE.
