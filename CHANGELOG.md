@@ -634,6 +634,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject README preview/apply targets reached through a symlinked or redirected
+  **parent directory**, not only aliases on the last root component. Shared
+  root validation now fails closed before reading or replacing README.md;
+  synthetic regressions check that a correctly hashed approved proposal
+  cannot write through a parent alias. This is not protection against concurrent
+  filesystem replacement (related to #70).
+
 - Make the real-repository case-study procedure distinguish a pinned
   `SECURITY.md` from GitHub's independently configured private vulnerability
   reporting. Record the date, actual read-only API response and unknown/denied

@@ -88,12 +88,24 @@ def _diff(original: str, proposed: str) -> str:
     return "".join(output)
 
 
-def preview(root: Path, proposal: Path, expected: str | None = None) -> str:
+def validate_root(root: Path) -> None:
+    """Reject path redirects at the root or in its ancestors.
+
+    abspath normalizes a relative spelling without following symlinks;
+    resolve() follows symlinks and Windows junctions. A mismatch means the
+    caller did not name the physical directory they are about to inspect.
+    """
     try:
         if _redirect(root) or not stat.S_ISDIR(root.lstat().st_mode):
             raise PreviewError("root: expected an ordinary, non-symlinked directory.")
-    except OSError as exc:
+        if root.resolve(strict=True) != Path(os.path.abspath(root)):
+            raise PreviewError("root: symlinked or redirected parent directory.")
+    except (OSError, RuntimeError) as exc:
         raise PreviewError("root: cannot inspect target directory.") from exc
+
+
+def preview(root: Path, proposal: Path, expected: str | None = None) -> str:
+    validate_root(root)
     before, old_text = read_file(root / "README.md", "README.md")
     after, new_text = read_file(proposal, "proposal")
     old_hash = hashlib.sha256(before).hexdigest()

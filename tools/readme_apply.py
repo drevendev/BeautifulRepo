@@ -16,7 +16,7 @@ import tempfile
 _preview = runpy.run_path(str(Path(__file__).with_name("readme_preview.py")))
 PreviewError = _preview["PreviewError"]
 read_file = _preview["read_file"]
-_redirect = _preview["_redirect"]
+validate_root = _preview["validate_root"]
 SHA256 = _preview["SHA256"]
 
 
@@ -27,8 +27,7 @@ class ApplyError(ValueError):
 def apply(root: Path, proposal: Path, approved_current: str, approved_proposed: str) -> str:
     """Replace only README.md; consent is a separate human/agent workflow gate."""
     try:
-        if _redirect(root) or not stat.S_ISDIR(root.lstat().st_mode):
-            raise ApplyError("root: expected an ordinary, non-symlinked directory.")
+        validate_root(root)
         if proposal.resolve(strict=True).is_relative_to(root.resolve(strict=True)):
             raise ApplyError("proposal must be outside the target checkout.")
         old, _ = read_file(root / "README.md", "README.md")

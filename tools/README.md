@@ -46,7 +46,9 @@ For a stale-content guard, repeat with `--expected-sha256` followed by the
 64-character SHA-256 printed for the original README in an earlier preview.
 The command fails with exit code 2 if that content has changed; it **does not**
 apply a patch, obtain consent or prevent later concurrent edits. No file is
-created or modified. Both inputs must be ordinary, non-symlinked UTF-8 files
+created or modified. The `--root` directory and **all its ancestor components** must be named
+through their physical paths, not symlinked or junction-based aliases.
+Both inputs must be ordinary, non-symlinked UTF-8 files
 of at most 256 KiB; the tool rejects bare carriage returns, C0/C1
 terminal controls (except tab and ordinary newlines), Unicode bidirectional
 formatting marks, U+2028/U+2029 line/paragraph separators and
@@ -74,9 +76,12 @@ python -I tools/readme_apply.py --root /path/to/target \
   --approved-proposed-sha256 PROPOSAL_HASH
 ```
 
-The proposal must be outside the target checkout. The tool rechecks both byte
-hashes and refuses stale or unsafe input, missing required hashes, symlinked
-files, non-UTF-8 text, display controls and candidates over 256 KiB. On a normal
+The proposal must be outside the target checkout. The target root also rejects
+symlinked or junction-backed parent paths, even if the final directory itself
+is ordinary. Use the physical checkout path for preview and application.
+The tool rechecks both byte hashes and refuses stale or unsafe input, missing
+required hashes, symlinked files, non-UTF-8 text, display controls and
+candidates over 256 KiB. On a normal
 local filesystem it stages a temporary sibling, checks the current README again,
 and replaces **only** `README.md`; it removes the staging file on ordinary
 failures and retains the proposal file. It preserves POSIX mode bits. The tool

@@ -107,6 +107,21 @@ class ReadmePreviewTests(unittest.TestCase):
         self.repo = linked
         self.assertEqual(2, self.command().returncode)
 
+    def test_symlinked_parent_cannot_redirect_preview(self):
+        alias_parent = self.tmp / "alias-parent"
+        try:
+            alias_parent.symlink_to(self.tmp, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        before = self.readme.read_bytes()
+        self.repo = alias_parent / "target repo"
+        result = self.command()
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertEqual("", result.stdout)
+        self.assertIn("redirected parent", result.stderr)
+        self.assertEqual(before, self.readme.read_bytes())
+        self.assertEqual(b"# Example\n\nAfter.\n", self.proposal.read_bytes())
+
     def test_missing_final_newline_and_line_endings_reported(self):
         self.readme.write_bytes(b"# X\r\nBefore")
         self.proposal.write_bytes(b"# X\nAfter\n")

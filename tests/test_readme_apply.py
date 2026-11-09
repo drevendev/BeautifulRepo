@@ -144,6 +144,26 @@ class ReadmeApplyTests(unittest.TestCase):
         self.assertEqual(2, result.returncode)
         self.assert_clean()
 
+    def test_symlinked_parent_cannot_redirect_approved_write(self):
+        alias_parent = self.tmp / "alias-parent"
+        try:
+            alias_parent.symlink_to(self.tmp, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        before = self.readme.read_bytes()
+        proposal_before = self.proposal.read_bytes()
+        # The final root directory is ordinary; only its parent is redirected.
+        self.root = alias_parent / "target repo"
+        self.readme = self.root / "README.md"
+        self.other = self.root / "keep.txt"
+        result = self.approved()
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertEqual("", result.stdout)
+        self.assertIn("redirected parent", result.stderr)
+        self.assertEqual(before, self.readme.read_bytes())
+        self.assertEqual(proposal_before, self.proposal.read_bytes())
+        self.assert_clean()
+
     def test_invisible_proposal_characters_fail_before_replacement(self):
         original = self.readme.read_bytes()
         for ch in ("\u200b", "\u2060", "\ufeff"):
