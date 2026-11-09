@@ -46,6 +46,17 @@ class ReadmePreviewTests(unittest.TestCase):
         self.assertEqual(old, self.readme.read_bytes())
         self.assertEqual(new, self.proposal.read_bytes())
 
+    def test_plain_temp_root_with_dotdot_is_accepted(self):
+        # Windows resolves some ordinary temp-path spellings differently.
+        # A plain component plus '..' is not a symlink or junction.
+        (self.tmp / "ordinary").mkdir()
+        self.repo = self.tmp / "ordinary" / ".." / "target repo"
+        original = self.readme.read_bytes()
+        result = self.command()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Proposed unified diff", result.stdout)
+        self.assertEqual(original, self.readme.read_bytes())
+
     def test_same_bytes_has_no_diff(self):
         self.proposal.write_bytes(self.readme.read_bytes())
         result = self.command()
@@ -106,6 +117,22 @@ class ReadmePreviewTests(unittest.TestCase):
             self.skipTest("directory symlinks unavailable")
         self.repo = linked
         self.assertEqual(2, self.command().returncode)
+
+    def test_symlinked_parent_cannot_redirect_preview(self):
+        alias_parent = self.tmp / "alias-parent"
+        try:
+            alias_parent.symlink_to(self.tmp, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        before = self.readme.read_bytes()
+        proposal_before = self.proposal.read_bytes()
+        self.repo = alias_parent / "target repo"
+        result = self.command()
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertEqual("", result.stdout)
+        self.assertIn("redirected parent", result.stderr)
+        self.assertEqual(before, self.readme.read_bytes())
+        self.assertEqual(proposal_before, self.proposal.read_bytes())
 
     def test_missing_final_newline_and_line_endings_reported(self):
         self.readme.write_bytes(b"# X\r\nBefore")

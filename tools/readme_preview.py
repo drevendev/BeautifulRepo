@@ -88,12 +88,25 @@ def _diff(original: str, proposed: str) -> str:
     return "".join(output)
 
 
-def preview(root: Path, proposal: Path, expected: str | None = None) -> str:
+def validate_root(root: Path) -> None:
+    """Reject symlink/junction components without comparing path spellings.
+
+    Resolving an ordinary Windows path may change its spelling (for example
+    short names), so resolved-vs-absolute equality wrongly rejects real roots.
+    Inspect every lexical ancestor instead, including those before '..'.
+    """
     try:
-        if _redirect(root) or not stat.S_ISDIR(root.lstat().st_mode):
+        lexical_root = root if root.is_absolute() else Path.cwd() / root
+        if _redirect(lexical_root) or not stat.S_ISDIR(lexical_root.lstat().st_mode):
             raise PreviewError("root: expected an ordinary, non-symlinked directory.")
-    except OSError as exc:
+        if any(_redirect(parent) for parent in lexical_root.parents):
+            raise PreviewError("root: symlinked or redirected parent directory.")
+    except (OSError, RuntimeError) as exc:
         raise PreviewError("root: cannot inspect target directory.") from exc
+
+
+def preview(root: Path, proposal: Path, expected: str | None = None) -> str:
+    validate_root(root)
     before, old_text = read_file(root / "README.md", "README.md")
     after, new_text = read_file(proposal, "proposal")
     old_hash = hashlib.sha256(before).hexdigest()

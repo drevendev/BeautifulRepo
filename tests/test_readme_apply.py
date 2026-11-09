@@ -72,6 +72,16 @@ class ReadmeApplyTests(unittest.TestCase):
             self.assertEqual(0o644, stat.S_IMODE(self.readme.stat().st_mode))
         self.assert_clean()
 
+    def test_plain_temp_root_with_dotdot_is_accepted(self):
+        # An ordinary lexical '..' component must not look like a redirect.
+        (self.tmp / "ordinary").mkdir()
+        self.root = self.tmp / "ordinary" / ".." / "target repo"
+        proposal = self.proposal.read_bytes()
+        result = self.approved()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(proposal, self.readme.read_bytes())
+        self.assert_clean()
+
     def test_stale_original_rejected_with_no_write(self):
         old = self.readme.read_bytes()
         self.readme.write_bytes(b"# Edited by someone else\n")
@@ -142,6 +152,26 @@ class ReadmeApplyTests(unittest.TestCase):
             self.skipTest("proposal symlinks unavailable")
         result = self.approved()
         self.assertEqual(2, result.returncode)
+        self.assert_clean()
+
+    def test_symlinked_parent_cannot_redirect_approved_write(self):
+        alias_parent = self.tmp / "alias-parent"
+        try:
+            alias_parent.symlink_to(self.tmp, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        before = self.readme.read_bytes()
+        proposal_before = self.proposal.read_bytes()
+        # The final root directory is ordinary; only its parent is redirected.
+        self.root = alias_parent / "target repo"
+        self.readme = self.root / "README.md"
+        self.other = self.root / "keep.txt"
+        result = self.approved()
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertEqual("", result.stdout)
+        self.assertIn("redirected parent", result.stderr)
+        self.assertEqual(before, self.readme.read_bytes())
+        self.assertEqual(proposal_before, self.proposal.read_bytes())
         self.assert_clean()
 
     def test_invisible_proposal_characters_fail_before_replacement(self):
