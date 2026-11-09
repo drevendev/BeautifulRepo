@@ -32,8 +32,14 @@ class PluginInstallVerificationTests(unittest.TestCase):
                 destination = root / "skills" / name / "SKILL.md"
                 destination.parent.mkdir(parents=True)
                 destination.write_bytes(f"---\nname: {name}\n---\n# Example\n".encode("utf-8"))
+        for root in (self.source, self.installed):
+            for relative in verifier.DEPENDENCIES:
+                destination = root / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(f"# synthetic {relative}\n".encode("utf-8"))
         subprocess.run(["git", "init", "-q", str(self.source)], check=True)
-        subprocess.run(["git", "-C", str(self.source), "add", "skills"], check=True)
+        subprocess.run(["git", "-C", str(self.source),
+                        "add", "skills", "tools", "scripts", "guides"], check=True)
         subprocess.run(["git", "-C", str(self.source), "-c", "user.email=test@example.invalid",
                         "-c", "user.name=Fixture", "commit", "-qm", "synthetic"], check=True)
         self.sha = subprocess.check_output(["git", "-C", str(self.source), "rev-parse", "HEAD"], text=True).strip()
@@ -41,7 +47,9 @@ class PluginInstallVerificationTests(unittest.TestCase):
     def test_matching_content_is_only_a_byte_match_not_a_host_pass(self):
         result = verifier.verify(self.source, self.installed, self.sha)
         self.assertEqual(result["state"], "match")
-        self.assertIn("does not prove", result["limitations"])
+        self.assertEqual(result["checked_plugin_dependencies"], list(verifier.DEPENDENCIES))
+        self.assertEqual(result["different_plugin_dependencies"], [])
+        self.assertIn("proof of", result["limitations"])
 
     def test_source_cannot_be_its_own_installed_cache_even_with_an_alias(self):
         for installed in (self.source, self.source.parent / "source" / ".." / "source"):
@@ -64,6 +72,40 @@ class PluginInstallVerificationTests(unittest.TestCase):
         self.assertEqual(result["state"], "mismatch")
         self.assertEqual(result["different_skill_definitions"], ["audit-repo"])
         self.assertEqual(target.read_bytes(), before)
+
+    def test_modified_executable_dependency_reports_mismatch(self):
+        target = self.installed / "tools" / "readme_apply.py"
+        target.write_bytes(b"# modified executable\n")
+        before = target.read_bytes()
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "mismatch")
+        self.assertEqual(result["different_skill_definitions"], [])
+        self.assertEqual(result["different_plugin_dependencies"], ["tools/readme_apply.py"])
+        self.assertEqual(target.read_bytes(), before)
+
+    def test_modified_policy_dependency_reports_mismatch(self):
+        target = self.installed / "guides" / "agent-safety.md"
+        target.write_bytes(b"# modified policy\n")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "mismatch")
+        self.assertEqual(result["different_plugin_dependencies"], ["guides/agent-safety.md"])
+
+    def test_missing_or_redirected_dependency_is_incomplete(self):
+        target = self.installed / "scripts" / "release_inventory.py"
+        target.unlink()
+        with self.assertRaisesRegex(verifier.VerificationError, "missing"):
+            verifier.verify(self.source, self.installed, self.sha)
+        try:
+            target.symlink_to(self.source / "scripts" / "release_inventory.py")
+        except OSError:
+            self.skipTest("symlink unavailable")
+        with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_dirty_source_dependency_cannot_override_pinned_blob(self):
+        (self.source / "tools" / "repo_audit.py").write_bytes(b"# dirty source\n")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "match")
 
     def test_wrong_commit_is_incomplete(self):
         with self.assertRaisesRegex(verifier.VerificationError, "differs"):
