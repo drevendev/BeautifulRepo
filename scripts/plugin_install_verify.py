@@ -16,6 +16,17 @@ import stat
 import subprocess
 
 SKILLS = ("audit-repo", "improve-readme", "trust-surfaces", "draft-release-notes")
+# Host-executed helpers and shared safety guidance referenced by the skills.
+# Deliberately bounded: this does not attest the full installed plugin tree.
+DEPENDENCIES = (
+    "tools/repo_audit.py",
+    "tools/docs_links.py",
+    "tools/html_navigation.py",
+    "tools/readme_preview.py",
+    "tools/readme_apply.py",
+    "scripts/release_inventory.py",
+    "guides/agent-safety.md",
+)
 MAX_SKILL_BYTES = 256 * 1024
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 
@@ -132,12 +143,23 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
         if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
                 _regular_bytes(installed, relative)).digest():
             mismatch.append(skill)
+    dependency_mismatch = []
+    for name in DEPENDENCIES:
+        relative = Path(name)
+        if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
+                _regular_bytes(installed, relative)).digest():
+            dependency_mismatch.append(name)
     return {
-        "state": "match" if not mismatch else "mismatch",
+        "state": "match" if not mismatch and not dependency_mismatch else "mismatch",
         "source_commit": actual_commit,
         "checked_skill_definitions": list(SKILLS),
         "different_skill_definitions": mismatch,
-        "limitations": "Byte match only; does not prove plugin installation, discovery, invocation or model behavior.",
+        "checked_plugin_dependencies": list(DEPENDENCIES),
+        "different_plugin_dependencies": dependency_mismatch,
+        "limitations": (
+            "Byte match of named skill/helper/policy files only; not a full plugin "
+            "attestation or proof of installation, discovery, invocation or model behavior."
+        ),
     }
 
 

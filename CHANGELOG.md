@@ -548,6 +548,11 @@ keep their original themed headings.
 
 ### Changed
 
+- Extend pinned four-skill cache verification beyond `SKILL.md` to compare
+  seven host-executed helper and shared safety-policy files against Git blobs.
+  Modified helpers report MISMATCH; missing/redirected helpers report INCOMPLETE.
+  The check is bounded, not complete plugin attestation or client proof (#257).
+
 - Recheck the official GSoC 2026 timetable (November 7): distinguish past
   application and contributor-submission deadlines from the November 9 mentor
   evaluation, document the organizer's eligibility baseline, and refresh the

@@ -153,15 +153,21 @@ python -I "/path/to/current-BeautifulRepo/scripts/plugin_install_verify.py" --so
 ```
 
 Requires Python 3.11+ and local Git; the source must be at the repository top
-level, with `HEAD` equal to the supplied full SHA. Exit **0** means the installed
-four `SKILL.md` files match the **committed Git blobs** of that revision, exit
-**1** means at least one differs, and exit **2** means verification is incomplete
-(for example a missing directory, redirected file, or wrong source revision).
-The output is a bounded JSON receipt naming skills and differences, without
-publishing their contents. The verifier invokes local Git to read committed blobs, but runs no model,
-network or target code
-and does not edit either checkout. It does **not** support the one-skill
-`v0.2.0` release.
+level, with `HEAD` equal to the supplied full SHA. Exit **0** means all four installed `SKILL.md` files **and seven named
+execution/safety dependencies** match the **committed Git blobs** of that
+revision. The dependencies are `tools/repo_audit.py`, `tools/docs_links.py`,
+`tools/html_navigation.py`, `tools/readme_preview.py`,
+`tools/readme_apply.py`, `scripts/release_inventory.py` and
+`guides/agent-safety.md`. Exit **1** means at least one checked file differs;
+exit **2** means verification is incomplete (for example a missing directory,
+redirected file or wrong source revision). JSON names the checked files and
+differences without publishing their contents. Other templates, guides,
+manifests, libraries and any extra files in the cache are **not covered**.
+A MATCH is **not** a complete plugin integrity or provenance certificate.
+
+The verifier invokes local Git to read committed blobs but runs no model,
+network or target code and does not edit either checkout. It does **not**
+support the one-skill `v0.2.0` release.
 
 A byte match is necessary evidence for this candidate, **not** evidence that
 Claude Code or Codex discovered, activated or invoked those files. Preserve
