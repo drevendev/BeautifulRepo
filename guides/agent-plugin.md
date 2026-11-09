@@ -138,8 +138,12 @@ A marketplace registration or source checkout is not proof that the host install
 the expected four skill files. After installing the **development candidate**
 above, locate the actual installed plugin cache root reported by your host.
 Separately check out the full `cf8ac81ddabb5e2006913e65a2f980ef201baf5c`
-commit in a local Git working tree. Keep that source checkout separate from
-the installed cache and use trusted Git source/origin verification.
+commit in a local Git working tree. Use the **actual cache location shown by
+the host**, not another copy of the source checkout. The two paths must be
+**different physical directories**: giving the same checkout twice (even
+through alternate path spellings) returns INCOMPLETE, never MATCH. Independently
+verify the source's Git origin and the host's cache location; a byte match
+cannot authenticate where either directory came from.
 
 From a **current BeautifulRepo toolkit checkout** (the verifier was added
 *after* the historical candidate and is not present at that SHA), run:
