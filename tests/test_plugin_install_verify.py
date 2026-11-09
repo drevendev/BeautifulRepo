@@ -10,7 +10,7 @@ import sys
 import tempfile
 import unittest
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "tools" / "plugin_install_verify.py"
+MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "plugin_install_verify.py"
 SPEC = importlib.util.spec_from_file_location("plugin_install_verify", MODULE_PATH)
 assert SPEC and SPEC.loader
 verifier = importlib.util.module_from_spec(SPEC)
@@ -31,7 +31,7 @@ class PluginInstallVerificationTests(unittest.TestCase):
             for name in verifier.SKILLS:
                 destination = root / "skills" / name / "SKILL.md"
                 destination.parent.mkdir(parents=True)
-                destination.write_text(f"---\nname: {name}\n---\n# Example\n", encoding="utf-8")
+                destination.write_bytes(f"---\nname: {name}\n---\n# Example\n".encode("utf-8"))
         subprocess.run(["git", "init", "-q", str(self.source)], check=True)
         subprocess.run(["git", "-C", str(self.source), "add", "skills"], check=True)
         subprocess.run(["git", "-C", str(self.source), "-c", "user.email=test@example.invalid",
@@ -86,8 +86,8 @@ class PluginInstallVerificationTests(unittest.TestCase):
 
     def test_dirty_source_matching_dirty_install_cannot_fake_pinned_match(self):
         for root in (self.source, self.installed):
-            (root / "skills" / "audit-repo" / "SKILL.md").write_text(
-                "---\nname: audit-repo\n---\n# Modified after commit\n", encoding="utf-8")
+            (root / "skills" / "audit-repo" / "SKILL.md").write_bytes(
+                b"---\nname: audit-repo\n---\n# Modified after commit\n")
         result = verifier.verify(self.source, self.installed, self.sha)
         self.assertEqual(result["state"], "mismatch")
         self.assertEqual(result["different_skill_definitions"], ["audit-repo"])
