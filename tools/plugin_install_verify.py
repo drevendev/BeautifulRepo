@@ -80,6 +80,33 @@ def _source_commit(root: Path) -> str:
     return lines[1]
 
 
+def _committed_bytes(root: Path, commit: str, relative: Path) -> bytes:
+    """Read the immutable Git blob, never uncommitted source working-tree bytes."""
+    env = {key: value for key, value in os.environ.items()
+           if not key.startswith("GIT_")}
+    blob = f"{commit}:{relative.as_posix()}"
+    try:
+        size = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "-s", blob],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, timeout=10, check=False, env=env,
+        )
+        if size.returncode != 0 or not size.stdout.strip().isdigit():
+            raise VerificationError("skill is not present in pinned Git commit")
+        if int(size.stdout.strip()) > MAX_SKILL_BYTES:
+            raise VerificationError("pinned skill definition exceeds 256 KiB")
+        content = subprocess.run(
+            ["git", "-C", str(root), "show", blob],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            timeout=10, check=False, env=env,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise VerificationError("cannot read pinned skill definition") from exc
+    if content.returncode != 0 or len(content.stdout) != int(size.stdout.strip()):
+        raise VerificationError("pinned skill definition could not be verified")
+    return content.stdout
+
+
 def verify(source: Path, installed: Path, expected_commit: str) -> dict:
     if not SHA_RE.fullmatch(expected_commit):
         raise VerificationError("expected commit must be a full lowercase 40-digit SHA")
@@ -97,7 +124,7 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
     mismatch = []
     for skill in SKILLS:
         relative = Path("skills") / skill / "SKILL.md"
-        if hashlib.sha256(_regular_bytes(source, relative)).digest() != hashlib.sha256(
+        if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
                 _regular_bytes(installed, relative)).digest():
             mismatch.append(skill)
     return {
