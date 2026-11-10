@@ -669,6 +669,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Extend the four-skill plugin-cache verifier beyond executable helpers to
+  the checklists, task guides and templates the skills need. A missing required
+  template now makes the receipt INCOMPLETE; a changed checklist produces
+  MISMATCH against the pinned Git blob. This remains a bounded byte comparison,
+  **not** Claude Code/Codex discovery or model acceptance (related to #257).
+
 - Fail closed on hard-linked regular files before **any** experimental MCP
   checker launches: hard links can alias out-of-root sources without symlink
   metadata, including extensionless entry points and non-Markdown documents.

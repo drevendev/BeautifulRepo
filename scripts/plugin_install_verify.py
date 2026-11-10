@@ -16,8 +16,9 @@ import stat
 import subprocess
 
 SKILLS = ("audit-repo", "improve-readme", "trust-surfaces", "draft-release-notes")
-# Host-executed helpers and shared safety guidance referenced by the skills.
-# Deliberately bounded: this does not attest the full installed plugin tree.
+# Files the four skills explicitly require locally: executable helpers, safety
+# and task guides, checklists and starter templates. This is intentionally not
+# an attestation of the entire plugin tree or host-side skill discovery.
 DEPENDENCIES = (
     "tools/repo_audit.py",
     "tools/docs_links.py",
@@ -26,6 +27,21 @@ DEPENDENCIES = (
     "tools/readme_apply.py",
     "scripts/release_inventory.py",
     "guides/agent-safety.md",
+    "guides/cli-repositories.md",
+    "guides/community-safety.md",
+    "guides/private-repositories.md",
+    "guides/release-notes.md",
+    "checklists/repository.md",
+    "checklists/first-success.md",
+    "checklists/confidentiality.md",
+    "templates/README.template.md",
+    "templates/LIBRARY_README.template.md",
+    "templates/APPLICATION_README.template.md",
+    "templates/RESEARCH_DATA_README.template.md",
+    "templates/CURATED_README.template.md",
+    "templates/INTERNAL_README.template.md",
+    "templates/SECURITY.template.md",
+    "templates/RELEASE_NOTES.template.md",
 )
 MAX_SKILL_BYTES = 256 * 1024
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")

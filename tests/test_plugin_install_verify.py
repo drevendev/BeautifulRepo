@@ -39,7 +39,7 @@ class PluginInstallVerificationTests(unittest.TestCase):
                 destination.write_bytes(f"# synthetic {relative}\n".encode("utf-8"))
         subprocess.run(["git", "init", "-q", str(self.source)], check=True)
         subprocess.run(["git", "-C", str(self.source),
-                        "add", "skills", "tools", "scripts", "guides"], check=True)
+                        "add", "skills", "tools", "scripts", "guides", "checklists", "templates"], check=True)
         subprocess.run(["git", "-C", str(self.source), "-c", "user.email=test@example.invalid",
                         "-c", "user.name=Fixture", "commit", "-qm", "synthetic"], check=True)
         self.sha = subprocess.check_output(["git", "-C", str(self.source), "rev-parse", "HEAD"], text=True).strip()
@@ -89,6 +89,37 @@ class PluginInstallVerificationTests(unittest.TestCase):
         result = verifier.verify(self.source, self.installed, self.sha)
         self.assertEqual(result["state"], "mismatch")
         self.assertEqual(result["different_plugin_dependencies"], ["guides/agent-safety.md"])
+
+    def test_skill_required_documents_are_covered(self):
+        # A MATCH must not hide absent first-success or policy materials
+        # that a SKILL.md explicitly requires or selects.
+        expected = {
+            "checklists/repository.md", "checklists/first-success.md",
+            "checklists/confidentiality.md", "guides/cli-repositories.md",
+            "guides/community-safety.md", "guides/private-repositories.md",
+            "guides/release-notes.md", "templates/README.template.md",
+            "templates/LIBRARY_README.template.md",
+            "templates/APPLICATION_README.template.md",
+            "templates/RESEARCH_DATA_README.template.md",
+            "templates/CURATED_README.template.md",
+            "templates/INTERNAL_README.template.md",
+            "templates/SECURITY.template.md",
+            "templates/RELEASE_NOTES.template.md",
+        }
+        self.assertTrue(expected.issubset(set(verifier.DEPENDENCIES)))
+
+    def test_missing_required_template_is_incomplete(self):
+        (self.installed / "templates" / "RELEASE_NOTES.template.md").unlink()
+        with self.assertRaisesRegex(verifier.VerificationError, "missing"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_modified_first_success_checklist_reports_mismatch(self):
+        target = self.installed / "checklists" / "first-success.md"
+        target.write_text("# modified checklist\\n", encoding="utf-8")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "mismatch")
+        self.assertEqual(result["different_plugin_dependencies"],
+                         ["checklists/first-success.md"])
 
     def test_missing_or_redirected_dependency_is_incomplete(self):
         target = self.installed / "scripts" / "release_inventory.py"
