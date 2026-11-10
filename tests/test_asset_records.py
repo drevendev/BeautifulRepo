@@ -51,6 +51,33 @@ class AssetRecordsTest(unittest.TestCase):
             self.assertIn('"has_pending_decisions": true', proc.stdout)
             self.assertNotIn("Fictional author", proc.stdout)
 
+    def test_every_disposition_requires_a_concrete_reason(self):
+        for status in ("APPROVED", "PENDING", "REMOVED"):
+            for value in (status, f"{status} —", f"{status} —   ", f"{status} — ...", f"{status} ()"):
+                with self.subTest(decision=value):
+                    with self.assertRaisesRegex(asset.RecordError, "concrete reason"):
+                        asset.validate(record(decision=value), today=date(2026, 11, 10))
+        for value, expected in (
+            ("APPROVED — checked synthetic provenance", "approved"),
+            ("PENDING: verify synthetic evidence", "pending"),
+            ("REMOVED (replaced with original art)", "removed"),
+        ):
+            with self.subTest(valid_decision=value):
+                result = asset.validate(record(decision=value), today=date(2026, 11, 10))
+                self.assertEqual(result["decisions"][expected], 1)
+
+    def test_bare_approval_cannot_exit_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory, "records.md")
+            path.write_text(record(decision="APPROVED"), encoding="utf-8")
+            proc = subprocess.run(
+                [sys.executable, str(MODULE), str(path), "--format", "json"],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(proc.returncode, 2)
+            self.assertEqual(proc.stdout, "")
+            self.assertIn("concrete reason", proc.stderr)
+
     def test_template_placeholder_is_rejected(self):
         with self.assertRaisesRegex(asset.RecordError, "template value"):
             asset.validate(record().replace("README.md (illustrative)", "REPOSITORY_PATHS_AND_EMBEDS"), today=date(2026, 11, 10))
