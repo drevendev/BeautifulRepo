@@ -133,6 +133,90 @@ class StandalonePreflightTests(unittest.TestCase):
             invalid = subprocess.run(command[:-1] + [str(root)], capture_output=True, text=True)
             self.assertEqual(invalid.returncode, 2, invalid.stderr)
 
+    def test_byte_comparison_detects_mismatch_without_executing_content(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "pinned"
+            installed = root / "installed"
+            for base in (source, installed):
+                skill = base / "skills" / "audit-repo"
+                skill.mkdir(parents=True)
+                (skill / "SKILL.md").write_text("ordinary definition", encoding="utf-8")
+                for relative in probe.REQUIRED["audit-repo"]:
+                    item = base / relative
+                    item.parent.mkdir(parents=True, exist_ok=True)
+                    item.write_text("do not execute this fixture", encoding="utf-8")
+            selected = installed / "skills" / "audit-repo"
+            good = probe.inspect(selected, source_root=source)
+            self.assertEqual(good["state"], "present")
+            self.assertEqual(good["source_comparison"]["mismatched"], [])
+            self.assertEqual(
+                good["source_comparison"]["checked_files"],
+                len(probe.REQUIRED["audit-repo"]) + 1,
+            )
+            changed = installed / probe.REQUIRED["audit-repo"][0]
+            changed.write_text("different bytes", encoding="utf-8")
+            failed = probe.inspect(selected, source_root=source)
+            self.assertEqual(failed["state"], "mismatch")
+            self.assertEqual(failed["source_comparison"]["mismatched"], [
+                probe.REQUIRED["audit-repo"][0],
+            ])
+            completed = subprocess.run(
+                [sys.executable, "-I", str(SCRIPT), str(selected),
+                 "--source-root", str(source)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(completed.returncode, 1, completed.stderr)
+            self.assertEqual(json.loads(completed.stdout)["state"], "mismatch")
+
+    def test_byte_comparison_fails_closed_on_untrusted_source_layout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "pinned"
+            installed = root / "installed"
+            for base in (source, installed):
+                skill = base / "skills" / "audit-repo"
+                skill.mkdir(parents=True)
+                (skill / "SKILL.md").write_text("definition", encoding="utf-8")
+                for relative in probe.REQUIRED["audit-repo"]:
+                    item = base / relative
+                    item.parent.mkdir(parents=True, exist_ok=True)
+                    item.write_text("ordinary", encoding="utf-8")
+            selected = installed / "skills" / "audit-repo"
+            with self.assertRaisesRegex(probe.ProbeError, "must differ"):
+                probe.inspect(selected, source_root=installed)
+            (source / probe.REQUIRED["audit-repo"][0]).unlink()
+            with self.assertRaisesRegex(probe.ProbeError, "source reference missing"):
+                probe.inspect(selected, source_root=source)
+            alias = root / "alias"
+            try:
+                alias.symlink_to(source, target_is_directory=True)
+            except (NotImplementedError, OSError):
+                self.skipTest("directory symlinks unavailable")
+            with self.assertRaisesRegex(probe.ProbeError, "source root.*redirected"):
+                probe.inspect(selected, source_root=alias)
+
+    def test_byte_comparison_cannot_hide_missing_installed_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "pinned"
+            installed = root / "installed"
+            for base in (source, installed):
+                skill = base / "skills" / "audit-repo"
+                skill.mkdir(parents=True)
+                (skill / "SKILL.md").write_text("definition", encoding="utf-8")
+            for relative in probe.REQUIRED["audit-repo"]:
+                item = source / relative
+                item.parent.mkdir(parents=True, exist_ok=True)
+                item.write_text("ordinary", encoding="utf-8")
+            result = probe.inspect(installed / "skills" / "audit-repo", source_root=source)
+            self.assertEqual(result["state"], "incomplete")
+            self.assertEqual(
+                set(result["missing_or_redirected"]),
+                set(probe.REQUIRED["audit-repo"]),
+            )
+            self.assertEqual(result["source_comparison"]["mismatched"], [])
+
     def test_known_skills_have_nonempty_unique_relative_dependencies(self):
         self.assertEqual(len(probe.REQUIRED), 4)
         for name, names in probe.REQUIRED.items():
