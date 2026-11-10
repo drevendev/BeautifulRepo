@@ -176,7 +176,6 @@ before/after snapshots and the independent review required by
 [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
 Do not call this an external-user installation or real-model PASS.
 
-
 ## Standalone skill-manager installations: separate and unverified
 
 **Do not treat a standalone skills.sh / skills CLI installation as a supported
@@ -189,7 +188,7 @@ BeautifulRepo's four skills currently depend on shared repository-root tools,
 guides, checklists and templates. Merely discovering SKILL.md can therefore
 be insufficient. This is a source-level distribution risk tracked in
 [#333](https://github.com/drevendev/BeautifulRepo/issues/333), **not**
-a reproduced failure of \`npx skills add\` or a real-host test.
+a reproduced failure of `npx skills add` or a real-host test.
 
 A maintainer or independent tester can inspect an **already installed**
 disposable per-skill copy without installing packages, executing a skill or
@@ -200,7 +199,7 @@ python -I scripts/standalone_skill_preflight.py /absolute/path/to/installed/skil
 ```
 
 Use each actual installed skill directory (or its SKILL.md) in turn.
-The preflight assumes the exact \`R = SKILL.md directory / ../..\` fallback
+The preflight assumes the exact `R = SKILL.md directory / ../..` fallback
 declared by these skills and checks the specifically required shared paths
 there. Exit **0** means named files are ordinary files at those paths;
 **1** identifies missing or redirected paths in JSON; **2** means the
