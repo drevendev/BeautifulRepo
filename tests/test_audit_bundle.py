@@ -175,6 +175,51 @@ class AuditBundleTests(unittest.TestCase):
         self.assertEqual(2, redirected.returncode)
         self.assertEqual("", redirected.stdout)
 
+    def test_symlinked_parent_is_rejected_before_any_checker_reads(self):
+        outside = self.repo.parent / "redirect-parent"
+        try:
+            outside.symlink_to(self.repo.parent, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        original = (self.repo / "README.md").read_bytes()
+        result = self.invoke("--format", "json", root=outside / "fixture")
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertEqual("", result.stdout, "invalid root must not emit a JSON pass")
+        self.assertIn("redirected ancestors", result.stderr)
+        self.assertEqual(original, (self.repo / "README.md").read_bytes())
+
+    def test_simulated_windows_reparse_parent_is_rejected_before_resolving(self):
+        from types import SimpleNamespace
+
+        parent = self.repo.parent
+        original_lstat = Path.lstat
+
+        def tagged_lstat(path):
+            info = original_lstat(path)
+            if path == parent:
+                return SimpleNamespace(st_mode=info.st_mode,
+                                       st_reparse_tag=0,
+                                       st_file_attributes=0x400)
+            return info
+
+        with patch.object(bundle.stat, "FILE_ATTRIBUTE_REPARSE_POINT",
+                          0x400, create=True):
+            with patch.object(Path, "lstat", tagged_lstat):
+                with patch.object(
+                    Path, "resolve",
+                    side_effect=AssertionError("redirected path was resolved")
+                ):
+                    with self.assertRaisesRegex(ValueError, "redirected ancestors"):
+                        bundle.checked_root(str(self.repo))
+
+    def test_ordinary_dotdot_parent_is_still_a_valid_audit_root(self):
+        intermediate = self.repo.parent / "ordinary"
+        intermediate.mkdir()
+        selected = intermediate / ".." / self.repo.name
+        result = self.invoke("--format", "json", root=selected)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(0, json.loads(result.stdout)["exit_code"])
+
     def test_output_overflow_and_checker_failure_are_incomplete(self):
         oversized = {"state": "complete", "exit_code": 0,
                      "diagnostics": ["x" * (bundle.RESULT_LIMIT + 1)]}
