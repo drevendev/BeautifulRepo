@@ -78,6 +78,25 @@ class AssetRecordsTest(unittest.TestCase):
             self.assertEqual(proc.stdout, "")
             self.assertIn("concrete reason", proc.stderr)
 
+    def test_extra_record_prose_cannot_silently_pass(self):
+        # An APPROVED record with stray prose should not get structural PASS.
+        for extra in ("Unreviewed permissions", "- incomplete entry", "### Addendum",
+                      "<!-- hidden note -->"):
+            with self.subTest(extra=extra):
+                with self.assertRaisesRegex(asset.RecordError, "unexpected content"):
+                    asset.validate(
+                        record().replace("- **Decision:**", extra + "\n- **Decision:**"),
+                        today=date(2026, 11, 10),
+                    )
+        with self.assertRaisesRegex(asset.RecordError, "unexpected content"):
+            asset.validate(record() + "Additional unreviewed note\n", today=date(2026, 11, 10))
+
+    def test_blank_lines_between_complete_asset_sections_are_allowed(self):
+        second = record().split("## assets/example.svg\n", 1)[1]
+        combined = record() + "\n## assets/second.svg\n" + second
+        result = asset.validate(combined, today=date(2026, 11, 10))
+        self.assertEqual(result["records"], 2)
+
     def test_template_placeholder_is_rejected(self):
         with self.assertRaisesRegex(asset.RecordError, "template value"):
             asset.validate(record().replace("README.md (illustrative)", "REPOSITORY_PATHS_AND_EMBEDS"), today=date(2026, 11, 10))
