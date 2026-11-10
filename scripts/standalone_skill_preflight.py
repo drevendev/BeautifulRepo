@@ -7,6 +7,7 @@ or evidence that an agent discovered, selected or ran a skill.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -39,6 +40,9 @@ REQUIRED = {
         "guides/release-notes.md", "templates/RELEASE_NOTES.template.md",
     ),
 }
+
+
+MAX_COMPARE_BYTES = 2 * 1024 * 1024
 
 
 class ProbeError(ValueError):
@@ -92,8 +96,24 @@ def _ordinary(root: Path, relative: Path) -> bool:
         return False
 
 
-def inspect(path: Path) -> dict:
-    """Report required files at the exact two-level-up SKILL.md fallback root."""
+def _digest_file(path: Path) -> bytes:
+    """Compare bounded file bytes; do not execute or parse installed content."""
+    digest = hashlib.sha256()
+    read_bytes = 0
+    try:
+        with path.open("rb") as source:
+            while chunk := source.read(65536):
+                read_bytes += len(chunk)
+                if read_bytes > MAX_COMPARE_BYTES:
+                    raise ProbeError("comparison file exceeds 2 MiB limit")
+                digest.update(chunk)
+    except OSError as exc:
+        raise ProbeError("comparison file could not be read") from exc
+    return digest.digest()
+
+
+def inspect(path: Path, *, source_root: Path | None = None) -> dict:
+    """Report required sibling files, optionally comparing a pinned local source."""
     lexical_skill_dir = path.parent if path.name == "SKILL.md" else path
     if lexical_skill_dir.name not in REQUIRED:
         raise ProbeError("expected one of the four BeautifulRepo skill directories")
@@ -109,25 +129,57 @@ def inspect(path: Path) -> dict:
         raise ProbeError("installed SKILL.md is missing, redirected or not an ordinary file")
     needed = REQUIRED[skill_dir.name]
     missing = [name for name in needed if not _ordinary(root, Path(name))]
-    return {
+    report = {
         "skill": skill_dir.name,
         "assumed_root": str(root),
         "checked_required_files": len(needed),
         "missing_or_redirected": missing,
         "state": "present" if not missing else "incomplete",
         "limitations": (
-            "Presence of named sibling files only. Not their bytes or safety, a skills.sh "
+            "Presence of named sibling files only. Not their safety, a skills.sh "
             "installation result, execution, discovery, model behavior or privacy guarantee."
         ),
     }
+    if source_root is not None:
+        # A separate, verified immutable checkout must be selected by the caller.
+        # These bytes alone cannot authenticate that checkout or certify safety.
+        if not _ordinary_directory_chain(source_root):
+            raise ProbeError("source root is missing or redirected through an ancestor")
+        reference_root = Path(os.path.abspath(source_root))
+        if reference_root == root:
+            raise ProbeError("source root must differ from installed skill root")
+        relative_files = (f"skills/{skill_dir.name}/SKILL.md", *needed)
+        for relative in relative_files:
+            if not _ordinary(reference_root, Path(relative)):
+                raise ProbeError(f"source reference missing or redirected: {relative}")
+        mismatched = [
+            relative for relative in relative_files
+            if _ordinary(root, Path(relative))
+            and _digest_file(root / relative) != _digest_file(reference_root / relative)
+        ]
+        report["source_comparison"] = {
+            "checked_files": len(relative_files),
+            "mismatched": mismatched,
+            "limitations": (
+                "Compares local bytes to a caller-selected source directory. "
+                "Does not verify its commit, trust, provenance, execution or host discovery."
+            ),
+        }
+        if mismatched and not missing:
+            report["state"] = "mismatch"
+    return report
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("skill", type=Path, help="installed skill directory or its SKILL.md")
+    parser.add_argument(
+        "--source-root", type=Path,
+        help="separate locally verified pinned BeautifulRepo checkout for byte comparison",
+    )
     args = parser.parse_args(argv)
     try:
-        result = inspect(args.skill)
+        result = inspect(args.skill, source_root=args.source_root)
     except ProbeError as exc:
         print(json.dumps({"state": "invalid", "reason": str(exc)}, sort_keys=True))
         return 2
