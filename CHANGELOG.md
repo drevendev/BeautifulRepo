@@ -669,6 +669,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject synthetic agent-eval snapshot targets reached through a symlinked
+  parent or Windows junction ancestor, not only redirects at the final root.
+  Check lexical components before resolving, including those preceding `..`;
+  retain ordinary path normalization and add cross-platform regressions.
+  This is a scope preflight, not a race-resistant sandbox or real-model PASS
+  (related to #74 and #257).
+
 - Extend the four-skill plugin-cache verifier beyond executable helpers to
   the checklists, task guides and templates the skills need. A missing required
   template now makes the receipt INCOMPLETE; a changed checklist produces
