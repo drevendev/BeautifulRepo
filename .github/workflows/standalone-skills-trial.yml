@@ -21,6 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
         with:
+          # PR events default to a synthetic merge SHA; use the exact source head.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 ref inspected 2026-10-30
         with:
@@ -35,13 +37,22 @@ jobs:
           DO_NOT_TRACK: '1'
           NPM_CONFIG_IGNORE_SCRIPTS: 'true'
           NPM_CONFIG_FUND: 'false'
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           node --version
           python --version
-          git rev-parse HEAD
+          source_sha="$(git rev-parse HEAD)"
+          expected_sha="${PR_HEAD_SHA:-$GITHUB_SHA}"
+          if [ "$source_sha" != "$expected_sha" ]; then
+            echo "Checkout SHA $source_sha does not match expected source $expected_sha" >&2
+            exit 1
+          fi
+          printf 'Copied source HEAD: %s\nWorkflow event SHA: %s\n' "$source_sha" "$GITHUB_SHA"
           work="$RUNNER_TEMP/beautifulrepo-skills-trial"
           mkdir -p "$work/results"
+          printf '%s\n' "$source_sha" > "$work/results/checkout-source-sha"
+          printf '%s\n' "$GITHUB_SHA" > "$work/results/workflow-event-sha"
           for skill in audit-repo improve-readme trust-surfaces draft-release-notes; do
             project="$work/projects/$skill"
             mkdir -p "$project"
@@ -55,7 +66,7 @@ jobs:
               exit 1
             }
             find "$installed" -type f -printf '%P\n' | LC_ALL=C sort > "$work/results/$skill.files"
-            printf '%s\n' "$GITHUB_SHA" > "$work/results/$skill.source-sha"
+            printf '%s\n' "$source_sha" > "$work/results/$skill.source-sha"
             set +e
             python -I "$GITHUB_WORKSPACE/scripts/standalone_skill_preflight.py" "$installed" > "$work/results/$skill.json"
             status=$?
