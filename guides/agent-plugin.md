@@ -176,6 +176,49 @@ before/after snapshots and the independent review required by
 [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
 Do not call this an external-user installation or real-model PASS.
 
+
+## Standalone skill-manager installations: separate and unverified
+
+**Do not treat a standalone skills.sh / skills CLI installation as a supported
+BeautifulRepo installation path yet.** The official [skills CLI
+documentation](https://www.skills.sh/docs/cli) describes installing individual
+skills and its [packs documentation](https://www.skills.sh/docs/packs)
+groups SKILL.md definitions, but neither guarantees that files *outside* each
+skill directory are copied next to it (sources reviewed **2026-11-10**).
+BeautifulRepo's four skills currently depend on shared repository-root tools,
+guides, checklists and templates. Merely discovering SKILL.md can therefore
+be insufficient. This is a source-level distribution risk tracked in
+[#333](https://github.com/drevendev/BeautifulRepo/issues/333), **not**
+a reproduced failure of \`npx skills add\` or a real-host test.
+
+A maintainer or independent tester can inspect an **already installed**
+disposable per-skill copy without installing packages, executing a skill or
+calling a model. From a current BeautifulRepo checkout, run:
+
+```bash
+python -I scripts/standalone_skill_preflight.py /absolute/path/to/installed/skills/audit-repo
+```
+
+Use each actual installed skill directory (or its SKILL.md) in turn.
+The preflight assumes the exact \`R = SKILL.md directory / ../..\` fallback
+declared by these skills and checks the specifically required shared paths
+there. Exit **0** means named files are ordinary files at those paths;
+**1** identifies missing or redirected paths in JSON; **2** means the
+skill definition cannot be checked. It does not inspect the target repository,
+execute imported code, follow redirecting dependency files or make network
+requests. The local synthetic regressions deliberately show a copied
+SKILL.md **without its sibling resources** returning exit 1, and a full
+synthetic layout returning exit 0.
+
+This is only a **presence preflight**, not an immutable-source byte match,
+a real skills CLI installation, dependency correctness proof or agent
+activation. The [whole-plugin pinned-cache verifier above](#verify-cached-skill-definitions-against-the-pinned-commit-offline)
+checks bytes for a different distribution route; neither substitutes for
+the host evaluations in [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
+Do not promote a skills.sh command or pack until a clean per-skill install has
+been reproduced and its exact filesystem layout and actual tool execution
+have been verified.
+
 ## Use
 
 Ask in plain words, for example "audit this repository's README and onboarding", or
