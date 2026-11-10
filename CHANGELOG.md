@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed fork-PR trust-boundary checklist for the copyable
+  documentation-check GitHub Actions workflow, covering read-only permissions,
+  persisted credentials, privileged event risks, untrusted code, output privacy
+  and an adoption test. Source-contract regressions check basic safety properties,
+  not the effective isolation of an adopter's runner.
+
 - Add a source-backed third-party README/media provenance guide and reusable
   evidence record, with hypothetical include/defer/replace cases and a link
   to BeautifulRepo's actual existing notice. This documents rights review,
