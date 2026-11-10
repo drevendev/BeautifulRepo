@@ -209,10 +209,28 @@ requests. The local synthetic regressions deliberately show a copied
 SKILL.md **without its sibling resources** returning exit 1, and a full
 synthetic layout returning exit 0.
 
-This is only a **presence preflight**, not an immutable-source byte match,
-a real skills CLI installation, dependency correctness proof or agent
-activation. The [whole-plugin pinned-cache verifier above](#verify-cached-skill-definitions-against-the-pinned-commit-offline)
-checks bytes for a different distribution route; neither substitutes for
+For a **byte comparison** of an actual installed copy, first obtain a
+**separate** local checkout of an explicitly selected full commit and verify
+its HEAD and clean worktree yourself. This optional check never fetches code:
+
+```bash
+git -C /absolute/path/to/pinned-BeautifulRepo rev-parse HEAD
+git -C /absolute/path/to/pinned-BeautifulRepo status --porcelain
+python -I scripts/standalone_skill_preflight.py /absolute/path/to/installed/skills/audit-repo --source-root /absolute/path/to/pinned-BeautifulRepo
+```
+
+The first command must match the full expected SHA, and the second must print
+nothing. The source root must be distinct from the installed root. The preflight
+compares the `SKILL.md` and named shared files byte-for-byte using bounded
+SHA-256 reads; a `mismatch` or `incomplete` result exits **1**, and an
+invalid or redirected reference exits **2**. The JSON lists relative
+mismatches, not their content. It cannot authenticate the source checkout on
+your behalf, cover unnamed dependencies, defend against concurrent hostile
+filesystem changes, or prove that a host actually invoked a skill.
+
+This is a **presence and optional local-byte comparison**, not an
+authenticated install or agent activation. The [whole-plugin pinned-cache verifier above](#verify-cached-skill-definitions-against-the-pinned-commit-offline)
+uses Git blob evidence for a different distribution route; neither substitutes for
 the host evaluations in [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
 Do not promote a skills.sh command or pack until a clean per-skill install has
 been reproduced and its exact filesystem layout and actual tool execution
