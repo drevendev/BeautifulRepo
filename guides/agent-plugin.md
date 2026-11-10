@@ -153,15 +153,15 @@ python -I "/path/to/current-BeautifulRepo/scripts/plugin_install_verify.py" --so
 ```
 
 Requires Python 3.11+ and local Git; the source must be at the repository top
-level, with `HEAD` equal to the supplied full SHA. Exit **0** means all four installed `SKILL.md` files **and seven named
-execution/safety dependencies** match the **committed Git blobs** of that
-revision. The dependencies are `tools/repo_audit.py`, `tools/docs_links.py`,
-`tools/html_navigation.py`, `tools/readme_preview.py`,
-`tools/readme_apply.py`, `scripts/release_inventory.py` and
-`guides/agent-safety.md`. Exit **1** means at least one checked file differs;
-exit **2** means verification is incomplete (for example a missing directory,
-redirected file or wrong source revision). JSON names the checked files and
-differences without publishing their contents. Other templates, guides,
+level, with `HEAD` equal to the supplied full SHA. Exit **0** means all four
+installed `SKILL.md` files **and 22 named local dependencies** match the
+**committed Git blobs** of that revision. The dependencies include the six
+executable helpers, shared agent-safety guidance, task guides, three checklists
+and the eight templates selected or required by the skills. The exact paths
+are reported in JSON as `checked_plugin_dependencies`. Exit **1** means at
+least one checked file differs; exit **2** means verification is incomplete
+(for example a missing template, redirected file or wrong source revision).
+JSON names differences without publishing file contents. Other guides,
 manifests, libraries and any extra files in the cache are **not covered**.
 A MATCH is **not** a complete plugin integrity or provenance certificate.
 
