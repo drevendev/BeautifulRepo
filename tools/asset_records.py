@@ -100,6 +100,10 @@ def validate(text: str, *, today: date | None = None) -> dict:
             if not value or value in PLACEHOLDERS or value.casefold() in ("todo", "tbd", "placeholder"):
                 raise RecordError(f"line {number}: blank or template value")
             current[key] = value
+        elif current is not None and line.strip():
+            # Only the thirteen single-line fields and blank separators belong
+            # to an asset section. Do not silently ignore extra claims or notes.
+            raise RecordError(f"line {number}: unexpected content in asset record")
     if current is not None:
         records.append((start, heading, current))
     if not records:
