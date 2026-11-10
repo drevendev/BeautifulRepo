@@ -41,11 +41,27 @@ def unsupported_reparse_point(path: Path, info: os.stat_result) -> bool:
 
 
 def target_root(path: Path) -> Path:
-    if path.is_symlink() or not path.is_dir():
-        raise ValueError("target must be a real directory, not a symlink")
-    if unsupported_reparse_point(path, path.lstat()):
-        raise ValueError("target must not be a junction or reparse point")
-    return path.resolve(strict=True)
+    """Reject redirects in every lexical component before resolving a target.
+
+    A normal final directory can still be reached through a symlinked parent.
+    Inspect ancestors from filesystem root to leaf, including components before
+    '..', so neither symlinks nor Windows junctions silently change the scope.
+    This is a preflight, not a race-resistant sandbox boundary.
+    """
+    selected = path if path.is_absolute() else Path.cwd() / path
+    for component in reversed((selected, *selected.parents)):
+        info = component.lstat()
+        if stat.S_ISLNK(info.st_mode):
+            if component == selected:
+                raise ValueError("target must be a real directory, not a symlink")
+            raise ValueError("target parent must not be a symlink")
+        if unsupported_reparse_point(component, info):
+            if component == selected:
+                raise ValueError("target must not be a junction or reparse point")
+            raise ValueError("target parent must not be a junction or reparse point")
+    if not stat.S_ISDIR(selected.lstat().st_mode):
+        raise ValueError("target must be a real directory")
+    return selected.resolve(strict=True)
 
 
 def baseline_path(path: Path, root: Path) -> Path:

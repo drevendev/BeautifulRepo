@@ -82,7 +82,11 @@ agent session. The [agent eval snapshot tool](../tools/agent_eval_snapshot.py)
 does not run any target code or access the network. It records files, directories
 and symbolic-link destinations; it never follows normal links inside the target.
 On Windows, junctions and other non-symlink reparse points **fail closed** rather
-than being scanned outside the target. Synthetic snapshots reject targets with
+than being scanned outside the target. The target directory **and every lexical
+ancestor** must be ordinary directories: a symlinked parent, Windows junction
+parent or redirected component before `..` is rejected before resolving and
+scanning the fixture. Ordinary, non-redirected `..` paths still work.
+Synthetic snapshots reject targets with
 more than **5,000 entries**, any regular file over **16 MiB**, or more than
 **64 MiB total file content**. Capture and verify return exit 2 for these
 limits rather than claiming an unchanged target. They are not a backup tool for
