@@ -59,6 +59,58 @@ git ls-remote https://github.com/drevendev/BeautifulRepo refs/tags/v0.2.0
 Each check also runs on Ubuntu and Windows runners in BeautifulRepo's own CI.
 macOS runners are not tested.
 
+
+## Check the fork-PR trust boundary
+
+The copyable workflow above uses **`pull_request`**, a read-only
+`GITHUB_TOKEN` (`contents: read`), and `persist-credentials: false` in
+checkout. These settings are deliberate: a documentation check does not need
+to publish a release, modify issues, access secrets or push code.
+The BeautifulRepo action runs its own checked-in Python tools against the
+selected checkout; it does **not** execute the target repository's build,
+install scripts or tests. Reading untrusted documentation still has risks.
+Neither this workflow nor its static checks constitute a security sandbox.
+
+**Do not switch this recipe to `pull_request_target` merely to handle fork
+PRs.** That event runs with the base repository's privileged context.
+Checking out fork-controlled code there and then executing its build scripts,
+installation hooks or downloaded artifacts can expose secrets and write tokens.
+For this read-only documentation check, `pull_request` is the appropriate
+event. A privileged `workflow_run` follow-up can likewise be dangerous if it
+executes artifacts originating from untrusted PRs.
+
+Before adopting or changing the example, review the following:
+
+1. **Trigger:** keep the documentation check on `pull_request`, rather than a
+   privileged event. A separate trusted-branch `push` trigger is fine.
+2. **Permissions:** keep `permissions: contents: read` explicit and checkout
+   `persist-credentials: false`. Review job-level overrides and new actions
+   before adding any access to secrets or write capabilities.
+3. **Execution:** don't add the target's `pip install -e .`, `npm install`,
+   Makefile or test scripts to this documentation-only job. Review and pin
+   third-party actions to immutable commits, or use a reviewed workflow
+   dependency lockfile where supported. A version comment beside a SHA is
+   not itself the executed identity.
+4. **Outputs:** names and snippets from a scanned private repository may
+   appear in CI logs. Do not automatically post reports to public issues,
+   comments or external services without reviewing their contents.
+5. **Proof:** try a disposable PR with one broken and one repaired local link.
+   Inspect the checkout ref, job result and token/runner configuration rather
+   than treating a badge as a complete security or functionality test.
+
+This repository's [Quality workflow](../.github/workflows/quality.yml) uses
+the same basic read-only PR configuration. The source-contract regression
+test guards only selected YAML/documentation properties; it cannot establish
+the effective isolation of an adopter's runner, actions, organization policy
+or private data. Self-hosted runners and privileged follow-up workflows
+require a separate threat review.
+
+**Primary sources checked 2026-11-10:**
+[GitHub Actions secure use](https://docs.github.com/en/actions/reference/security/secure-use),
+[secure use of `pull_request_target`](https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target),
+[`GITHUB_TOKEN` concepts](https://docs.github.com/en/actions/concepts/security/github_token),
+and [workflow permissions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
+
 ## Inputs
 
 | Input | Default | Meaning |
