@@ -136,7 +136,7 @@ def inspect(path: Path, *, source_root: Path | None = None) -> dict:
         "missing_or_redirected": missing,
         "state": "present" if not missing else "incomplete",
         "limitations": (
-            "Presence of named sibling files only. Not their safety, a skills.sh "
+            "Presence of named sibling files only. Not their bytes or safety, a skills.sh "
             "installation result, execution, discovery, model behavior or privacy guarantee."
         ),
     }
@@ -157,6 +157,10 @@ def inspect(path: Path, *, source_root: Path | None = None) -> dict:
             if _ordinary(root, Path(relative))
             and _digest_file(root / relative) != _digest_file(reference_root / relative)
         ]
+        report["limitations"] = (
+            "Presence and local byte equality only. Not source authentication, "
+            "execution, discovery, model behavior or privacy guarantees."
+        )
         report["source_comparison"] = {
             "checked_files": len(relative_files),
             "mismatched": mismatched,
