@@ -39,7 +39,10 @@ or success. Example commands must match the documented revision and environment.
 
 ## Add personality without adding friction
 
-Use one memorable visual idea rather than competing banners. Keep essential text outside
+Use one memorable visual idea rather than competing banners.
+Before adding borrowed icons, screenshots, fonts or photos, check the
+[asset provenance workflow](third-party-assets.md); a project-wide license
+or an image-search attribution is not automatically permission to reuse them. Keep essential text outside
 images, explain complex diagrams, and prefer a static preview before a large animation.
 Use badges as compact navigation to evidence, not as a wall of decoration. A technical
 mascot or metaphor needs a plain-language explanation for readers unfamiliar with it.
