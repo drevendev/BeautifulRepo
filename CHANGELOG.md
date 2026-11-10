@@ -675,6 +675,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject combined-audit checkout roots reached through symlinked or Windows
+  reparse-point ancestors, not just a redirected final directory. Preflight
+  every lexical path component before resolving; add regressions for outside
+  aliases, simulated junction parents and ordinary `..` paths. This prevents
+  accidental scope substitution at entry, but is not a filesystem race sandbox.
+
 - Reject synthetic agent-eval snapshot targets reached through a symlinked
   parent or Windows junction ancestor, not only redirects at the final root.
   Check lexical components before resolving, including those preceding `..`;
