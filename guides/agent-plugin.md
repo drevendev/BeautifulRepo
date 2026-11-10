@@ -178,6 +178,20 @@ Do not call this an external-user installation or real-model PASS.
 
 ## Standalone skill-manager installations: separate and unverified
 
+**Optional, observed-file CI experiment:** the
+[standalone-skills CLI copy workflow](../.github/workflows/standalone-skills-trial.yml)
+uses `skills@1.7.6` with Node 24 to install each of the four skills via the
+**real** `npx skills add` command into separate disposable projects. It uses
+`--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
+is **not launched**. The job saves the installed file lists and exact required
+path diagnostics as a seven-day artifact. With the current layout it deliberately
+expects an `incomplete` preflight result for each skill. A green workflow
+therefore means *the known dependency gap was reproduced*, **not** that the
+skills can run, that CLI installations are supported, or that any agent tested
+them. These steps download a version-pinned third-party npm CLI in an
+isolated read-only CI job; they do not run target-repository code. Review the
+actual run and artifacts before describing an observed result.
+
 **Do not treat a standalone skills.sh / skills CLI installation as a supported
 BeautifulRepo installation path yet.** The official [skills CLI
 documentation](https://www.skills.sh/docs/cli) describes installing individual
