@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Add a bounded GitHub Actions trial of **actual**, version-pinned
+  `skills@1.7.6` per-skill `--copy` installation in disposable projects,
+  recording installed file lists and the existing missing-dependency
+  preflight for all four skills. Its expected `incomplete` results are evidence
+  of a packaging problem, **not** skill execution, host acceptance or an
+  installation success claim (#333). External CLI execution is restricted to
+  same-repository PRs and manual workflow dispatch.
+
 - Allow the standalone skill-layout preflight to optionally compare installed
   SKILL.md and required sibling bytes against a separately verified local pinned
   source checkout. Reject redirected/incomplete references and distinguish
