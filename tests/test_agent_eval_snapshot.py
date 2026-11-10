@@ -169,7 +169,7 @@ class SnapshotTests(unittest.TestCase):
         external_target = outside / "live-target"
         external_target.mkdir(parents=True)
         secret = external_target / "README.md"
-        secret.write_text("# Outside fixture\\n", encoding="utf-8")
+        secret.write_text("# Outside fixture\n", encoding="utf-8")
         alias = self.home / "redirect-parent"
         try:
             alias.symlink_to(outside, target_is_directory=True)
@@ -179,7 +179,7 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(2, result.returncode, result.stdout + result.stderr)
         self.assertIn("target parent must not be a symlink", result.stderr)
         self.assertFalse(self.baseline.exists())
-        self.assertEqual("# Outside fixture\\n", secret.read_text(encoding="utf-8"))
+        self.assertEqual("# Outside fixture\n", secret.read_text(encoding="utf-8"))
 
     def test_simulated_windows_junction_parent_fails_before_resolve(self):
         import importlib.util
