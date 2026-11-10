@@ -11,13 +11,6 @@ keep their original themed headings.
 
 ## [Unreleased]
 
-### Fixed
-
-- Make the asset provenance record preflight reject unrecognized nonblank
-  lines inside a record instead of returning a structural PASS while silently
-  ignoring additional claims or malformed entries. Blank separators remain valid;
-  this does not verify ownership, licenses or publication rights.
-
 ### Added
 
 - Add an optional, dependency-free asset provenance record preflight for the
@@ -688,6 +681,11 @@ keep their original themed headings.
   public guidance and issue history remain available.
 
 ### Fixed
+
+- Make the asset provenance record preflight reject unrecognized nonblank
+  lines inside a record instead of returning a structural PASS while silently
+  ignoring additional claims or malformed entries. Blank separators remain valid;
+  this does not verify ownership, licenses or publication rights.
 
 - Reject combined-audit checkout roots reached through symlinked or Windows
   reparse-point ancestors, not just a redirected final directory. Preflight
