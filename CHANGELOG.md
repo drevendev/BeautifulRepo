@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Allow the standalone skill-layout preflight to optionally compare installed
+  SKILL.md and required sibling bytes against a separately verified local pinned
+  source checkout. Reject redirected/incomplete references and distinguish
+  missing from changed files, with synthetic regressions. This is not proof
+  that skills.sh installed or ran a skill (related to #333).
+
 - Add a read-only per-skill installation-layout preflight with named-file checks, explicit missing-path JSON and synthetic tests for isolated copies, complete roots and redirected files. It records the **skills.sh/skills CLI distribution risk** without claiming a real skills CLI install, host acceptance or model invocation (#333).
 
 - Add an optional, dependency-free asset provenance record preflight for the
