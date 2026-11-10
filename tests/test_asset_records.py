@@ -116,7 +116,9 @@ class AssetRecordsTest(unittest.TestCase):
 
     def test_duplicate_assets_and_nonordinary_file_are_rejected(self):
         with self.assertRaisesRegex(asset.RecordError, "duplicate asset section"):
-            asset.validate(record() + record(), today=date(2026, 11, 10))
+            second = record().split("## assets/example.svg\n", 1)[1]
+            asset.validate(record() + "\n## assets/example.svg\n" + second,
+                           today=date(2026, 11, 10))
         with tempfile.TemporaryDirectory() as directory:
             original = Path(directory, "original.md")
             alias = Path(directory, "alias.md")
