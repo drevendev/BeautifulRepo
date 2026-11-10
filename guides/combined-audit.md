@@ -126,7 +126,12 @@ Per-checker structured results are capped at 128 KiB; an excess is
 **incomplete**, never silently truncated into a success. This is a returned
 result cap, **not** a time, memory or filesystem-usage bound. The individual
 checkers retain their own documented scan limits and syntax gaps. Use a stable,
-ordinary local checkout, not an adversarial filesystem.
+ordinary local checkout, not an adversarial filesystem. The combined audit
+rejects a root reached through a symlink or Windows reparse-point ancestor,
+including a redirect hidden before `..`, before running any checker. Use the
+real checkout path instead of an alias. This is a one-time root preflight,
+not a defense against concurrent filesystem replacement or against unsafe
+links inside the checkout; the underlying checkers retain their own rules.
 
 All three tools read repository-owned files locally. None intentionally
 fetches remote links. This wrapper is **not** a security boundary against a
