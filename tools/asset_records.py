@@ -29,7 +29,10 @@ FIELDS = (
     "Recheck when",
 )
 FIELD_PATTERN = re.compile(r"^- \*\*(.+?):\*\*\s*(.*?)\s*$")
-DECISION_PATTERN = re.compile(r"^(APPROVED|PENDING|REMOVED)(?:\s*(?:[-—:]\s*|\(.*\)\s*).*)?$", re.I)
+DECISION_PATTERN = re.compile(
+    r"^(APPROVED|PENDING|REMOVED)(?:\s*[-—:]\s*(\S.*?)|\s*\(\s*(\S.*?)\s*\))$",
+    re.I,
+)
 DATE_PATTERN = re.compile(r"^(\d{4}-\d{2}-\d{2})\s*/\s*(\S.*)$")
 PLACEHOLDERS = {
     "ASSET_FILENAME_OR_GROUP", "REPOSITORY_PATHS_AND_EMBEDS",
@@ -112,8 +115,8 @@ def validate(text: str, *, today: date | None = None) -> dict:
             # Output only the canonical field name; never echo user values.
             raise RecordError(f"line {line}: missing field '{sorted(missing)[0]}'")
         decision = DECISION_PATTERN.fullmatch(fields["Decision"])
-        if decision is None:
-            raise RecordError(f"line {line}: decision must begin APPROVED, PENDING or REMOVED")
+        if decision is None or not any(char.isalnum() for char in (decision.group(2) or decision.group(3) or "")):
+            raise RecordError(f"line {line}: decision requires APPROVED/PENDING/REMOVED and a concrete reason")
         choice = decision.group(1).lower()
         reviewed = DATE_PATTERN.fullmatch(fields["Reviewed on / by"])
         if reviewed is None:
