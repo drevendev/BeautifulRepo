@@ -4,6 +4,9 @@ BeautifulRepo is MIT-licensed (see [LICENSE](LICENSE)). This page documents
 external examples adapted into its public recipes and preserves applicable
 source notices. It is ordinary contributor-maintained Markdown; no internal
 agent ledger or separate attribution generator is required.
+For additional media or adapted material, use the [asset provenance workflow](guides/third-party-assets.md)
+and its [record template](templates/ASSET_PROVENANCE.template.md) before publishing;
+this existing notice does not certify unrelated assets.
 
 ## vale-cli/vale @ 8b9bfb9 — MIT
 

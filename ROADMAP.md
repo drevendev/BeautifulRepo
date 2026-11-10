@@ -7,6 +7,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 
 - Reader-first [README](README.md), [repository checklist](checklists/repository.md),
   [README guide](guides/readme.md) and [README scaffold](templates/README.template.md).
+- [Third-party asset provenance](guides/third-party-assets.md) with a
+  [reusable rights-evidence record](templates/ASSET_PROVENANCE.template.md),
+  hypothetical include/defer/replace decisions and a real existing notice example.
 - [Visual README patterns](guides/readme-visuals.md), including a before/after example
   with theme-aware assets, text equivalents and a
   [project-specific design brief](examples/readme-visuals/DESIGN_INTENT.md).
