@@ -11,6 +11,13 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Make the asset provenance record preflight reject unrecognized nonblank
+  lines inside a record instead of returning a structural PASS while silently
+  ignoring additional claims or malformed entries. Blank separators remain valid;
+  this does not verify ownership, licenses or publication rights.
+
 ### Added
 
 - Add an optional, dependency-free asset provenance record preflight for the
