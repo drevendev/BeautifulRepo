@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed third-party README/media provenance guide and reusable
+  evidence record, with hypothetical include/defer/replace cases and a link
+  to BeautifulRepo's actual existing notice. This documents rights review,
+  not an automatic licensing check or a change to the project's MIT license.
+
 - Exercise the experimental MCP adapter's outside-document alias refusals
   through the pinned SDK's modern and legacy **real stdio** lifecycles: a
   hard-linked non-Markdown `LICENSE` and an outside-pointing Markdown symlink
