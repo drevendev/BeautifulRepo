@@ -180,8 +180,8 @@ Do not call this an external-user installation or real-model PASS.
 
 **Optional, observed-file CI experiment:** the
 [standalone-skills CLI copy workflow](../.github/workflows/standalone-skills-trial.yml)
-uses `skills@1.7.6` with Node 24 to install each of the four skills via the
-**real** `npx skills add` command into separate disposable projects. It uses
+uses `skills@1.7.6` with Node 24 to install each skill separately **and all
+four together** via the **real** `npx skills add` command in disposable projects. It uses
 `--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
 is **not launched**. The job saves the installed file lists and exact required
 path diagnostics as a seven-day artifact. With the current layout it deliberately
