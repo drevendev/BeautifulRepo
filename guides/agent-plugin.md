@@ -199,10 +199,16 @@ skills and its [packs documentation](https://www.skills.sh/docs/packs)
 groups SKILL.md definitions, but neither guarantees that files *outside* each
 skill directory are copied next to it (sources reviewed **2026-11-10**).
 BeautifulRepo's four skills currently depend on shared repository-root tools,
-guides, checklists and templates. Merely discovering SKILL.md can therefore
-be insufficient. This is a source-level distribution risk tracked in
-[#333](https://github.com/drevendev/BeautifulRepo/issues/333), **not**
-a reproduced failure of `npx skills add` or a real-host test.
+guides, checklists and templates. Merely discovering SKILL.md is therefore insufficient. The
+[real CLI copy experiment](https://github.com/drevendev/BeautifulRepo/actions/runs/42915282555)
+(successful on 2026-11-10 UTC) reproduced this dependency problem: the CLI
+completed four single-skill copies and one combined copy, but all eight
+installed skill-layout preflights returned `incomplete`. Its first run used
+GitHub's synthetic PR merge checkout (`5b0e763a`), **not** the source head
+(`14bf301d`); subsequent runs explicitly select and record the checked-out
+source SHA. This is a **reproduced incomplete installed layout**, not a
+failed CLI invocation or evidence of real agent execution. Distribution
+support remains blocked under [#333](https://github.com/drevendev/BeautifulRepo/issues/333).
 
 A maintainer or independent tester can inspect an **already installed**
 disposable per-skill copy without installing packages, executing a skill or
