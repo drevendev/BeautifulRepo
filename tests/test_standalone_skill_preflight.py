@@ -168,6 +168,14 @@ class StandalonePreflightTests(unittest.TestCase):
             )
             self.assertEqual(completed.returncode, 1, completed.stderr)
             self.assertEqual(json.loads(completed.stdout)["state"], "mismatch")
+            changed.write_text("do not execute this fixture", encoding="utf-8")
+            (selected / "SKILL.md").write_text("modified skill instructions", encoding="utf-8")
+            changed_skill = probe.inspect(selected, source_root=source)
+            self.assertEqual(changed_skill["state"], "mismatch")
+            self.assertEqual(
+                changed_skill["source_comparison"]["mismatched"],
+                ["skills/audit-repo/SKILL.md"],
+            )
 
     def test_byte_comparison_fails_closed_on_untrusted_source_layout(self):
         with tempfile.TemporaryDirectory() as directory:
