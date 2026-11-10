@@ -1,0 +1,80 @@
+name: Standalone skills CLI copy trial
+
+# This observes per-skill file distribution, not agent discovery or execution.
+on:
+  pull_request:
+    paths:
+      - .github/workflows/standalone-skills-trial.yml
+      - skills/**
+      - scripts/standalone_skill_preflight.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-layout:
+    # Avoid executing an external npm CLI on fork-submitted code.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 ref inspected 2026-10-30
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 ref inspected 2026-10-29
+        with:
+          python-version: '3.11'
+      - name: Observe a real CLI copy of each skill into a fresh disposable project
+        shell: bash
+        env:
+          DISABLE_TELEMETRY: '1'
+          DO_NOT_TRACK: '1'
+          NPM_CONFIG_IGNORE_SCRIPTS: 'true'
+          NPM_CONFIG_FUND: 'false'
+        run: |
+          set -euo pipefail
+          node --version
+          python --version
+          git rev-parse HEAD
+          work="$RUNNER_TEMP/beautifulrepo-skills-trial"
+          mkdir -p "$work/results"
+          for skill in audit-repo improve-readme trust-surfaces draft-release-notes; do
+            project="$work/projects/$skill"
+            mkdir -p "$project"
+            (
+              cd "$project"
+              npx --yes skills@1.7.6 add "$GITHUB_WORKSPACE" --skill "$skill" --agent codex --copy --yes
+            )
+            installed="$project/.agents/skills/$skill"
+            test -f "$installed/SKILL.md" || {
+              echo "CLI did not install expected skill definition: $skill" >&2
+              exit 1
+            }
+            find "$installed" -type f -printf '%P\n' | LC_ALL=C sort > "$work/results/$skill.files"
+            printf '%s\n' "$GITHUB_SHA" > "$work/results/$skill.source-sha"
+            set +e
+            python -I "$GITHUB_WORKSPACE/scripts/standalone_skill_preflight.py" "$installed" > "$work/results/$skill.json"
+            status=$?
+            set -e
+            printf '%s\n' "$status" > "$work/results/$skill.exit"
+            cat "$work/results/$skill.json"
+            # An expected incomplete result records the existing packaging defect.
+            # It is NOT an installation pass. A layout change needs fresh review.
+            if [ "$status" -ne 1 ]; then
+              echo "Unexpected preflight exit $status for $skill; inspect the observed tree" >&2
+              exit 1
+            fi
+            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2] and x["state"] == "incomplete" and x["missing_or_redirected"]' "$work/results/$skill.json" "$skill"
+          done
+      - name: Preserve the observed copied-file lists and required-path diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 ref inspected 2026-10-30
+        with:
+          name: standalone-skill-copy-layout
+          path: \${{ runner.temp }}/beautifulrepo-skills-trial/results/
+          if-no-files-found: warn
+          retention-days: 7
