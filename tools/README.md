@@ -124,6 +124,24 @@ are not automatically fixes. This offline tool never executes the target.
 `--write` prepares UTF-8 bytes and atomically replaces the selected output via a temporary sibling; review the path before using it. Failed encoding/replacement leaves the previous file unchanged (this is not an fsync/crash-durability guarantee).
 
 
+## Check asset provenance record structure (optional)
+
+Fill in the [asset record template](../templates/ASSET_PROVENANCE.template.md)
+for each third-party image, icon, font, screenshot or borrowed excerpt, then:
+
+```bash
+python -I tools/asset_records.py asset-records.md --format json
+```
+
+This offline read-only check validates the template's **thirteen named fields**,
+unique asset headings, review dates and declared `APPROVED`, `PENDING` or
+`REMOVED` decisions. Exit 0 means structurally recorded without pending
+decisions, 1 means pending, 2 means invalid/unreadable; neither 0 nor
+`APPROVED` is legal permission. It does not fetch source URLs, authenticate
+ownership, determine license compatibility or inspect actual assets. Read the
+[provenance review workflow](../guides/third-party-assets.md#optional-offline-record-preflight)
+before using it as a publication checklist.
+
 ## Saved Mermaid SVG structure check
 
 [mermaid_svg_check.py](mermaid_svg_check.py) checks the **saved SVG element**
