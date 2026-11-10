@@ -67,6 +67,52 @@ class StandalonePreflightTests(unittest.TestCase):
             report = probe.inspect(skill)
             self.assertIn("tools/repo_audit.py", report["missing_or_redirected"])
 
+    def test_redirected_ancestor_above_root_fails_even_with_complete_layout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory)
+            actual = parent / "complete"
+            skill = actual / "skills" / "audit-repo"
+            skill.mkdir(parents=True)
+            (skill / "SKILL.md").write_text("ordinary definition", encoding="utf-8")
+            for relative in probe.REQUIRED["audit-repo"]:
+                path = actual / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("ordinary dependency", encoding="utf-8")
+            self.assertEqual(probe.inspect(skill)["state"], "present")
+
+            alias = parent / "redirected-parent"
+            try:
+                alias.symlink_to(actual, target_is_directory=True)
+            except (NotImplementedError, OSError):
+                self.skipTest("directory symlinks unavailable")
+
+            for redirected in (
+                alias / "skills" / "audit-repo",
+                alias / ".." / "complete" / "skills" / "audit-repo",
+            ):
+                with self.subTest(redirected=str(redirected)):
+                    with self.assertRaisesRegex(probe.ProbeError, "redirected"):
+                        probe.inspect(redirected)
+
+            command = [sys.executable, "-I", str(SCRIPT), str(alias / "skills" / "audit-repo")]
+            completed = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(completed.returncode, 2, completed.stderr)
+            self.assertEqual(json.loads(completed.stdout)["state"], "invalid")
+
+    def test_ordinary_dotdot_in_skill_path_is_accepted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            skill = root / "skills" / "audit-repo"
+            skill.mkdir(parents=True)
+            (skill / "SKILL.md").write_text("definition", encoding="utf-8")
+            (root / "ordinary").mkdir()
+            for relative in probe.REQUIRED["audit-repo"]:
+                item = root / relative
+                item.parent.mkdir(parents=True, exist_ok=True)
+                item.write_text("ordinary file", encoding="utf-8")
+            route = root / "ordinary" / ".." / "skills" / "audit-repo"
+            self.assertEqual(probe.inspect(route)["state"], "present")
+
     def test_cli_exit_codes_and_no_skill_execution(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
