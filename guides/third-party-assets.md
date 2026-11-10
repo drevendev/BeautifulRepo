@@ -95,7 +95,10 @@ python -I tools/asset_records.py path/to/asset-records.md --format json
 ```
 
 Use one `## asset-name` heading per item, followed by the template's thirteen
-single-line `- **Field:** value` entries. Write the decision as
+single-line `- **Field:** value` entries, with blank lines allowed between
+records. Unexpected prose, bullets, comments or subheadings *inside* a record
+are errors instead of silently ignored text. Keep review commentary outside
+the machine-checked record file. Write the decision as
 `APPROVED — reason`, `PENDING — reason` or `REMOVED — reason`, and
 the review field as `YYYY-MM-DD / reviewer`. Do not add fake approvals just
 to clear the check. `PENDING` means the item must stay unpublished.
