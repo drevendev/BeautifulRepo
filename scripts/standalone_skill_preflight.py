@@ -45,6 +45,34 @@ class ProbeError(ValueError):
     """Cannot assess an installed skill definition safely."""
 
 
+def _ordinary_directory_chain(path: Path) -> bool:
+    """Refuse redirected directory ancestors, including prefixes before '..'.
+
+    Inspect the lexical route before abspath() normalizes it; otherwise a
+    symlinked directory followed by '..' can disappear from the checked path.
+    """
+    lexical = path if path.is_absolute() else Path.cwd() / path
+    cursor = Path(lexical.anchor)
+    try:
+        for part in lexical.parts[1:]:
+            if part == "..":
+                cursor = cursor.parent
+                continue
+            if part == ".":
+                continue
+            cursor = cursor / part
+            info = cursor.lstat()
+            if (
+                not stat.S_ISDIR(info.st_mode)
+                or stat.S_ISLNK(info.st_mode)
+                or getattr(info, "st_reparse_tag", 0)
+            ):
+                return False
+        return True
+    except OSError:
+        return False
+
+
 def _ordinary(root: Path, relative: Path) -> bool:
     """Refuse links/reparse points at every descendant component."""
     cursor = root
@@ -66,11 +94,14 @@ def _ordinary(root: Path, relative: Path) -> bool:
 
 def inspect(path: Path) -> dict:
     """Report required files at the exact two-level-up SKILL.md fallback root."""
-    skill_dir = Path(os.path.abspath(path))
-    if skill_dir.name == "SKILL.md":
-        skill_dir = skill_dir.parent
-    if skill_dir.name not in REQUIRED:
+    lexical_skill_dir = path.parent if path.name == "SKILL.md" else path
+    if lexical_skill_dir.name not in REQUIRED:
         raise ProbeError("expected one of the four BeautifulRepo skill directories")
+    # Check every lexical ancestor before abspath() erases '..' components.
+    # This includes parents above the assumed two-up root, not just its files.
+    if not _ordinary_directory_chain(lexical_skill_dir):
+        raise ProbeError("installed skill path is missing or redirected through an ancestor")
+    skill_dir = Path(os.path.abspath(lexical_skill_dir))
     root = skill_dir.parent.parent
     # A relocated skill may be discoverable, but a redirected definition is not
     # acceptable evidence for this structural check.
