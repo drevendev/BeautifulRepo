@@ -156,6 +156,61 @@ class SnapshotTests(unittest.TestCase):
                 self.assertIn(expected_error, outcome.stderr)
                 self.assertNotIn("UNCHANGED", outcome.stdout)
 
+    def test_ordinary_dotdot_parent_remains_usable(self):
+        ordinary = self.home / "ordinary"
+        ordinary.mkdir()
+        selected = ordinary / ".." / "synthetic-target"
+        captured = self.run_tool("capture", target=selected)
+        self.assertEqual(0, captured.returncode, captured.stderr)
+        self.assertEqual(0, self.run_tool("verify", target=selected).returncode)
+
+    def test_symlinked_parent_fails_before_outside_fixture_is_read(self):
+        outside = self.home / "outside-parent"
+        external_target = outside / "live-target"
+        external_target.mkdir(parents=True)
+        secret = external_target / "README.md"
+        secret.write_text("# Outside fixture\\n", encoding="utf-8")
+        alias = self.home / "redirect-parent"
+        try:
+            alias.symlink_to(outside, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        result = self.run_tool("capture", target=alias / "live-target")
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("target parent must not be a symlink", result.stderr)
+        self.assertFalse(self.baseline.exists())
+        self.assertEqual("# Outside fixture\\n", secret.read_text(encoding="utf-8"))
+
+    def test_simulated_windows_junction_parent_fails_before_resolve(self):
+        import importlib.util
+        from types import SimpleNamespace
+        from unittest import mock
+
+        parent = self.home / "ordinary-parent"
+        child = parent / "nested"
+        child.mkdir(parents=True)
+        spec = importlib.util.spec_from_file_location("agent_eval_snapshot_parent", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        original_lstat = Path.lstat
+
+        def tagged_lstat(path):
+            info = original_lstat(path)
+            if path == parent:
+                return SimpleNamespace(st_mode=info.st_mode, st_file_attributes=0x400)
+            return info
+
+        with mock.patch.object(module.stat, "FILE_ATTRIBUTE_REPARSE_POINT",
+                               0x400, create=True):
+            with mock.patch.object(Path, "lstat", tagged_lstat):
+                with mock.patch.object(
+                    Path, "resolve",
+                    side_effect=AssertionError("redirected parent was resolved")
+                ):
+                    with self.assertRaisesRegex(ValueError,
+                                                "target parent must not be a junction"):
+                        module.target_root(child)
+
     def test_symlink_target_is_not_followed(self):
         external = self.home / "outside.txt"
         external.write_text("secret before", encoding="utf-8")
