@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a read-only per-skill installation-layout preflight with named-file checks, explicit missing-path JSON and synthetic tests for isolated copies, complete roots and redirected files. It records the **skills.sh/skills CLI distribution risk** without claiming a real skills CLI install, host acceptance or model invocation (#333).
+
 - Add an optional, dependency-free asset provenance record preflight for the
   existing Markdown evidence template. It rejects malformed/placeholder records,
   distinguishes pending decisions from structurally complete records, emits
