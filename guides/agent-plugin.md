@@ -199,6 +199,11 @@ python -I scripts/standalone_skill_preflight.py /absolute/path/to/installed/skil
 ```
 
 Use each actual installed skill directory (or its SKILL.md) in turn.
+If the skills CLI uses its default **symlink** installation method, select
+the ordinary canonical skill copy rather than an agent-facing symlink alias;
+this preflight deliberately rejects redirected paths, so an alias gives exit
+2 instead of a claim about its target. The [CLI reference](https://www.skills.sh/docs/cli)
+describes symlink and copy installation methods (reviewed 2026-11-10).
 The preflight assumes the exact `R = SKILL.md directory / ../..` fallback
 declared by these skills and checks the specifically required shared paths
 there. Exit **0** means named files are ordinary files at those paths;
