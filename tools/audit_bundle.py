@@ -25,12 +25,26 @@ MODULES = {
 
 
 def checked_root(value: str) -> Path:
+    """Reject redirects anywhere in the requested root's lexical ancestry.
+
+    A real directory beneath a symlinked parent is still a redirected target.
+    Inspect components (including those before '..') before resolving. This is
+    preflight only, not protection against concurrent filesystem replacement.
+    """
     path = Path(value).absolute()
     try:
-        info = path.lstat()
-        if (not stat.S_ISDIR(info.st_mode) or stat.S_ISLNK(info.st_mode)
-                or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG):
-            raise ValueError("root must be an ordinary directory, not a redirect")
+        for component in reversed((path, *path.parents)):
+            info = component.lstat()
+            if (stat.S_ISLNK(info.st_mode)
+                    or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG
+                    or (getattr(info, "st_file_attributes", 0)
+                        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+                    or getattr(component, "is_junction", lambda: False)()):
+                raise ValueError(
+                    "root must be an ordinary directory without redirected ancestors"
+                )
+        if not stat.S_ISDIR(path.lstat().st_mode):
+            raise ValueError("root must be an ordinary directory")
         return path.resolve(strict=True)
     except (OSError, RuntimeError, ValueError) as exc:
         if isinstance(exc, ValueError) and str(exc).startswith("root must be"):
