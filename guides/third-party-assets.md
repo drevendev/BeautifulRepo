@@ -84,6 +84,39 @@ upstream license text or swap a source's notice for the project's own MIT
 heading. For more complex combinations, ask someone qualified to assess
 compatibility before distributing.
 
+## Optional offline record preflight
+
+Once you have filled in the [Markdown asset record template](../templates/ASSET_PROVENANCE.template.md),
+check its **structure** before a human rights review:
+
+```sh
+python -I tools/asset_records.py path/to/asset-records.md
+python -I tools/asset_records.py path/to/asset-records.md --format json
+```
+
+Use one `## asset-name` heading per item, followed by the template's thirteen
+single-line `- **Field:** value` entries. Write the decision as
+`APPROVED — reason`, `PENDING — reason` or `REMOVED — reason`, and
+the review field as `YYYY-MM-DD / reviewer`. Do not add fake approvals just
+to clear the check. `PENDING` means the item must stay unpublished.
+
+The checker uses only Python 3.11+ standard-library file reads. It rejects
+missing, repeated and placeholder fields; duplicate asset headings; malformed
+or future review dates; and a few exact unresolved evidence values on
+`APPROVED` records. Exit **0** means the record shape is complete and no
+`PENDING` decisions were declared; **1** means at least one
+`PENDING` decision; **2** means unreadable or invalid input. JSON output
+contains counts and decision status, not source URLs or personal notes.
+
+**This is not a rights verifier.** The tool does not open source URLs,
+check licenses or notice placement, prove a review occurred, validate the
+decision, scan the assets themselves or decide whether publication is legal.
+A fabricated `APPROVED` record can still return exit 0. An authorized
+maintainer must inspect actual sources, licenses, changes, attribution and
+relevant rights before distributing an asset. Keep private permission evidence
+private. The input must be an ordinary UTF-8 file no larger than 128 KiB;
+symbolic links at the input file are rejected.
+
 ## Review this in a pull request
 
 A contributor should make the proposed media visible for review, name its

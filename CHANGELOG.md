@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add an optional, dependency-free asset provenance record preflight for the
+  existing Markdown evidence template. It rejects malformed/placeholder records,
+  distinguishes pending decisions from structurally complete records, emits
+  non-sensitive counts and includes synthetic regressions. It does **not** verify
+  rights, licenses, actual asset files or permission to publish.
+
+
 - Add a source-backed fork-PR trust-boundary checklist for the copyable
   documentation-check GitHub Actions workflow, covering read-only permissions,
   persisted credentials, privileged event risks, untrusted code, output privacy
