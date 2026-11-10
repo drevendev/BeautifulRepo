@@ -261,7 +261,15 @@ also exercises real-process refusal of relative, missing, home and filesystem
 roots, plus a symlink root where the platform permits creating one. While an
 MCP client stays connected, the test temporarily renames its synthetic target
 and requires **incomplete** results for all three tools in both lifecycles; the
-directory is restored and its bytes rechecked. Run locally
+directory is restored and its bytes rechecked. The current development smoke
+also creates a synthetic file **outside** the repository, exposes it as a
+hard-linked `LICENSE` and as an outside-pointing Markdown symlink, and demands
+`incomplete` (exit 2) from **all three tools** through both SDK lifecycles.
+Link creation that a platform does not permit is explicitly reported as
+**untested**, not PASS. This is a protocol-level boundary regression, not proof
+of resistance to concurrent filesystem replacement. The older immutable
+host-trial checkout pinned above predates this added smoke coverage; use the
+current development checkout to run these new cases. Run locally
 with the optional SDK installed:
 
 ```sh
