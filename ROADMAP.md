@@ -110,7 +110,7 @@ issues for their live status.
 - **Standalone skills CLI distribution** ([#333](https://github.com/drevendev/BeautifulRepo/issues/333)):
   the separate skills.sh/skills CLI channel has **not** been proven to copy
   required shared files alongside individual skill definitions. The
-  [offline layout preflight](guides/agent-plugin.md#standalone-skill-manager-installations-separate-and-unverified)
+  [offline layout preflight](guides/agent-plugin.md#standalone-skill-manager-installations-separate-from-full-plugins)
   can inspect an already installed local copy for missing sibling resources,
   but synthetic filesystem checks are **not** a real CLI install or agent PASS.
   Use the pinned whole-plugin candidate for its separate acceptance work; do
