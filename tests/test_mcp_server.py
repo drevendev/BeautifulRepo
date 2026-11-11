@@ -73,6 +73,37 @@ class RootBoundaryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "parent traversal"):
                 adapter.allowed_root(str(base / "nested" / ".."))
 
+    def test_unknown_windows_reparse_ancestor_is_rejected(self):
+        with tempfile.TemporaryDirectory() as path:
+            base = Path(path).resolve()
+            redirected = base / "reparse-like"
+            target = redirected / "repo"
+            target.mkdir(parents=True)
+            original = adapter.os.lstat
+
+            def tagged(candidate):
+                info = original(candidate)
+                if Path(candidate) == redirected:
+                    return types.SimpleNamespace(st_mode=info.st_mode,
+                                                 st_reparse_tag=0xA000001D)
+                return info
+
+            with mock.patch.object(adapter.os, "lstat", side_effect=tagged):
+                with self.assertRaisesRegex(ValueError, "redirects"):
+                    adapter.allowed_root(str(target))
+
+            def attribute_only(candidate):
+                info = original(candidate)
+                if Path(candidate) == redirected:
+                    return types.SimpleNamespace(st_mode=info.st_mode,
+                                                 st_file_attributes=0x400)
+                return info
+
+            with mock.patch.object(adapter, "REPARSE_ATTRIBUTE", 0x400):
+                with mock.patch.object(adapter.os, "lstat", side_effect=attribute_only):
+                    with self.assertRaisesRegex(ValueError, "redirects"):
+                        adapter.allowed_root(str(target))
+
     def test_junction_tagged_ancestor_is_rejected(self):
         with tempfile.TemporaryDirectory() as path:
             base = Path(path).resolve()
@@ -304,6 +335,40 @@ class CheckerWrapperTests(unittest.TestCase):
         (self.root / "nested").mkdir()
         (self.root / "nested" / "guide.md").write_text("# Guide\n", encoding="utf-8")
         self.assertTrue(adapter._bounded_source_tree(self.root))
+
+    def test_unknown_windows_reparse_sources_fail_closed(self):
+        for kind in ("directory", "ordinary-file"):
+            with self.subTest(kind=kind):
+                path = self.root / ("redirected" if kind == "directory" else "LICENSE")
+                if kind == "directory":
+                    path.mkdir()
+                    (path / "guide.md").write_text("# synthetic", encoding="utf-8")
+                else:
+                    path.write_text("synthetic", encoding="utf-8")
+                original = adapter.os.lstat
+
+                def tagged(candidate, original=original, path=path):
+                    info = original(candidate)
+                    if Path(candidate) == path:
+                        return types.SimpleNamespace(
+                            st_mode=info.st_mode,
+                            st_reparse_tag=0xA000001D,
+                            st_size=getattr(info, "st_size", 0),
+                        )
+                    return info
+
+                with mock.patch.object(adapter.os, "lstat", side_effect=tagged):
+                    with mock.patch.object(adapter, "_bounded_run") as run:
+                        for tool_name in adapter.CHECKS:
+                            response = adapter.run_check(self.root, tool_name)
+                            self.assertEqual(response["state"], "incomplete")
+                            self.assertEqual(response["exit_code"], 2)
+                        run.assert_not_called()
+                if kind == "directory":
+                    (path / "guide.md").unlink()
+                    path.rmdir()
+                else:
+                    path.unlink()
 
     def test_junction_tagged_directory_is_not_traversed(self):
         redirected = self.root / "junction-like"

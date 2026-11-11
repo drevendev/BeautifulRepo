@@ -26,6 +26,7 @@ CHECKS = {
 TIMEOUT_SECONDS = 30
 MAX_OUTPUT_BYTES = 512 * 1024
 JUNCTION_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
+REPARSE_ATTRIBUTE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
 COVERAGE = (
     "Read-only offline source checks, not a rendered accessibility, security, "
     "external-link, or repository-quality certification."
@@ -38,6 +39,19 @@ MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_MARKDOWN_BYTES = 32 * 1024 * 1024
 MAX_WALK_ENTRIES = 50000
 MAX_PREFLIGHT_SECONDS = 5
+
+
+def _unsupported_reparse(info: os.stat_result) -> bool:
+    """Reject unknown Windows reparse types, even without a symlink mode bit.
+
+    A non-junction reparse tag or an attribute-only reparse point may redirect
+    access. Known symlink and mount-point cases have separate bounded handling.
+    """
+    tag = getattr(info, "st_reparse_tag", 0)
+    attributes = getattr(info, "st_file_attributes", 0)
+    return tag not in (0, JUNCTION_TAG) or bool(
+        attributes & REPARSE_ATTRIBUTE and tag != JUNCTION_TAG
+    )
 
 
 def _bounded_source_tree(root: Path) -> bool:
@@ -67,6 +81,8 @@ def _bounded_source_tree(root: Path) -> bool:
                     # os.lstat consistently exposes Windows junction tags;
                     # DirEntry.stat can omit reparse metadata on some versions.
                     info = os.lstat(entry.path)
+                    if not stat.S_ISLNK(info.st_mode) and _unsupported_reparse(info):
+                        return False
                     if (stat.S_ISDIR(info.st_mode)
                             and getattr(info, "st_reparse_tag", 0) != JUNCTION_TAG):
                         pending.append(Path(entry.path))
@@ -128,7 +144,8 @@ def allowed_root(value: str) -> Path:
         while True:
             info = os.lstat(current)
             if (not stat.S_ISDIR(info.st_mode) or stat.S_ISLNK(info.st_mode)
-                    or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG):
+                    or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG
+                    or _unsupported_reparse(info)):
                 raise ValueError("allowed root must be an ordinary directory without redirects")
             if current == current.parent:
                 break

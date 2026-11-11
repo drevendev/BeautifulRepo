@@ -746,6 +746,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject unsupported Windows filesystem reparse points in the experimental
+  MCP server's configured-root and source preflights. Unrecognized reparse
+  tags and attribute-only redirects no longer pass as ordinary paths.
+  Synthetic metadata regressions cover these boundaries; real Windows host
+  installation and concurrent filesystem changes remain unverified (#255).
+
 - Make the asset provenance record preflight reject unrecognized nonblank
   lines inside a record instead of returning a structural PASS while silently
   ignoring additional claims or malformed entries. Blank separators remain valid;
