@@ -31,14 +31,20 @@ proposed diff, **not** a published policy or legal advice.
 
 ## 1. Determine the installed handbook `R` and target `T`
 
-Use the host-expanded `${CLAUDE_PLUGIN_ROOT}` when available. Otherwise,
-start from the **directory containing** this `SKILL.md`
-(`R/skills/trust-surfaces/`) and go up two levels (`../..`) to reach `R`.
-Require `guides/agent-safety.md`,
+Start from the directory containing this `SKILL.md`. Prefer the complete
+BeautifulRepo plugin/checkout at `../..` when all required files exist.
+If that checkout is unavailable, use the **skill directory itself** as `R`:
+standalone skills CLI copies include local `tools/`, `guides/`,
+`checklists/` and `templates/`. An expanded ${CLAUDE_PLUGIN_ROOT} may
+identify a complete plugin root; the literal placeholder is not a path.
+Never select the target repository as `R`.
+
+At the selected root require `guides/agent-safety.md`,
 `guides/community-safety.md`, `guides/private-repositories.md`,
 `checklists/repository.md`, `checklists/confidentiality.md`,
-`templates/SECURITY.template.md`, and `tools/repo_audit.py`.
-If missing, stop and report rather than downloading replacements.
+`templates/SECURITY.template.md` and `tools/repo_audit.py`.
+If neither root is complete, stop and report rather than downloading
+or substituting tools. Presence of files is not evidence of agent execution.
 
 `T` is the user's named local repository or the current repository root.
 State its absolute path and inspect no files outside authorized `T`.

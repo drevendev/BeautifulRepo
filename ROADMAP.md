@@ -108,13 +108,14 @@ issues for their live status.
   cover the remaining positive, negative and hostile cases. No stable
   four-skill release is claimed.
 - **Standalone skills CLI distribution** ([#333](https://github.com/drevendev/BeautifulRepo/issues/333)):
-  the separate skills.sh/skills CLI channel has **not** been proven to copy
-  required shared files alongside individual skill definitions. The
-  [offline layout preflight](guides/agent-plugin.md#standalone-skill-manager-installations-separate-from-full-plugins)
-  can inspect an already installed local copy for missing sibling resources,
-  but synthetic filesystem checks are **not** a real CLI install or agent PASS.
-  Use the pinned whole-plugin candidate for its separate acceptance work; do
-  not advertise standalone installation yet.
+  the four skills now carry their individual required files in-source. The
+  [real skills CLI copy trial](guides/agent-plugin.md#standalone-skill-manager-installations-separate-from-full-plugins)
+  checks individual and combined fresh copies plus synthetic local tool
+  execution; consult the current GitHub run for an observed result. A
+  successful file copy does **not** prove skill discovery or model execution
+  inside Claude Code/Codex. Use the pinned full-plugin candidate for its
+  separate host-acceptance tests; do not advertise an agent-verified
+  standalone installation yet.
 - **Real before/after cases**
   ([#88](https://github.com/drevendev/BeautifulRepo/issues/88)):
   the [repeatable procedure](case-studies/README.md) and

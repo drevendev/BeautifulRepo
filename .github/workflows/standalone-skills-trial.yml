@@ -10,6 +10,8 @@ on:
       - scripts/sync_standalone_audit.py
       - scripts/sync_standalone_release.py
       - scripts/sync_standalone_readme.py
+      - scripts/sync_standalone_trust.py
+      - scripts/verify_copied_trust.py
       - scripts/verify_copied_readme.py
       - scripts/verify_copied_release.py
       - scripts/verify_copied_audit.py
@@ -63,6 +65,7 @@ jobs:
           python -I "$GITHUB_WORKSPACE/scripts/sync_standalone_audit.py"
           python -I "$GITHUB_WORKSPACE/scripts/sync_standalone_release.py"
           python -I "$GITHUB_WORKSPACE/scripts/sync_standalone_readme.py"
+          python -I "$GITHUB_WORKSPACE/scripts/sync_standalone_trust.py"
           for skill in audit-repo improve-readme trust-surfaces draft-release-notes; do
             project="$work/projects/$skill"
             mkdir -p "$project"
@@ -84,13 +87,12 @@ jobs:
             printf '%s\n' "$status" > "$work/results/$skill.exit"
             cat "$work/results/$skill.json"
             # A passing pilot is a successful copied-file layout, not agent use.
-            expected=1
-            if [ "$skill" = "audit-repo" ] || [ "$skill" = "draft-release-notes" ] || [ "$skill" = "improve-readme" ]; then expected=0; fi
+            expected=0
             if [ "$status" -ne "$expected" ]; then
               echo "Unexpected preflight exit $status for $skill" >&2
               exit 1
             fi
-            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2] in ("audit-repo", "draft-release-notes", "improve-readme") else ("incomplete","full-repository"))' "$work/results/$skill.json" "$skill"
+            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == ("present","self-contained")' "$work/results/$skill.json" "$skill"
             if [ "$skill" = "audit-repo" ]; then
               python -I "$GITHUB_WORKSPACE/scripts/verify_copied_audit.py" \
                 --skill-root "$installed" \
@@ -102,6 +104,9 @@ jobs:
             elif [ "$skill" = "improve-readme" ]; then
               python -I "$GITHUB_WORKSPACE/scripts/verify_copied_readme.py" \
                 --skill-root "$installed" --output "$work/results/readme-behavior-single.json"
+            elif [ "$skill" = "trust-surfaces" ]; then
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_trust.py" \
+                --skill-root "$installed" --output "$work/results/trust-behavior-single.json"
             fi
           done
           # The same installer must also handle all four in a single project.
@@ -123,13 +128,12 @@ jobs:
             status=$?
             set -e
             printf '%s\n' "$status" > "$work/results/all-four-$skill.exit"
-            expected=1
-            if [ "$skill" = "audit-repo" ] || [ "$skill" = "draft-release-notes" ] || [ "$skill" = "improve-readme" ]; then expected=0; fi
+            expected=0
             if [ "$status" -ne "$expected" ]; then
               echo "Combined install changed $skill preflight outcome: $status" >&2
               exit 1
             fi
-            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2] in ("audit-repo", "draft-release-notes", "improve-readme") else ("incomplete","full-repository"))' "$work/results/all-four-$skill.json" "$skill"
+            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == ("present","self-contained")' "$work/results/all-four-$skill.json" "$skill"
             if [ "$skill" = "audit-repo" ]; then
               python -I "$GITHUB_WORKSPACE/scripts/verify_copied_audit.py" \
                 --skill-root "$installed" \
@@ -141,6 +145,9 @@ jobs:
             elif [ "$skill" = "improve-readme" ]; then
               python -I "$GITHUB_WORKSPACE/scripts/verify_copied_readme.py" \
                 --skill-root "$installed" --output "$work/results/readme-behavior-combined.json"
+            elif [ "$skill" = "trust-surfaces" ]; then
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_trust.py" \
+                --skill-root "$installed" --output "$work/results/trust-behavior-combined.json"
             fi
           done
       - name: Preserve the observed copied-file lists and required-path diagnostics

@@ -178,25 +178,32 @@ Do not call this an external-user installation or real-model PASS.
 
 ## Standalone skill-manager installations: separate from full plugins
 
-**Two standalone pilots — not yet host-accepted:** `audit-repo` now ships a self-contained
-copy of its offline Python tools, checklists and guidance inside the skill folder.
-The canonical originals remain at the repository root. The maintainer uses
-`python -I scripts/sync_standalone_audit.py --write` to regenerate deterministic
-copies, rewriting Markdown links to omitted examples or guides as explicit
-GitHub source URLs. These optional off-bundle readings require network access.
-The same command without `--write` detects drift in CI. The
-`draft-release-notes` skill also includes the canonical local Git inventory,
-release and safety guides, and template, synchronized with
-`python -I scripts/sync_standalone_release.py --write`. The README skill's
-five helpers and eleven reference files are synchronized with
-`python -I scripts/sync_standalone_readme.py --write`. Packaged Markdown
-is intentionally not byte-identical where off-bundle links were rewritten.
-The three copied skills (`audit-repo`, `draft-release-notes` and
-`improve-readme`) can use their own root without a full plugin. README
-preview/apply SHA guards are **not** user permission to edit. `trust-surfaces`
-remains incomplete as a standalone copy. Agent activation is unverified.
-Inspect the updated CLI trial artifacts for source SHA, copied paths and
-synthetic checker execution before calling even the pilot installation verified.
+**Four self-contained skills — host activation remains unverified.**
+`audit-repo`, `draft-release-notes`, `improve-readme` and
+`trust-surfaces` each include their required tools and references inside
+their own skill folder. Canonical sources remain at the repository root.
+Regenerate deterministic copies with the relevant command below; omit
+`--write` to check for source drift in CI:
+
+- `python -I scripts/sync_standalone_audit.py --write`
+- `python -I scripts/sync_standalone_release.py --write`
+- `python -I scripts/sync_standalone_readme.py --write`
+- `python -I scripts/sync_standalone_trust.py --write`
+
+The trust bundle contains the offline repository auditor, three safety and
+community guides, two checklists and a SECURITY draft template. The CLI
+trial exercises its **copied** auditor on fictional targets with and without
+a LICENSE, checking the expected findings and unchanged files. The other
+three skills have their own bounded copied-helper trials below.
+Packaged Markdown can differ from canonical source where links to omitted
+materials are rewritten to public GitHub URLs; following those optional
+off-bundle links needs network access.
+
+All four isolated copies can resolve their own root without a full plugin.
+README preview/apply SHA guards do **not** grant permission to edit.
+A successful copied-tool trial does not show that Claude Code or Codex
+discovered, selected or ran any skill. Inspect the exact-head CI run and its
+artifacts before describing an observed distribution result.
 
 
 **Optional, observed-file CI experiment:** the
@@ -205,9 +212,9 @@ uses `skills@1.7.6` with Node 24 to install each skill separately **and all
 four together** via the **real** `npx skills add` command in disposable projects. It uses
 `--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
 is **not launched**. The job saves the installed file lists and exact required
-path diagnostics as a seven-day artifact. With the current layout it deliberately
-expects `present` for `audit-repo`, `draft-release-notes` and `improve-readme`,
-and `incomplete` for `trust-surfaces`, alone and in the combined copy. It also invokes the copied release inventory against disposable synthetic tagged
+path diagnostics as a seven-day artifact. With the self-contained bundles it requires `present` for **all four**
+individual skills and the combined copy. This tests distribution and copied
+local tools, not discovery or activation inside an agent. It also invokes the copied release inventory against disposable synthetic tagged
 and dirty Git history, verifying range-boundary refusal and unchanged target
 files and refs. It exercises **all three copied audit checkers** against deliberately broken
 and fixed synthetic Markdown/HTML links, requiring the expected diagnostics and
@@ -227,9 +234,9 @@ documentation](https://www.skills.sh/docs/cli) describes installing individual
 skills and its [packs documentation](https://www.skills.sh/docs/packs)
 groups SKILL.md definitions, but neither guarantees that files *outside* each
 skill directory are copied next to it (sources reviewed **2026-11-10**).
-One skill, `trust-surfaces`, still depends on unbundled root files;
-`audit-repo`, `draft-release-notes` and `improve-readme` carry copies. Merely discovering
-SKILL.md is insufficient. The
+All four skills now carry their required tools and references within their
+individual directories. Merely discovering SKILL.md remains insufficient.
+Check the current CI run before claiming an observed installation result. The
 [real CLI copy experiment](https://github.com/drevendev/BeautifulRepo/actions/runs/42915282555)
 (successful on 2026-11-10 UTC) reproduced this dependency problem: the CLI
 completed four single-skill copies and one combined copy, but all eight
@@ -237,8 +244,15 @@ installed skill-layout preflights returned `incomplete`. Its first run used
 GitHub's synthetic PR merge checkout (`5b0e763a`), **not** the source head
 (`14bf301d`); subsequent runs explicitly select and record the checked-out
 source SHA. This is a **reproduced incomplete installed layout**, not a
-failed CLI invocation or evidence of real agent execution. Distribution
-support remains blocked under [#333](https://github.com/drevendev/BeautifulRepo/issues/333).
+failed CLI invocation or evidence of real agent execution. This is a
+**historical failed packaging snapshot**, before the four self-contained
+bundles. The [2026-11-11 updated copy trial](https://github.com/drevendev/BeautifulRepo/actions/runs/42995464299)
+on PR head `d8e45d6` passed eight isolated/combined structural checks
+and bounded copied-helper exercises. That result verifies only the
+tested copy layout and synthetic execution. Follow
+[#333](https://github.com/drevendev/BeautifulRepo/issues/333) for
+distribution packaging and [#257](https://github.com/drevendev/BeautifulRepo/issues/257)
+for actual Claude Code/Codex host acceptance.
 
 A maintainer or independent tester can inspect an **already installed**
 disposable per-skill copy without installing packages, executing a skill or
@@ -254,8 +268,7 @@ the ordinary canonical skill copy rather than an agent-facing symlink alias;
 this preflight deliberately rejects redirected paths, so an alias gives exit
 2 instead of a claim about its target. The [CLI reference](https://www.skills.sh/docs/cli)
 describes symlink and copy installation methods (reviewed 2026-11-10).
-The preflight checks the two-up full-repository root and, for isolated
-`audit-repo` or `draft-release-notes` copies, the bundled resources in each skill directory. It reports
+The preflight checks the two-up full-repository root and, for isolated copies, the bundled resources in each skill directory. It reports
 which layout was selected. Exit **0** means named files are ordinary files
 at those paths;
 **1** identifies missing or redirected paths in JSON; **2** means the
@@ -288,9 +301,9 @@ This is a **presence and optional local-byte comparison**, not an
 authenticated install or agent activation. The [whole-plugin pinned-cache verifier above](#verify-cached-skill-definitions-against-the-pinned-commit-offline)
 uses Git blob evidence for a different distribution route; neither substitutes for
 the host evaluations in [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
-Do not promote a skills.sh command or pack until a clean per-skill install has
-been reproduced and its exact filesystem layout and actual tool execution
-have been verified.
+Do not promote a skills.sh command or pack as **agent-verified** until
+actual host discovery, invocation and permission behavior have been tested
+and accepted; the observed clean per-skill copies alone are insufficient.
 
 ## Use
 
