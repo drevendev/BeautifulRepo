@@ -126,13 +126,15 @@ class PluginManifestTests(unittest.TestCase):
             guide,
         )
         self.assertIn("codex plugin marketplace list", guide)
-        self.assertIn("`/plugins`", guide)
-        self.assertIn("Install plugin", guide)
+        self.assertIn("Plugins Directory", guide)
+        self.assertIn("installation as **INCONCLUSIVE**", guide)
 
     def test_codex_guide_distinguishes_marketplace_from_plugin_install(self):
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        self.assertIn("registers a **source**, not an installed plugin", guide)
-        self.assertIn("**test procedure**", guide)
+        self.assertIn("registers a **marketplace source**", guide)
+        self.assertIn("not an installed plugin", guide)
+        self.assertIn("**not** an", guide)
+        self.assertIn("Inspect the actual installed/cached files", guide)
         for unsupported_command in ("add", "remove", "update"):
             with self.subTest(command=unsupported_command):
                 self.assertNotRegex(

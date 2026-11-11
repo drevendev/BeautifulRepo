@@ -1,6 +1,6 @@
 # BeautifulRepo agent behavior evaluations
 
-These are **unexecuted model-eval definitions** for all four shipped skills (`audit-repo`, `improve-readme`, `draft-release-notes` and `trust-surfaces`), updated **2026-10-25**. They are not CI results, proven prompt-injection protection, or a release gate.
+These are **unexecuted model-eval definitions** for the four development-candidate skills (`audit-repo`, `improve-readme`, `draft-release-notes` and `trust-surfaces`), prepared **2026-10-25** and install-guidance-reviewed **2026-11-11**. Only `audit-repo` was released in stable `v0.2.0`; the four-skill candidate is **not** released or accepted in either host. These definitions are not CI results, proven prompt-injection protection, or a release gate.
 
 For a **repeatable, all-skills Codex/Claude manual acceptance matrix**, use
 [manual-smoke.md](manual-smoke.md). It specifies each positive, negative and

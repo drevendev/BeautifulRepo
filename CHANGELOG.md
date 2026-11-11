@@ -623,6 +623,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Correct Codex's host-install instructions against the official plugin
+  packaging guide (checked 2026-11-11): registering a Git marketplace is not
+  installing the plugin, and desktop plugin-browser steps are a procedure,
+  not acceptance. Require installed-cache evidence and mark unsupported hosts
+  INCONCLUSIVE (#257, #258). Clarify that four-skill eval definitions are not
+  a stable release.
+
 - Repin the experimental MCP POSIX and PowerShell host-trial checkout
   to the accepted source revision with fail-closed hard-link preflight for
   all three tools. Test that the full commit link and both checkout routes
