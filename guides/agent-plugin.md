@@ -187,11 +187,14 @@ GitHub source URLs. These optional off-bundle readings require network access.
 The same command without `--write` detects drift in CI. The
 `draft-release-notes` skill also includes the canonical local Git inventory,
 release and safety guides, and template, synchronized with
-`python -I scripts/sync_standalone_release.py --write`. Packaged Markdown
+`python -I scripts/sync_standalone_release.py --write`. The README skill's
+five helpers and eleven reference files are synchronized with
+`python -I scripts/sync_standalone_readme.py --write`. Packaged Markdown
 is intentionally not byte-identical where off-bundle links were rewritten.
-Both copied skills can use their local root without a full plugin, but
-neither is verified as selected or invoked by a model. The other two skills,
-`improve-readme` and `trust-surfaces`, are still incomplete standalone copies.
+The three copied skills (`audit-repo`, `draft-release-notes` and
+`improve-readme`) can use their own root without a full plugin. README
+preview/apply SHA guards are **not** user permission to edit. `trust-surfaces`
+remains incomplete as a standalone copy. Agent activation is unverified.
 Inspect the updated CLI trial artifacts for source SHA, copied paths and
 synthetic checker execution before calling even the pilot installation verified.
 
@@ -203,13 +206,15 @@ four together** via the **real** `npx skills add` command in disposable projects
 `--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
 is **not launched**. The job saves the installed file lists and exact required
 path diagnostics as a seven-day artifact. With the current layout it deliberately
-expects `present` for `audit-repo` and `draft-release-notes` and `incomplete`
-for the other two skills, both alone and in the combined copy. It also invokes the copied release inventory against disposable synthetic tagged
+expects `present` for `audit-repo`, `draft-release-notes` and `improve-readme`,
+and `incomplete` for `trust-surfaces`, alone and in the combined copy. It also invokes the copied release inventory against disposable synthetic tagged
 and dirty Git history, verifying range-boundary refusal and unchanged target
 files and refs. It exercises **all three copied audit checkers** against deliberately broken
 and fixed synthetic Markdown/HTML links, requiring the expected diagnostics and
 exit codes and verifying that the fixture files are unchanged. The trial runs
-for an isolated audit installation and the combined four-skill copy. Synthetic
+for an isolated audit installation and the combined four-skill copy.
+Copied README helpers are tested on a disposable fictional target for
+read-only preview, hash rejection and an explicitly synthetic README-only apply. Synthetic
 checker behavior is not proof of safe behavior on arbitrary repositories or
 that a model actually discovered or invoked the skill. A green workflow
 **does not** mean an agent discovered, selected or ran a skill. These steps download a version-pinned third-party npm CLI in an
@@ -222,8 +227,8 @@ documentation](https://www.skills.sh/docs/cli) describes installing individual
 skills and its [packs documentation](https://www.skills.sh/docs/packs)
 groups SKILL.md definitions, but neither guarantees that files *outside* each
 skill directory are copied next to it (sources reviewed **2026-11-10**).
-Two skills still depend on unbundled repository-root resources; the
-`audit-repo` and `draft-release-notes` pilots carry synchronized copies. Merely discovering
+One skill, `trust-surfaces`, still depends on unbundled root files;
+`audit-repo`, `draft-release-notes` and `improve-readme` carry copies. Merely discovering
 SKILL.md is insufficient. The
 [real CLI copy experiment](https://github.com/drevendev/BeautifulRepo/actions/runs/42915282555)
 (successful on 2026-11-10 UTC) reproduced this dependency problem: the CLI

@@ -288,6 +288,35 @@ class StandalonePreflightTests(unittest.TestCase):
             self.assertIn("templates/RELEASE_NOTES.template.md",
                           incomplete["missing_or_redirected"])
 
+    def test_readme_bundle_and_copied_helpers(self):
+        check = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "scripts/sync_standalone_readme.py")],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(check.returncode, 0, check.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory) / ".agents" / "skills" / "improve-readme"
+            shutil.copytree(ROOT / "skills" / "improve-readme", installed)
+            complete = probe.inspect(installed, source_root=ROOT)
+            self.assertEqual((complete["state"], complete["layout"]), ("present", "self-contained"))
+            self.assertEqual(complete["source_comparison"]["mismatched"], [])
+            behavior = subprocess.run(
+                [sys.executable, "-I", str(ROOT / "scripts/verify_copied_readme.py"),
+                 "--skill-root", str(installed)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(behavior.returncode, 0, behavior.stderr)
+            self.assertTrue(json.loads(behavior.stdout)["passed"])
+            helper = installed / "tools/readme_apply.py"
+            helper.write_text("tampered", encoding="utf-8")
+            altered = probe.inspect(installed, source_root=ROOT)
+            self.assertEqual(altered["state"], "mismatch")
+            self.assertIn("tools/readme_apply.py", altered["source_comparison"]["mismatched"])
+            helper.unlink()
+            incomplete = probe.inspect(installed)
+            self.assertEqual(incomplete["state"], "incomplete")
+            self.assertIn("tools/readme_apply.py", incomplete["missing_or_redirected"])
+
     def test_known_skills_have_nonempty_unique_relative_dependencies(self):
         self.assertEqual(len(probe.REQUIRED), 4)
         for name, names in probe.REQUIRED.items():

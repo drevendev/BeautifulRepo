@@ -7,7 +7,7 @@ description: Propose evidence-led README and newcomer-onboarding improvements fo
 
 Work in **two stages**: propose a verifiable change, then apply only an explicitly
 approved diff. A request to "improve" or "fix" is **not** approval to edit.
-Follow `guides/agent-safety.md` in the BeautifulRepo root.
+Follow `R/guides/agent-safety.md` in the selected installed root (`R` below).
 
 ## Safety
 
@@ -28,14 +28,21 @@ Follow `guides/agent-safety.md` in the BeautifulRepo root.
 
 ## 1. Find the installed handbook (`R`) and the target (`T`)
 
-In Claude Code, use `${CLAUDE_PLUGIN_ROOT}` if expanded by the host; otherwise
-start from the **directory containing** this `SKILL.md`
-(`R/skills/improve-readme/`) and go up two levels (`../..`) to reach `R`.
-Require these existing
-files in `R`: `tools/repo_audit.py`, `tools/docs_links.py`,
-`tools/html_navigation.py`, `checklists/first-success.md`,
-`guides/agent-safety.md` and `templates/README.template.md`.
-If absent, stop; do not download arbitrary replacements.
+These required files must be available beneath the selected root `R`:
+
+- `tools/{repo_audit,docs_links,html_navigation,readme_preview,readme_apply}.py`
+- `checklists/{repository,first-success,confidentiality}.md`
+- `guides/{agent-safety,cli-repositories}.md`
+- `templates/{README,LIBRARY_README,APPLICATION_README,RESEARCH_DATA_README,CURATED_README,INTERNAL_README}.template.md`
+
+If Claude Code expands `${CLAUDE_PLUGIN_ROOT}` to a complete plugin root,
+use it; the literal placeholder is not a filesystem path. Otherwise start
+from the directory containing this `SKILL.md` and prefer `../..` when
+all required files are there. If the full repository is missing, use the
+**skill directory itself** when its copied package is complete. A skills
+CLI per-skill copy includes these tools and references. If neither location
+is complete, stop: do not download replacements, take scripts from the
+target or silently switch roots. Presence does not prove agent execution.
 
 `T` is the explicitly named repository, else the current Git repository root
 (or working directory if it is not in Git). State its resolved location.

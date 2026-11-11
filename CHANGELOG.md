@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Make `improve-readme` self-contained for skills CLI copies: five offline
+  Python helpers and eleven source-derived references/templates with drift
+  checking, exact-diff preview and synthetic approval-hash regression trials.
+  Hash checks do not establish human approval or model behavior (#333, #257).
+
 - Make `draft-release-notes` self-contained for standalone skills CLI copies,
   with synchronized local Git inventory, guides, template, source-comparison
   preflight and a real copied-helper invocation in CI. The other two skills
