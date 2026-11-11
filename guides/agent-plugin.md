@@ -131,8 +131,16 @@ Restart the client. Check the *installed copy* of `skills/` for all four named
 model test. For a low-risk first test use a **disposable synthetic target**,
 never a private repository with unapproved provider data controls. Follow the
 [revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/8947574399df2cc11e8ded41cecbef70be4808c6/evals/manual-smoke.md).
-Use the matrix from the **same pinned commit** as the installed source; do
-not combine it with instructions or reports from earlier candidates.
+**Pinned-matrix installation caveat:** Step 3 of that immutable matrix
+links to its *own* relative `../guides/agent-plugin.md`. At the pinned
+`8947574399df2cc11e8ded41cecbef70be4808c6` revision, that older guide
+still installs `cf8ac81ddabb5e2006913e65a2f980ef201baf5c` instead.
+**Do not follow the matrix's relative installation-guide link.** For this
+trial, use the full `8947574399df2cc11e8ded41cecbef70be4808c6` Claude Code
+or Codex installation command **above**, followed by the offline
+`--expected-commit 8947574399df2cc11e8ded41cecbef70be4808c6` cache
+verification **below**. Use the pinned matrix for its cases and scoring, but
+never mix installer commands or result evidence from different revisions.
 Actual skill selection, file reads, tool calls, permission decisions and
 before/after target snapshots must be observed; static CI and plugin manifests
 cannot verify them. Results (including failures or INCONCLUSIVE outcomes) go to
