@@ -347,7 +347,7 @@ class CheckerWrapperTests(unittest.TestCase):
                     path.write_text("synthetic", encoding="utf-8")
                 original = adapter.os.lstat
 
-                def tagged(candidate):
+                def tagged(candidate, original=original, path=path):
                     info = original(candidate)
                     if Path(candidate) == path:
                         return types.SimpleNamespace(
