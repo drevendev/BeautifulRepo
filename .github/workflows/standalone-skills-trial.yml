@@ -8,6 +8,8 @@ on:
       - skills/**
       - scripts/standalone_skill_preflight.py
       - scripts/sync_standalone_audit.py
+      - scripts/sync_standalone_release.py
+      - scripts/verify_copied_release.py
       - scripts/verify_copied_audit.py
   workflow_dispatch:
 
@@ -57,6 +59,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > "$work/results/workflow-event-sha"
           # The repository-owned audited files and copied package must not drift.
           python -I "$GITHUB_WORKSPACE/scripts/sync_standalone_audit.py"
+          python -I "$GITHUB_WORKSPACE/scripts/sync_standalone_release.py"
           for skill in audit-repo improve-readme trust-surfaces draft-release-notes; do
             project="$work/projects/$skill"
             mkdir -p "$project"
@@ -79,17 +82,20 @@ jobs:
             cat "$work/results/$skill.json"
             # A passing pilot is a successful copied-file layout, not agent use.
             expected=1
-            if [ "$skill" = "audit-repo" ]; then expected=0; fi
+            if [ "$skill" = "audit-repo" ] || [ "$skill" = "draft-release-notes" ]; then expected=0; fi
             if [ "$status" -ne "$expected" ]; then
               echo "Unexpected preflight exit $status for $skill" >&2
               exit 1
             fi
-            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2]=="audit-repo" else ("incomplete","full-repository"))' "$work/results/$skill.json" "$skill"
+            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2] in ("audit-repo", "draft-release-notes") else ("incomplete","full-repository"))' "$work/results/$skill.json" "$skill"
             if [ "$skill" = "audit-repo" ]; then
               python -I "$GITHUB_WORKSPACE/scripts/verify_copied_audit.py" \
                 --skill-root "$installed" \
                 --output-dir "$work/results/audit-behavior-single" \
                 > "$work/results/audit-behavior-single.json"
+            elif [ "$skill" = "draft-release-notes" ]; then
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_release.py" \
+                --skill-root "$installed" --output "$work/results/release-inventory-single.json"
             fi
           done
           # The same installer must also handle all four in a single project.
@@ -112,17 +118,20 @@ jobs:
             set -e
             printf '%s\n' "$status" > "$work/results/all-four-$skill.exit"
             expected=1
-            if [ "$skill" = "audit-repo" ]; then expected=0; fi
+            if [ "$skill" = "audit-repo" ] || [ "$skill" = "draft-release-notes" ]; then expected=0; fi
             if [ "$status" -ne "$expected" ]; then
               echo "Combined install changed $skill preflight outcome: $status" >&2
               exit 1
             fi
-            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2]=="audit-repo" else ("incomplete","full-repository"))' "$work/results/all-four-$skill.json" "$skill"
+            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2] in ("audit-repo", "draft-release-notes") else ("incomplete","full-repository"))' "$work/results/all-four-$skill.json" "$skill"
             if [ "$skill" = "audit-repo" ]; then
               python -I "$GITHUB_WORKSPACE/scripts/verify_copied_audit.py" \
                 --skill-root "$installed" \
                 --output-dir "$work/results/audit-behavior-combined" \
                 > "$work/results/audit-behavior-combined.json"
+            elif [ "$skill" = "draft-release-notes" ]; then
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_release.py" \
+                --skill-root "$installed" --output "$work/results/release-inventory-combined.json"
             fi
           done
       - name: Preserve the observed copied-file lists and required-path diagnostics
