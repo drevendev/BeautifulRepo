@@ -20,9 +20,9 @@ for every private repository.
    intended audience. An agent session may transmit context to its model provider;
    BeautifulRepo's offline Python scripts do not.
 
-For a concrete starting point, adapt the [internal README template](../templates/INTERNAL_README.template.md)
+For a concrete starting point, adapt the [internal README template](https://github.com/drevendev/BeautifulRepo/blob/master/templates/INTERNAL_README.template.md)
 and [confidentiality checklist](../checklists/confidentiality.md), then compare the
-[fictional filled example](../examples/internal-repository/README.md).
+[fictional filled example](https://github.com/drevendev/BeautifulRepo/blob/master/examples/internal-repository/README.md).
 
 ## Feature matrix for private repositories on GitHub.com
 
@@ -93,8 +93,8 @@ unavailable feature as a pass or mislabel a missing internal route as N/A.
 
 ### Checks, badges and distribution
 
-You can run BeautifulRepo's three [offline checks](adopting-the-checks.md#without-github-actions)
-on a private checkout. If you use the [GitHub Action](adopting-the-checks.md),
+You can run BeautifulRepo's three [offline checks](https://github.com/drevendev/BeautifulRepo/blob/master/guides/adopting-the-checks.md#without-github-actions)
+on a private checkout. If you use the [GitHub Action](https://github.com/drevendev/BeautifulRepo/blob/master/guides/adopting-the-checks.md),
 confirm account policies, the reviewed commit pin and private-runner billing.
 A protected branch is a separate plan-dependent feature, **not** a prerequisite
 for running CI. Avoid public badge/image URLs or artifacts that imply strangers

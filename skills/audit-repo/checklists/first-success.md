@@ -18,10 +18,10 @@ update. It checks the reader's route, not a universal quality score.
   Run the appropriate tests and distinguish local results from provider CI. Do not
   claim checks that were skipped or blocked.
 
-For example, [Pocket Board](../examples/application-starter/README.md) has a useful
+For example, [Pocket Board](https://github.com/drevendev/BeautifulRepo/blob/master/examples/application-starter/README.md) has a useful
 first-success claim: choose Open and see three tasks totaling 12 fictional points.
 Its server and JSON fixture demonstrate that interaction, not durability or real
-workload performance. [Research/data](../examples/research-data-starter/README.md)
+workload performance. [Research/data](https://github.com/drevendev/BeautifulRepo/blob/master/examples/research-data-starter/README.md)
 instead exposes a reproducible aggregate (6 fabricated rows, total 60) and fixture digest.
 
 For private or internal projects, check the disclosure boundaries in the
@@ -29,5 +29,5 @@ For private or internal projects, check the disclosure boundaries in the
 screenshots or logs into public reports.
 
 See the broader [repository checklist](repository.md) and the
-[maintenance workflow](../guides/maintenance-workflow.md). The checklist is an aid to
+[maintenance workflow](https://github.com/drevendev/BeautifulRepo/blob/master/guides/maintenance-workflow.md). The checklist is an aid to
 judgement, not accessibility, security or scientific certification.

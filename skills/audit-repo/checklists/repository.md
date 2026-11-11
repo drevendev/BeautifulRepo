@@ -30,7 +30,7 @@ automatically N/A. This does not waive third-party licence obligations.
 - [ ] Example commands show expected results and have been tried against a named revision.
 - [ ] A license is present; third-party material has separate provenance where needed.
 - [ ] README images, icons, fonts, recordings and borrowed excerpts have traceable
-  origins and permitted reuse; use the [third-party asset workflow](../guides/third-party-assets.md)
+  origins and permitted reuse; use the [third-party asset workflow](https://github.com/drevendev/BeautifulRepo/blob/master/guides/third-party-assets.md)
   when ownership or permission is uncertain.
 - [ ] Help, bug reporting and contribution instructions are easy to find.
 
