@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Pilot a self-contained standalone `audit-repo` skill folder with eight
+  source-synchronized offline tools/checklists/guides. Extend the preflight to
+  recognize this layout, keep the checked-in copies byte-identical to canonical
+  files, and exercise an isolated CLI copy on a synthetic target. The other
+  three skills still have incomplete standalone dependency layouts; no agent
+  selection or Claude Code/Codex host acceptance is claimed (#333).
+
 - Add a bounded GitHub Actions trial of **actual**, version-pinned
   `skills@1.7.6` per-skill and combined-four `--copy` installations in disposable projects,
   recording installed file lists and the existing missing-dependency

@@ -176,7 +176,19 @@ before/after snapshots and the independent review required by
 [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
 Do not call this an external-user installation or real-model PASS.
 
-## Standalone skill-manager installations: separate and unverified
+## Standalone skill-manager installations: separate from full plugins
+
+**Audit pilot — not yet host-accepted:** `audit-repo` now ships a self-contained
+copy of its offline Python tools, checklists and guidance inside the skill folder.
+The canonical originals remain at the repository root. The maintainer uses
+`python -I scripts/sync_standalone_audit.py --write` to regenerate the
+copies, and the same command without `--write` to catch drift in CI.
+A copied audit skill can select this local root if the complete plugin root is
+unavailable. This is not evidence that Claude Code or Codex discovered,
+activated or invoked the skill, and does not change the other three skills.
+Inspect the updated CLI trial artifacts for source SHA, copied paths and
+synthetic checker execution before calling even the pilot installation verified.
+
 
 **Optional, observed-file CI experiment:** the
 [standalone-skills CLI copy workflow](../.github/workflows/standalone-skills-trial.yml)
@@ -185,10 +197,10 @@ four together** via the **real** `npx skills add` command in disposable projects
 `--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
 is **not launched**. The job saves the installed file lists and exact required
 path diagnostics as a seven-day artifact. With the current layout it deliberately
-expects an `incomplete` preflight result for each skill. A green workflow
-therefore means *the known dependency gap was reproduced*, **not** that the
-skills can run, that CLI installations are supported, or that any agent tested
-them. These steps download a version-pinned third-party npm CLI in an
+expects `present` for the copied `audit-repo` pilot and `incomplete` for
+the other three skills, both alone and in the combined copy. It also runs the
+copied audit tool against a disposable synthetic README. A green workflow
+**does not** mean an agent discovered, selected or ran a skill. These steps download a version-pinned third-party npm CLI in an
 isolated read-only CI job; they do not run target-repository code. Review the
 actual run and artifacts before describing an observed result.
 
@@ -198,8 +210,9 @@ documentation](https://www.skills.sh/docs/cli) describes installing individual
 skills and its [packs documentation](https://www.skills.sh/docs/packs)
 groups SKILL.md definitions, but neither guarantees that files *outside* each
 skill directory are copied next to it (sources reviewed **2026-11-10**).
-BeautifulRepo's four skills currently depend on shared repository-root tools,
-guides, checklists and templates. Merely discovering SKILL.md is therefore insufficient. The
+Three skills still depend on unbundled repository-root resources; the
+`audit-repo` pilot now carries source-synchronized copies. Merely discovering
+SKILL.md is insufficient. The
 [real CLI copy experiment](https://github.com/drevendev/BeautifulRepo/actions/runs/42915282555)
 (successful on 2026-11-10 UTC) reproduced this dependency problem: the CLI
 completed four single-skill copies and one combined copy, but all eight
@@ -224,9 +237,10 @@ the ordinary canonical skill copy rather than an agent-facing symlink alias;
 this preflight deliberately rejects redirected paths, so an alias gives exit
 2 instead of a claim about its target. The [CLI reference](https://www.skills.sh/docs/cli)
 describes symlink and copy installation methods (reviewed 2026-11-10).
-The preflight assumes the exact `R = SKILL.md directory / ../..` fallback
-declared by these skills and checks the specifically required shared paths
-there. Exit **0** means named files are ordinary files at those paths;
+The preflight checks the two-up full-repository root and, for an isolated
+`audit-repo` copy, the bundled files inside its skill directory. It reports
+which layout was selected. Exit **0** means named files are ordinary files
+at those paths;
 **1** identifies missing or redirected paths in JSON; **2** means the
 skill definition cannot be checked. It does not inspect the target repository,
 execute imported code, follow redirecting dependency files or make network
