@@ -13,6 +13,15 @@ keep their original themed headings.
 
 ### Added
 
+- Bundle the final standalone `trust-surfaces` skill for the skills CLI:
+  seven source-synchronized offline auditor, safety/community guides, checklists
+  and SECURITY draft files, with drift checks and a real copied-skill CLI trial.
+  The trial exercises the copied auditor on synthetic LICENSE-present/missing
+  repositories and checks that target files are unchanged. All four skills now
+  pass bounded standalone-copy preflights. These results do **not** establish
+  live Claude Code/Codex discovery, model behavior, verified security intake,
+  legal compliance or general target safety (#333, #257).
+
 - Make `improve-readme` self-contained for skills CLI copies: five offline
   Python helpers and eleven source-derived references/templates with drift
   checking, exact-diff preview and synthetic approval-hash regression trials.
