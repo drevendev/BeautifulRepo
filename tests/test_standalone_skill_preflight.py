@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -261,6 +262,31 @@ class StandalonePreflightTests(unittest.TestCase):
             capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+
+    def test_release_bundle_matches_source_and_detects_incomplete_copy(self):
+        result = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "scripts/sync_standalone_release.py")],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory) / ".agents" / "skills" / "draft-release-notes"
+            shutil.copytree(ROOT / "skills" / "draft-release-notes", installed)
+            expected = probe.inspect(installed, source_root=ROOT)
+            self.assertEqual((expected["state"], expected["layout"]), ("present", "self-contained"))
+            self.assertEqual(expected["source_comparison"]["mismatched"], [])
+            template = installed / "templates/RELEASE_NOTES.template.md"
+            template.write_text("tampered", encoding="utf-8")
+            altered = probe.inspect(installed, source_root=ROOT)
+            self.assertEqual(altered["state"], "mismatch")
+            self.assertEqual(altered["source_comparison"]["mismatched"],
+                             ["templates/RELEASE_NOTES.template.md"])
+            template.unlink()
+            incomplete = probe.inspect(installed)
+            self.assertEqual(incomplete["state"], "incomplete")
+            self.assertIn("templates/RELEASE_NOTES.template.md",
+                          incomplete["missing_or_redirected"])
 
     def test_known_skills_have_nonempty_unique_relative_dependencies(self):
         self.assertEqual(len(probe.REQUIRED), 4)

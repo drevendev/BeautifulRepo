@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Make `draft-release-notes` self-contained for standalone skills CLI copies,
+  with synchronized local Git inventory, guides, template, source-comparison
+  preflight and a real copied-helper invocation in CI. The other two skills
+  remain incomplete; copying a helper is not model-driven acceptance (#333).
+
 - Extend the standalone skills CLI trial to run **all three copied audit
   checkers** on deliberately broken and fixed disposable link/HTML fixtures,
   asserting actual findings, exit codes and unchanged target bytes in both

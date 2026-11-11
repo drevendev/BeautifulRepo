@@ -26,15 +26,21 @@ Follow `guides/agent-safety.md` in the BeautifulRepo root (`R`, below).
 
 ## 1. Locate the installed tools (`R`)
 
-`R` is the directory containing `scripts/release_inventory.py`, this
-`skills/draft-release-notes/SKILL.md`, `guides/release-notes.md` and
+`R` contains `scripts/release_inventory.py`,
+`guides/agent-safety.md`, `guides/release-notes.md` and
 `templates/RELEASE_NOTES.template.md`.
 
-In Claude Code, use `${CLAUDE_PLUGIN_ROOT}` only if it was substituted by
-the host. Otherwise, start from the **directory containing** this `SKILL.md`
-(`R/skills/draft-release-notes/`) and go up two levels (`../..`) to reach `R`.
-If any required file is missing, stop and report the missing installation
-rather than downloading code or improvising its behavior.
+- If Claude Code expands `${CLAUDE_PLUGIN_ROOT}` to an actual complete
+  plugin directory, use it. A literal placeholder is not a filesystem path.
+- Otherwise start from the **directory containing this SKILL.md**. Prefer
+  its `../..` root when all four resources are present. If it is incomplete,
+  use the **skill directory itself**: skills CLI copies include the helper,
+  guides and template under this self-contained root.
+- Check that all required files exist before running the helper. If missing,
+  report an incomplete installation. Do not download code, use the target as
+  toolkit root or improvise a missing script.
+
+This check does not prove agent discovery, selection or execution.
 
 ## 2. Choose the target (`T`) and prerequisites
 

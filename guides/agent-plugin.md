@@ -178,17 +178,20 @@ Do not call this an external-user installation or real-model PASS.
 
 ## Standalone skill-manager installations: separate from full plugins
 
-**Audit pilot — not yet host-accepted:** `audit-repo` now ships a self-contained
+**Two standalone pilots — not yet host-accepted:** `audit-repo` now ships a self-contained
 copy of its offline Python tools, checklists and guidance inside the skill folder.
 The canonical originals remain at the repository root. The maintainer uses
 `python -I scripts/sync_standalone_audit.py --write` to regenerate deterministic
 copies, rewriting Markdown links to omitted examples or guides as explicit
 GitHub source URLs. These optional off-bundle readings require network access.
-The same command without `--write` detects drift in CI. Packaged Markdown
+The same command without `--write` detects drift in CI. The
+`draft-release-notes` skill also includes the canonical local Git inventory,
+release and safety guides, and template, synchronized with
+`python -I scripts/sync_standalone_release.py --write`. Packaged Markdown
 is intentionally not byte-identical where off-bundle links were rewritten.
-A copied audit skill can select this local root if the complete plugin root is
-unavailable. This is not evidence that Claude Code or Codex discovered,
-activated or invoked the skill, and does not change the other three skills.
+Both copied skills can use their local root without a full plugin, but
+neither is verified as selected or invoked by a model. The other two skills,
+`improve-readme` and `trust-surfaces`, are still incomplete standalone copies.
 Inspect the updated CLI trial artifacts for source SHA, copied paths and
 synthetic checker execution before calling even the pilot installation verified.
 
@@ -200,8 +203,8 @@ four together** via the **real** `npx skills add` command in disposable projects
 `--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
 is **not launched**. The job saves the installed file lists and exact required
 path diagnostics as a seven-day artifact. With the current layout it deliberately
-expects `present` for the copied `audit-repo` pilot and `incomplete` for
-the other three skills, both alone and in the combined copy. It now exercises **all three copied checkers** against both deliberately broken
+expects `present` for `audit-repo` and `draft-release-notes` and `incomplete`
+for the other two skills, both alone and in the combined copy. It now exercises **all three copied checkers** against both deliberately broken
 and fixed synthetic Markdown/HTML links, requiring the expected diagnostics and
 exit codes and verifying that the fixture files are unchanged. The trial runs
 for an isolated audit installation and the combined four-skill copy. Synthetic
@@ -217,8 +220,8 @@ documentation](https://www.skills.sh/docs/cli) describes installing individual
 skills and its [packs documentation](https://www.skills.sh/docs/packs)
 groups SKILL.md definitions, but neither guarantees that files *outside* each
 skill directory are copied next to it (sources reviewed **2026-11-10**).
-Three skills still depend on unbundled repository-root resources; the
-`audit-repo` pilot now carries source-synchronized copies. Merely discovering
+Two skills still depend on unbundled repository-root resources; the
+`audit-repo` and `draft-release-notes` pilots carry synchronized copies. Merely discovering
 SKILL.md is insufficient. The
 [real CLI copy experiment](https://github.com/drevendev/BeautifulRepo/actions/runs/42915282555)
 (successful on 2026-11-10 UTC) reproduced this dependency problem: the CLI
@@ -244,8 +247,8 @@ the ordinary canonical skill copy rather than an agent-facing symlink alias;
 this preflight deliberately rejects redirected paths, so an alias gives exit
 2 instead of a claim about its target. The [CLI reference](https://www.skills.sh/docs/cli)
 describes symlink and copy installation methods (reviewed 2026-11-10).
-The preflight checks the two-up full-repository root and, for an isolated
-`audit-repo` copy, the bundled files inside its skill directory. It reports
+The preflight checks the two-up full-repository root and, for isolated
+`audit-repo` or `draft-release-notes` copies, the bundled resources in each skill directory. It reports
 which layout was selected. Exit **0** means named files are ordinary files
 at those paths;
 **1** identifies missing or redirected paths in JSON; **2** means the
