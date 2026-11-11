@@ -16,7 +16,7 @@ FILES = (
     "guides/private-repositories.md",
 )
 
-LINK = re.compile(r"(\\]\\()([^\\s)]+)(\\))")
+LINK = re.compile(r"(\]\()([^\s)]+)(\))")
 
 def render(name: str) -> bytes:
     """Rewrite only links to files intentionally omitted from the copied package."""

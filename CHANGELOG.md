@@ -14,7 +14,8 @@ keep their original themed headings.
 ### Added
 
 - Pilot a self-contained standalone `audit-repo` skill folder with eight
-  source-synchronized offline tools/checklists/guides. Extend the preflight to
+  source-derived offline tools/checklists/guides, with links to omitted
+  resources converted to explicit GitHub source URLs. Extend the preflight to
   recognize this layout, keep the checked-in copies byte-identical to canonical
   files, and exercise an isolated CLI copy on a synthetic target. The other
   three skills still have incomplete standalone dependency layouts; no agent

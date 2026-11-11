@@ -87,7 +87,7 @@ jobs:
             if [ "$skill" = "audit-repo" ]; then
               fixture="$work/synthetic-target"
               mkdir -p "$fixture"
-              printf '# Synthetic Repo\\n\\n[bad link](missing.md)\\n' > "$fixture/README.md"
+              printf '# Synthetic Repo\n\n[bad link](missing.md)\n' > "$fixture/README.md"
               before="$(sha256sum "$fixture/README.md")"
               python -I "$installed/tools/repo_audit.py" "$fixture" --format json --fail-on never > "$work/results/audit-actual-tool.json"
               test "$before" = "$(sha256sum "$fixture/README.md")"

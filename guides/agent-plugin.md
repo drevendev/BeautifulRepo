@@ -181,8 +181,11 @@ Do not call this an external-user installation or real-model PASS.
 **Audit pilot — not yet host-accepted:** `audit-repo` now ships a self-contained
 copy of its offline Python tools, checklists and guidance inside the skill folder.
 The canonical originals remain at the repository root. The maintainer uses
-`python -I scripts/sync_standalone_audit.py --write` to regenerate the
-copies, and the same command without `--write` to catch drift in CI.
+`python -I scripts/sync_standalone_audit.py --write` to regenerate deterministic
+copies, rewriting Markdown links to omitted examples or guides as explicit
+GitHub source URLs. These optional off-bundle readings require network access.
+The same command without `--write` detects drift in CI. Packaged Markdown
+is intentionally not byte-identical where off-bundle links were rewritten.
 A copied audit skill can select this local root if the complete plugin root is
 unavailable. This is not evidence that Claude Code or Codex discovered,
 activated or invoked the skill, and does not change the other three skills.
