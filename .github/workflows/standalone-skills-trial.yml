@@ -8,6 +8,7 @@ on:
       - skills/**
       - scripts/standalone_skill_preflight.py
       - scripts/sync_standalone_audit.py
+      - scripts/verify_copied_audit.py
   workflow_dispatch:
 
 permissions:
@@ -85,12 +86,10 @@ jobs:
             fi
             python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2]=="audit-repo" else ("incomplete","full-repository"))' "$work/results/$skill.json" "$skill"
             if [ "$skill" = "audit-repo" ]; then
-              fixture="$work/synthetic-target"
-              mkdir -p "$fixture"
-              printf '# Synthetic Repo\n\n[bad link](missing.md)\n' > "$fixture/README.md"
-              before="$(sha256sum "$fixture/README.md")"
-              python -I "$installed/tools/repo_audit.py" "$fixture" --format json --fail-on never > "$work/results/audit-actual-tool.json"
-              test "$before" = "$(sha256sum "$fixture/README.md")"
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_audit.py" \
+                --skill-root "$installed" \
+                --output-dir "$work/results/audit-behavior-single" \
+                > "$work/results/audit-behavior-single.json"
             fi
           done
           # The same installer must also handle all four in a single project.
@@ -119,6 +118,12 @@ jobs:
               exit 1
             fi
             python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2]=="audit-repo" else ("incomplete","full-repository"))' "$work/results/all-four-$skill.json" "$skill"
+            if [ "$skill" = "audit-repo" ]; then
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_audit.py" \
+                --skill-root "$installed" \
+                --output-dir "$work/results/audit-behavior-combined" \
+                > "$work/results/audit-behavior-combined.json"
+            fi
           done
       - name: Preserve the observed copied-file lists and required-path diagnostics
         if: always()
