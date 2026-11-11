@@ -178,6 +178,20 @@ Do not call this an external-user installation or real-model PASS.
 
 ## Standalone skill-manager installations: separate and unverified
 
+**Optional, observed-file CI experiment:** the
+[standalone-skills CLI copy workflow](../.github/workflows/standalone-skills-trial.yml)
+uses `skills@1.7.6` with Node 24 to install each skill separately **and all
+four together** via the **real** `npx skills add` command in disposable projects. It uses
+`--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
+is **not launched**. The job saves the installed file lists and exact required
+path diagnostics as a seven-day artifact. With the current layout it deliberately
+expects an `incomplete` preflight result for each skill. A green workflow
+therefore means *the known dependency gap was reproduced*, **not** that the
+skills can run, that CLI installations are supported, or that any agent tested
+them. These steps download a version-pinned third-party npm CLI in an
+isolated read-only CI job; they do not run target-repository code. Review the
+actual run and artifacts before describing an observed result.
+
 **Do not treat a standalone skills.sh / skills CLI installation as a supported
 BeautifulRepo installation path yet.** The official [skills CLI
 documentation](https://www.skills.sh/docs/cli) describes installing individual
@@ -185,10 +199,16 @@ skills and its [packs documentation](https://www.skills.sh/docs/packs)
 groups SKILL.md definitions, but neither guarantees that files *outside* each
 skill directory are copied next to it (sources reviewed **2026-11-10**).
 BeautifulRepo's four skills currently depend on shared repository-root tools,
-guides, checklists and templates. Merely discovering SKILL.md can therefore
-be insufficient. This is a source-level distribution risk tracked in
-[#333](https://github.com/drevendev/BeautifulRepo/issues/333), **not**
-a reproduced failure of `npx skills add` or a real-host test.
+guides, checklists and templates. Merely discovering SKILL.md is therefore insufficient. The
+[real CLI copy experiment](https://github.com/drevendev/BeautifulRepo/actions/runs/42915282555)
+(successful on 2026-11-10 UTC) reproduced this dependency problem: the CLI
+completed four single-skill copies and one combined copy, but all eight
+installed skill-layout preflights returned `incomplete`. Its first run used
+GitHub's synthetic PR merge checkout (`5b0e763a`), **not** the source head
+(`14bf301d`); subsequent runs explicitly select and record the checked-out
+source SHA. This is a **reproduced incomplete installed layout**, not a
+failed CLI invocation or evidence of real agent execution. Distribution
+support remains blocked under [#333](https://github.com/drevendev/BeautifulRepo/issues/333).
 
 A maintainer or independent tester can inspect an **already installed**
 disposable per-skill copy without installing packages, executing a skill or
