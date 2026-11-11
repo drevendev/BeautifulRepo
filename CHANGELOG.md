@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Extend the standalone skills CLI trial to run **all three copied audit
+  checkers** on deliberately broken and fixed disposable link/HTML fixtures,
+  asserting actual findings, exit codes and unchanged target bytes in both
+  isolated and combined installations. Preserve diagnostic artifacts and add
+  offline regressions. This proves a bounded synthetic behavior check, not
+  model invocation or general safety (#333).
+
 - Pilot a self-contained standalone `audit-repo` skill folder with eight
   source-derived offline tools/checklists/guides, with links to omitted
   resources converted to explicit GitHub source URLs. Extend the preflight to
