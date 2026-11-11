@@ -205,9 +205,9 @@ uses `skills@1.7.6` with Node 24 to install each skill separately **and all
 four together** via the **real** `npx skills add` command in disposable projects. It uses
 `--copy --agent codex` only to test the CLI's selected-file layout; Codex itself
 is **not launched**. The job saves the installed file lists and exact required
-path diagnostics as a seven-day artifact. With the current layout it deliberately
-expects `present` for `audit-repo`, `draft-release-notes` and `improve-readme`,
-and `incomplete` for `trust-surfaces`, alone and in the combined copy. It also invokes the copied release inventory against disposable synthetic tagged
+path diagnostics as a seven-day artifact. With the self-contained bundles it requires `present` for **all four**
+individual skills and the combined copy. This tests distribution and copied
+local tools, not discovery or activation inside an agent. It also invokes the copied release inventory against disposable synthetic tagged
 and dirty Git history, verifying range-boundary refusal and unchanged target
 files and refs. It exercises **all three copied audit checkers** against deliberately broken
 and fixed synthetic Markdown/HTML links, requiring the expected diagnostics and
@@ -227,9 +227,9 @@ documentation](https://www.skills.sh/docs/cli) describes installing individual
 skills and its [packs documentation](https://www.skills.sh/docs/packs)
 groups SKILL.md definitions, but neither guarantees that files *outside* each
 skill directory are copied next to it (sources reviewed **2026-11-10**).
-One skill, `trust-surfaces`, still depends on unbundled root files;
-`audit-repo`, `draft-release-notes` and `improve-readme` carry copies. Merely discovering
-SKILL.md is insufficient. The
+All four skills now carry their required tools and references within their
+individual directories. Merely discovering SKILL.md remains insufficient.
+Check the current CI run before claiming an observed installation result. The
 [real CLI copy experiment](https://github.com/drevendev/BeautifulRepo/actions/runs/42915282555)
 (successful on 2026-11-10 UTC) reproduced this dependency problem: the CLI
 completed four single-skill copies and one combined copy, but all eight
@@ -254,8 +254,7 @@ the ordinary canonical skill copy rather than an agent-facing symlink alias;
 this preflight deliberately rejects redirected paths, so an alias gives exit
 2 instead of a claim about its target. The [CLI reference](https://www.skills.sh/docs/cli)
 describes symlink and copy installation methods (reviewed 2026-11-10).
-The preflight checks the two-up full-repository root and, for isolated
-`audit-repo` or `draft-release-notes` copies, the bundled resources in each skill directory. It reports
+The preflight checks the two-up full-repository root and, for isolated copies, the bundled resources in each skill directory. It reports
 which layout was selected. Exit **0** means named files are ordinary files
 at those paths;
 **1** identifies missing or redirected paths in JSON; **2** means the
