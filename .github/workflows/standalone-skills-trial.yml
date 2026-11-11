@@ -9,6 +9,7 @@ on:
       - scripts/standalone_skill_preflight.py
       - scripts/sync_standalone_audit.py
       - scripts/sync_standalone_release.py
+      - scripts/verify_copied_release.py
       - scripts/verify_copied_audit.py
   workflow_dispatch:
 
@@ -93,8 +94,8 @@ jobs:
                 --output-dir "$work/results/audit-behavior-single" \
                 > "$work/results/audit-behavior-single.json"
             elif [ "$skill" = "draft-release-notes" ]; then
-              python -I "$installed/scripts/release_inventory.py" "$GITHUB_WORKSPACE" > "$work/results/release-inventory-single.json"
-              python -c 'import json,sys; x=json.load(open(sys.argv[1])); assert x["status"]=="unreleased_draft_only" and x["commit_count"]>=0 and len(x["head_commit"])==40' "$work/results/release-inventory-single.json"
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_release.py" \
+                --skill-root "$installed" --output "$work/results/release-inventory-single.json"
             fi
           done
           # The same installer must also handle all four in a single project.
@@ -129,8 +130,8 @@ jobs:
                 --output-dir "$work/results/audit-behavior-combined" \
                 > "$work/results/audit-behavior-combined.json"
             elif [ "$skill" = "draft-release-notes" ]; then
-              python -I "$installed/scripts/release_inventory.py" "$GITHUB_WORKSPACE" > "$work/results/release-inventory-combined.json"
-              python -c 'import json,sys; x=json.load(open(sys.argv[1])); assert x["status"]=="unreleased_draft_only" and x["commit_count"]>=0 and len(x["head_commit"])==40' "$work/results/release-inventory-combined.json"
+              python -I "$GITHUB_WORKSPACE/scripts/verify_copied_release.py" \
+                --skill-root "$installed" --output "$work/results/release-inventory-combined.json"
             fi
           done
       - name: Preserve the observed copied-file lists and required-path diagnostics

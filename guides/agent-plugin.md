@@ -204,7 +204,9 @@ four together** via the **real** `npx skills add` command in disposable projects
 is **not launched**. The job saves the installed file lists and exact required
 path diagnostics as a seven-day artifact. With the current layout it deliberately
 expects `present` for `audit-repo` and `draft-release-notes` and `incomplete`
-for the other two skills, both alone and in the combined copy. It now exercises **all three copied checkers** against both deliberately broken
+for the other two skills, both alone and in the combined copy. It also invokes the copied release inventory against disposable synthetic tagged
+and dirty Git history, verifying range-boundary refusal and unchanged target
+files and refs. It exercises **all three copied audit checkers** against deliberately broken
 and fixed synthetic Markdown/HTML links, requiring the expected diagnostics and
 exit codes and verifying that the fixture files are unchanged. The trial runs
 for an isolated audit installation and the combined four-skill copy. Synthetic
