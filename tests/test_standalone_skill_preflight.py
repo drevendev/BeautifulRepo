@@ -317,6 +317,35 @@ class StandalonePreflightTests(unittest.TestCase):
             self.assertEqual(incomplete["state"], "incomplete")
             self.assertIn("tools/readme_apply.py", incomplete["missing_or_redirected"])
 
+    def test_trust_bundle_and_copied_audit(self):
+        check = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "scripts/sync_standalone_trust.py")],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(check.returncode, 0, check.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory) / ".agents" / "skills" / "trust-surfaces"
+            shutil.copytree(ROOT / "skills" / "trust-surfaces", installed)
+            ready = probe.inspect(installed, source_root=ROOT)
+            self.assertEqual((ready["state"], ready["layout"]), ("present", "self-contained"))
+            self.assertEqual(ready["source_comparison"]["mismatched"], [])
+            ran = subprocess.run(
+                [sys.executable, "-I", str(ROOT / "scripts/verify_copied_trust.py"),
+                 "--skill-root", str(installed)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(ran.returncode, 0, ran.stderr)
+            self.assertTrue(json.loads(ran.stdout)["passed"])
+            template = installed / "templates/SECURITY.template.md"
+            template.write_text("tampered", encoding="utf-8")
+            changed = probe.inspect(installed, source_root=ROOT)
+            self.assertEqual(changed["state"], "mismatch")
+            self.assertIn("templates/SECURITY.template.md", changed["source_comparison"]["mismatched"])
+            template.unlink()
+            incomplete = probe.inspect(installed)
+            self.assertEqual(incomplete["state"], "incomplete")
+            self.assertIn("templates/SECURITY.template.md", incomplete["missing_or_redirected"])
+
     def test_known_skills_have_nonempty_unique_relative_dependencies(self):
         self.assertEqual(len(probe.REQUIRED), 4)
         for name, names in probe.REQUIRED.items():

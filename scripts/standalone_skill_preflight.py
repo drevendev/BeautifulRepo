@@ -129,9 +129,9 @@ def inspect(path: Path, *, source_root: Path | None = None) -> dict:
         raise ProbeError("installed SKILL.md is missing, redirected or not an ordinary file")
     needed = REQUIRED[skill_dir.name]
     plugin_ready = all(_ordinary(plugin_root, Path(name)) for name in needed)
-    # Three skills now provide self-contained copies. Prefer a full plugin
+    # Four skills now provide self-contained copies. Prefer a full plugin
     # if complete; otherwise probe the copied skill folder.
-    bundled_hint = skill_dir.name in ("audit-repo", "draft-release-notes", "improve-readme") and any(
+    bundled_hint = skill_dir.name in ("audit-repo", "draft-release-notes", "improve-readme", "trust-surfaces") and any(
         (skill_dir / name).exists() or (skill_dir / name).is_symlink()
         for name in needed
     )
