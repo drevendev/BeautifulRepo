@@ -11,6 +11,10 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Changed
+
+- Correct Codex's host-install instructions against the official plugin packaging guide (checked 2026-11-11): registering a Git marketplace is not installing the plugin, and desktop plugin-browser steps are a test procedure, not acceptance. Require actual installed cache evidence and mark unsupported hosts INCONCLUSIVE (#257, #258). Clarify that the four-skill eval definitions are not a stable release.
+
 ### Added
 
 - Bundle the final standalone `trust-surfaces` skill for the skills CLI:
