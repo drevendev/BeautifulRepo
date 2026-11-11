@@ -7,6 +7,7 @@ on:
       - .github/workflows/standalone-skills-trial.yml
       - skills/**
       - scripts/standalone_skill_preflight.py
+      - scripts/sync_standalone_audit.py
   workflow_dispatch:
 
 permissions:
@@ -53,6 +54,8 @@ jobs:
           mkdir -p "$work/results"
           printf '%s\n' "$source_sha" > "$work/results/checkout-source-sha"
           printf '%s\n' "$GITHUB_SHA" > "$work/results/workflow-event-sha"
+          # The repository-owned audited files and copied package must not drift.
+          python -I "$GITHUB_WORKSPACE/scripts/sync_standalone_audit.py"
           for skill in audit-repo improve-readme trust-surfaces draft-release-notes; do
             project="$work/projects/$skill"
             mkdir -p "$project"
@@ -73,13 +76,22 @@ jobs:
             set -e
             printf '%s\n' "$status" > "$work/results/$skill.exit"
             cat "$work/results/$skill.json"
-            # An expected incomplete result records the existing packaging defect.
-            # It is NOT an installation pass. A layout change needs fresh review.
-            if [ "$status" -ne 1 ]; then
-              echo "Unexpected preflight exit $status for $skill; inspect the observed tree" >&2
+            # A passing pilot is a successful copied-file layout, not agent use.
+            expected=1
+            if [ "$skill" = "audit-repo" ]; then expected=0; fi
+            if [ "$status" -ne "$expected" ]; then
+              echo "Unexpected preflight exit $status for $skill" >&2
               exit 1
             fi
-            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2] and x["state"] == "incomplete" and x["missing_or_redirected"]' "$work/results/$skill.json" "$skill"
+            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2]=="audit-repo" else ("incomplete","full-repository"))' "$work/results/$skill.json" "$skill"
+            if [ "$skill" = "audit-repo" ]; then
+              fixture="$work/synthetic-target"
+              mkdir -p "$fixture"
+              printf '# Synthetic Repo\n\n[bad link](missing.md)\n' > "$fixture/README.md"
+              before="$(sha256sum "$fixture/README.md")"
+              python -I "$installed/tools/repo_audit.py" "$fixture" --format json --fail-on never > "$work/results/audit-actual-tool.json"
+              test "$before" = "$(sha256sum "$fixture/README.md")"
+            fi
           done
           # The same installer must also handle all four in a single project.
           combined="$work/projects/all-four"
@@ -100,11 +112,13 @@ jobs:
             status=$?
             set -e
             printf '%s\n' "$status" > "$work/results/all-four-$skill.exit"
-            if [ "$status" -ne 1 ]; then
+            expected=1
+            if [ "$skill" = "audit-repo" ]; then expected=0; fi
+            if [ "$status" -ne "$expected" ]; then
               echo "Combined install changed $skill preflight outcome: $status" >&2
               exit 1
             fi
-            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2] and x["state"] == "incomplete" and x["missing_or_redirected"]' "$work/results/all-four-$skill.json" "$skill"
+            python -c 'import json,sys; x=json.load(open(sys.argv[1], encoding="utf-8")); assert x["skill"] == sys.argv[2]; assert (x["state"],x["layout"]) == (("present","self-contained") if sys.argv[2]=="audit-repo" else ("incomplete","full-repository"))' "$work/results/all-four-$skill.json" "$skill"
           done
       - name: Preserve the observed copied-file lists and required-path diagnostics
         if: always()

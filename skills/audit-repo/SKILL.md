@@ -28,13 +28,17 @@ In short:
 
 ## 1. Locate BeautifulRepo (`R`)
 
-`R` is the directory that contains `tools/repo_audit.py`.
+The installed toolkit root `R` is the directory containing `tools/repo_audit.py`.
 
-- In Claude Code, `R` is `${CLAUDE_PLUGIN_ROOT}`. If that text still reads as a literal
-  `${...}` placeholder, it was not substituted; use the next rule.
-- Otherwise, start from the **directory containing** this `SKILL.md`
-(`R/skills/audit-repo/`) and go up two levels (`../..`) to reach `R`.
-Do not count upward from the `SKILL.md` file path itself.
+- If Claude Code expands `${CLAUDE_PLUGIN_ROOT}` and that directory contains
+  `tools/repo_audit.py`, use it as `R`. A literal placeholder is not a path.
+- Otherwise start from the directory containing this `SKILL.md`. Check its
+  `../..` root first (the complete BeautifulRepo plugin/checkout). When that
+  root lacks the tools, use the **skill directory itself** as `R`: standalone
+  skills CLI copies include local `tools/`, `checklists/` and `guides/`.
+  Do not count upward from the `SKILL.md` file or use the target as `R`.
+- Check required files at the chosen root before running anything. If both
+  complete roots exist, prefer the full plugin root.
 
 Confirm that `R/tools/repo_audit.py`, `R/tools/docs_links.py` and
 `R/tools/html_navigation.py` exist. If they don't, stop. Tell the user to install the

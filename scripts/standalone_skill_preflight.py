@@ -122,16 +122,25 @@ def inspect(path: Path, *, source_root: Path | None = None) -> dict:
     if not _ordinary_directory_chain(lexical_skill_dir):
         raise ProbeError("installed skill path is missing or redirected through an ancestor")
     skill_dir = Path(os.path.abspath(lexical_skill_dir))
-    root = skill_dir.parent.parent
+    plugin_root = skill_dir.parent.parent
     # A relocated skill may be discoverable, but a redirected definition is not
     # acceptable evidence for this structural check.
     if not _ordinary(skill_dir.parent, Path(skill_dir.name) / "SKILL.md"):
         raise ProbeError("installed SKILL.md is missing, redirected or not an ordinary file")
     needed = REQUIRED[skill_dir.name]
+    plugin_ready = all(_ordinary(plugin_root, Path(name)) for name in needed)
+    # Only audit-repo is self-contained so far. Prefer the full plugin root
+    # when valid; otherwise probe copied resources inside that skill folder.
+    bundled_hint = skill_dir.name == "audit-repo" and any(
+        (skill_dir / name).exists() or (skill_dir / name).is_symlink()
+        for name in needed
+    )
+    root = skill_dir if bundled_hint and not plugin_ready else plugin_root
     missing = [name for name in needed if not _ordinary(root, Path(name))]
     report = {
         "skill": skill_dir.name,
         "assumed_root": str(root),
+        "layout": "self-contained" if root == skill_dir else "full-repository",
         "checked_required_files": len(needed),
         "missing_or_redirected": missing,
         "state": "present" if not missing else "incomplete",
@@ -149,14 +158,32 @@ def inspect(path: Path, *, source_root: Path | None = None) -> dict:
         if reference_root == root:
             raise ProbeError("source root must differ from installed skill root")
         relative_files = (f"skills/{skill_dir.name}/SKILL.md", *needed)
+        bundled = root == skill_dir
         for relative in relative_files:
-            if not _ordinary(reference_root, Path(relative)):
-                raise ProbeError(f"source reference missing or redirected: {relative}")
-        mismatched = [
-            relative for relative in relative_files
-            if _ordinary(root, Path(relative))
-            and _digest_file(root / relative) != _digest_file(reference_root / relative)
-        ]
+            source_relative = (
+                f"skills/{skill_dir.name}/{relative}" if bundled and
+                relative != f"skills/{skill_dir.name}/SKILL.md" else relative
+            )
+            if not _ordinary(reference_root, Path(source_relative)):
+                raise ProbeError(f"source reference missing or redirected: {source_relative}")
+        mismatched = []
+        for relative in relative_files:
+            # The copied SKILL.md lives directly in the installed skill folder.
+            installed_path = (
+                skill_dir / "SKILL.md"
+                if relative == f"skills/{skill_dir.name}/SKILL.md"
+                else root / relative
+            )
+            if (
+                (relative.startswith("skills/") or _ordinary(root, Path(relative)))
+                and _digest_file(installed_path) != _digest_file(
+                    reference_root / (
+                        f"skills/{skill_dir.name}/{relative}" if bundled and
+                        relative != f"skills/{skill_dir.name}/SKILL.md" else relative
+                    )
+                )
+            ):
+                mismatched.append(relative)
         report["limitations"] = (
             "Presence and local byte equality only. Not source authentication, "
             "execution, discovery, model behavior or privacy guarantees."

@@ -225,6 +225,43 @@ class StandalonePreflightTests(unittest.TestCase):
             )
             self.assertEqual(result["source_comparison"]["mismatched"], [])
 
+
+    def test_self_contained_audit_copy_with_source_comparison(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            source = base / "pinned"
+            installed = base / "installed" / ".agents" / "skills" / "audit-repo"
+            original = source / "skills" / "audit-repo"
+            installed.mkdir(parents=True)
+            original.mkdir(parents=True)
+            (original / "SKILL.md").write_text("definition", encoding="utf-8")
+            (installed / "SKILL.md").write_text("definition", encoding="utf-8")
+            for relative in probe.REQUIRED["audit-repo"]:
+                for file in (source / relative, source / "skills" / "audit-repo" / relative, installed / relative):
+                    file.parent.mkdir(parents=True, exist_ok=True)
+                    file.write_text("same dependency", encoding="utf-8")
+            result = probe.inspect(installed, source_root=source)
+            self.assertEqual(result["state"], "present")
+            self.assertEqual(result["layout"], "self-contained")
+            self.assertEqual(result["assumed_root"], str(installed))
+            self.assertEqual(result["source_comparison"]["mismatched"], [])
+            modified = installed / "tools/repo_audit.py"
+            modified.write_text("tampered", encoding="utf-8")
+            result = probe.inspect(installed, source_root=source)
+            self.assertEqual(result["state"], "mismatch")
+            self.assertEqual(result["source_comparison"]["mismatched"], ["tools/repo_audit.py"])
+            modified.unlink()
+            result = probe.inspect(installed)
+            self.assertEqual(result["state"], "incomplete")
+            self.assertIn("tools/repo_audit.py", result["missing_or_redirected"])
+
+    def test_committed_audit_bundle_has_no_dependency_drift(self):
+        result = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "scripts" / "sync_standalone_audit.py")],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_known_skills_have_nonempty_unique_relative_dependencies(self):
         self.assertEqual(len(probe.REQUIRED), 4)
         for name, names in probe.REQUIRED.items():
