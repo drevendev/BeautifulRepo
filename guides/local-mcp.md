@@ -1,6 +1,6 @@
 # Experimental local MCP adapter (not a released integration)
 
-**Development candidate, reviewed 2026-11-12.** This optional adapter exposes
+**Development candidate, reviewed 2026-11-11 (UTC).** This optional adapter exposes
 BeautifulRepo's *existing* offline checkers as three read-only tools over MCP
 stdio. No successful Claude Code, Codex, or external-user installation is
 claimed. The normal CLI and GitHub Action do **not** require MCP.
@@ -82,7 +82,7 @@ do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
 
-This **source-checked procedure, refreshed 2026-11-12, has not passed a fresh
+This **source-checked procedure, refreshed 2026-11-11 (UTC), has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
 following full commit is a `master` snapshot containing both SDK protocol
 smoke lifecycles, per-checker isolation, bounded child output, missing-root
