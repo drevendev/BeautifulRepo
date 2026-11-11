@@ -623,6 +623,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Repin the four-skill Claude Code/Codex trial to the accepted development
+  source commit `8947574399df2cc11e8ded41cecbef70be4808c6` across installation commands, offline
+  cache verification, roadmap and three-arm comparison. Add a regression
+  preventing the trial procedure from drifting away from the installer pin.
+  Earlier `cf8ac81` results are historical, not evidence for this candidate;
+  no real agent installation or model execution is claimed (#257, #258).
+
 - Correct Codex's host-install instructions against the official plugin
   packaging guide (checked 2026-11-11): registering a Git marketplace is not
   installing the plugin, and desktop plugin-browser steps are a procedure,

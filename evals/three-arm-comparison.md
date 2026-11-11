@@ -1,10 +1,10 @@
 # Three-arm comparison: before, ordinary prompt, installed skill
 
-**Protocol prepared 2026-11-06; no agent or model runs are reported here.**
+**Protocol prepared 2026-11-06, candidate repinned 2026-11-11; no agent or model runs are reported here.**
 This is a reproducible companion to the [manual smoke matrix](manual-smoke.md),
 not a new eval harness, a passing result, or permission to spend money.
 The four-skill development candidate is
-[`cf8ac81ddabb5e2006913e65a2f980ef201baf5c`](https://github.com/drevendev/BeautifulRepo/tree/cf8ac81ddabb5e2006913e65a2f980ef201baf5c),
+[`8947574399df2cc11e8ded41cecbef70be4808c6`](https://github.com/drevendev/BeautifulRepo/tree/8947574399df2cc11e8ded41cecbef70be4808c6),
 **not** the released v0.2.0 one-skill plugin. Test that exact source
 revision, including any defects it has, rather than silently using moving
 `master`. Read [the install guide](../guides/agent-plugin.md) first.
