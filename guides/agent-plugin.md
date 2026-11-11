@@ -201,8 +201,12 @@ four together** via the **real** `npx skills add` command in disposable projects
 is **not launched**. The job saves the installed file lists and exact required
 path diagnostics as a seven-day artifact. With the current layout it deliberately
 expects `present` for the copied `audit-repo` pilot and `incomplete` for
-the other three skills, both alone and in the combined copy. It also runs the
-copied audit tool against a disposable synthetic README. A green workflow
+the other three skills, both alone and in the combined copy. It now exercises **all three copied checkers** against both deliberately broken
+and fixed synthetic Markdown/HTML links, requiring the expected diagnostics and
+exit codes and verifying that the fixture files are unchanged. The trial runs
+for an isolated audit installation and the combined four-skill copy. Synthetic
+checker behavior is not proof of safe behavior on arbitrary repositories or
+that a model actually discovered or invoked the skill. A green workflow
 **does not** mean an agent discovered, selected or ran a skill. These steps download a version-pinned third-party npm CLI in an
 isolated read-only CI job; they do not run target-repository code. Review the
 actual run and artifacts before describing an observed result.
