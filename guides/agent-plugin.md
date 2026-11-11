@@ -63,7 +63,16 @@ codex plugin marketplace add drevendev/BeautifulRepo --ref v0.2.0
 codex plugin marketplace list
 ```
 
-For Codex, `codex plugin marketplace add` registers a **marketplace source**, not an installed plugin. The [current official packaging guide](https://developers.openai.com/plugins/build/plugins) documents installing a local marketplace plugin through the **ChatGPT desktop app's Plugins Directory**: open the added marketplace, find **BeautifulRepo**, install it, then start a new Codex chat. This is a procedure, **not** an observed BeautifulRepo installation. A `/plugins` command in a particular Codex CLI version is not assumed to be available; record the actual host and command if using it. If no supported plugin browser is available, report installation as **INCONCLUSIVE**, never PASS. In Claude Code, start a new session after installation.
+For Codex, `codex plugin marketplace add` registers a **marketplace source**,
+not an installed plugin. The [current official packaging guide](https://developers.openai.com/plugins/build/plugins)
+documents installing a local marketplace plugin through the **ChatGPT desktop
+app's Plugins Directory**: open the added marketplace, find **BeautifulRepo**,
+install it, then start a new Codex chat. This is a procedure, **not** an
+observed BeautifulRepo installation. A `/plugins` command in a particular
+Codex CLI version is not assumed to be available; record the actual host and
+command if using it. If no supported plugin browser is available, report
+installation as **INCONCLUSIVE**, never PASS. In Claude Code, start a new
+session after installation.
 
 These commands pin release `v0.2.0`, the first release that contains the plugin.
 Leaving out the pin follows mutable `master`; **do not use an unpinned
@@ -110,7 +119,16 @@ codex plugin marketplace add drevendev/BeautifulRepo --ref cf8ac81ddabb5e2006913
 codex plugin marketplace list
 ```
 
-On Codex, these commands only **register and list** the pinned marketplace. For a supported local-plugin path, use the [ChatGPT desktop Plugins Directory](https://developers.openai.com/plugins/build/plugins): open the registered marketplace, choose **BeautifulRepo**, install it, and start a **new Codex chat**. Inspect the actual installed/cached files before grading any skill. Do not substitute `codex plugin marketplace list`, a source checkout, or a hypothetical `/plugins` menu for observed installation. The former `codex plugin add ...` syntax is not part of the documented marketplace workflow. If the client does not expose the plugin browser, record its version and report **INCONCLUSIVE**; do not silently switch to unpinned `master`. The procedure is unverified for BeautifulRepo in both hosts.
+On Codex, these commands only **register and list** the pinned marketplace.
+For a supported local-plugin path, use the [ChatGPT desktop Plugins Directory](https://developers.openai.com/plugins/build/plugins):
+open the registered marketplace, choose **BeautifulRepo**, install it, and
+start a **new Codex chat**. Inspect the actual installed/cached files before
+grading any skill. Do not substitute `codex plugin marketplace list`, a
+source checkout, or a hypothetical `/plugins` menu for observed installation.
+The former `codex plugin add ...` syntax is not part of the documented
+marketplace workflow. If the client does not expose the plugin browser, record
+its version and report **INCONCLUSIVE**; do not silently switch to unpinned
+`master`. The procedure is unverified for BeautifulRepo in both hosts.
 
 Restart the client. Check the *installed copy* of `skills/` for all four named
 `SKILL.md` files and confirm they correspond to the pinned commit before a
@@ -384,8 +402,8 @@ See [evals](../evals/README.md) and
 
 | | Claude Code | Codex |
 | --- | --- | --- |
-| Update | `claude plugin marketplace update beautifulrepo`, then `claude plugin update beautifulrepo@beautifulrepo` | For an intentionally **new** revision, refresh the marketplace with `codex plugin marketplace upgrade beautifulrepo` and manage the plugin in the supported desktop plugin browser. **Do not upgrade a pinned test candidate mid-run.** |
-| Remove | `claude plugin uninstall beautifulrepo@beautifulrepo`, then `claude plugin marketplace remove beautifulrepo` | Uninstall the plugin through the supported desktop plugin browser, then remove the marketplace with `codex plugin marketplace remove beautifulrepo`. Removing a marketplace alone is not proof of uninstalling the cached plugin. |
+| Update | `claude plugin marketplace update beautifulrepo`, then `claude plugin update beautifulrepo@beautifulrepo` | For an intentionally **new** revision, use `codex plugin marketplace upgrade beautifulrepo` and the desktop plugin browser. **Do not upgrade a pinned test candidate mid-run.** |
+| Remove | `claude plugin uninstall beautifulrepo@beautifulrepo`, then `claude plugin marketplace remove beautifulrepo` | Uninstall in the desktop plugin browser first, then remove the source with `codex plugin marketplace remove beautifulrepo`. Removing the marketplace alone does not prove uninstall. |
 
 Restart the session after an update.
 
