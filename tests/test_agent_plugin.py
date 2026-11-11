@@ -103,6 +103,22 @@ class PluginManifestTests(unittest.TestCase):
             "offline cache verification must pin the tested candidate",
         )
 
+        # The immutable matrix's step 3 links to a historical installation
+        # guide. Without an explicit warning, following that link silently
+        # changes the tested source even though all current-checkout pins agree.
+        self.assertIn(
+            "**Do not follow the matrix's relative installation-guide link.**",
+            guide,
+        )
+        self.assertIn(
+            "still installs `cf8ac81ddabb5e2006913e65a2f980ef201baf5c` instead.",
+            guide,
+        )
+        self.assertIn(
+            f"`--expected-commit {claude[0]}` cache",
+            guide,
+        )
+
     def test_manifest_versions_are_valid(self):
         for path in (".claude-plugin/plugin.json", "plugin.json"):
             version = load(path)["version"]
