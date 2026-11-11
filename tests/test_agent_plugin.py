@@ -89,6 +89,20 @@ class PluginManifestTests(unittest.TestCase):
             guide,
         )
 
+        comparison = (ROOT / "evals/three-arm-comparison.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            f"https://github.com/drevendev/BeautifulRepo/tree/{claude[0]}",
+            comparison,
+            "the three-arm protocol must use the same immutable candidate",
+        )
+        self.assertIn(
+            f"--expected-commit {claude[0]}",
+            guide,
+            "offline cache verification must pin the tested candidate",
+        )
+
     def test_manifest_versions_are_valid(self):
         for path in (".claude-plugin/plugin.json", "plugin.json"):
             version = load(path)["version"]

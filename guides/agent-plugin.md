@@ -80,24 +80,20 @@ checkout as evidence for a tested release candidate**.
 
 ## Try all four skills from a pinned development candidate
 
-The source candidate at [commit `cf8ac81ddabb5`](https://github.com/drevendev/BeautifulRepo/tree/cf8ac81ddabb5e2006913e65a2f980ef201baf5c)
+The source candidate at [commit `8947574399df`](https://github.com/drevendev/BeautifulRepo/tree/8947574399df2cc11e8ded41cecbef70be4808c6)
 contains `audit-repo`, `improve-readme`, `trust-surfaces` and
 `draft-release-notes` (manifest version `0.3.0-dev.0`). It is **not a
-stable v0.3.0 release**. Unlike the earlier `a6ff79ee137d2` trial tree,
-this revision includes the Codex desktop-only `requires_local_executor`
-manifest declaration, the documented plugin-browser installation flow, and
-the four-skill discovery, snapshot and synthetic-demo corrections.
-The [six source CI checks](https://github.com/drevendev/BeautifulRepo/actions/runs/42210225927)
-completed successfully on this exact commit on 2026-11-06; they are **not**
-evidence of successful plugin installation, skill discovery or model behavior.
-Earlier candidates `a6ff79ee137d2` and `9b3e43fd8502` remain inspectable,
-but their results must **not** be transferred to this candidate. Record the
-exact SHA for every run. The following commands come from the current official
+stable v0.3.0 release**. Compared with the earlier `cf8ac81` candidate,
+this revision also contains independently copied dependencies for all four
+skills, the corrected Codex plugin-browser procedure and the offline
+installed-cache verifier. The development source was accepted through
+GitHub PRs #337–#343 on 2026-11-11; their CI results belong to the specific
+PR heads, not automatically to this merged squash SHA. **No fresh Claude Code
+or Codex installation, skill discovery or model invocation has been proven.**
+Record the full SHA for each trial. Use the official
 [Claude Code CLI reference](https://code.claude.com/docs/en/plugins/cli-reference)
-and [Codex plugin guide](https://developers.openai.com/plugins/build/plugins),
-but **fresh GitHub-source installation and actual model invocation have not
-been confirmed** at this revision. Treat installation errors as test results,
-not as proof of success.
+and [Codex plugin guide](https://developers.openai.com/plugins/build/plugins)
+for host commands; treat errors as test results, not proof of success.
 
 Start with a clean, disposable test environment. If `beautifulrepo` is already
 configured, inspect it first rather than overwriting valued marketplace settings.
@@ -106,7 +102,7 @@ You need Python 3.11+ and Git. Try one host, from a regular terminal:
 **Claude Code — test the immutable commit:**
 
 ```bash
-claude plugin marketplace add drevendev/BeautifulRepo@cf8ac81ddabb5e2006913e65a2f980ef201baf5c
+claude plugin marketplace add drevendev/BeautifulRepo@8947574399df2cc11e8ded41cecbef70be4808c6
 claude plugin install beautifulrepo@beautifulrepo
 claude plugin list
 claude plugin details beautifulrepo
@@ -115,7 +111,7 @@ claude plugin details beautifulrepo
 **Codex — test the same immutable commit:**
 
 ```bash
-codex plugin marketplace add drevendev/BeautifulRepo --ref cf8ac81ddabb5e2006913e65a2f980ef201baf5c
+codex plugin marketplace add drevendev/BeautifulRepo --ref 8947574399df2cc11e8ded41cecbef70be4808c6
 codex plugin marketplace list
 ```
 
@@ -134,12 +130,9 @@ Restart the client. Check the *installed copy* of `skills/` for all four named
 `SKILL.md` files and confirm they correspond to the pinned commit before a
 model test. For a low-risk first test use a **disposable synthetic target**,
 never a private repository with unapproved provider data controls. Follow the
-[revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/cf8ac81ddabb5e2006913e65a2f980ef201baf5c/evals/manual-smoke.md).
-**Historical-link caveat:** that immutable matrix links relatively to the
-plugin guide *as it existed in the pinned commit*, where the installer still
-references the superseded `a6ff79ee` candidate. For a `cf8ac81` trial, use
-the full-SHA installation commands **on this page** and verify the installed
-copy against the `cf8ac81` source, not the old guide or mutable `master`.
+[revision-pinned manual matrix](https://github.com/drevendev/BeautifulRepo/blob/8947574399df2cc11e8ded41cecbef70be4808c6/evals/manual-smoke.md).
+Use the matrix from the **same pinned commit** as the installed source; do
+not combine it with instructions or reports from earlier candidates.
 Actual skill selection, file reads, tool calls, permission decisions and
 before/after target snapshots must be observed; static CI and plugin manifests
 cannot verify them. Results (including failures or INCONCLUSIVE outcomes) go to
@@ -155,7 +148,7 @@ No model evaluation or release publication is automatic.
 A marketplace registration or source checkout is not proof that the host installed
 the expected four skill files. After installing the **development candidate**
 above, locate the actual installed plugin cache root reported by your host.
-Separately check out the full `cf8ac81ddabb5e2006913e65a2f980ef201baf5c`
+Separately check out the full `8947574399df2cc11e8ded41cecbef70be4808c6`
 commit in a local Git working tree. Use the **actual cache location shown by
 the host**, not another copy of the source checkout. The two paths must be
 **different physical directories**: giving the same checkout twice (even
@@ -163,11 +156,11 @@ through alternate path spellings) returns INCOMPLETE, never MATCH. Independently
 verify the source's Git origin and the host's cache location; a byte match
 cannot authenticate where either directory came from.
 
-From a **current BeautifulRepo toolkit checkout** (the verifier was added
-*after* the historical candidate and is not present at that SHA), run:
+From that **pinned BeautifulRepo source checkout**, which contains the
+verifier, run:
 
 ```text
-python -I "/path/to/current-BeautifulRepo/scripts/plugin_install_verify.py" --source "/absolute/path/to/cf8ac81-source" --installed "/absolute/path/to/installed-plugin-cache" --expected-commit cf8ac81ddabb5e2006913e65a2f980ef201baf5c
+python -I "/absolute/path/to/pinned-source/scripts/plugin_install_verify.py" --source "/absolute/path/to/pinned-source" --installed "/absolute/path/to/installed-plugin-cache" --expected-commit 8947574399df2cc11e8ded41cecbef70be4808c6
 ```
 
 Requires Python 3.11+ and local Git; the source must be at the repository top
@@ -430,7 +423,7 @@ need access to a **local** Git checkout and Python/Git tools. This follows the
 (reviewed 2026-11-06). It does **not** install a plugin, grant filesystem
 permissions, verify real model execution, or add an MCP server. The stable
 `v0.2.0` tag and older `a6ff79ee` development tree are immutable and do
-not carry this flag; the pinned `cf8ac81` development candidate does.
+not carry this flag; the pinned development candidate does.
 
 ## Fixture-based checks (not model evaluations)
 
