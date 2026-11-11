@@ -237,8 +237,7 @@ class StandalonePreflightTests(unittest.TestCase):
             (original / "SKILL.md").write_text("definition", encoding="utf-8")
             (installed / "SKILL.md").write_text("definition", encoding="utf-8")
             for relative in probe.REQUIRED["audit-repo"]:
-                for root in (source, installed):
-                    file = root / relative
+                for file in (source / relative, source / "skills" / "audit-repo" / relative, installed / relative):
                     file.parent.mkdir(parents=True, exist_ok=True)
                     file.write_text("same dependency", encoding="utf-8")
             result = probe.inspect(installed, source_root=source)
@@ -257,18 +256,11 @@ class StandalonePreflightTests(unittest.TestCase):
             self.assertIn("tools/repo_audit.py", result["missing_or_redirected"])
 
     def test_committed_audit_bundle_has_no_dependency_drift(self):
-        files = (
-            *probe.REQUIRED["audit-repo"],
-            "checklists/confidentiality.md",
-            "guides/private-repositories.md",
+        result = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "scripts" / "sync_standalone_audit.py")],
+            capture_output=True, text=True,
         )
-        for relative in files:
-            with self.subTest(relative=relative):
-                canonical = ROOT / relative
-                packaged = ROOT / "skills" / "audit-repo" / relative
-                self.assertFalse(packaged.is_symlink())
-                self.assertTrue(packaged.is_file())
-                self.assertEqual(packaged.read_bytes(), canonical.read_bytes())
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_known_skills_have_nonempty_unique_relative_dependencies(self):
         self.assertEqual(len(probe.REQUIRED), 4)

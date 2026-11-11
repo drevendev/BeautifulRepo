@@ -158,9 +158,14 @@ def inspect(path: Path, *, source_root: Path | None = None) -> dict:
         if reference_root == root:
             raise ProbeError("source root must differ from installed skill root")
         relative_files = (f"skills/{skill_dir.name}/SKILL.md", *needed)
+        bundled = root == skill_dir
         for relative in relative_files:
-            if not _ordinary(reference_root, Path(relative)):
-                raise ProbeError(f"source reference missing or redirected: {relative}")
+            source_relative = (
+                f"skills/{skill_dir.name}/{relative}" if bundled and
+                relative != f"skills/{skill_dir.name}/SKILL.md" else relative
+            )
+            if not _ordinary(reference_root, Path(source_relative)):
+                raise ProbeError(f"source reference missing or redirected: {source_relative}")
         mismatched = []
         for relative in relative_files:
             # The copied SKILL.md lives directly in the installed skill folder.
@@ -171,7 +176,12 @@ def inspect(path: Path, *, source_root: Path | None = None) -> dict:
             )
             if (
                 (relative.startswith("skills/") or _ordinary(root, Path(relative)))
-                and _digest_file(installed_path) != _digest_file(reference_root / relative)
+                and _digest_file(installed_path) != _digest_file(
+                    reference_root / (
+                        f"skills/{skill_dir.name}/{relative}" if bundled and
+                        relative != f"skills/{skill_dir.name}/SKILL.md" else relative
+                    )
+                )
             ):
                 mismatched.append(relative)
         report["limitations"] = (
