@@ -1056,6 +1056,14 @@ keep their original themed headings.
 
 ### Security
 
+- Fail closed on out-of-checkout **non-Markdown file symlinks** (such as
+  LICENSE, README.rst and image assets) before any MCP checker starts.
+  Previously the preflight validated Markdown aliases but silently skipped
+  other symlink names. Keep ordinary in-root single-linked file aliases
+  usable, refuse directory symlinks, and add synthetic source-preservation
+  and no-checker-launch regressions. This is a stable-checkout boundary,
+  not a claim of protection against concurrent filesystem replacement (#255).
+
 - Reject directory junctions encountered in the MCP source inventory
   before running any checker (excluding intentionally ignored `.git` and
   `node_modules` trees). Previously the metadata preflight silently skipped
