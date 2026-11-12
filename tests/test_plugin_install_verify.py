@@ -147,6 +147,32 @@ class PluginInstallVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(verifier.VerificationError, "exactly"):
             verifier.verify(self.source, self.installed, self.sha)
 
+    def test_redirected_root_parent_cannot_pass_as_installed_or_source(self):
+        alias = Path(self.temp.name) / "alias-to-checkouts"
+        try:
+            alias.symlink_to(Path(self.temp.name), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        for source, installed in (
+            (self.source, alias / "installed"),
+            (alias / "source", self.installed),
+        ):
+            with self.subTest(source=str(source), installed=str(installed)):
+                with self.assertRaisesRegex(verifier.VerificationError, "redirected component"):
+                    verifier.verify(source, installed, self.sha)
+
+    @unittest.skipUnless(sys.platform == "win32", "native junction test requires Windows")
+    def test_native_windows_root_junction_is_not_treated_as_ordinary_cache(self):
+        alias = Path(self.temp.name) / "junction-to-checkouts"
+        result = subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(alias), self.temp.name],
+            capture_output=True, text=True, check=False,
+        )
+        if result.returncode:
+            self.skipTest("creating a test junction is unavailable")
+        with self.assertRaisesRegex(verifier.VerificationError, "redirected component"):
+            verifier.verify(self.source, alias / "installed", self.sha)
+
     def test_symbolic_link_is_not_followed(self):
         target = self.installed / "skills" / "audit-repo" / "SKILL.md"
         target.unlink()
