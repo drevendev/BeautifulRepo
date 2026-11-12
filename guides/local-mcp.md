@@ -42,9 +42,11 @@ with a five-second preflight deadline. It skips `.git` and `node_modules`
 like the link checkers and refuses Markdown-named devices, redirects outside
 the repository, and hard-linked regular files (including extensionless
 entry points and non-Markdown documents) whose in-root names could alias
-files outside the checkout. Directory junctions inside the checkout are
-also refused before a checker runs, even when the redirected subtree
-contains ordinary documents; they are not silently skipped. Copy fixtures rather than using hard links. A limit or unreadable source returns **incomplete evidence**
+files outside the checkout. Directory junctions encountered in the
+scanned tree (excluding ignored `.git` and `node_modules`) are also
+refused before a checker runs, even if their target contains ordinary
+documents. Copy fixtures rather than using hard links. A limit or
+unreadable source returns **incomplete evidence**
 (exit 2), not a clean audit. This is **not** a stable filesystem snapshot,
 concurrent-write protection or a general limit on non-Markdown contents;
 the standalone CLI has its own coverage boundaries.
