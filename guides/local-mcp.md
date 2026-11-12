@@ -250,6 +250,19 @@ for acceptance criteria. No claim of Claude Code or Codex host success is made h
 
 ## Automated SDK protocol smoke (not host acceptance)
 
+The optional [MCP workflow](../.github/workflows/mcp-protocol.yml) runs the
+same pinned Python 3.11 / `mcp==2.3.0` protocol exercise independently on
+`ubuntu-latest` and `windows-latest`. The jobs use GitHub's official
+[OS matrix pattern](https://docs.github.com/en/actions/tutorials/build-and-test-code/python)
+and `fail-fast: false` so a Windows failure cannot be hidden by a Linux
+success, or vice versa. Inspect **each** job result and log: on Windows,
+symlink creation may be reported as **untested**, which is not symlink
+coverage. This smoke does not create a native Windows junction (that has a
+separate Windows-only source-level regression), does not run an actual
+Claude Code or Codex host, and does not establish model behavior or external
+installation. Do not mark cross-platform protocol PASS until both jobs
+actually complete successfully on the same commit.
+
 An opt-in [real-protocol smoke script](../integrations/mcp_protocol_smoke.py)
 and [focused GitHub Actions workflow](../.github/workflows/mcp-protocol.yml)
 install the pinned `mcp==2.3.0` SDK in a disposable CI environment,

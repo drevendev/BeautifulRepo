@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Extend the optional pinned-SDK MCP stdio smoke from Ubuntu to separate
+  Ubuntu and Windows Python 3.11 matrix jobs, checking modern and legacy
+  protocol sessions and synthetic read-only tool results on each OS. The
+  new Windows job is development evidence only, not a Claude Code/Codex
+  host-installation PASS or arbitrary NTFS reparse-point certification.
+  Preserve independent job outcomes and explicit untested-link reporting
+  (related to #255).
+
 - Add a Windows-only native directory-junction regression for the experimental
   MCP root boundary. It creates a synthetic `mklink /J` alias, verifies that
   direct and nested redirected roots are refused before any checker launches,
