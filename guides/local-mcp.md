@@ -39,17 +39,28 @@ Before any of the three checkers starts, the adapter also makes a metadata-only,
 fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
-like the link checkers and refuses Markdown-named devices, redirects outside
-the repository, and hard-linked regular files (including extensionless
-entry points and non-Markdown documents) whose in-root names could alias
-files outside the checkout. Directory junctions encountered in the
-scanned tree (excluding ignored `.git` and `node_modules`) are also
-refused before a checker runs, even if their target contains ordinary
-documents. Copy fixtures rather than using hard links. A limit or
-unreadable source returns **incomplete evidence**
-(exit 2), not a clean audit. This is **not** a stable filesystem snapshot,
-concurrent-write protection or a general limit on non-Markdown contents;
-the standalone CLI has its own coverage boundaries.
+like the link checkers. **At the immutable installation pin below**
+(`2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d`), it refuses
+Markdown-named devices, out-of-checkout **Markdown-named** symlinks,
+hard-linked regular files of any extension, and directory junctions in
+the scanned tree (excluding ignored directories). That pinned version
+does **not** validate non-Markdown file symlink targets in this preflight.
+
+**Development-only change in PR #351 (not integrated at the time of this
+update):** this PR's source additionally refuses out-of-checkout
+**non-Markdown file symlinks**, including LICENSE, README.rst and assets,
+and symlinked directories before a checker runs. Ordinary non-Markdown
+aliases are accepted only if they resolve to a regular, single-linked
+file inside the checkout. **This additional behavior is not available
+from the pinned POSIX/PowerShell commands below.** The install pin must
+be updated to a separately reviewed, merged immutable commit before
+those commands can claim this stronger boundary.
+
+Copy fixtures rather than using hard links. A limit or unreadable source
+returns **incomplete evidence** (exit 2), not a clean audit. This is
+**not** a stable filesystem snapshot, concurrent-write protection or a
+general limit on non-Markdown contents; the standalone CLI has its own
+coverage boundaries.
 The checkers do not execute target code or fetch external links. MCP clients
 and model hosts **may transmit returned findings to their providers**.
 

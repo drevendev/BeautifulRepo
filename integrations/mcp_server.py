@@ -95,7 +95,20 @@ def _bounded_source_tree(root: Path) -> bool:
                     # *every* regular hard link, independent of extension.
                     if stat.S_ISREG(info.st_mode) and info.st_nlink > 1:
                         return False
-                    if not entry.name.lower().endswith((".md", ".markdown")):
+                    is_markdown = entry.name.lower().endswith((".md", ".markdown"))
+                    if stat.S_ISLNK(info.st_mode) and not is_markdown:
+                        # An extensionless README/LICENSE or asset link may be
+                        # considered by a checker even though it is not a Markdown
+                        # source. Do not silently skip a redirect outside root.
+                        target = Path(entry.path).resolve(strict=True)
+                        if not target.is_relative_to(root) or not target.is_file():
+                            return False
+                        target_info = os.lstat(target)
+                        if (not stat.S_ISREG(target_info.st_mode)
+                                or target_info.st_nlink > 1
+                                or _unsupported_reparse(target_info)):
+                            return False
+                    if not is_markdown:
                         continue
                     if stat.S_ISREG(info.st_mode):
                         size = info.st_size
