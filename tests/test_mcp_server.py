@@ -329,6 +329,55 @@ class CheckerWrapperTests(unittest.TestCase):
             self.assertEqual(result["state"], "incomplete")
             run.assert_not_called()
 
+    def test_non_markdown_symlink_outside_root_fails_before_every_checker(self):
+        with tempfile.TemporaryDirectory() as outside:
+            external = Path(outside) / "private.txt"
+            external.write_text("synthetic outside content", encoding="utf-8")
+            for name in ("LICENSE", "README.rst", "assets/logo.svg"):
+                with self.subTest(name=name):
+                    alias = self.root / name
+                    alias.parent.mkdir(parents=True, exist_ok=True)
+                    try:
+                        alias.symlink_to(external)
+                    except (OSError, NotImplementedError):
+                        self.skipTest("file symlinks unavailable")
+                    try:
+                        with mock.patch.object(adapter, "_bounded_run") as run:
+                            for tool_name in adapter.CHECKS:
+                                report = adapter.run_check(self.root, tool_name)
+                                self.assertEqual(report["state"], "incomplete")
+                                self.assertEqual(report["exit_code"], 2)
+                            run.assert_not_called()
+                        self.assertEqual(external.read_text(encoding="utf-8"),
+                                         "synthetic outside content")
+                    finally:
+                        alias.unlink()
+
+    def test_non_markdown_symlink_to_in_root_file_remains_allowed(self):
+        original = self.root / "original.svg"
+        original.write_text("<svg></svg>", encoding="utf-8")
+        alias = self.root / "image.svg"
+        try:
+            alias.symlink_to(original)
+        except (OSError, NotImplementedError):
+            self.skipTest("file symlinks unavailable")
+        self.assertTrue(adapter._bounded_source_tree(self.root))
+
+    def test_non_markdown_directory_symlink_is_refused(self):
+        ordinary = self.root / "docs"
+        ordinary.mkdir()
+        alias = self.root / "linked-docs"
+        try:
+            alias.symlink_to(ordinary, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        with mock.patch.object(adapter, "_bounded_run") as run:
+            for tool_name in adapter.CHECKS:
+                report = adapter.run_check(self.root, tool_name)
+                self.assertEqual(report["state"], "incomplete")
+                self.assertEqual(report["exit_code"], 2)
+            run.assert_not_called()
+
     def test_hardlinked_outside_markdown_is_refused_by_every_tool(self):
         with tempfile.TemporaryDirectory() as outside:
             original = Path(outside) / "external.md"
