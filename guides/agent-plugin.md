@@ -166,7 +166,11 @@ the host**, not another copy of the source checkout. The two paths must be
 **different physical directories**: giving the same checkout twice (even
 through alternate path spellings) returns INCOMPLETE, never MATCH. Independently
 verify the source's Git origin and the host's cache location; a byte match
-cannot authenticate where either directory came from.
+cannot authenticate where either directory came from. Supply **physical absolute
+paths**: the verifier returns INCOMPLETE when either root or any ancestor is a
+symlink or Windows junction/reparse point. On POSIX, use `realpath` on an
+already trusted path if necessary (including systems where `/var` is a
+symlink); resolving a path does not prove installation provenance.
 
 From that **pinned BeautifulRepo source checkout**, which contains the
 verifier, run:
