@@ -157,14 +157,37 @@ class PluginManifestTests(unittest.TestCase):
         )
         self.assertIn("codex plugin marketplace list", guide)
         self.assertIn("Plugins Directory", guide)
-        self.assertIn("installation as **INCONCLUSIVE**", guide)
+        self.assertIn("**INCONCLUSIVE/FAIL**", guide)
 
     def test_codex_guide_distinguishes_marketplace_from_plugin_install(self):
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        self.assertIn("registers a **marketplace source**", guide)
-        self.assertIn("not an installed plugin", guide)
-        self.assertIn("**not** an", guide)
-        self.assertIn("Inspect the actual installed/cached files", guide)
+        released = guide.split(
+            "## Install the released audit skill (v0.2.0)", 1
+        )[1].split("## Try all four skills", 1)[0]
+        candidate = guide.split(
+            "## Try all four skills from a pinned development candidate", 1
+        )[1].split("## Verify cached skill definitions", 1)[0]
+
+        # A marketplace registration is not proof of plugin installation.
+        # Keep both official installation routes discoverable in both paths.
+        self.assertRegex(
+            released,
+            r"(?s)`codex plugin marketplace add`.{0,90}registers a source;"
+            r" it does\s+not install the plugin",
+        )
+        self.assertIn("only **register and list** the pinned marketplace", candidate)
+        self.assertIn("**not** installation evidence", candidate)
+        for name, section in (("release", released), ("candidate", candidate)):
+            with self.subTest(path=name):
+                self.assertIn(
+                    "https://developers.openai.com/learn/developers-codex-plugin",
+                    section,
+                )
+                self.assertIn("`/plugins`", section)
+                self.assertIn("**Install plugin**", section)
+                self.assertIn("Plugins Directory", section)
+                self.assertIn("installed/cached", section)
+
         for unsupported_command in ("add", "remove", "update"):
             with self.subTest(command=unsupported_command):
                 self.assertNotRegex(

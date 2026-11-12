@@ -63,15 +63,17 @@ codex plugin marketplace add drevendev/BeautifulRepo --ref v0.2.0
 codex plugin marketplace list
 ```
 
-For Codex, `codex plugin marketplace add` registers a **marketplace source**,
-not an installed plugin. The [current official packaging guide](https://developers.openai.com/plugins/build/plugins)
-documents installing a local marketplace plugin through the **ChatGPT desktop
-app's Plugins Directory**: open the added marketplace, find **BeautifulRepo**,
-install it, then start a new Codex chat. This is a procedure, **not** an
-observed BeautifulRepo installation. A `/plugins` command in a particular
-Codex CLI version is not assumed to be available; record the actual host and
-command if using it. If no supported plugin browser is available, report
-installation as **INCONCLUSIVE**, never PASS. In Claude Code, start a new
+For Codex, `codex plugin marketplace add` **registers a source; it does
+not install the plugin**. The [official Codex CLI installation example](https://developers.openai.com/learn/developers-codex-plugin)
+(rechecked **2026-11-12**) documents starting `codex`, opening `/plugins`,
+selecting a plugin and choosing **Install plugin**, then starting a new chat.
+The [official packaging guide](https://developers.openai.com/plugins/build/plugins)
+also documents installing local-marketplace plugins through the ChatGPT desktop
+**Plugins Directory**. These are documented host workflows, **not** observed
+BeautifulRepo installations. Use the browser actually available in your host
+version, inspect its installed/cached copy, and record any missing marketplace,
+unsupported command or installation error as **FAIL/INCONCLUSIVE** rather than
+treating marketplace registration as success. In Claude Code, start a new
 session after installation.
 
 These commands pin release `v0.2.0`, the first release that contains the plugin.
@@ -116,15 +118,17 @@ codex plugin marketplace list
 ```
 
 On Codex, these commands only **register and list** the pinned marketplace.
-For a supported local-plugin path, use the [ChatGPT desktop Plugins Directory](https://developers.openai.com/plugins/build/plugins):
-open the registered marketplace, choose **BeautifulRepo**, install it, and
-start a **new Codex chat**. Inspect the actual installed/cached files before
-grading any skill. Do not substitute `codex plugin marketplace list`, a
-source checkout, or a hypothetical `/plugins` menu for observed installation.
-The former `codex plugin add ...` syntax is not part of the documented
-marketplace workflow. If the client does not expose the plugin browser, record
-its version and report **INCONCLUSIVE**; do not silently switch to unpinned
-`master`. The procedure is unverified for BeautifulRepo in both hosts.
+The [official Codex CLI example](https://developers.openai.com/learn/developers-codex-plugin)
+documents `codex` followed by `/plugins`: find **BeautifulRepo** in the
+registered marketplace, select **Install plugin**, and start a **new chat**.
+Alternatively, use the [ChatGPT desktop Plugins Directory](https://developers.openai.com/plugins/build/plugins)
+with that marketplace. Neither route has been observed to install this
+BeautifulRepo candidate. Inspect the installed/cached files before grading
+any skill; merely opening `/plugins`, listing marketplaces or checking out a
+source tree is **not** installation evidence. If your host does not expose a
+compatible plugin browser, or installation fails, record its version and exact
+error as **INCONCLUSIVE/FAIL**. Do not switch to unpinned `master` or reuse a
+different candidate's evidence.
 
 Restart the client. Check the *installed copy* of `skills/` for all four named
 `SKILL.md` files and confirm they correspond to the pinned commit before a

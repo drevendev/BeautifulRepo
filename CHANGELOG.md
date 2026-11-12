@@ -784,6 +784,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Correct the Claude Code/Codex plugin setup guide to include the
+  officially documented Codex CLI `/plugins` installation browser alongside
+  the desktop Plugins Directory, without mistaking marketplace registration
+  or source checkout for an installed, tested BeautifulRepo plugin
+  (official OpenAI docs rechecked 2026-11-12; #258, #257).
+
 - Reject unsupported Windows filesystem reparse points in the experimental
   MCP server's configured-root and source preflights. Unrecognized reparse
   tags and attribute-only redirects no longer pass as ordinary paths.
