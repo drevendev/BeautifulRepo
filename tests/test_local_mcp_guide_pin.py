@@ -34,11 +34,14 @@ class MCPGuidePinTests(unittest.TestCase):
         self.assertIn(f"$pin = '{pin}'", trial)
         self.assertIn("git checkout --detach $pin", trial)
 
-    def test_host_and_windows_reparse_coverage_is_not_overclaimed(self):
+    def test_native_junction_evidence_is_scoped_not_host_acceptance(self):
         source = GUIDE.read_text(encoding="utf-8")
-        self.assertIn("The Windows reparse tests use **mocked filesystem metadata**", source)
-        self.assertIn("no real NTFS", source)
-        self.assertIn("no real NTFS\nreparse-point host test or Claude Code/Codex installation PASS", source)
+        self.assertIn("test_real_windows_junction_ancestor_rejected_before_any_checker", source)
+        self.assertIn("test_real_windows_internal_junction_fails_closed", source)
+        self.assertIn("**PR-head CI evidence**", source)
+        self.assertIn("Arbitrary NTFS reparse types and concurrent path", source)
+        self.assertIn("not host\ninstallation or model-tool-call acceptance", source)
+        self.assertNotIn("The Windows reparse tests use **mocked filesystem metadata**", source)
 
 
 if __name__ == "__main__":
