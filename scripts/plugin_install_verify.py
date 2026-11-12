@@ -51,6 +51,37 @@ class VerificationError(ValueError):
     """An input cannot be verified safely or completely."""
 
 
+def _is_redirected(path: Path, info: os.stat_result) -> bool:
+    """Recognize links and Windows reparse points without following them."""
+    return (
+        stat.S_ISLNK(info.st_mode)
+        or bool(getattr(info, "st_reparse_tag", 0))
+        or bool(getattr(info, "st_file_attributes", 0)
+                & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+        or getattr(path, "is_junction", lambda: False)()
+    )
+
+
+def _ordinary_root(root: Path) -> None:
+    """Reject redirected ancestors as well as a redirected final directory.
+
+    A symlinked parent could otherwise make a cached plugin appear to be in
+    a different location while reading bytes from somewhere else. This is
+    a point-in-time preflight, not protection against concurrent replacement.
+    """
+    if not root.is_absolute():
+        raise VerificationError("source and installed roots must be ordinary absolute directories")
+    for component in reversed((root, *root.parents)):
+        try:
+            info = component.lstat()
+        except OSError as exc:
+            raise VerificationError("source or installed root cannot be inspected") from exc
+        if _is_redirected(component, info):
+            raise VerificationError("source or installed root has a redirected component")
+        if not stat.S_ISDIR(info.st_mode):
+            raise VerificationError("source and installed roots must be ordinary absolute directories")
+
+
 def _regular_bytes(root: Path, relative: Path) -> bytes:
     """Read a bounded file and reject redirecting path components."""
     path = root
@@ -60,7 +91,7 @@ def _regular_bytes(root: Path, relative: Path) -> bytes:
             info = path.lstat()
         except OSError as exc:
             raise VerificationError("required skill file or directory is missing") from exc
-        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_reparse_tag", 0):
+        if _is_redirected(path, info):
             raise VerificationError("skill path contains a symbolic link or reparse point")
         if path != root / relative and not stat.S_ISDIR(info.st_mode):
             raise VerificationError("skill path has a non-directory component")
@@ -138,8 +169,7 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
     if not SHA_RE.fullmatch(expected_commit):
         raise VerificationError("expected commit must be a full lowercase 40-digit SHA")
     for root in (source, installed):
-        if not root.is_absolute() or not root.is_dir() or root.is_symlink():
-            raise VerificationError("source and installed roots must be ordinary absolute directories")
+        _ordinary_root(root)
     try:
         if source.samefile(installed):
             raise VerificationError("source and installed must be distinct physical directories")
