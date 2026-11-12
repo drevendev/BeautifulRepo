@@ -42,16 +42,21 @@ award verification, organizer contact or test of any third-party contest rules.
 
 ## Google Summer of Code: prepare for mentorship, not a badge
 
-**2026 source rechecked: 2026-11-07.** Use the
+**2026 source rechecked: 2026-11-12.** Use the
 [official program](https://summerofcode.withgoogle.com/) and its
 [detailed 2026 timeline](https://developers.google.com/open-source/gsoc/timeline).
 The organization application deadline was **February 3 at 18:00 UTC** and the
 contributor application deadline was **March 31 at 18:00 UTC**. The last extended
-contributor final-work/evaluation deadline was **November 2 at 18:00 UTC**;
-all three have passed as of this review. **November 9 at 18:00 UTC** is still
-scheduled for mentors' final evaluations of extended projects, **not** a new
-contributor application window. The page's automatic summary quotes different
-dates: rely on its explicit **2026 Timeline** instead. No 2027 dates are asserted.
+contributor final-work/evaluation deadline was **November 2 at 18:00 UTC**.
+The final scheduled **mentor** evaluation deadline for extended projects was
+**November 9 at 18:00 UTC**. All four deadlines are past as of this review;
+the deadline passing does not establish whether any particular evaluation
+was submitted. November 9 was **not** a new contributor application window.
+
+The page's automatic summary quotes different dates: use its explicit
+**2026 Timeline**, not the summary. It also gives a general month-by-month
+outline for future programs, but **no confirmed 2027 deadlines**; do not
+reuse 2026's exact dates for applications in another year.
 
 For mentoring organizations, Google's
 [January 19, 2026 announcement](https://opensource.googleblog.com/2026/01/mentor-org-applications-for-google-summer-of-code-2026-open-through-feb-3.html)
