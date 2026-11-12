@@ -81,10 +81,13 @@ def _bounded_source_tree(root: Path) -> bool:
                     # os.lstat consistently exposes Windows junction tags;
                     # DirEntry.stat can omit reparse metadata on some versions.
                     info = os.lstat(entry.path)
+                    # A junction redirects its subtree and must never reach
+                    # a checker, even when lstat reports a directory mode.
+                    if getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG:
+                        return False
                     if not stat.S_ISLNK(info.st_mode) and _unsupported_reparse(info):
                         return False
-                    if (stat.S_ISDIR(info.st_mode)
-                            and getattr(info, "st_reparse_tag", 0) != JUNCTION_TAG):
+                    if stat.S_ISDIR(info.st_mode):
                         pending.append(Path(entry.path))
                         continue
                     # A non-Markdown entry point such as LICENSE or README.rst

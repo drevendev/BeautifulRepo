@@ -1053,6 +1053,16 @@ keep their original themed headings.
   agent-evaluation snapshot baselines. Verification now fails closed instead of
   potentially reporting `UNCHANGED` for an edited or malformed baseline (#74).
 
+### Security
+
+- Reject directory junctions encountered in the MCP source inventory
+  before running any checker (excluding intentionally ignored `.git` and
+  `node_modules` trees). Previously the metadata preflight silently skipped
+  those redirected subtrees. Add simulated metadata and a native Windows
+  `mklink /J` regression checking all three tools and an unchanged synthetic
+  outside document. This is stable-checkout scope enforcement, not proof
+  against concurrent filesystem swaps (related to #255).
+
 ## [v0.2.0] — 2026-10-23
 
 First release with the Claude Code and Codex plugin. The GitHub Action changes too,
