@@ -17,8 +17,12 @@ permissions:
 jobs:
   protocol:
     # Additional evidence, not a repository protection or release gate.
-    name: MCP stdio / Python 3.11
-    runs-on: ubuntu-latest
+    name: MCP stdio / ${{ matrix.os }} / Python 3.11
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
