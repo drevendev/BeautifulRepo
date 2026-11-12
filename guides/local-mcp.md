@@ -39,13 +39,14 @@ Before any of the three checkers starts, the adapter also makes a metadata-only,
 fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
-like the link checkers and refuses Markdown-named devices, redirects outside
-the repository, and hard-linked regular files (including extensionless
-entry points and non-Markdown documents) whose in-root names could alias
-files outside the checkout. Directory junctions encountered in the
-scanned tree (excluding ignored `.git` and `node_modules`) are also
-refused before a checker runs, even if their target contains ordinary
-documents. Copy fixtures rather than using hard links. A limit or
+like the link checkers and refuses Markdown-named devices, symlinks
+outside the checkout **regardless of file extension** (including LICENSE,
+README.rst and assets), and hard-linked regular files whose in-root names
+could alias files outside the checkout. Non-Markdown file symlinks are
+accepted only when they resolve to an ordinary, single-linked in-root file;
+symlinked directories and directory junctions in the scanned tree (excluding
+ignored `.git` and `node_modules`) are refused before a checker runs,
+even if their targets contain ordinary documents. Copy fixtures rather than using hard links. A limit or
 unreadable source returns **incomplete evidence**
 (exit 2), not a clean audit. This is **not** a stable filesystem snapshot,
 concurrent-write protection or a general limit on non-Markdown contents;
