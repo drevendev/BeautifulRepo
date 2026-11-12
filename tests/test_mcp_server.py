@@ -413,7 +413,7 @@ class CheckerWrapperTests(unittest.TestCase):
                 else:
                     path.unlink()
 
-    def test_junction_tagged_directory_is_not_traversed(self):
+    def test_junction_tagged_directory_fails_closed_before_checker(self):
         redirected = self.root / "junction-like"
         redirected.mkdir()
         (redirected / "oversized.md").write_text("12345678", encoding="utf-8")
@@ -432,8 +432,49 @@ class CheckerWrapperTests(unittest.TestCase):
         # Simulate NTFS junction metadata without requiring elevated Windows
         # privileges. DirEntry.stat may omit the tag; os.lstat must be used.
         with mock.patch.object(adapter.os, "lstat", side_effect=with_junction_metadata):
-            with mock.patch.object(adapter, "MAX_SOURCE_BYTES", 4):
-                self.assertTrue(adapter._bounded_source_tree(self.root))
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                for tool_name in adapter.CHECKS:
+                    with self.subTest(tool=tool_name):
+                        response = adapter.run_check(self.root, tool_name)
+                        self.assertEqual(response["state"], "incomplete")
+                        self.assertEqual(response["exit_code"], 2)
+                run.assert_not_called()
+
+    @unittest.skipUnless(os.name == "nt", "native Windows junction requires Windows")
+    def test_real_windows_internal_junction_fails_closed(self):
+        with tempfile.TemporaryDirectory() as outside:
+            destination = Path(outside).resolve() / "outside"
+            destination.mkdir()
+            document = destination / "README.md"
+            document.write_text("# Outside synthetic fixture\n", encoding="utf-8")
+            alias = self.root / "linked-docs"
+            created = subprocess.run(
+                ["cmd.exe", "/d", "/c", "mklink", "/J", str(alias), str(destination)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, check=False,
+            )
+            if created.returncode != 0:
+                self.skipTest("native Windows junction unavailable")
+            try:
+                self.assertEqual(
+                    getattr(os.lstat(alias), "st_reparse_tag", None),
+                    adapter.JUNCTION_TAG,
+                )
+                with mock.patch.object(adapter, "_bounded_run") as run:
+                    for tool_name in adapter.CHECKS:
+                        with self.subTest(tool=tool_name):
+                            response = adapter.run_check(self.root, tool_name)
+                            self.assertEqual(response["state"], "incomplete")
+                            self.assertEqual(response["exit_code"], 2)
+                    run.assert_not_called()
+                self.assertEqual(
+                    document.read_text(encoding="utf-8"),
+                    "# Outside synthetic fixture\n",
+                )
+            finally:
+                # Remove only the reparse entry, never its target.
+                alias.rmdir()
+            self.assertTrue(destination.is_dir())
 
     def test_real_bundle_reports_broken_link_without_target_edit(self):
         (self.root / "README.md").write_text("# Example\n\n[Guide](docs/missing.md)\n", encoding="utf-8")
