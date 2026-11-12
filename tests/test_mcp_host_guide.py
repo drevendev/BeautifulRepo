@@ -27,13 +27,13 @@ class McpHostGuidePinTests(unittest.TestCase):
         # Inspect copyable install commands, not unrelated explanatory prose.
         # Additional mentions of the pin must not break this contract test.
         posix = re.search(
-            r"### Reproduce an immutable development checkout \\(POSIX\\)"
-            r".*?```sh\\n(.*?)\\n```",
+            r"### Reproduce an immutable development checkout \(POSIX\)"
+            r".*?```sh\n(.*?)\n```",
             text, re.S,
         )
         windows = re.search(
             r"### Windows PowerShell: immutable source and SDK preflight"
-            r".*?```powershell\\n(.*?)\\n```",
+            r".*?```powershell\n(.*?)\n```",
             text, re.S,
         )
         self.assertIsNotNone(posix, "POSIX installation block is missing")
