@@ -24,17 +24,34 @@ class McpHostGuidePinTests(unittest.TestCase):
         self.assertIsNotNone(match, "guide must link the full pinned commit")
         pin = match.group(1)
 
-        self.assertIn(f"git checkout --detach {pin}", text)
+        # Inspect copyable install commands, not unrelated explanatory prose.
+        # Additional mentions of the pin must not break this contract test.
+        posix = re.search(
+            r"### Reproduce an immutable development checkout \\(POSIX\\)"
+            r".*?```sh\\n(.*?)\\n```",
+            text, re.S,
+        )
+        windows = re.search(
+            r"### Windows PowerShell: immutable source and SDK preflight"
+            r".*?```powershell\\n(.*?)\\n```",
+            text, re.S,
+        )
+        self.assertIsNotNone(posix, "POSIX installation block is missing")
+        self.assertIsNotNone(windows, "PowerShell installation block is missing")
+        posix_commands = posix.group(1)
+        windows_commands = windows.group(1)
+        self.assertIn(f"git checkout --detach {pin}", posix_commands)
         self.assertIn(
-            f'test "$(git rev-parse HEAD)" = "{pin}" || exit 1', text
+            f'test "$(git rev-parse HEAD)" = "{pin}" || exit 1',
+            posix_commands,
         )
-        self.assertIn(f"$pin = '{pin}'", text)
-        self.assertIn("git checkout --detach $pin", text)
-        self.assertIn("$actual -ne $pin", text)
-        self.assertEqual(
-            text.count(pin), 5,
-            "all explicit POSIX and PowerShell pin references must agree",
-        )
+        self.assertIn(f"$pin = '{pin}'", windows_commands)
+        self.assertIn("git checkout --detach $pin", windows_commands)
+        self.assertIn("$actual -ne $pin", windows_commands)
+        # Enforce the same exact immutable SHA in every command occurrence.
+        full_sha = r"(?<![0-9a-f])[0-9a-f]{40}(?![0-9a-f])"
+        self.assertEqual(re.findall(full_sha, posix_commands), [pin, pin])
+        self.assertEqual(re.findall(full_sha, windows_commands), [pin])
 
     def test_host_outcomes_remain_explicitly_unverified(self):
         text = GUIDE.read_text(encoding="utf-8")
