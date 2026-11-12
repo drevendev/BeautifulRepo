@@ -108,6 +108,18 @@ class PluginInstallVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
             verifier.verify(self.source, self.installed, self.sha)
 
+    def test_dangling_redirected_manifest_parent_is_not_harmless_absence(self):
+        self.add_optional_manifests()
+        parent = self.installed / ".claude-plugin"
+        (parent / "plugin.json").unlink()
+        parent.rmdir()
+        try:
+            parent.symlink_to(self.installed / "missing-directory", target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        with self.assertRaisesRegex(verifier.VerificationError, "redirected component"):
+            verifier.verify(self.source, self.installed, self.sha)
+
     def test_source_cannot_be_its_own_installed_cache_even_with_an_alias(self):
         for installed in (self.source, self.source.parent / "source" / ".." / "source"):
             with self.subTest(installed=str(installed)):
