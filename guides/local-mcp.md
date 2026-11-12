@@ -46,8 +46,8 @@ could alias files outside the checkout. Non-Markdown file symlinks are
 accepted only when they resolve to an ordinary, single-linked in-root file;
 symlinked directories and directory junctions in the scanned tree (excluding
 ignored `.git` and `node_modules`) are refused before a checker runs,
-even if their targets contain ordinary documents. Copy fixtures rather than using hard links. A limit or
-unreadable source returns **incomplete evidence**
+even if their targets contain ordinary documents. Copy fixtures rather
+than using hard links. A limit or unreadable source returns **incomplete evidence**
 (exit 2), not a clean audit. This is **not** a stable filesystem snapshot,
 concurrent-write protection or a general limit on non-Markdown contents;
 the standalone CLI has its own coverage boundaries.
