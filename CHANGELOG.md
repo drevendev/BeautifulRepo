@@ -639,6 +639,14 @@ keep their original themed headings.
 
 ### Changed
 
+- Repin the experimental MCP POSIX/PowerShell host-trial commands to
+  immutable merged source `7b9c3391f426c76cbf0a75a1470ff06eb7e6db18` so they include the
+  out-of-checkout non-Markdown symlink boundary from PR #351. The reviewed
+  PR head passed [Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43218140007)
+  (6/6) and [MCP SDK CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43218140106)
+  (2/2); those are not installed Claude Code/Codex host trials or tests of
+  concurrent filesystem replacement. Reviewed 2026-11-12 (#255).
+
 - Repin the experimental MCP POSIX/PowerShell host-trial instructions to
   immutable source `2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d`, including
   Windows reparse hardening and native root/internal-junction regressions.
