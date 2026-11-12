@@ -639,6 +639,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Refresh the GSoC 2026 participation timeline against Google's dated 2026
+  schedule on November 12: the final extended-project mentor deadline has
+  passed, like all 2026 application and contributor deadlines. Distinguish
+  official 2026 dates from the still-unspecified 2027 schedule, without
+  claiming an individual mentor submitted an evaluation.
+
 - Repin the experimental MCP POSIX/PowerShell host-trial commands to
   immutable merged source `7b9c3391f426c76cbf0a75a1470ff06eb7e6db18` so they include the
   out-of-checkout non-Markdown symlink boundary from PR #351. The reviewed
