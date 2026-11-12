@@ -51,6 +51,63 @@ class PluginInstallVerificationTests(unittest.TestCase):
         self.assertEqual(result["different_plugin_dependencies"], [])
         self.assertIn("proof of", result["limitations"])
 
+    def add_optional_manifests(self):
+        # Add metadata after the fixture's first commit so both snapshots are
+        # pinned Git blobs rather than mutable working-tree files.
+        for root in (self.source, self.installed):
+            for relative in verifier.OPTIONAL_MANIFESTS:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('{"name": "beautifulrepo", "version": "0.3.0-dev.0"}\n',
+                                encoding="utf-8")
+        subprocess.run(["git", "-C", str(self.source), "add",
+                        *verifier.OPTIONAL_MANIFESTS], check=True)
+        subprocess.run(["git", "-C", str(self.source),
+                        "-c", "user.email=test@example.invalid", "-c",
+                        "user.name=Fixture", "commit", "-qm", "pin manifests"], check=True)
+        self.sha = subprocess.check_output(
+            ["git", "-C", str(self.source), "rev-parse", "HEAD"], text=True,
+        ).strip()
+
+    def test_present_plugin_manifests_match_committed_bytes(self):
+        self.add_optional_manifests()
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual("match", result["state"])
+        self.assertEqual(list(verifier.OPTIONAL_MANIFESTS), result["checked_present_manifests"])
+        self.assertEqual([], result["missing_optional_manifests"])
+        self.assertEqual([], result["different_present_manifests"])
+
+    def test_modified_installed_manifest_is_a_mismatch(self):
+        self.add_optional_manifests()
+        target = self.installed / "plugin.json"
+        target.write_text('{"name": "different"}\n', encoding="utf-8")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual("mismatch", result["state"])
+        self.assertEqual(["plugin.json"], result["different_present_manifests"])
+        self.assertEqual([], result["different_skill_definitions"])
+        self.assertEqual([], result["different_plugin_dependencies"])
+
+    def test_absent_optional_manifest_is_reported_not_falsely_verified(self):
+        self.add_optional_manifests()
+        (self.installed / ".claude-plugin" / "plugin.json").unlink()
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual("match", result["state"])
+        self.assertEqual(["plugin.json"], result["checked_present_manifests"])
+        self.assertEqual([".claude-plugin/plugin.json"], result["missing_optional_manifests"])
+        self.assertEqual([], result["different_present_manifests"])
+        self.assertIn("unverified", result["limitations"])
+
+    def test_redirected_optional_manifest_fails_closed(self):
+        self.add_optional_manifests()
+        target = self.installed / "plugin.json"
+        target.unlink()
+        try:
+            target.symlink_to(self.source / "plugin.json")
+        except (OSError, NotImplementedError):
+            self.skipTest("symlinks unavailable")
+        with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
+            verifier.verify(self.source, self.installed, self.sha)
+
     def test_source_cannot_be_its_own_installed_cache_even_with_an_alias(self):
         for installed in (self.source, self.source.parent / "source" / ".." / "source"):
             with self.subTest(installed=str(installed)):
