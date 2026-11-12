@@ -125,6 +125,49 @@ class RootBoundaryTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "redirects"):
                     adapter.allowed_root(str(root))
 
+
+    @unittest.skipUnless(os.name == "nt", "real Windows junction requires Windows")
+    def test_real_windows_junction_ancestor_rejected_before_any_checker(self):
+        """Use a real junction, not patched lstat metadata, when supported."""
+        with tempfile.TemporaryDirectory() as path:
+            base = Path(path).resolve()
+            real = base / "real"
+            repo = real / "repo"
+            repo.mkdir(parents=True)
+            document = repo / "README.md"
+            document.write_text("# Synthetic fixture\n", encoding="utf-8")
+            alias = base / "junction"
+            # mklink /J creates a directory junction without requiring a
+            # symlink privilege. This is an optional native Windows fixture.
+            created = subprocess.run(
+                ["cmd.exe", "/d", "/c", "mklink", "/J", str(alias), str(real)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, check=False,
+            )
+            if created.returncode != 0:
+                self.skipTest("directory junction unavailable on this Windows filesystem")
+            try:
+                self.assertEqual(
+                    getattr(os.lstat(alias), "st_reparse_tag", None),
+                    adapter.JUNCTION_TAG,
+                    "native test must exercise a real mount-point reparse tag",
+                )
+                with mock.patch.object(adapter, "_bounded_run") as checker:
+                    for candidate in (alias, alias / "repo"):
+                        with self.subTest(root=str(candidate)):
+                            with self.assertRaises(ValueError):
+                                adapter.allowed_root(str(candidate))
+                            result = adapter.run_check(candidate, "audit_repository")
+                            self.assertEqual(result["state"], "incomplete")
+                            self.assertEqual(result["exit_code"], 2)
+                    checker.assert_not_called()
+                self.assertEqual(document.read_text(encoding="utf-8"), "# Synthetic fixture\n")
+            finally:
+                # Remove the junction itself, never recurse into its target.
+                alias.rmdir()
+            self.assertTrue(repo.is_dir())
+
+
 class CheckerWrapperTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

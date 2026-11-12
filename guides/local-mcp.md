@@ -299,8 +299,19 @@ python -I tools/audit_bundle.py /absolute/path/to/synthetic-fixture --format jso
 ```
 
 Source-level tests check path refusal, fixed subprocess arguments, timeout
-behavior, incomplete evidence and one actual broken-link fixture. These are
-**not** protocol tests. For MCP acceptance, confirm the SDK smoke passes for both protocol eras,
+behavior, incomplete evidence and one actual broken-link fixture. On Windows,
+the `test_real_windows_junction_ancestor_rejected_before_any_checker`
+regression additionally attempts to create a **real directory junction** with
+[`mklink /J`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink)
+and checks that both a junction root and a nested root through it are refused
+**before** a checker launches, without changing synthetic source bytes.
+The test skips on non-Windows systems or when junction creation is unavailable:
+inspect the named test's actual CI result rather than counting a skipped test
+as native NTFS evidence. This does **not** test arbitrary reparse-point types,
+host/model discovery, or a concurrent filesystem-swap attack. These are
+**not** protocol tests.
+
+For MCP acceptance, confirm the SDK smoke passes for both protocol eras,
 including negotiated versions, `tools/list` and `tools/call` on good and
 broken synthetic repositories. This still does not verify a third-party
 legacy client. Then connect actual

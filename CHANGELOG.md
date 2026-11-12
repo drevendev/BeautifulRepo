@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Add a Windows-only native directory-junction regression for the experimental
+  MCP root boundary. It creates a synthetic `mklink /J` alias, verifies that
+  direct and nested redirected roots are refused before any checker launches,
+  and leaves the real fixture intact. The test skips on non-Windows systems
+  or where junction creation is unavailable; verify the actual Windows CI
+  test result before claiming native NTFS coverage. It is not a Claude Code,
+  Codex, arbitrary-reparse-tag or race-condition test (#255).
+
 - Bundle the final standalone `trust-surfaces` skill for the skills CLI:
   seven source-synchronized offline auditor, safety/community guides, checklists
   and SECURITY draft files, with drift checks and a real copied-skill CLI trial.
