@@ -105,7 +105,7 @@ class PluginInstallVerificationTests(unittest.TestCase):
             target.symlink_to(self.source / "plugin.json")
         except (OSError, NotImplementedError):
             self.skipTest("symlinks unavailable")
-        with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
+        with self.assertRaisesRegex(verifier.VerificationError, "redirected component"):
             verifier.verify(self.source, self.installed, self.sha)
 
     def test_dangling_redirected_manifest_parent_is_not_harmless_absence(self):
