@@ -40,21 +40,14 @@ fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
 like the link checkers. **At the immutable installation pin below**
-(`2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d`), it refuses
-Markdown-named devices, out-of-checkout **Markdown-named** symlinks,
-hard-linked regular files of any extension, and directory junctions in
-the scanned tree (excluding ignored directories). That pinned version
-does **not** validate non-Markdown file symlink targets in this preflight.
-
-**Development-only change in PR #351 (not integrated at the time of this
-update):** this PR's source additionally refuses out-of-checkout
-**non-Markdown file symlinks**, including LICENSE, README.rst and assets,
-and symlinked directories before a checker runs. Ordinary non-Markdown
-aliases are accepted only if they resolve to a regular, single-linked
-file inside the checkout. **This additional behavior is not available
-from the pinned POSIX/PowerShell commands below.** The install pin must
-be updated to a separately reviewed, merged immutable commit before
-those commands can claim this stronger boundary.
+(`7b9c3391f426c76cbf0a75a1470ff06eb7e6db18`), it refuses Markdown-named devices,
+out-of-checkout file symlinks regardless of extension (including `LICENSE`,
+`README.rst` and assets), hard-linked regular files of any extension,
+directory symlinks and directory junctions encountered in the scanned tree
+(excluding ignored directories). The non-Markdown symlink check was merged
+in [PR #351](https://github.com/drevendev/BeautifulRepo/pull/351);
+ordinary in-root file aliases are accepted only when they resolve to regular,
+single-linked files. This metadata preflight is not an anti-race sandbox.
 
 Copy fixtures rather than using hard links. A limit or unreadable source
 returns **incomplete evidence** (exit 2), not a clean audit. This is
@@ -106,16 +99,19 @@ hardening and **both native junction regressions**: rejection of a redirected
 root ([PR #347](https://github.com/drevendev/BeautifulRepo/pull/347)) and
 rejection of a junction encountered *inside* the allowed checkout
 ([PR #349](https://github.com/drevendev/BeautifulRepo/pull/349)).
+It also includes the extension-independent file-symlink preflight merged
+in [PR #351](https://github.com/drevendev/BeautifulRepo/pull/351).
 On the PR #349 head, [Windows Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43167429218)
 executed the native junction tests successfully (not skipped); that is
 **PR-head CI evidence**, not a fresh test on this squash-merge SHA or an
 installed Claude Code/Codex host. Mocked tests additionally cover unknown
 Windows reparse metadata. Arbitrary NTFS reparse types and concurrent path
-replacement remain untested. The older trial pin `ed1e70c` predates the
-internal-junction fix and should not be reused for new host trials.
+replacement remain untested. The older `ed1e70c` trial predates the internal-junction fix; the former
+`2f0e0e8` trial predates the non-Markdown symlink fix. Neither older
+checkout should be reused when testing the current documented boundary.
 This commit is **not a released MCP version**:
 
-[BeautifulRepo `2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d`](https://github.com/drevendev/BeautifulRepo/commit/2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d).
+[BeautifulRepo `7b9c3391f426c76cbf0a75a1470ff06eb7e6db18`](https://github.com/drevendev/BeautifulRepo/commit/7b9c3391f426c76cbf0a75a1470ff06eb7e6db18).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -123,8 +119,8 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d
-test "$(git rev-parse HEAD)" = "2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d" || exit 1
+git checkout --detach 7b9c3391f426c76cbf0a75a1470ff06eb7e6db18
+test "$(git rev-parse HEAD)" = "7b9c3391f426c76cbf0a75a1470ff06eb7e6db18" || exit 1
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
 ../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
@@ -159,7 +155,7 @@ checked explicitly rather than assuming `$ErrorActionPreference` catches
 external program exit codes:
 
 ```powershell
-$pin = '2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d'
+$pin = '7b9c3391f426c76cbf0a75a1470ff06eb7e6db18'
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
 Set-Location BeautifulRepo
