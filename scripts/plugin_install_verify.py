@@ -203,14 +203,27 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
     different_manifests = []
     for name in OPTIONAL_MANIFESTS:
         relative = Path(name)
-        try:
-            (installed / relative).lstat()
-        except FileNotFoundError:
-            # Some hosts copy only the plugin payload, not its manifests.
-            missing_manifests.append(name)
+        present = True
+        path = installed
+        for index, part in enumerate(relative.parts):
+            path = path / part
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                # A genuinely absent optional manifest is not host evidence.
+                missing_manifests.append(name)
+                present = False
+                break
+            except OSError as exc:
+                raise VerificationError("optional plugin manifest could not be inspected") from exc
+            # Inspect parents before classifying a missing file; a dangling
+            # symlinked directory must never be reported as harmless absence.
+            if _is_redirected(path, info):
+                raise VerificationError("optional plugin manifest has a redirected component")
+            if index < len(relative.parts) - 1 and not stat.S_ISDIR(info.st_mode):
+                raise VerificationError("optional plugin manifest parent is not a directory")
+        if not present:
             continue
-        except OSError as exc:
-            raise VerificationError("optional plugin manifest could not be inspected") from exc
         checked_manifests.append(name)
         if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
                 _regular_bytes(installed, relative)).digest():
