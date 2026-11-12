@@ -11,6 +11,15 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Extend the offline plugin cache verifier to compare Codex and Claude plugin
+  manifest bytes against the pinned source **when those files exist in the
+  installed cache**. A changed present manifest now reports MISMATCH; a missing
+  optional manifest is explicitly listed as unverified, not mistaken for an
+  installed host or agent PASS. The four skills and 22 required dependencies
+  remain the mandatory byte-match baseline (#257).
+
 ### Added
 
 - Extend the optional pinned-SDK MCP stdio smoke from Ubuntu to separate
