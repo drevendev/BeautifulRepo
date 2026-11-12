@@ -11,6 +11,15 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Security
+
+- Reject directory junctions **inside** the configured MCP repository before
+  running any checker. Previously the metadata preflight silently skipped
+  those redirected subtrees. Add simulated metadata and a native Windows
+  `mklink /J` regression checking all three tools and an unchanged synthetic
+  outside document. This is stable-checkout scope enforcement, not proof
+  against concurrent filesystem swaps (related to #255).
+
 ### Added
 
 - Extend the optional pinned-SDK MCP stdio smoke from Ubuntu to separate
