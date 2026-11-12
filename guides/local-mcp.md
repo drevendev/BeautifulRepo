@@ -1,6 +1,6 @@
 # Experimental local MCP adapter (not a released integration)
 
-**Development candidate, reviewed 2026-11-11 (UTC).** This optional adapter exposes
+**Development candidate, reviewed 2026-11-12 (UTC).** This optional adapter exposes
 BeautifulRepo's *existing* offline checkers as three read-only tools over MCP
 stdio. No successful Claude Code, Codex, or external-user installation is
 claimed. The normal CLI and GitHub Action do **not** require MCP.
@@ -86,20 +86,25 @@ do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
 
-This **source-checked procedure, refreshed 2026-11-11 (UTC), has not passed a fresh
+This **source-checked procedure, refreshed 2026-11-12 (UTC), has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
-following full commit is a `master` snapshot containing both SDK protocol
-smoke lifecycles, per-checker isolation, bounded child output, missing-root
-and hard-link/symlink boundary cases, and source-level regressions for
-unrecognized Windows reparse points (including attribute-only redirects).
-It includes the [hard-link coverage fix](https://github.com/drevendev/BeautifulRepo/pull/324)
-and [Windows reparse hardening](https://github.com/drevendev/BeautifulRepo/pull/345).
-The Windows reparse tests use **mocked filesystem metadata**; no real NTFS
-reparse-point host test or Claude Code/Codex installation PASS is claimed.
-Older immutable trial commits such as `3c1040`, `331df37`, and
-`8c1d1523` lack later boundary fixes. This commit is **not a released MCP version**:
+following full commit is a `master` snapshot containing both official-SDK
+protocol smoke lifecycles, per-checker isolation, bounded child output,
+missing-root and hard-link/symlink boundary tests, plus the Windows reparse
+hardening and **both native junction regressions**: rejection of a redirected
+root ([PR #347](https://github.com/drevendev/BeautifulRepo/pull/347)) and
+rejection of a junction encountered *inside* the allowed checkout
+([PR #349](https://github.com/drevendev/BeautifulRepo/pull/349)).
+On the PR #349 head, [Windows Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43167429218)
+executed the native junction tests successfully (not skipped); that is
+**PR-head CI evidence**, not a fresh test on this squash-merge SHA or an
+installed Claude Code/Codex host. Mocked tests additionally cover unknown
+Windows reparse metadata. Arbitrary NTFS reparse types and concurrent path
+replacement remain untested. The older trial pin `ed1e70c` predates the
+internal-junction fix and should not be reused for new host trials.
+This commit is **not a released MCP version**:
 
-[BeautifulRepo `ed1e70c0e41833fd2b60a8431e1e3134107bf3ac`](https://github.com/drevendev/BeautifulRepo/commit/ed1e70c0e41833fd2b60a8431e1e3134107bf3ac).
+[BeautifulRepo `2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d`](https://github.com/drevendev/BeautifulRepo/commit/2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -107,8 +112,8 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach ed1e70c0e41833fd2b60a8431e1e3134107bf3ac
-test "$(git rev-parse HEAD)" = "ed1e70c0e41833fd2b60a8431e1e3134107bf3ac" || exit 1
+git checkout --detach 2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d
+test "$(git rev-parse HEAD)" = "2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d" || exit 1
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
 ../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
@@ -134,15 +139,16 @@ The POSIX `bin/python` path above is **not** a Windows path. For an
 isolated PowerShell trial on Windows, use a Python **3.11+** launcher and
 Git. This example selects Python 3.11; if only a newer supported version
 is installed, change `py -3.11` to the installed launcher selection.
-These commands have **not** been executed in a Windows host in this
-project. The smoke is an SDK test, not Claude Code or Codex acceptance.
+These exact setup commands have **not** been executed in a real Windows
+Claude Code or Codex host. The separate Windows CI SDK smoke is not host
+installation or model-tool-call acceptance.
 
 Run in a disposable parent directory; PowerShell command failures are
 checked explicitly rather than assuming `$ErrorActionPreference` catches
 external program exit codes:
 
 ```powershell
-$pin = 'ed1e70c0e41833fd2b60a8431e1e3134107bf3ac'
+$pin = '2f0e0e8801a570e3dd95ffb7ff2b6d4530931f9d'
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
 Set-Location BeautifulRepo
@@ -322,11 +328,15 @@ regression additionally attempts to create a **real directory junction** with
 [`mklink /J`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink)
 and checks that both a junction root and a nested root through it are refused
 **before** a checker launches, without changing synthetic source bytes.
-The test skips on non-Windows systems or when junction creation is unavailable:
-inspect the named test's actual CI result rather than counting a skipped test
-as native NTFS evidence. This does **not** test arbitrary reparse-point types,
-host/model discovery, or a concurrent filesystem-swap attack. These are
-**not** protocol tests.
+The companion `test_real_windows_internal_junction_fails_closed` regression
+creates a junction **inside** the allowed checkout and confirms every tool
+returns incomplete evidence before starting a checker. Both tests skip on
+non-Windows systems or when junction creation is unavailable: inspect the
+named tests' actual CI statuses rather than counting skips as NTFS coverage.
+The PR #349 Windows run above executed both native tests, but the pinned merge
+commit has not been independently installed in Claude Code or Codex. These
+tests do **not** cover arbitrary NTFS reparse-point types, host/model discovery,
+or concurrent filesystem swaps. They are **not** protocol tests.
 
 For MCP acceptance, confirm the SDK smoke passes for both protocol eras,
 including negotiated versions, `tools/list` and `tools/call` on good and
