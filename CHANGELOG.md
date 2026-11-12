@@ -13,8 +13,9 @@ keep their original themed headings.
 
 ### Security
 
-- Reject directory junctions **inside** the configured MCP repository before
-  running any checker. Previously the metadata preflight silently skipped
+- Reject directory junctions encountered in the MCP source inventory
+  before running any checker (excluding intentionally ignored `.git` and
+  `node_modules` trees). Previously the metadata preflight silently skipped
   those redirected subtrees. Add simulated metadata and a native Windows
   `mklink /J` regression checking all three tools and an unchanged synthetic
   outside document. This is stable-checkout scope enforcement, not proof
