@@ -172,13 +172,17 @@ class PluginManifestTests(unittest.TestCase):
         # Keep both official installation routes discoverable in both paths.
         self.assertRegex(
             released,
-            r"(?s)`codex plugin marketplace add`.{0,90}registers a source; it does\\s+not install the plugin",
+            r"(?s)`codex plugin marketplace add`.{0,90}registers a source;"
+            r" it does\s+not install the plugin",
         )
         self.assertIn("only **register and list** the pinned marketplace", candidate)
         self.assertIn("**not** installation evidence", candidate)
         for name, section in (("release", released), ("candidate", candidate)):
             with self.subTest(path=name):
-                self.assertIn("https://developers.openai.com/learn/developers-codex-plugin", section)
+                self.assertIn(
+                    "https://developers.openai.com/learn/developers-codex-plugin",
+                    section,
+                )
                 self.assertIn("`/plugins`", section)
                 self.assertIn("**Install plugin**", section)
                 self.assertIn("Plugins Directory", section)
@@ -188,7 +192,7 @@ class PluginManifestTests(unittest.TestCase):
             with self.subTest(command=unsupported_command):
                 self.assertNotRegex(
                     guide,
-                    rf"(?m)^\\s*codex plugin {unsupported_command}\\s",
+                    rf"(?m)^\s*codex plugin {unsupported_command}\s",
                     "Do not advertise an unverified Codex plugin-management command",
                 )
 
