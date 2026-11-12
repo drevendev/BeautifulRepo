@@ -623,6 +623,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Repin the experimental MCP POSIX/PowerShell host-trial instructions to
+  immutable source `ed1e70c0e41833fd2b60a8431e1e3134107bf3ac`, including
+  Windows reparse-point preflight regressions and both SDK smoke lifecycles.
+  Check the source link and both platform checkout commands for SHA drift.
+  The reparse tests mock Windows metadata; real NTFS and Claude Code/Codex
+  host installation or tool invocation remain unverified (related to #255).
+
 - Repin the four-skill Claude Code/Codex trial to the accepted development
   source commit `8947574399df2cc11e8ded41cecbef70be4808c6` across installation commands, offline
   cache verification, roadmap and three-arm comparison. Add a regression

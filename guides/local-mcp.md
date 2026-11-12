@@ -1,6 +1,6 @@
 # Experimental local MCP adapter (not a released integration)
 
-**Development candidate, reviewed 2026-11-06.** This optional adapter exposes
+**Development candidate, reviewed 2026-11-11 (UTC).** This optional adapter exposes
 BeautifulRepo's *existing* offline checkers as three read-only tools over MCP
 stdio. No successful Claude Code, Codex, or external-user installation is
 claimed. The normal CLI and GitHub Action do **not** require MCP.
@@ -82,18 +82,20 @@ do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
 
-This **source-checked procedure, refreshed 2026-11-09, has not passed a fresh
+This **source-checked procedure, refreshed 2026-11-11 (UTC), has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
-following full commit is a `master` snapshot containing the **modern and
-legacy SDK smoke**, missing-root regressions, bounded child output, isolated
-single-checker calls and the metadata preflight that refuses hard-linked
-regular files across all three tools, including non-Markdown entry points.
-It incorporates the accepted [hard-link coverage fix](https://github.com/drevendev/BeautifulRepo/pull/324)
-missing from the earlier `3c1040` trial snapshot. The older `331df37`
-snapshot also lacks subsequent safety and isolation fixes; `6c01779`
-lacks the legacy smoke. This commit is **not a released MCP version**:
+following full commit is a `master` snapshot containing both SDK protocol
+smoke lifecycles, per-checker isolation, bounded child output, missing-root
+and hard-link/symlink boundary cases, and source-level regressions for
+unrecognized Windows reparse points (including attribute-only redirects).
+It includes the [hard-link coverage fix](https://github.com/drevendev/BeautifulRepo/pull/324)
+and [Windows reparse hardening](https://github.com/drevendev/BeautifulRepo/pull/345).
+The Windows reparse tests use **mocked filesystem metadata**; no real NTFS
+reparse-point host test or Claude Code/Codex installation PASS is claimed.
+Older immutable trial commits such as `3c1040`, `331df37`, and
+`8c1d1523` lack later boundary fixes. This commit is **not a released MCP version**:
 
-[BeautifulRepo `8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2`](https://github.com/drevendev/BeautifulRepo/commit/8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2).
+[BeautifulRepo `ed1e70c0e41833fd2b60a8431e1e3134107bf3ac`](https://github.com/drevendev/BeautifulRepo/commit/ed1e70c0e41833fd2b60a8431e1e3134107bf3ac).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -101,8 +103,8 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2
-test "$(git rev-parse HEAD)" = "8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2" || exit 1
+git checkout --detach ed1e70c0e41833fd2b60a8431e1e3134107bf3ac
+test "$(git rev-parse HEAD)" = "ed1e70c0e41833fd2b60a8431e1e3134107bf3ac" || exit 1
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
 ../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
@@ -136,7 +138,7 @@ checked explicitly rather than assuming `$ErrorActionPreference` catches
 external program exit codes:
 
 ```powershell
-$pin = '8c1d1523fc55a2cd02b7d2cec311a2b7e78628d2'
+$pin = 'ed1e70c0e41833fd2b60a8431e1e3134107bf3ac'
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
 Set-Location BeautifulRepo
@@ -267,9 +269,9 @@ hard-linked `LICENSE` and as an outside-pointing Markdown symlink, and demands
 `incomplete` (exit 2) from **all three tools** through both SDK lifecycles.
 Link creation that a platform does not permit is explicitly reported as
 **untested**, not PASS. This is a protocol-level boundary regression, not proof
-of resistance to concurrent filesystem replacement. The older immutable
-host-trial checkout pinned above predates this added smoke coverage; use the
-current development checkout to run these new cases. Run locally
+of resistance to concurrent filesystem replacement. The immutable host-trial checkout pinned above includes these smoke
+cases, but the SDK's own clients are not independent Claude Code or Codex
+hosts. Run locally
 with the optional SDK installed:
 
 ```sh
