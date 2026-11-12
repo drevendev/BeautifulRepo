@@ -784,6 +784,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Refuse symlinked parent directories and Windows junction/reparse aliases
+  when verifying the local installed four-skill plugin against a pinned Git
+  checkout. A redirected parent could previously pass the byte comparison
+  while obscuring the actual source/cache location. Add disposable symlink
+  and native Windows junction regressions. This is a preflight, not a
+  race-resistant filesystem sandbox or real agent-host acceptance (#257).
+
 - Correct the Claude Code/Codex plugin setup guide to include the
   officially documented Codex CLI `/plugins` installation browser alongside
   the desktop Plugins Directory, without mistaking marketplace registration
