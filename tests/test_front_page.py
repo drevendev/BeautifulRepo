@@ -25,6 +25,18 @@ class FrontPageTests(unittest.TestCase):
         ):
             self.assertIn(link, self.text)
 
+    def test_goal_picker_precedes_long_evidence(self):
+        # Let newcomers choose a useful route before reading the full proof.
+        self.assertEqual(1, self.text.count("## Start here"))
+        self.assertEqual(1, self.text.count("| Your goal | First step | Visible result |"))
+        self.assertLess(self.text.index("## Start here"), self.text.index("## Working proof"))
+        for goal in (
+            "Diagnose an existing repository",
+            "Start a new one",
+            "Borrow a working example",
+        ):
+            self.assertIn(goal, self.text)
+
     def test_visitor_journey_is_explicit_and_ordered(self):
         positions = [
             self.text.index("1 · Promise"),
