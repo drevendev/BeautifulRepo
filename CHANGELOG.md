@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add an actionable small-project governance decision recipe, with a
+  copyable decision card and an annotated real offline-tool decision;
+  no new voting rights, moderation channels or repository settings.
+
 - Extend the optional pinned-SDK MCP stdio smoke from Ubuntu to separate
   Ubuntu and Windows Python 3.11 matrix jobs, checking modern and legacy
   protocol sessions and synthetic read-only tool results on each OS. The

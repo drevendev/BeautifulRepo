@@ -11,7 +11,8 @@ reader's problem before proposing a solution. An issue is helpful for a large ch
 a small correction can go straight to a pull request. Keep one topic per contribution.
 Coding agents follow the short contract in [AGENTS.md](AGENTS.md). The
 [decision records](docs/decisions/README.md) explain why the tools, the Action and
-`master` work the way they do.
+`master` work the way they do. The [small-project governance recipe](guides/governance-decisions.md)
+shows how to bring proposals to a decision without inventing votes or review deadlines.
 
 For your first contribution, use the [short contributor route](guides/first-contribution.md)
 with its deliberately fictional, fully scoped issue example. Maintainers can
