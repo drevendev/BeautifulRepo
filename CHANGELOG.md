@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a Markdown output mode to the offline entry-point audit delta, with
+  severity/rule tables, explicit coverage changes and no input document paths.
+  Tests cover changed/unchanged counts and profile refusal. These counts are
+  observations, not verified repairs or an accessibility verdict.
+
 - Add an actionable small-project governance decision recipe, with a
   copyable decision card and an annotated real offline-tool decision;
   no new voting rights, moderation channels or repository settings.
