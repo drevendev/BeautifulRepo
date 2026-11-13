@@ -784,6 +784,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject every Windows reparse-point type in the README preview/apply path
+  preflight, not just symlinks and junctions. A source-level regression covers
+  generic reparse attributes and unknown tags; it does not certify race-free
+  filesystem isolation or native behavior for every vendor reparse type.
+
 - Correct the four-skill installed-cache verification walkthrough: the immutable
   `8947574` host-test candidate includes an older verifier that cannot
   substantiate the newer parent-link/junction and present-manifest checks.
