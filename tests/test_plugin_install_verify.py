@@ -58,8 +58,9 @@ class PluginInstallVerificationTests(unittest.TestCase):
             for relative in verifier.OPTIONAL_MANIFESTS:
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text('{"name": "beautifulrepo", "version": "0.3.0-dev.0"}\n',
-                                encoding="utf-8")
+                # Explicit LF bytes keep the pinned Git blob and installed cache
+                # identical even when Git for Windows enables core.autocrlf.
+                path.write_bytes(b'{"name": "beautifulrepo", "version": "0.3.0-dev.0"}\n')
         subprocess.run(["git", "-C", str(self.source), "add",
                         *verifier.OPTIONAL_MANIFESTS], check=True)
         subprocess.run(["git", "-C", str(self.source),
