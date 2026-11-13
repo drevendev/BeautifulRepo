@@ -795,6 +795,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Refuse detected Windows reparse points of any tag/attribute in the offline
+  source-review date scanner, including regular-looking Markdown files and
+  source directories. Previously only directory junction tags were refused
+  explicitly. Synthetic file/directory metadata regressions cover the generic
+  rejection; they are not native vendor-specific NTFS or race-condition tests.
+
 - Fail closed when the optional offline agent-eval Read-receipt checker is
   given a fixture or receipt through a symlinked parent or detected Windows
   reparse point, rather than reading redirected evidence. Add synthetic
