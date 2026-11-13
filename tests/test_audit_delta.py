@@ -101,6 +101,37 @@ class AuditDeltaTests(unittest.TestCase):
         self.assertNotIn("INDEX.md", result.stdout)
         self.assertNotIn("README.md", result.stdout)
 
+
+    def test_markdown_is_copyable_and_hides_source_paths(self):
+        old = report(finding("readme.placeholder"), finding("readme.placeholder"))
+        new = report(finding("readme.placeholder"), read_files=["INDEX.md", "LICENSE.md"])
+        new["documents"]["license"] = "LICENSE.md"
+        result = self.run_cli(old, new, "--format", "markdown")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("## Repository entry-point audit delta", result.stdout)
+        self.assertIn("**Audit profile:** public", result.stdout)
+        self.assertIn("**Coverage changed:** YES", result.stdout)
+        self.assertIn("Changed document roles: license", result.stdout)
+        self.assertIn("Inspected-file selection: 1 -> 2 entries (paths withheld).", result.stdout)
+        self.assertIn("| warning | 2 | 1 | -1 |", result.stdout)
+        self.assertIn("| readme.placeholder | warning | 2 | 1 | -1 |", result.stdout)
+        self.assertIn("does not prove a repaired experience", result.stdout)
+        self.assertNotIn("README.md", result.stdout)
+        self.assertNotIn("INDEX.md", result.stdout)
+        self.assertNotIn("LICENSE.md", result.stdout)
+
+    def test_markdown_unchanged_and_profile_mismatch(self):
+        same = self.run_cli(report(), report(), "--format", "markdown")
+        self.assertEqual(0, same.returncode, same.stderr)
+        self.assertIn("**Coverage changed:** no", same.stdout)
+        self.assertIn("No rule-count changes.", same.stdout)
+        self.assertIn("| error | 0 | 0 | +0 |", same.stdout)
+        mismatch = self.run_cli(report(profile="public"), report(profile="private"),
+                                "--format", "markdown")
+        self.assertEqual(2, mismatch.returncode)
+        self.assertEqual("", mismatch.stdout)
+        self.assertIn("profiles differ", mismatch.stderr)
+
     def test_unmatched_profiles_rejected(self):
         text = self.run_cli(report(profile="public"), report(profile="private"))
         self.assertEqual(2, text.returncode)
