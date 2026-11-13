@@ -6,6 +6,8 @@ from datetime import date
 import importlib.util
 import json
 from pathlib import Path
+import stat
+from types import SimpleNamespace
 import subprocess
 import sys
 import tempfile
@@ -136,6 +138,58 @@ class ReviewDateTests(unittest.TestCase):
             self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
             self.assertIn("guides: redirected or non-directory source", out.stderr)
             self.assertNotIn("1999-01-01", out.stderr)
+
+    def test_windows_reparse_file_metadata_is_rejected_before_reading(self):
+        root = self.repo({"guides/a.md": "Reviewed 2026-10-22\n"})
+        source = root / "guides/a.md"
+        # An ordinary st_mode is not enough: third-party reparse tags may
+        # redirect regular-looking files on Windows.
+        for attributes, tag in ((0x400, 0), (0, 0xA000001D)):
+            with self.subTest(attributes=attributes, tag=tag):
+                fake = SimpleNamespace(
+                    st_mode=stat.S_IFREG | 0o644,
+                    st_file_attributes=attributes,
+                    st_reparse_tag=tag,
+                )
+                with mock.patch.object(Path, "lstat", return_value=fake):
+                    with mock.patch.object(review_dates.os, "open",
+                                           side_effect=AssertionError("read attempted")):
+                        with self.assertRaisesRegex(
+                            review_dates.ReviewInputError,
+                            "guides/a.md: source is not an ordinary file",
+                        ):
+                            review_dates._source_text(source, "guides/a.md")
+
+    def test_windows_reparse_directory_metadata_is_rejected_before_scan(self):
+        root = self.repo({"guides/a.md": "Reviewed 2026-10-22\n"})
+        selected = root / "guides"
+        original_lstat = Path.lstat
+        for attributes, tag in ((0x400, 0), (0, 0xA000001D)):
+            with self.subTest(attributes=attributes, tag=tag):
+                def metadata(path):
+                    info = original_lstat(path)
+                    if Path(path) == selected:
+                        return SimpleNamespace(
+                            st_mode=info.st_mode,
+                            st_file_attributes=attributes,
+                            st_reparse_tag=tag,
+                        )
+                    return info
+
+                with mock.patch.object(Path, "lstat", autospec=True,
+                                       side_effect=metadata):
+                    with mock.patch.object(review_dates.os, "scandir",
+                                           side_effect=AssertionError("scan attempted")):
+                        with self.assertRaisesRegex(
+                            review_dates.ReviewInputError,
+                            "guides: redirected or non-directory source",
+                        ):
+                            review_dates.find_review_dates(root)
+
+    def test_normal_windows_file_metadata_is_not_a_reparse_point(self):
+        info = SimpleNamespace(st_mode=stat.S_IFREG | 0o644,
+                               st_file_attributes=0, st_reparse_tag=0)
+        self.assertFalse(review_dates._is_reparse(info))
 
     def test_unreadable_selected_directory_is_not_silently_skipped(self):
         root = self.repo({"guides/a.md": "Reviewed 2026-10-22\n",
