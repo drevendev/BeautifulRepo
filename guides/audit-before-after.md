@@ -39,6 +39,10 @@ before pasting it into a public discussion. No source filenames or finding
 messages are copied into the generated Markdown, but the saved JSON reports
 may contain private paths. Markdown uses the same input validation and exit
 codes as the text/JSON views; it cannot certify that either report is genuine.
+On rejection, known violations such as a redirected report, oversized evidence or
+duplicate JSON keys retain a specific error category without printing the
+input path. Unreadable files and generic JSON parsing errors still receive a
+path-free generic message; no diagnostic authenticates the report.
 
 ## Interpreting the output
 
