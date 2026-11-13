@@ -176,7 +176,7 @@ class PluginManifestTests(unittest.TestCase):
             r"(?s)`codex plugin marketplace add`.{0,90}registers a source;"
             r" it does\s+not install the plugin",
         )
-        self.assertIn("only **register and list** the pinned marketplace", candidate)
+        self.assertIn("only **register and list** the source", candidate)
         self.assertIn("**not** installation evidence", candidate)
         for name, section in (("release", released), ("candidate", candidate)):
             with self.subTest(path=name):
