@@ -25,6 +25,14 @@
 > [!TIP]
 > **Beautiful is not “more decoration.”** A strong repository reduces the time from landing on the page to understanding the result, trying it, trusting it, and knowing how to contribute.
 
+## Start here
+
+| Your goal | First step | Visible result |
+| --- | --- | --- |
+| Diagnose an existing repository | Run the [offline audit](guides/repository-audit.md) and use the [repository checklist](checklists/repository.md) | Specific findings, not a beauty score |
+| Start a new one | Adapt the [README scaffold](templates/README.template.md) with the [first-success checklist](checklists/first-success.md) | A reproducible command and an honest scope |
+| Borrow a working example | Choose from [five starter types](examples/README.md) | Real source, tests and exact limitations |
+
 ## Working proof
 
 **See the result first:** the [text-first Pocket Trails showcase](SHOWCASE.md)
@@ -190,14 +198,6 @@ Keyboard navigation, real 400% zoom and screen readers remain untested.
 For real repository revisions, the [offline audit comparison](guides/audit-before-after.md)
 reads two saved entry-point audit reports and lists changed rule counts and
 coverage without inventing a beauty score or claiming that warnings were fixed.
-
-## Start here
-
-| Your goal | First step | Visible result |
-| --- | --- | --- |
-| Diagnose an existing repository | Run the [offline audit](guides/repository-audit.md) and use the [repository checklist](checklists/repository.md) | Specific findings, not a beauty score |
-| Start a new one | Adapt the [README scaffold](templates/README.template.md) with the [first-success checklist](checklists/first-success.md) | A reproducible command and an honest scope |
-| Borrow a working example | Choose from [five starter types](examples/README.md) | Real source, tests and exact limitations |
 
 ## The visitor journey
 
