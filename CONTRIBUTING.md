@@ -10,7 +10,10 @@ Read the [roadmap](ROADMAP.md) and search existing issues and pull requests. Des
 reader's problem before proposing a solution. An issue is helpful for a large change;
 a small correction can go straight to a pull request. Keep one topic per contribution.
 Coding agents follow the short contract in [AGENTS.md](AGENTS.md). The
-[decision records](docs/decisions/README.md) explain why the tools, the Action and
+[decision records](docs/decisions/README.md).
+The [small-project governance recipe](guides/governance-decisions.md) explains
+who decides proposals and how to record outcomes without claiming votes or
+review deadlines explain why the tools, the Action and
 `master` work the way they do.
 
 For your first contribution, use the [short contributor route](guides/first-contribution.md)
