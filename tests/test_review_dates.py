@@ -162,11 +162,13 @@ class ReviewDateTests(unittest.TestCase):
 
     def test_windows_reparse_directory_metadata_is_rejected_before_scan(self):
         root = self.repo({"guides/a.md": "Reviewed 2026-10-22\n"})
-        selected = root / "guides"
+        # find_review_dates() resolves --root first; normalize this fixture too
+        # because Windows temporary paths may use short or alternate spelling.
+        selected = (root / "guides").resolve(strict=True)
         original_lstat = Path.lstat
         for attributes, tag in ((0x400, 0), (0, 0xA000001D)):
             with self.subTest(attributes=attributes, tag=tag):
-                def metadata(path):
+                def metadata(path, attributes=attributes, tag=tag):
                     info = original_lstat(path)
                     if Path(path) == selected:
                         return SimpleNamespace(
