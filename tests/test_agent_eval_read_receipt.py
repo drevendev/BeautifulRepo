@@ -139,5 +139,81 @@ class ReceiptTests(unittest.TestCase):
         self.assertIn("non-symlink", result.stderr)
 
 
+    def test_fixture_under_symlinked_parent_is_rejected(self):
+        parent = self.home / "trusted-fixture"
+        parent.mkdir()
+        (parent / "README.md").write_text("# Synthetic\\n", encoding="utf-8")
+        alias = self.home / "redirected-fixture"
+        try:
+            alias.symlink_to(parent, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        self.fixture = alias / "README.md"
+        result = self.run_checker({"format": 1, "reads": [
+            {"kind": "tool_result", "tool": "Read", "path": self.path,
+             "content": "# Synthetic\\n"}
+        ]})
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("fixture parent must not be a symlink", result.stderr)
+        self.assertNotIn("CONTENT_MATCH", result.stdout)
+
+    def test_receipt_under_symlinked_parent_is_rejected(self):
+        # The fixture itself is ordinary; the JSON evidence path is redirected.
+        real = self.home / "evidence"
+        real.mkdir()
+        alias = self.home / "redirected-evidence"
+        try:
+            alias.symlink_to(real, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        self.receipt = alias / "receipt.json"
+        result = self.run_checker({"format": 1, "reads": [self.item()]})
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("receipt parent must not be a symlink", result.stderr)
+
+    def test_simulated_windows_reparse_file_and_parent_fail_before_read(self):
+        import importlib.util
+        from types import SimpleNamespace
+        from unittest import mock
+
+        parent = self.home / "normal-parent"
+        parent.mkdir()
+        file = parent / "fixture.md"
+        file.write_text("# Synthetic\\n", encoding="utf-8")
+        spec = importlib.util.spec_from_file_location("agent_eval_receipt_guard", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        original_lstat = Path.lstat
+
+        for redirected, label, expected in (
+            (parent, "fixture", "fixture parent must not be a Windows reparse point"),
+            (file, "fixture", "fixture must not be a Windows reparse point"),
+        ):
+            with self.subTest(redirected=str(redirected)):
+                def tagged_lstat(path):
+                    info = original_lstat(path)
+                    if path == redirected:
+                        return SimpleNamespace(st_mode=info.st_mode,
+                                               st_file_attributes=0x400)
+                    return info
+
+                with mock.patch.object(module.stat, "FILE_ATTRIBUTE_REPARSE_POINT",
+                                       0x400, create=True):
+                    with mock.patch.object(Path, "lstat", tagged_lstat):
+                        with mock.patch.object(
+                            Path, "read_bytes",
+                            side_effect=AssertionError("redirected file was read")
+                        ):
+                            with self.assertRaisesRegex(ValueError, expected):
+                                module._text_file(file, label)
+
+    def test_unredirected_lexical_dotdot_parent_remains_usable(self):
+        ordinary = self.home / "ordinary"
+        ordinary.mkdir()
+        self.fixture = ordinary / ".." / "fixture.md"
+        result = self.run_checker({"format": 1, "reads": [self.item()]})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
