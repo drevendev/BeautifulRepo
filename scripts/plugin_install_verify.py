@@ -43,6 +43,9 @@ DEPENDENCIES = (
     "templates/SECURITY.template.md",
     "templates/RELEASE_NOTES.template.md",
 )
+# Installed plugin caches may omit marketplace metadata. Compare actual plugin
+# manifests only when present; never infer their presence from a source checkout.
+OPTIONAL_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
 MAX_SKILL_BYTES = 256 * 1024
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 
@@ -195,16 +198,51 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
         if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
                 _regular_bytes(installed, relative)).digest():
             dependency_mismatch.append(name)
+    checked_manifests = []
+    missing_manifests = []
+    different_manifests = []
+    for name in OPTIONAL_MANIFESTS:
+        relative = Path(name)
+        present = True
+        path = installed
+        for index, part in enumerate(relative.parts):
+            path = path / part
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                # A genuinely absent optional manifest is not host evidence.
+                missing_manifests.append(name)
+                present = False
+                break
+            except OSError as exc:
+                raise VerificationError("optional plugin manifest could not be inspected") from exc
+            # Inspect parents before classifying a missing file; a dangling
+            # symlinked directory must never be reported as harmless absence.
+            if _is_redirected(path, info):
+                raise VerificationError("optional plugin manifest has a redirected component")
+            if index < len(relative.parts) - 1 and not stat.S_ISDIR(info.st_mode):
+                raise VerificationError("optional plugin manifest parent is not a directory")
+        if not present:
+            continue
+        checked_manifests.append(name)
+        if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
+                _regular_bytes(installed, relative)).digest():
+            different_manifests.append(name)
     return {
-        "state": "match" if not mismatch and not dependency_mismatch else "mismatch",
+        "state": "match" if not mismatch and not dependency_mismatch and not different_manifests else "mismatch",
         "source_commit": actual_commit,
         "checked_skill_definitions": list(SKILLS),
         "different_skill_definitions": mismatch,
         "checked_plugin_dependencies": list(DEPENDENCIES),
         "different_plugin_dependencies": dependency_mismatch,
+        "checked_present_manifests": checked_manifests,
+        "missing_optional_manifests": missing_manifests,
+        "different_present_manifests": different_manifests,
         "limitations": (
-            "Byte match of named skill/helper/policy files only; not a full plugin "
-            "attestation or proof of installation, discovery, invocation or model behavior."
+            "Byte match of named skill/helper/policy files and present optional "
+            "manifests only. Missing manifests are unverified; this is not a full "
+            "plugin attestation or proof of installation, discovery, invocation "
+            "or model behavior."
         ),
     }
 

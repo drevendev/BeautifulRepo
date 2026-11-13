@@ -188,9 +188,15 @@ and the eight templates selected or required by the skills. The exact paths
 are reported in JSON as `checked_plugin_dependencies`. Exit **1** means at
 least one checked file differs; exit **2** means verification is incomplete
 (for example a missing template, redirected file or wrong source revision).
-JSON names differences without publishing file contents. Other guides,
-manifests, libraries and any extra files in the cache are **not covered**.
-A MATCH is **not** a complete plugin integrity or provenance certificate.
+JSON names differences without publishing file contents. The verifier
+**at that immutable candidate commit** does not inspect plugin manifests,
+other guides, libraries or extra files in the cache. More recent development
+versions additionally compare `plugin.json` and `.claude-plugin/plugin.json`
+**if present** in the installed cache. They report absent manifests as
+unverified rather than treating an absent file as an installed-host PASS.
+Those newer verifier results do not retroactively apply to the pinned
+candidate's included script. A MATCH is **not** a complete plugin integrity
+or provenance certificate.
 
 The verifier invokes local Git to read committed blobs but runs no model,
 network or target code and does not edit either checkout. It does **not**
