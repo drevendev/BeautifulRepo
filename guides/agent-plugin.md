@@ -101,34 +101,62 @@ Start with a clean, disposable test environment. If `beautifulrepo` is already
 configured, inspect it first rather than overwriting valued marketplace settings.
 You need Python 3.11+ and Git. Try one host, from a regular terminal:
 
-**Claude Code — test the immutable commit:**
+**Prepare one immutable local checkout for both hosts (source-locked preflight):**
+
+The [Claude Code marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference)
+documents `owner/repo@ref` for a **branch or tag**, not a full commit SHA as
+a marketplace-source selector. The Codex `--ref` option similarly documents
+a Git ref, without proving that a raw SHA works in an installed client.
+Rather than treat either untested remote SHA syntax as a verified install,
+clone the repository and check out the **exact** candidate commit in a
+disposable directory. Run these commands from its **parent** directory:
 
 ```bash
-claude plugin marketplace add drevendev/BeautifulRepo@8947574399df2cc11e8ded41cecbef70be4808c6
+git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
+git -C BeautifulRepo-candidate checkout --detach 8947574399df2cc11e8ded41cecbef70be4808c6
+git -C BeautifulRepo-candidate rev-parse HEAD
+```
+
+Confirm the last command prints exactly
+`8947574399df2cc11e8ded41cecbef70be4808c6`; if it differs or checkout
+fails, **stop and record the failure**. Keep the checkout unchanged during
+the trial. This proves only the **local source revision**, not what a host
+installed from it.
+
+**Claude Code — register that local marketplace, then install:**
+
+```bash
+claude plugin marketplace add ./BeautifulRepo-candidate
 claude plugin install beautifulrepo@beautifulrepo
 claude plugin list
 claude plugin details beautifulrepo
 ```
 
-**Codex — test the same immutable commit:**
+**Codex — register that same local marketplace:**
 
 ```bash
-codex plugin marketplace add drevendev/BeautifulRepo --ref 8947574399df2cc11e8ded41cecbef70be4808c6
+codex plugin marketplace add ./BeautifulRepo-candidate
 codex plugin marketplace list
 ```
 
-On Codex, these commands only **register and list** the pinned marketplace.
+The local-directory marketplace source is documented for
+[Claude Code](https://code.claude.com/docs/en/plugins/cli-reference) and
+[Codex](https://developers.openai.com/plugins/build/plugins), but these
+exact commands **have not been run in either client** by this project.
+This is a pinned **local-marketplace** trial, not a successful GitHub
+remote-marketplace install, agent discovery or model invocation.
+
+For Codex, the commands above only **register and list** the source.
 The [official Codex CLI example](https://developers.openai.com/learn/developers-codex-plugin)
-documents `codex` followed by `/plugins`: find **BeautifulRepo** in the
-registered marketplace, select **Install plugin**, and start a **new chat**.
-Alternatively, use the [ChatGPT desktop Plugins Directory](https://developers.openai.com/plugins/build/plugins)
-with that marketplace. Neither route has been observed to install this
+documents launching `codex`, opening `/plugins`, finding **BeautifulRepo**,
+selecting **Install plugin** and starting a **new chat**. Alternatively,
+use the [ChatGPT desktop Plugins Directory](https://developers.openai.com/plugins/build/plugins)
+with that local marketplace. Neither route has been observed to install this
 BeautifulRepo candidate. Inspect the installed/cached files before grading
-any skill; merely opening `/plugins`, listing marketplaces or checking out a
-source tree is **not** installation evidence. If your host does not expose a
-compatible plugin browser, or installation fails, record its version and exact
-error as **INCONCLUSIVE/FAIL**. Do not switch to unpinned `master` or reuse a
-different candidate's evidence.
+any skill; a source checkout, listed marketplace or opened `/plugins` panel
+is **not** installation evidence. If a host rejects the command or cannot
+install, record its version and exact error as **FAIL/INCONCLUSIVE**; do not
+fall back to mutable `master` or reuse another candidate's evidence.
 
 Restart the client. Check the *installed copy* of `skills/` for all four named
 `SKILL.md` files and confirm they correspond to the pinned commit before a
