@@ -25,7 +25,7 @@ ROOT_SOURCES = ("CONTRIBUTING.md", "SECURITY.md")
 DEFAULT_DAYS = 180
 MAX_SOURCE_BYTES = 256 * 1024
 MAX_SOURCE_FILES = 4096
-JUNCTION_REPARSE_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
+REPARSE_ATTRIBUTE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
 # Program rules change every season, like catalog entries in the "program" category.
 DAYS_BY_FILE = {"guides/programs.md": 30}
 REVIEW_DATE = re.compile(
@@ -113,15 +113,23 @@ class ReviewInputError(ValueError):
     """The selected source cannot be scanned within the offline file bounds."""
 
 
+def _is_reparse(info: os.stat_result) -> bool:
+    """Fail closed on any Windows reparse tag/attribute, not only junctions."""
+    return bool(
+        getattr(info, "st_file_attributes", 0) & REPARSE_ATTRIBUTE
+        or getattr(info, "st_reparse_tag", 0)
+    )
+
+
 def _source_text(path: Path, relative: str) -> str:
     """Read an ordinary bounded UTF-8 file; never intentionally follow a file link."""
     try:
-        if not stat.S_ISREG(path.lstat().st_mode):
+        if not stat.S_ISREG((info := path.lstat()).st_mode) or _is_reparse(info):
             raise ReviewInputError(f"{relative}: source is not an ordinary file.")
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
         fd = os.open(path, flags)
         with os.fdopen(fd, "rb") as handle:
-            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+            if not stat.S_ISREG((info := os.fstat(handle.fileno())).st_mode) or _is_reparse(info):
                 raise ReviewInputError(f"{relative}: source is not an ordinary file.")
             raw = handle.read(MAX_SOURCE_BYTES + 1)
         if len(raw) > MAX_SOURCE_BYTES:
@@ -149,7 +157,8 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
         raise ReviewInputError("--root must be an existing directory.") from None
 
     # The selected paths live only at root or one level below these directories.
-    # Reject redirected directories, including NTFS junctions, before scanning.
+    # Reject redirected directories, including any detected NTFS reparse point,
+    # before scanning. This is a preflight, not race-resistant isolation.
     directories = []
     for directory in SOURCE_DIRS:
         folder = root / directory
@@ -159,9 +168,7 @@ def find_review_dates(root: Path) -> list[tuple[str, int, date | None, str]]:
             continue
         except OSError:
             raise ReviewInputError(f"{directory}: cannot inspect source directory.") from None
-        if not stat.S_ISDIR(info.st_mode) or (
-            getattr(info, "st_reparse_tag", 0) == JUNCTION_REPARSE_TAG
-        ):
+        if not stat.S_ISDIR(info.st_mode) or _is_reparse(info):
             raise ReviewInputError(f"{directory}: redirected or non-directory source.")
         directories.append((directory, folder))
 
