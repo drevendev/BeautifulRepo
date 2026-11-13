@@ -11,6 +11,15 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fail closed when the optional offline agent-eval Read-receipt checker is
+  given a fixture or receipt through a symlinked parent or detected Windows
+  reparse point, rather than reading redirected evidence. Add synthetic
+  parent/leaf regressions and retain ordinary lexical `..` paths.
+  The preflight is not race-resistant, does not authenticate provider traces
+  and cannot establish Claude Code/Codex model behavior (#74).
+
 ### Added
 
 - Add an actionable small-project governance decision recipe, with a
