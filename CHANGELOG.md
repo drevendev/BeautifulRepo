@@ -11,15 +11,6 @@ keep their original themed headings.
 
 ## [Unreleased]
 
-### Fixed
-
-- Fail closed when the optional offline agent-eval Read-receipt checker is
-  given a fixture or receipt through a symlinked parent or detected Windows
-  reparse point, rather than reading redirected evidence. Add synthetic
-  parent/leaf regressions and retain ordinary lexical `..` paths.
-  The preflight is not race-resistant, does not authenticate provider traces
-  and cannot establish Claude Code/Codex model behavior (#74).
-
 ### Added
 
 - Add an actionable small-project governance decision recipe, with a
@@ -796,6 +787,13 @@ keep their original themed headings.
   public guidance and issue history remain available.
 
 ### Fixed
+
+- Fail closed when the optional offline agent-eval Read-receipt checker is
+  given a fixture or receipt through a symlinked parent or detected Windows
+  reparse point, rather than reading redirected evidence. Add synthetic
+  parent/leaf regressions and retain ordinary lexical `..` paths.
+  The preflight is not race-resistant, does not authenticate provider traces
+  and cannot establish Claude Code/Codex model behavior (#74).
 
 - Reject every Windows reparse-point type in the README preview/apply path
   preflight, not just symlinks and junctions. A source-level regression covers
