@@ -190,7 +190,7 @@ class ReceiptTests(unittest.TestCase):
             (file, "fixture", "fixture must not be a Windows reparse point"),
         ):
             with self.subTest(redirected=str(redirected)):
-                def tagged_lstat(path):
+                def tagged_lstat(path, redirected=redirected):
                     info = original_lstat(path)
                     if path == redirected:
                         return SimpleNamespace(st_mode=info.st_mode,
