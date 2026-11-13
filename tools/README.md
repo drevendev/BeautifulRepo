@@ -115,7 +115,8 @@ An abrupt crash can leave a staging file; atomic replacement is not a
 durability guarantee. See the [improve-readme skill](../skills/improve-readme/SKILL.md).
 
 For an evidence-based change comparison, save two JSON entry-point audits and
-run `python -I tools/audit_delta.py before.json after.json`. The
+run `python -I tools/audit_delta.py before.json after.json`. For a copyable,
+path-free PR summary, pass `--format markdown` and review it before sharing. The
 [before/after comparison guide](../guides/audit-before-after.md) explains
 coverage changes, immutable revisions, input limits and why fewer warnings
 are not automatically fixes. This offline tool never executes the target.
