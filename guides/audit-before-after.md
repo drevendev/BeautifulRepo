@@ -19,6 +19,7 @@ python -I tools/repo_audit.py /path/to/before --profile public --format json --f
 python -I tools/repo_audit.py /path/to/after --profile public --format json --fail-on never > after.json
 python -I tools/audit_delta.py before.json after.json
 python -I tools/audit_delta.py before.json after.json --format json
+python -I tools/audit_delta.py before.json after.json --format markdown > audit-delta.md
 ~~~
 
 Replace the paths with real, immutable checkouts; record their **full Git commit
@@ -31,6 +32,13 @@ For a tiny self-contained demonstration, the [repository-audit
 walkthrough](../examples/repository-audit/README.md) has fictional before/after
 sources and explicitly leaves unresolved warnings. Do not present those
 examples as measurements of another project's deployed software.
+
+For a pull request or case study, the Markdown format produces a copyable
+severity table, changed-rule table and coverage notice. Review the result
+before pasting it into a public discussion. No source filenames or finding
+messages are copied into the generated Markdown, but the saved JSON reports
+may contain private paths. Markdown uses the same input validation and exit
+codes as the text/JSON views; it cannot certify that either report is genuine.
 
 ## Interpreting the output
 

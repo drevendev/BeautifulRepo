@@ -131,11 +131,54 @@ def render_text(delta: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+
+def render_markdown(delta: dict) -> str:
+    """Render a path-free Markdown summary suitable for a PR."""
+    details = delta["coverage_details"]
+    lines = [
+        "## Repository entry-point audit delta",
+        "",
+        "_Offline rule counts; not verification of repaired behavior._",
+        "",
+        f"**Audit profile:** {delta['profile']}",
+        f"**Coverage changed:** {'YES' if delta['coverage_changed'] else 'no'}",
+    ]
+    if delta["coverage_changed"]:
+        if details["changed_document_roles"]:
+            lines.append("Changed document roles: " + ", ".join(details["changed_document_roles"]))
+        if details["read_files_changed"]:
+            lines.append(
+                f"Inspected-file selection: {details['read_file_count_before']} -> "
+                f"{details['read_file_count_after']} entries (paths withheld)."
+            )
+    lines.extend(["", "| Severity | Before | After | Delta |", "| --- | ---: | ---: | ---: |"])
+    for level in SEVERITIES:
+        before, after = delta["before"][level], delta["after"][level]
+        lines.append(f"| {level} | {before} | {after} | {after - before:+d} |")
+    lines.append("")
+    if delta["changes"]:
+        lines.extend(["| Rule ID | Severity | Before | After | Delta |",
+                      "| --- | --- | ---: | ---: | ---: |"])
+        for item in delta["changes"]:
+            lines.append(
+                f"| {item['rule_id']} | {item['severity']} | "
+                f"{item['before']} | {item['after']} | {item['delta']:+d} |"
+            )
+    else:
+        lines.append("No rule-count changes.")
+    lines.extend([
+        "",
+        "> A lower finding count does not prove a repaired experience. "
+        "Review the source diff, observed behavior and coverage separately.",
+    ])
+    return "\n".join(lines) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("before", help="saved JSON from repo_audit.py --format json")
     parser.add_argument("after", help="saved JSON from repo_audit.py --format json")
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--format", choices=("text", "json", "markdown"), default="text")
     args = parser.parse_args(argv)
     try:
         result = compare(load_report(args.before, "before"), load_report(args.after, "after"))
@@ -144,6 +187,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if args.format == "json":
         print(json.dumps(result, ensure_ascii=True, indent=2, sort_keys=True))
+    elif args.format == "markdown":
+        print(render_markdown(result), end="")
     else:
         print(render_text(result), end="")
     return 0
