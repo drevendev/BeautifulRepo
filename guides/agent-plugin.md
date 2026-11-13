@@ -200,31 +200,55 @@ symlink or Windows junction/reparse point. On POSIX, use `realpath` on an
 already trusted path if necessary (including systems where `/var` is a
 symlink); resolving a path does not prove installation provenance.
 
-From that **pinned BeautifulRepo source checkout**, which contains the
-verifier, run:
+**Use a newer, separately pinned verifier.** The script *inside* the
+immutable `8947574399df2cc11e8ded41cecbef70be4808c6` candidate does
+**not** reject symlinks in the parents of the source/cache roots, Windows
+junction aliases, or changed plugin manifests. Those checks were implemented
+later. Do not run that older script while claiming the newer safeguards.
+
+From the same parent directory where you cloned `BeautifulRepo-candidate`,
+prepare the corrected verifier at the merged, immutable
+[commit `ac28c4f6`](https://github.com/drevendev/BeautifulRepo/commit/ac28c4f6ee6560405be5fc6aff601f18022e5c40):
+
+```bash
+git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-verifier
+git -C BeautifulRepo-verifier checkout --detach ac28c4f6ee6560405be5fc6aff601f18022e5c40
+git -C BeautifulRepo-verifier rev-parse HEAD
+```
+
+Confirm the last command prints **exactly**
+`ac28c4f6ee6560405be5fc6aff601f18022e5c40`. If not, stop; do not
+run a verifier from mutable `master`. Keep both checkouts unchanged.
+Pass the original `8947574…` candidate as `--source`, the host's **real**
+installed cache as `--installed`, and run the script from the **separate**
+verifier checkout (three distinct physical directories):
 
 ```text
-python -I "/absolute/path/to/pinned-source/scripts/plugin_install_verify.py" --source "/absolute/path/to/pinned-source" --installed "/absolute/path/to/installed-plugin-cache" --expected-commit 8947574399df2cc11e8ded41cecbef70be4808c6
+python -I "/absolute/path/to/BeautifulRepo-verifier/scripts/plugin_install_verify.py" --source "/absolute/path/to/BeautifulRepo-candidate" --installed "/absolute/path/to/installed-plugin-cache" --expected-commit 8947574399df2cc11e8ded41cecbef70be4808c6
 ```
+
+The verifier's own checkout is only the **program** used for comparison;
+`--expected-commit` and the committed Git blobs still identify the older,
+immutable four-skill **candidate**. Its more recent implementation does not
+turn that candidate into a new release or prove a host install.
 
 Requires Python 3.11+ and local Git; the source must be at the repository top
 level, with `HEAD` equal to the supplied full SHA. Exit **0** means all four
 installed `SKILL.md` files **and 22 named local dependencies** match the
-**committed Git blobs** of that revision. The dependencies include the six
-executable helpers, shared agent-safety guidance, task guides, three checklists
-and the eight templates selected or required by the skills. The exact paths
-are reported in JSON as `checked_plugin_dependencies`. Exit **1** means at
-least one checked file differs; exit **2** means verification is incomplete
-(for example a missing template, redirected file or wrong source revision).
-JSON names differences without publishing file contents. The verifier
-**at that immutable candidate commit** does not inspect plugin manifests,
-other guides, libraries or extra files in the cache. More recent development
-versions additionally compare `plugin.json` and `.claude-plugin/plugin.json`
-**if present** in the installed cache. They report absent manifests as
-unverified rather than treating an absent file as an installed-host PASS.
-Those newer verifier results do not retroactively apply to the pinned
-candidate's included script. A MATCH is **not** a complete plugin integrity
-or provenance certificate.
+**committed Git blobs** of the `8947574…` candidate. The dependencies
+include six executable helpers, shared agent-safety guidance, task guides,
+three checklists and eight templates. The JSON lists them as
+`checked_plugin_dependencies`. The corrected verifier additionally compares
+`plugin.json` and `.claude-plugin/plugin.json` **when present** in the
+installed cache; `checked_present_manifests` lists compared files and
+`missing_optional_manifests` explicitly marks absent files as **unverified**.
+Exit **1** means at least one checked file differs; exit **2** means
+incomplete evidence (for example a missing required template, redirected
+path or wrong candidate revision). Exit **0** with missing optional manifests
+is **not** evidence that those manifests or the host installation passed.
+Other guides, libraries and extra cache files are outside this comparison.
+JSON names differences without exposing file contents. A MATCH is **not** a
+complete plugin integrity or provenance certificate.
 
 The verifier invokes local Git to read committed blobs but runs no model,
 network or target code and does not edit either checkout. It does **not**

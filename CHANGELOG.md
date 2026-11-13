@@ -784,6 +784,14 @@ keep their original themed headings.
 
 ### Fixed
 
+- Correct the four-skill installed-cache verification walkthrough: the immutable
+  `8947574` host-test candidate includes an older verifier that cannot
+  substantiate the newer parent-link/junction and present-manifest checks.
+  Pin the corrected verifier's **separate** `ac28c4f` checkout and run it
+  against the unchanged `8947574` candidate and actual host cache. Distinguish
+  required-file MATCH, absent optional manifests and unproven host acceptance
+  (#257, #258).
+
 - Correct the four-skill development-candidate installation walkthrough:
   Claude Code's documented remote marketplace `@ref` selects a branch or
   tag, not an established immutable-SHA installer. Use an exact detached

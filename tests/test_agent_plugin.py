@@ -120,6 +120,32 @@ class PluginManifestTests(unittest.TestCase):
             guide,
         )
 
+    def test_cache_verifier_is_separately_pinned_from_immutable_candidate(self):
+        """The corrected tool must not be attributed to an older source pin."""
+        guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
+        section = guide.split("## Verify cached skill definitions", 1)[1]
+        candidate = "8947574399df2cc11e8ded41cecbef70be4808c6"
+        verifier = "ac28c4f6ee6560405be5fc6aff601f18022e5c40"
+        self.assertNotEqual(candidate, verifier)
+        self.assertIn(
+            f"git -C BeautifulRepo-verifier checkout --detach {verifier}",
+            section,
+        )
+        self.assertIn("git -C BeautifulRepo-verifier rev-parse HEAD", section)
+        self.assertIn(
+            'python -I "/absolute/path/to/BeautifulRepo-verifier/scripts/plugin_install_verify.py"',
+            section,
+        )
+        self.assertIn('--source "/absolute/path/to/BeautifulRepo-candidate"', section)
+        self.assertIn(f"--expected-commit {candidate}", section)
+        self.assertIn("three distinct physical directories", section)
+        self.assertIn("`checked_present_manifests`", section)
+        self.assertIn("`missing_optional_manifests`", section)
+        self.assertNotIn(
+            'python -I "/absolute/path/to/pinned-source/scripts/plugin_install_verify.py"',
+            section,
+        )
+
     def test_manifest_versions_are_valid(self):
         for path in (".claude-plugin/plugin.json", "plugin.json"):
             version = load(path)["version"]
