@@ -66,8 +66,10 @@ remaining findings and known limits.
 
 [audit_delta.py](../tools/audit_delta.py) uses Python's standard library,
 reads at most **1 MiB per report** and 4,096 findings, rejects
-symlinked/nonregular reports, duplicate JSON object keys, contradictory summary
-counts, unsupported profiles and mismatched profiles. It does not invoke Git,
+symlinked lexical parent paths, detected Windows reparse points, nonregular
+reports, duplicate JSON object keys, contradictory summary counts,
+unsupported profiles and mismatched profiles. This path check is a preflight,
+not a race-resistant sandbox or a guarantee for unusual filesystem features. It does not invoke Git,
 run target code, contact a network, modify inputs, discover repositories or
 include input document paths/messages in its output. Exit code **0** means
 structurally comparable reports, not an improvement; **2** means invalid or
