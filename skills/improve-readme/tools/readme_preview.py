@@ -14,7 +14,10 @@ import unicodedata
 
 MAX_BYTES = 256 * 1024
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
-JUNCTION_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
+# Fail closed on all Windows reparse points, not only mount-point junctions.
+# Other tags (for example cloud or vendor filters) must not bypass the path
+# preflight merely because their tag is not IO_REPARSE_TAG_MOUNT_POINT.
+REPARSE_ATTRIBUTE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
 
 
 class PreviewError(ValueError):
@@ -22,8 +25,11 @@ class PreviewError(ValueError):
 
 
 def _redirect(path: Path) -> bool:
+    """Reject symbolic links and every Windows reparse-point kind, before reads."""
     info = path.lstat()
-    return stat.S_ISLNK(info.st_mode) or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG
+    return (stat.S_ISLNK(info.st_mode)
+            or bool(getattr(info, "st_file_attributes", 0) & REPARSE_ATTRIBUTE)
+            or bool(getattr(info, "st_reparse_tag", 0)))
 
 
 def _unsafe_display_character(ch: str) -> bool:
