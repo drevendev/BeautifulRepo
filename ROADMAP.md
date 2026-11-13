@@ -50,6 +50,8 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md),
   [maintenance workflow](guides/maintenance-workflow.md) and application/collection README templates.
 
+- [Small-project governance decisions](guides/governance-decisions.md): a
+  copyable decision card and annotated real offline-tool choice, without invented roles.
 - [Evidence-led issue triage recipe](guides/issue-triage.md), with a copyable
   decision card, real issue examples and explicit not-run/permission boundaries.
 - [First-contribution route](guides/first-contribution.md) with a
