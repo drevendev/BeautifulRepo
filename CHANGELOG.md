@@ -784,6 +784,14 @@ keep their original themed headings.
 
 ### Fixed
 
+- Correct the four-skill development-candidate installation walkthrough:
+  Claude Code's documented remote marketplace `@ref` selects a branch or
+  tag, not an established immutable-SHA installer. Use an exact detached
+  checkout with documented local-directory marketplace registration for
+  both Claude Code and Codex. Keep remote-install syntax and host behavior
+  explicitly unverified, and assert the guide's full SHA agrees with the
+  candidate link and roadmap (related to #257, #258).
+
 - Extend the offline plugin cache verifier to compare Codex and Claude plugin
   manifest bytes against the pinned source **when those files exist in the
   installed cache**. A changed present manifest now reports MISMATCH; a missing

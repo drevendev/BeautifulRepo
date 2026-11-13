@@ -64,28 +64,29 @@ class PluginManifestTests(unittest.TestCase):
     def test_development_install_examples_share_one_immutable_candidate(self):
         """Keep Claude/Codex and the manual matrix pinned to one actual commit."""
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        claude = re.findall(
-            r"(?m)^claude plugin marketplace add drevendev/BeautifulRepo@([a-f0-9]{40})$",
+        checkout = re.findall(
+            r"(?m)^git -C BeautifulRepo-candidate checkout --detach ([a-f0-9]{40})$",
             guide,
         )
-        codex = re.findall(
-            r"(?m)^codex plugin marketplace add drevendev/BeautifulRepo --ref ([a-f0-9]{40})$",
+        self.assertIn("git -C BeautifulRepo-candidate rev-parse HEAD", guide)
+        self.assertIn("claude plugin marketplace add ./BeautifulRepo-candidate", guide)
+        self.assertIn("codex plugin marketplace add ./BeautifulRepo-candidate", guide)
+        self.assertNotRegex(
             guide,
+            r"(?m)^claude plugin marketplace add drevendev/BeautifulRepo@[a-f0-9]{40}$",
         )
         linked = re.findall(
             r"https://github\.com/drevendev/BeautifulRepo/tree/([a-f0-9]{40})",
             guide,
         )
-        self.assertEqual(len(claude), 1, "need one full-SHA Claude dev installer")
-        self.assertEqual(len(codex), 1, "need one full-SHA Codex dev installer")
+        self.assertEqual(len(checkout), 1, "need one full-SHA local candidate checkout")
         self.assertEqual(len(linked), 1, "need one matching immutable source link")
-        self.assertEqual(claude, codex)
-        self.assertEqual(claude, linked)
+        self.assertEqual(checkout, linked)
         roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
         roadmap_pins = re.findall(r"is pinned to `([a-f0-9]{40})`", roadmap)
-        self.assertEqual(roadmap_pins, claude, "roadmap candidate must match installed candidate")
+        self.assertEqual(roadmap_pins, checkout, "roadmap candidate must match the checkout")
         self.assertIn(
-            f"https://github.com/drevendev/BeautifulRepo/blob/{claude[0]}/evals/manual-smoke.md",
+            f"https://github.com/drevendev/BeautifulRepo/blob/{checkout[0]}/evals/manual-smoke.md",
             guide,
         )
 
@@ -93,12 +94,12 @@ class PluginManifestTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn(
-            f"https://github.com/drevendev/BeautifulRepo/tree/{claude[0]}",
+            f"https://github.com/drevendev/BeautifulRepo/tree/{checkout[0]}",
             comparison,
             "the three-arm protocol must use the same immutable candidate",
         )
         self.assertIn(
-            f"--expected-commit {claude[0]}",
+            f"--expected-commit {checkout[0]}",
             guide,
             "offline cache verification must pin the tested candidate",
         )
@@ -115,7 +116,7 @@ class PluginManifestTests(unittest.TestCase):
             guide,
         )
         self.assertIn(
-            f"`--expected-commit {claude[0]}` cache",
+            f"`--expected-commit {checkout[0]}` cache",
             guide,
         )
 
@@ -175,7 +176,7 @@ class PluginManifestTests(unittest.TestCase):
             r"(?s)`codex plugin marketplace add`.{0,90}registers a source;"
             r" it does\s+not install the plugin",
         )
-        self.assertIn("only **register and list** the pinned marketplace", candidate)
+        self.assertIn("only **register and list** the source", candidate)
         self.assertIn("**not** installation evidence", candidate)
         for name, section in (("release", released), ("candidate", candidate)):
             with self.subTest(path=name):
