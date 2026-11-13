@@ -152,9 +152,15 @@ class AuditDeltaTests(unittest.TestCase):
     def test_duplicate_json_keys_and_oversize_rejected(self):
         self.before.write_text('{"schema_version":1,"schema_version":1}', encoding="utf-8")
         self.after.write_text(json.dumps(report()), encoding="utf-8")
-        self.assertEqual(2, self.invoke().returncode)
+        duplicate = self.invoke()
+        self.assertEqual(2, duplicate.returncode)
+        self.assertIn("Duplicate JSON object key", duplicate.stderr)
+        self.assertNotIn(str(self.home), duplicate.stderr)
         self.before.write_bytes(b"x" * (delta.LIMIT + 1))
-        self.assertEqual(2, self.invoke().returncode)
+        oversized = self.invoke()
+        self.assertEqual(2, oversized.returncode)
+        self.assertIn("exceeds 1 MiB", oversized.stderr)
+        self.assertNotIn(str(self.home), oversized.stderr)
 
     def test_oversized_json_integer_reports_clean_error(self):
         # CPython 3.11+ may reject integers exceeding its decimal digit limit.
@@ -181,7 +187,10 @@ class AuditDeltaTests(unittest.TestCase):
             self.before.symlink_to(original)
         except (NotImplementedError, OSError):
             self.skipTest("symlinks unavailable")
-        self.assertEqual(2, self.invoke().returncode)
+        result = self.invoke()
+        self.assertEqual(2, result.returncode)
+        self.assertIn("redirected report path or parent", result.stderr)
+        self.assertNotIn(str(self.home), result.stderr)
 
     def test_symlinked_report_parent_rejected(self):
         actual = self.home / "actual"
@@ -197,6 +206,17 @@ class AuditDeltaTests(unittest.TestCase):
         result = self.invoke()
         self.assertEqual(2, result.returncode, result.stderr)
         self.assertEqual("", result.stdout)
+        self.assertIn("redirected report path or parent", result.stderr)
+        self.assertNotIn(str(self.home), result.stderr)
+
+    def test_unreadable_report_keeps_generic_path_free_error(self):
+        self.after.write_text(json.dumps(report()), encoding="utf-8")
+        # There is no before.json; never echo the OS filename in the diagnostic.
+        result = self.invoke()
+        self.assertEqual(2, result.returncode)
+        self.assertIn("before: cannot read a valid UTF-8 JSON report", result.stderr)
+        self.assertNotIn(str(self.home), result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
 
     def test_windows_reparse_metadata_rejected_before_read(self):
         self.before.write_text(json.dumps(report()), encoding="utf-8")

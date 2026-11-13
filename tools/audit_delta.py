@@ -60,6 +60,9 @@ def load_report(filename: str, label: str) -> dict:
         if len(raw) > LIMIT or b"\x00" in raw:
             raise ReportError(f"{label}: report exceeds 1 MiB or contains NUL bytes.")
         data = json.loads(raw.decode("utf-8-sig"), object_pairs_hook=_unique_pairs)
+    except ReportError:
+        # Preserve deliberate, path-free validation reasons; ReportError inherits ValueError.
+        raise
     except (OSError, UnicodeError, ValueError, RecursionError) as exc:
         raise ReportError(f"{label}: cannot read a valid UTF-8 JSON report.") from exc
     if not isinstance(data, dict) or type(data.get("schema_version")) is not int or data["schema_version"] != 1:

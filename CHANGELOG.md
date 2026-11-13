@@ -800,6 +800,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Keep actionable, path-free validation errors when the offline audit-delta
+  reader detects a redirected input, duplicate JSON keys or an oversized report.
+  Previously the generic ValueError handler masked these reasons. Unreadable
+  files and generic parse failures still get a generic path-free error.
+  Regression tests cover all three conditions and a missing input.
+
 - Reject symlinked lexical parents and detected Windows reparse points in
   saved JSON report paths for the offline audit-delta reader. Add parent-link
   and synthetic unknown-tag/attribute-only regressions; this preflight does
