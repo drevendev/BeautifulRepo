@@ -788,6 +788,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Fail closed when the optional offline agent-eval Read-receipt checker is
+  given a fixture or receipt through a symlinked parent or detected Windows
+  reparse point, rather than reading redirected evidence. Add synthetic
+  parent/leaf regressions and retain ordinary lexical `..` paths.
+  The preflight is not race-resistant, does not authenticate provider traces
+  and cannot establish Claude Code/Codex model behavior (#74).
+
 - Reject every Windows reparse-point type in the README preview/apply path
   preflight, not just symlinks and junctions. A source-level regression covers
   generic reparse attributes and unknown tags; it does not certify race-free
