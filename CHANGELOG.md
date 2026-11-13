@@ -643,6 +643,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Move the existing three-route “Start here” chooser above the long
+  audit proof in the public README, so first-time visitors can select
+  diagnosis, a new scaffold, or a runnable starter without scrolling
+  past the full demonstration. Keep every existing proof claim and link;
+  add a source-order regression. This is a navigation change, not a
+  measured usability or accessibility result.
+
 - Refresh the GSoC 2026 participation timeline against Google's dated 2026
   schedule on November 12: the final extended-project mentor deadline has
   passed, like all 2026 application and contributor deadlines. Distinguish
