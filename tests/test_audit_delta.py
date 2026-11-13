@@ -4,6 +4,8 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
 import subprocess
 import sys
 import tempfile
@@ -180,6 +182,49 @@ class AuditDeltaTests(unittest.TestCase):
         except (NotImplementedError, OSError):
             self.skipTest("symlinks unavailable")
         self.assertEqual(2, self.invoke().returncode)
+
+    def test_symlinked_report_parent_rejected(self):
+        actual = self.home / "actual"
+        actual.mkdir()
+        (actual / "before.json").write_text(json.dumps(report()), encoding="utf-8")
+        self.after.write_text(json.dumps(report()), encoding="utf-8")
+        alias = self.home / "alias"
+        try:
+            alias.symlink_to(actual, target_is_directory=True)
+        except (NotImplementedError, OSError):
+            self.skipTest("directory symlinks unavailable")
+        self.before = alias / "before.json"
+        result = self.invoke()
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertEqual("", result.stdout)
+
+    def test_windows_reparse_metadata_rejected_before_read(self):
+        self.before.write_text(json.dumps(report()), encoding="utf-8")
+        original_lstat = Path.lstat
+        # Both unknown non-junction tags and attribute-only reparse points
+        # must be rejected for the final file and its lexical ancestors.
+        for selected, attributes, tag in (
+            (self.before, 0, 0xA00000AB),
+            (self.before, 0x400, 0),
+            (self.home, 0, 0xA00000AB),
+            (self.home, 0x400, 0),
+        ):
+            with self.subTest(path=selected, attributes=attributes, tag=tag):
+                def modified_lstat(path, chosen=selected, flags=attributes, reparse_tag=tag):
+                    info = original_lstat(path)
+                    if path == chosen:
+                        return SimpleNamespace(st_mode=info.st_mode,
+                                               st_file_attributes=flags,
+                                               st_reparse_tag=reparse_tag)
+                    return info
+
+                with (mock.patch.object(delta.stat, "FILE_ATTRIBUTE_REPARSE_POINT",
+                                        0x400, create=True),
+                      mock.patch.object(Path, "lstat", modified_lstat),
+                      mock.patch.object(delta.os, "open",
+                                        side_effect=AssertionError("redirect was opened"))):
+                    with self.assertRaises(delta.ReportError):
+                        delta.load_report(str(self.before), "before")
 
     def test_real_repo_audit_json_round_trip(self):
         if not AUDIT.is_file():

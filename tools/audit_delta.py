@@ -15,11 +15,18 @@ LIMIT = 1024 * 1024
 MAX_FINDINGS = 4096
 SEVERITIES = ("error", "warning", "info")
 RULE = re.compile(r"[a-z][a-z0-9_.-]{0,79}\Z")
-JUNCTION_TAG = getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003)
 
 
 class ReportError(ValueError):
     """Malformed or unsupported local audit evidence."""
+
+
+def _is_redirect(info) -> bool:
+    """Catch symlinks and detected Windows reparse points, not just junctions."""
+    return (stat.S_ISLNK(info.st_mode)
+            or bool(getattr(info, "st_file_attributes", 0)
+                    & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+            or bool(getattr(info, "st_reparse_tag", 0)))
 
 
 def _unique_pairs(pairs):
@@ -33,14 +40,21 @@ def _unique_pairs(pairs):
 
 def load_report(filename: str, label: str) -> dict:
     path = Path(filename)
+    selected = path if path.is_absolute() else Path.cwd() / path
     try:
-        info = path.lstat()
-        if not stat.S_ISREG(info.st_mode) or getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG:
-            raise ReportError(f"{label}: expected an ordinary, non-symlinked report file.")
+        # Inspect lexical ancestors before resolution, including those before "..".
+        # This is a preflight, not a race-free filesystem containment boundary.
+        for component in reversed((selected, *selected.parents)):
+            info = component.lstat()
+            if _is_redirect(info) or getattr(component, "is_junction", lambda: False)():
+                raise ReportError(f"{label}: redirected report path or parent.")
+        if not stat.S_ISREG(info.st_mode):
+            raise ReportError(f"{label}: expected an ordinary report file.")
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
-        fd = os.open(path, flags)
+        fd = os.open(selected, flags)
         with os.fdopen(fd, "rb") as stream:
-            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+            opened = os.fstat(stream.fileno())
+            if not stat.S_ISREG(opened.st_mode) or _is_redirect(opened):
                 raise ReportError(f"{label}: report must be an ordinary file.")
             raw = stream.read(LIMIT + 1)
         if len(raw) > LIMIT or b"\x00" in raw:

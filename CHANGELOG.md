@@ -800,6 +800,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject symlinked lexical parents and detected Windows reparse points in
+  saved JSON report paths for the offline audit-delta reader. Add parent-link
+  and synthetic unknown-tag/attribute-only regressions; this preflight does
+  not make arbitrary filesystems or concurrent path changes race-safe.
+
+
 - Refuse detected Windows reparse points of any tag/attribute in the offline
   source-review date scanner, including regular-looking Markdown files and
   source directories. Previously only directory junction tags were refused
