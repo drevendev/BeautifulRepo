@@ -91,6 +91,27 @@ class ReadmePreviewTests(unittest.TestCase):
         self.proposal.unlink()
         self.assertEqual(2, self.command().returncode)
 
+    def test_windows_reparse_metadata_other_than_junction_is_rejected(self):
+        # Exercise native Windows metadata shapes without requiring permission to
+        # create vendor/cloud reparse points on a CI runner. This is a predicate
+        # test, not a claim of actual Windows filesystem integration coverage.
+        import runpy
+        import stat
+        from types import SimpleNamespace
+
+        redirect = runpy.run_path(str(TOOL))["_redirect"]
+
+        def simulated_path(*, attributes=0, tag=0):
+            info = SimpleNamespace(st_mode=stat.S_IFDIR,
+                                   st_file_attributes=attributes,
+                                   st_reparse_tag=tag)
+            return SimpleNamespace(lstat=lambda: info)
+
+        self.assertFalse(redirect(simulated_path()))
+        self.assertTrue(redirect(simulated_path(attributes=0x400)))
+        # Non-junction tag without file attributes still fails closed.
+        self.assertTrue(redirect(simulated_path(tag=0xA000001D)))
+
     def test_symlinked_root_readme_and_proposal_are_rejected(self):
         target = self.tmp / "real.md"
         target.write_text("# Real\n", encoding="utf-8")
