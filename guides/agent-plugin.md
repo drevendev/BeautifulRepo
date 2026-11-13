@@ -155,7 +155,7 @@ with that local marketplace. Neither route has been observed to install this
 BeautifulRepo candidate. Inspect the installed/cached files before grading
 any skill; a source checkout, listed marketplace or opened `/plugins` panel
 is **not** installation evidence. If a host rejects the command or cannot
-install, record its version and exact error as **FAIL/INCONCLUSIVE**; do not
+install, record its version and exact error as **INCONCLUSIVE/FAIL**; do not
 fall back to mutable `master` or reuse another candidate's evidence.
 
 Restart the client. Check the *installed copy* of `skills/` for all four named
