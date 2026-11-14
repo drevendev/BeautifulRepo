@@ -665,6 +665,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Pin the documented offline four-skill cache verifier to merged commit
+  `207ea2c`, which checks Git-tracked bundled scripts/references as well as
+  skill definitions, shared dependencies and present manifests. The immutable
+  `8947574` candidate remains unchanged; this still does not prove actual
+  Claude Code/Codex installation or model use (#257).
+
 - Move the existing three-route “Start here” chooser above the long
   audit proof in the public README, so first-time visitors can select
   diagnosis, a new scaffold, or a runnable starter without scrolling
