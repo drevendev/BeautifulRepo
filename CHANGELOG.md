@@ -664,6 +664,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Repin the four-skill development cache-check instructions to the immutable
+  strict verifier from #371. Unlike the previous pin, it rejects additional
+  untracked or redirected files **inside** the installed skill folders as
+  INCOMPLETE; files outside those folders and real Claude Code/Codex execution
+  remain unverified (#257). The tested skill candidate SHA is unchanged.
+
 - Pin the documented offline four-skill cache verifier to merged commit
   `207ea2c`, which checks Git-tracked bundled scripts/references as well as
   skill definitions, shared dependencies and present manifests. The immutable
