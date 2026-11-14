@@ -128,6 +128,12 @@ class PluginInstallVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(verifier.VerificationError, "redirected entry"):
             verifier.verify(self.source, self.installed, self.sha)
 
+    def test_files_outside_skill_folders_remain_unverified(self):
+        (self.installed / "cache-metadata.json").write_bytes(b"host data\n")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "match")
+        self.assertIn("outside the four skill folders", result["limitations"])
+
     def add_optional_manifests(self):
         # Add metadata after the fixture's first commit so both snapshots are
         # pinned Git blobs rather than mutable working-tree files.
