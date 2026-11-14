@@ -71,6 +71,16 @@ class PluginManifestTests(unittest.TestCase):
         self.assertIn("git -C BeautifulRepo-candidate rev-parse HEAD", guide)
         self.assertIn("claude plugin marketplace add ./BeautifulRepo-candidate", guide)
         self.assertIn("codex plugin marketplace add ./BeautifulRepo-candidate", guide)
+        # Optional source validation runs before marketplace registration.
+        # It does not exercise installed files or model selection.
+        preflight = "claude plugin validate ./BeautifulRepo-candidate"
+        self.assertIn(preflight, guide)
+        self.assertLess(
+            guide.index(preflight),
+            guide.index("claude plugin marketplace add ./BeautifulRepo-candidate"),
+        )
+        self.assertIn("v2.1.289+", guide)
+        self.assertIn("not an installed-host", guide)
         self.assertNotRegex(
             guide,
             r"(?m)^claude plugin marketplace add drevendev/BeautifulRepo@[a-f0-9]{40}$",
