@@ -160,9 +160,17 @@ class PluginManifestTests(unittest.TestCase):
         self.assertIn("skill-local files", section)
         self.assertIn("up to 1,024 visited entries", section)
         self.assertIn("Extra files **outside**", section)
-        self.assertEqual(
-            re.findall(r"(?m)^git -C BeautifulRepo-verifier checkout --detach ([0-9a-f]{40})$", section),
-            [verifier],
+        pinned_checkouts = re.findall(
+            r"(?m)^git -C BeautifulRepo-verifier checkout --detach ([0-9a-f]{40})$",
+            section,
+        )
+        self.assertEqual(pinned_checkouts, [verifier])
+        tools_guide = (ROOT / "tools/README.md").read_text(encoding="utf-8")
+        self.assertIn("inside the four installed skill folders", tools_guide)
+        self.assertIn("Extra files elsewhere in the plugin", tools_guide)
+        self.assertNotIn(
+            "Extra untracked cache files and missing optional",
+            tools_guide,
         )
         self.assertNotIn(
             'python -I "/absolute/path/to/pinned-source/scripts/plugin_install_verify.py"',
