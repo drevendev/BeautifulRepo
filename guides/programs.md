@@ -70,6 +70,47 @@ project, scoped project ideas, documented onboarding, review capacity and an hon
 commitment. This is our readiness advice, not a substitute for Google's selection rules.
 Mentor guidance and eligibility deserve a separate source review before any application.
 
+## Prepare a project idea before applying to GSoC
+
+**Practical reusable artifact:** copy the
+[GSoC project-idea card](../templates/GSOC_PROJECT_IDEA.template.md) as a
+draft. It asks for a real reader problem, a bounded deliverable, observable
+tests, prerequisites, a verified first-contribution route, mentor capacity
+and an explicit AI-tool policy. One completed card is **not** an application
+or a complete organization ideas list.
+
+Google's [ideas-list guide](https://google.github.io/gsocguides/mentor/defining-a-project-ideas-list)
+recommends concise needs rather than a prescribed implementation, independent
+projects rather than tasks contingent on another contributor, and multiple
+substantive ideas for organizations considering participation. Its
+[ideas-page checklist](https://google.github.io/gsocguides/mentor/making-your-ideas-page)
+calls for a description, prerequisites, difficulty, prospective mentors and a
+size category. The published guide currently uses approximately **90, 175 or
+350 hours**, but verify those categories again for the intended program year.
+A mentor name is not a commitment: Google also emphasizes
+[real mentor availability](https://google.github.io/gsocguides/mentor/selecting-students-and-mentors)
+and [collaborative expectations](https://google.github.io/gsocguides/mentor/setting-expectations).
+
+**Worked scoping example (hypothetical, not offered for applications):**
+for an offline README checker, "reduce false positives in an existing
+Markdown-link diagnostic" is a *problem*, not a project plan. A useful core
+outcome would be a set of public synthetic fixtures that reproduce named
+false positives, a bounded correction to the diagnostic, and before/after
+CLI results. A separate optional stretch might improve the explanation of
+the finding. This does **not** claim such defects were reproduced or that
+BeautifulRepo has an available mentor; no project or eligibility is being
+advertised.
+
+**AI-tool expectations:** the [2026 GSoC program lead's guidance](https://groups.google.com/g/google-summer-of-code-discuss/c/UzgaSAKgcyg)
+encouraged organizations to state their own AI-tooling expectations on the
+ideas page. The card makes that decision explicit rather than assuming a
+universal permission or ban. This is guidance for writing an honest
+public project idea, not permission to apply, recruit, run an agent or
+submit work on a maintainer's behalf.
+
+**Sources reviewed 2026-11-14.** Recheck the actual program year and current
+official timeline before publishing dates or project sizes.
+
 ## Keep seasonal material honest
 
 Record the year, source, observation date, exact claim and next recheck trigger. Recheck
