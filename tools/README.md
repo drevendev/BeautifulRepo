@@ -42,9 +42,12 @@ pinned source. It is read-only, runs only
 local Git commands (unlike the no-subprocess audit checkers in `tools/`), uses
 Python 3.11+ and local Git, and reports JSON with exit 0 (match), 1
 (mismatch) or 2 (incomplete). It rejects missing/extra skill directories
-and redirecting skill file paths. Missing tracked assets are INCOMPLETE;
-modified assets are MISMATCH. Extra untracked cache files and missing optional
-manifests remain unverified, and this is not proof of model execution.
+and redirecting skill file paths. It also rejects unexpected files and
+redirected entries **inside the four installed skill folders** as INCOMPLETE
+(exit 2; at most 1,024 inventory entries). Missing tracked assets are
+INCOMPLETE; modified assets are MISMATCH. Extra files elsewhere in the plugin
+cache and missing optional manifests remain unverified. A file match is not
+proof of host installation, skill discovery or model execution.
 This is for the **four-skill development candidate**, not the released
 v0.2.0 single-skill bundle.
 
