@@ -225,17 +225,17 @@ junction aliases, or changed plugin manifests. Those checks were implemented
 later. Do not run that older script while claiming the newer safeguards.
 
 From the same parent directory where you cloned `BeautifulRepo-candidate`,
-prepare the corrected verifier at the merged, immutable
-[commit `ac28c4f6`](https://github.com/drevendev/BeautifulRepo/commit/ac28c4f6ee6560405be5fc6aff601f18022e5c40):
+prepare the expanded verifier at the merged, immutable
+[commit `207ea2c`](https://github.com/drevendev/BeautifulRepo/commit/207ea2c37bb095389d6141cb1ab173cc6873c1f6):
 
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-verifier
-git -C BeautifulRepo-verifier checkout --detach ac28c4f6ee6560405be5fc6aff601f18022e5c40
+git -C BeautifulRepo-verifier checkout --detach 207ea2c37bb095389d6141cb1ab173cc6873c1f6
 git -C BeautifulRepo-verifier rev-parse HEAD
 ```
 
 Confirm the last command prints **exactly**
-`ac28c4f6ee6560405be5fc6aff601f18022e5c40`. If not, stop; do not
+`207ea2c37bb095389d6141cb1ab173cc6873c1f6`. If not, stop; do not
 run a verifier from mutable `master`. Keep both checkouts unchanged.
 Pass the original `8947574…` candidate as `--source`, the host's **real**
 installed cache as `--installed`, and run the script from the **separate**
@@ -252,11 +252,12 @@ turn that candidate into a new release or prove a host install.
 
 Requires Python 3.11+ and local Git; the source must be at the repository top
 level, with `HEAD` equal to the supplied full SHA. Exit **0** means all four
-installed `SKILL.md` files **and 22 named local dependencies** match the
-**committed Git blobs** of the `8947574…` candidate. The dependencies
+installed `SKILL.md` files, all Git-tracked files bundled inside the four
+skill directories, and **22 named shared dependencies** match the **committed
+Git blobs** of the `8947574…` candidate. The dependencies
 include six executable helpers, shared agent-safety guidance, task guides,
 three checklists and eight templates. The JSON lists them as
-`checked_plugin_dependencies`. The corrected verifier additionally compares
+`checked_plugin_dependencies`. The pinned verifier additionally compares
 `plugin.json` and `.claude-plugin/plugin.json` **when present** in the
 installed cache; `checked_present_manifests` lists compared files and
 `missing_optional_manifests` explicitly marks absent files as **unverified**.
@@ -264,15 +265,14 @@ Exit **1** means at least one checked file differs; exit **2** means
 incomplete evidence (for example a missing required template, redirected
 path or wrong candidate revision). Exit **0** with missing optional manifests
 is **not** evidence that those manifests or the host installation passed.
-**Pinned-verifier scope:** the `ac28c4f6` verifier in the command above
-compares four `SKILL.md` files, 22 shared dependencies and present manifests,
-**not** scripts and references bundled *inside* each standalone skill folder.
-A newer development version of `scripts/plugin_install_verify.py` also compares
-every Git-tracked file under the four pinned skill directories, reporting
-`checked_skill_assets` and `different_skill_assets`. Do not claim that broader
-verification from the older pinned command; pin and review a new immutable
-verifier revision before using it as acceptance evidence. The candidate SHA
-itself remains unchanged.
+**Pinned-verifier scope:** the `207ea2c` verifier in the command above
+also checks all Git-tracked, non-`SKILL.md` files under the four pinned skill
+directories, including bundled scripts and references. Its JSON includes
+`checked_skill_assets` and `different_skill_assets`; modified assets return
+MISMATCH (exit 1), while missing or redirected required assets return
+INCOMPLETE (exit 2). The older `ac28c4f6` verifier **did not** check these
+bundled assets; do not use that old pin as evidence for the expanded scope.
+The candidate SHA itself remains unchanged.
 
 Other repository files, extra untracked cache files and missing optional
 manifests are outside the comparison. JSON names differences without exposing
