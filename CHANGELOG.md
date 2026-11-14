@@ -13,6 +13,14 @@ keep their original themed headings.
 
 ### Added
 
+- Extend the offline installed-plugin cache verifier to compare all Git-tracked
+  non-`SKILL.md` assets bundled inside the four candidate skill directories,
+  including copied helper scripts and references. Changed files are reported as
+  MISMATCH and missing/redirected files as INCOMPLETE; extra untracked cache
+  files, actual host installation, discovery and model behavior remain
+  unverified (#257). The previously documented pinned verifier SHA does not
+  contain this change.
+
 - Add a source-backed game README guide and editable template for verified first
   play, exact build steps, screenshots/text alternatives and separate code/asset
   rights. No executable game, release or real gameplay test is claimed.
