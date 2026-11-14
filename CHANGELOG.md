@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed, reusable GSoC project-idea card with bounded outcomes,
+  first-contribution verification, actual mentor availability and an explicit
+  AI-tooling policy. The programs guide includes a clearly hypothetical
+  scoping example and 2026-11-14 official-source review. No application,
+  volunteer commitment or future-year eligibility is claimed.
+
 - Add a revision-pinned HungryCrab README correction to the release-notes guide, distinguishing a development-version claim, Git tags, published GitHub Releases and the moving `/releases/latest` link. The historical 404 evidence is dated; no new release or live publication check is claimed.
 
 - Extend the offline installed-plugin cache verifier to compare all Git-tracked
