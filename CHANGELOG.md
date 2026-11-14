@@ -836,6 +836,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Restore discovery of the GSoC project-idea template from the public
+  template index and roadmap. Both routes identify it as a draft and point to
+  the dated programs guide, not as proof of enrollment or mentor availability.
+
 - Reject unexpected files or redirected entries inside the four installed skill
   directories during the offline pinned-cache comparison. Previously, matching
   tracked files could report MATCH despite additional untracked skill-local

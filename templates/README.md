@@ -1,8 +1,9 @@
-# README templates
+# Repository templates
 
 Pick a scaffold for the audience that will actually read the repository.
-Each template is an **editable starting point**, not a completed project
-or a verification of its placeholder commands.
+Some templates describe a README; others document a release, security policy
+or contributor project idea. Every template is an **editable starting point**,
+not a completed project or verification of its placeholder claims.
 
 - [General repository README](README.template.md) — public-facing first result.
 - [Design-intent brief](DESIGN_INTENT.template.md) — audience, fixed evidence, two
@@ -18,6 +19,16 @@ or a verification of its placeholder commands.
 - [Curated references README](CURATED_README.template.md) — selection and retirement criteria.
 - [Release notes](RELEASE_NOTES.template.md) — accurately scoped changes.
 - [Security policy](SECURITY.template.md) — publish only after a real private reporting route exists.
+
+## Contributor project ideas
+
+- [GSoC project-idea card](GSOC_PROJECT_IDEA.template.md) — a draft with an
+  observable deliverable, actual mentor capacity, prerequisites and an explicit
+  AI-tool policy. It does **not** enroll this repository, promise mentoring or
+  verify future-year eligibility.
+
+See the [dated programs guide](../guides/programs.md) and recheck the organizer's
+current rules before publishing an ideas page or making participation claims.
 
 See the [filled fictional internal example](../examples/internal-repository/README.md)
 and the [private-repository adoption guide](../guides/adopting-the-checks.md#private-and-enterprise-repositories).

@@ -61,6 +61,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   [copyable good-first-issue template](templates/GOOD_FIRST_ISSUE.template.md),
   a clearly fictional broken-link repair example, contributor and maintainer
   acceptance steps, and no implied assignments or review guarantees.
+- [Contributor-program guidance](guides/programs.md) and the
+  [draft GSoC project-idea card](templates/GSOC_PROJECT_IDEA.template.md),
+  with observed-scope, mentor-capacity and AI-policy checks; neither template
+  nor guide implies program enrollment or a confirmed next-year schedule.
 
 - [Repository pause and archive recipe](guides/repository-retirement.md) and
   [reusable status notice](templates/REPOSITORY_STATUS_NOTICE.template.md),
