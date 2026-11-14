@@ -123,6 +123,24 @@ fails, **stop and record the failure**. Keep the checkout unchanged during
 the trial. This proves only the **local source revision**, not what a host
 installed from it.
 
+**Optional Claude Code package preflight (before installation):**
+
+```bash
+claude plugin validate ./BeautifulRepo-candidate
+```
+
+The [Claude Code plugin validator](https://code.claude.com/docs/en/plugins/cli-reference#plugin-validate)
+accepts a directory. It checks the marketplace manifest; **Claude Code
+v2.1.289+** also checks the plugin manifest and components when the directory
+has both `.claude-plugin/marketplace.json` and `.claude-plugin/plugin.json`.
+Older clients may validate less. Exit **0** means its selected checks passed
+(possibly with warnings), **1** means validation failed and **2** means an
+unexpected validation error. Check `claude plugin validate --help` for the
+actual installed version. Record the output and exit code rather than claiming
+a pass by inference. This is a **source-only** validation, not an installed-host
+copy check, Codex compatibility test, skill discovery or model invocation.
+Do not run model evaluations as part of this preflight.
+
 **Claude Code — register that local marketplace, then install:**
 
 ```bash
