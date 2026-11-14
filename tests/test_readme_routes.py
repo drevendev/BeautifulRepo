@@ -15,18 +15,26 @@ def first_screen() -> str:
 
 
 class ReaderRoutesTests(unittest.TestCase):
-    def test_three_clear_first_routes_without_directory_table(self):
+    def test_three_clear_first_routes_without_layout_table(self):
         section = README.split("## Start here\n", 1)[1].split(
-            "\n## The visitor journey", 1
+            "\n## Working proof", 1
         )[0]
-        rows = [line for line in section.splitlines() if line.startswith("|")]
-        self.assertEqual(len(rows), 5)  # header, separator, three destinations
-        for row in rows:
-            with self.subTest(row=row):
-                self.assertEqual(row.count("|"), 4)
-        self.assertIn("guides/repository-audit.md", section)
-        self.assertIn("templates/README.template.md", section)
-        self.assertIn("examples/README.md", section)
+        items = [line for line in section.splitlines() if line.startswith("- **")]
+        self.assertEqual(3, len(items), "first-step chooser should remain three options")
+        self.assertFalse(any(line.startswith("|") for line in section.splitlines()),
+                         "first-step chooser is navigation, not comparison data")
+        for destination in (
+            "guides/repository-audit.md",
+            "checklists/repository.md",
+            "templates/README.template.md",
+            "checklists/first-success.md",
+            "examples/README.md",
+        ):
+            with self.subTest(destination=destination):
+                self.assertIn(f"]({destination})", section)
+        for outcome in ("not a beauty score", "reproducible command",
+                        "documented limitations"):
+            self.assertIn(outcome, section)
 
     def test_proof_names_actual_checkout_command_and_output(self):
         quickstart = first_screen()
