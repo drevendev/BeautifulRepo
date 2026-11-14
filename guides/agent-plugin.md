@@ -225,17 +225,17 @@ junction aliases, or changed plugin manifests. Those checks were implemented
 later. Do not run that older script while claiming the newer safeguards.
 
 From the same parent directory where you cloned `BeautifulRepo-candidate`,
-prepare the expanded verifier at the merged, immutable
-[commit `207ea2c`](https://github.com/drevendev/BeautifulRepo/commit/207ea2c37bb095389d6141cb1ab173cc6873c1f6):
+prepare the strict skill-inventory verifier at the merged, immutable
+[commit `56d1c02`](https://github.com/drevendev/BeautifulRepo/commit/56d1c0236000354647cd1ea1987354a3c0025e70):
 
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-verifier
-git -C BeautifulRepo-verifier checkout --detach 207ea2c37bb095389d6141cb1ab173cc6873c1f6
+git -C BeautifulRepo-verifier checkout --detach 56d1c0236000354647cd1ea1987354a3c0025e70
 git -C BeautifulRepo-verifier rev-parse HEAD
 ```
 
 Confirm the last command prints **exactly**
-`207ea2c37bb095389d6141cb1ab173cc6873c1f6`. If not, stop; do not
+`56d1c0236000354647cd1ea1987354a3c0025e70`. If not, stop; do not
 run a verifier from mutable `master`. Keep both checkouts unchanged.
 Pass the original `8947574…` candidate as `--source`, the host's **real**
 installed cache as `--installed`, and run the script from the **separate**
@@ -265,17 +265,23 @@ Exit **1** means at least one checked file differs; exit **2** means
 incomplete evidence (for example a missing required template, redirected
 path or wrong candidate revision). Exit **0** with missing optional manifests
 is **not** evidence that those manifests or the host installation passed.
-**Pinned-verifier scope:** the `207ea2c` verifier in the command above
+**Pinned-verifier scope:** the `56d1c02` verifier in the command above
 also checks all Git-tracked, non-`SKILL.md` files under the four pinned skill
 directories, including bundled scripts and references. Its JSON includes
 `checked_skill_assets` and `different_skill_assets`; modified assets return
 MISMATCH (exit 1), while missing or redirected required assets return
-INCOMPLETE (exit 2). The older `ac28c4f6` verifier **did not** check these
-bundled assets; do not use that old pin as evidence for the expanded scope.
-The candidate SHA itself remains unchanged.
+INCOMPLETE (exit 2). The older `ac28c4f6` verifier **did not** check these bundled assets.
+The intermediate `207ea2c` verifier checked tracked assets but **not**
+untracked extras inside the installed skill folders; neither older pin
+is evidence of this stricter inventory. The candidate SHA itself is unchanged.
 
-Other repository files, extra untracked cache files and missing optional
-manifests are outside the comparison. JSON names differences without exposing
+The pinned `56d1c02` verifier also inventories ordinary files **inside all
+four installed skill folders** (up to 1,024 visited entries). Unexpected
+skill-local files, redirected paths and unsupported entries return INCOMPLETE
+(exit 2), not MATCH. A legitimate host-generated file inside a skill folder
+may therefore cause a conservative INCOMPLETE. Extra files **outside** those
+four skill folders (including elsewhere in the plugin cache) and missing
+optional manifests remain unverified. JSON names differences without exposing
 file contents. A MATCH is **not** a complete plugin integrity or provenance
 certificate.
 
