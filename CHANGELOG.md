@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed game README guide and editable template for verified first
+  play, exact build steps, screenshots/text alternatives and separate code/asset
+  rights. No executable game, release or real gameplay test is claimed.
+
 - Document a version-aware optional `claude plugin validate` preflight
   for the pinned four-skill development candidate, including limitations
   and exit codes. This checks source packaging only; it is not an installed
