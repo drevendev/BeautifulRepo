@@ -13,6 +13,8 @@ keep their original themed headings.
 
 ### Added
 
+- Add a revision-pinned HungryCrab README correction to the release-notes guide, distinguishing a development-version claim, Git tags, published GitHub Releases and the moving `/releases/latest` link. The historical 404 evidence is dated; no new release or live publication check is claimed.
+
 - Extend the offline installed-plugin cache verifier to compare all Git-tracked
   non-`SKILL.md` assets bundled inside the four candidate skill directories,
   including copied helper scripts and references. Changed files are reported as

@@ -14,6 +14,53 @@ It is not a pasted list of commits, internal tickets, or pull request titles.
 The tag date and the release publication date can differ. Never infer that
 downloadable software exists from a tag or a draft note alone.
 
+## Real correction: a development version was linked as a published release
+
+On **2026-11-04**, [HungryCrab PR #614](https://github.com/drevendev/HungryCrab/pull/614)
+corrected a concrete release-status error without publishing software.
+The [before README at `e689500`](https://github.com/drevendev/HungryCrab/blob/e68950088924e0883324ed30bf20ea7e5f1d0bb2/README.md)
+linked the words **Status: 0.6.10** to the version-specific GitHub Release
+URL. The PR records that **both** the `v0.6.10` Git ref and the version's
+GitHub Release returned 404 *when checked that day*. That dated observation
+must not be presented as their current state.
+
+The [merged after README at `4b94ff3`](https://github.com/drevendev/HungryCrab/blob/4b94ff30199a4a25a2cab0aed4cdf6bcf2247b2c/README.md)
+instead links **latest published release** to
+[`/releases/latest`](https://github.com/drevendev/HungryCrab/releases/latest)
+and separately describes the 0.6.10 maintenance work. The single-file
+[reviewable diff](https://github.com/drevendev/HungryCrab/pull/614/files)
+changes the **claim and destination**, not the software or release state.
+
+**Apply the distinction to your own README:**
+
+1. For a **specific published version**, check its tag *and* its GitHub
+   Release. A tag, merged patch or changelog entry alone is insufficient.
+   With an authenticated GitHub CLI, the following read-only requests inspect
+   two different provider resources (replace the placeholders):
+
+   ```sh
+   gh api repos/OWNER/REPO/git/ref/tags/vX.Y.Z
+   gh api repos/OWNER/REPO/releases/tags/vX.Y.Z
+   ```
+
+   Capture the date, HTTP result and actual returned identifiers. A failure
+   to query is **unknown**, not evidence that publication occurred.
+2. For a **moving pointer to the currently published release**, use
+   `/releases/latest` with a label such as "latest published release".
+   It can change when a new release is published; **do not** use it as an
+   immutable receipt for which version was available on a historical date.
+3. If maintenance for a future version is merged but not published, call it
+   *maintenance work*, *unreleased* or *planned* as supported by evidence.
+   Never quietly equate it with an installable release.
+
+This is a revision-pinned **documentation comparison**, not a fresh
+publication check, new BeautifulRepo release, tested upgrade or full
+before/after onboarding study. GitHub's official
+[release-link guidance](https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases)
+and [release API](https://docs.github.com/en/rest/releases/releases)
+were consulted **2026-11-14**; provider state must be rechecked for any
+current release claim.
+
 ## Write for the person upgrading
 
 Start with the result and the affected audience. A useful note answers:
