@@ -300,6 +300,8 @@ not a second copy of the first-screen chooser.
   [example](examples/library-starter/README.md);
   [application guide](guides/application-repositories.md) and
   [example](examples/application-starter/README.md);
+  [game README guide](guides/game-repositories.md) and
+  [editable template](templates/GAME_README.template.md) (no bundled game);
   [research/data guide](guides/research-data-repositories.md) and
   [example](examples/research-data-starter/README.md);
   [curated-collection guide](guides/curated-collections.md) and

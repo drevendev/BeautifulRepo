@@ -13,6 +13,7 @@ or a verification of its placeholder commands.
   runbooks and approved usage terms **without presuming an open-source license**.
 - [Library README](LIBRARY_README.template.md) — actual installation and API.
 - [Application README](APPLICATION_README.template.md) — visible journey and data boundaries.
+- [Game README](GAME_README.template.md) — observed play route, source build and separately licensed assets; no example game bundled.
 - [Research/data README](RESEARCH_DATA_README.template.md) — provenance and reproduction.
 - [Curated references README](CURATED_README.template.md) — selection and retirement criteria.
 - [Release notes](RELEASE_NOTES.template.md) — accurately scoped changes.
