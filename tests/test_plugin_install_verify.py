@@ -96,7 +96,7 @@ class PluginInstallVerificationTests(unittest.TestCase):
             target.symlink_to(self.source / self.sample_assets[0])
         except (OSError, NotImplementedError):
             self.skipTest("symlinks unavailable")
-        with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
+        with self.assertRaisesRegex(verifier.VerificationError, "redirected entry"):
             verifier.verify(self.source, self.installed, self.sha)
 
     def test_untracked_extra_cache_file_is_incomplete_not_match(self):
