@@ -672,6 +672,8 @@ keep their original themed headings.
 
 ### Changed
 
+- Present the three first-visit choices in the root README as a linear, linked list rather than a three-column navigation table. Keep outcomes and destinations unchanged; add a structural regression. This follows GitHub's table-for-tabular-data guidance (reviewed 2026-11-15); it is not a manual narrow-screen or screen-reader acceptance claim.
+
 - Refocus the README's first screen on one pinned offline audit and its
   observable exit codes. Move the full synthetic demonstrations, real-revision
   audit evidence, optional browser capture and Rowcount example into a linked
