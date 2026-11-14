@@ -47,6 +47,8 @@ DEPENDENCIES = (
 # manifests only when present; never infer their presence from a source checkout.
 OPTIONAL_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
 MAX_SKILL_BYTES = 256 * 1024
+MAX_TRACKED_SKILL_FILES = 512
+MAX_SKILL_TREE_BYTES = 128 * 1024
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 
 
@@ -168,6 +170,47 @@ def _committed_bytes(root: Path, commit: str, relative: Path) -> bytes:
     return content.stdout
 
 
+def _committed_skill_assets(root: Path, commit: str) -> list[Path]:
+    """Enumerate tracked files beyond SKILL.md from the immutable source tree.
+
+    Verify actual copied scripts and references, not just their entry-point
+    instructions. Host-generated untracked extras remain outside this check.
+    """
+    env = {key: value for key, value in os.environ.items()
+           if not key.startswith("GIT_")}
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "ls-tree", "-r", "-z", commit, "--", "skills"],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            timeout=10, check=False, env=env,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise VerificationError("cannot enumerate pinned skill assets") from exc
+    if result.returncode != 0 or len(result.stdout) > MAX_SKILL_TREE_BYTES:
+        raise VerificationError("pinned skill inventory is unavailable or too large")
+    files: list[Path] = []
+    for record in result.stdout.split(b"\0"):
+        if not record:
+            continue
+        try:
+            header, raw_path = record.split(b"\t", 1)
+            mode, kind, _object_id = header.split(b" ")
+            name = raw_path.decode("utf-8")
+        except (ValueError, UnicodeError) as exc:
+            raise VerificationError("pinned skill inventory contains an invalid entry") from exc
+        parts = name.split("/")
+        if (len(parts) < 3 or parts[0] != "skills" or parts[1] not in SKILLS
+                or any(part in ("", ".", "..") or "\\" in part for part in parts)
+                or mode not in (b"100644", b"100755") or kind != b"blob"):
+            raise VerificationError("pinned skill inventory has an unsupported path or file type")
+        if len(parts) == 3 and parts[2] == "SKILL.md":
+            continue
+        files.append(Path(name))
+        if len(files) > MAX_TRACKED_SKILL_FILES:
+            raise VerificationError("pinned skill inventory exceeds the file limit")
+    return sorted(files, key=lambda path: path.as_posix())
+
+
 def verify(source: Path, installed: Path, expected_commit: str) -> dict:
     if not SHA_RE.fullmatch(expected_commit):
         raise VerificationError("expected commit must be a full lowercase 40-digit SHA")
@@ -192,6 +235,12 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
         if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
                 _regular_bytes(installed, relative)).digest():
             mismatch.append(skill)
+    skill_assets = _committed_skill_assets(source, actual_commit)
+    different_assets = []
+    for relative in skill_assets:
+        if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
+                _regular_bytes(installed, relative)).digest():
+            different_assets.append(relative.as_posix())
     dependency_mismatch = []
     for name in DEPENDENCIES:
         relative = Path(name)
@@ -229,20 +278,23 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
                 _regular_bytes(installed, relative)).digest():
             different_manifests.append(name)
     return {
-        "state": "match" if not mismatch and not dependency_mismatch and not different_manifests else "mismatch",
+        "state": "match" if not mismatch and not different_assets and not dependency_mismatch and not different_manifests else "mismatch",
         "source_commit": actual_commit,
         "checked_skill_definitions": list(SKILLS),
         "different_skill_definitions": mismatch,
+        "checked_skill_assets": [path.as_posix() for path in skill_assets],
+        "different_skill_assets": different_assets,
         "checked_plugin_dependencies": list(DEPENDENCIES),
         "different_plugin_dependencies": dependency_mismatch,
         "checked_present_manifests": checked_manifests,
         "missing_optional_manifests": missing_manifests,
         "different_present_manifests": different_manifests,
         "limitations": (
-            "Byte match of named skill/helper/policy files and present optional "
-            "manifests only. Missing manifests are unverified; this is not a full "
-            "plugin attestation or proof of installation, discovery, invocation "
-            "or model behavior."
+            "Byte match of pinned skill definitions, tracked skill assets, named "
+            "shared dependencies and present optional manifests only. Missing "
+            "manifests and untracked extra cache files are unverified; this is "
+            "not a full plugin attestation or proof of installation, discovery, "
+            "invocation or model behavior."
         ),
     }
 
