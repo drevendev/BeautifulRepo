@@ -264,9 +264,20 @@ Exit **1** means at least one checked file differs; exit **2** means
 incomplete evidence (for example a missing required template, redirected
 path or wrong candidate revision). Exit **0** with missing optional manifests
 is **not** evidence that those manifests or the host installation passed.
-Other guides, libraries and extra cache files are outside this comparison.
-JSON names differences without exposing file contents. A MATCH is **not** a
-complete plugin integrity or provenance certificate.
+**Pinned-verifier scope:** the `ac28c4f6` verifier in the command above
+compares four `SKILL.md` files, 22 shared dependencies and present manifests,
+**not** scripts and references bundled *inside* each standalone skill folder.
+A newer development version of `scripts/plugin_install_verify.py` also compares
+every Git-tracked file under the four pinned skill directories, reporting
+`checked_skill_assets` and `different_skill_assets`. Do not claim that broader
+verification from the older pinned command; pin and review a new immutable
+verifier revision before using it as acceptance evidence. The candidate SHA
+itself remains unchanged.
+
+Other repository files, extra untracked cache files and missing optional
+manifests are outside the comparison. JSON names differences without exposing
+file contents. A MATCH is **not** a complete plugin integrity or provenance
+certificate.
 
 The verifier invokes local Git to read committed blobs but runs no model,
 network or target code and does not edit either checkout. It does **not**
