@@ -26,16 +26,26 @@ class FrontPageTests(unittest.TestCase):
             self.assertIn(link, self.text)
 
     def test_goal_picker_precedes_long_evidence(self):
-        # Let newcomers choose a useful route before reading the full proof.
+        # The chooser is a linear navigation list, not a layout table.
         self.assertEqual(1, self.text.count("## Start here"))
-        self.assertEqual(1, self.text.count("| Your goal | First step | Visible result |"))
         self.assertLess(self.text.index("## Start here"), self.text.index("## Working proof"))
-        for goal in (
-            "Diagnose an existing repository",
-            "Start a new one",
-            "Borrow a working example",
-        ):
-            self.assertIn(goal, self.text)
+        chooser = self.text.split("## Start here\n", 1)[1].split(
+            "\n## Working proof", 1
+        )[0]
+        self.assertFalse(any(line.startswith("|") for line in chooser.splitlines()))
+        choices = (
+            ("- **Diagnose an existing repository:**", "guides/repository-audit.md"),
+            ("- **Start a new repository:**", "templates/README.template.md"),
+            ("- **Borrow a working example:**", "examples/README.md"),
+        )
+        self.assertEqual(3, sum(line.startswith("- **") for line in chooser.splitlines()))
+        positions = []
+        for goal, destination in choices:
+            with self.subTest(goal=goal):
+                self.assertIn(goal, chooser)
+                self.assertIn(f"]({destination})", chooser)
+                positions.append(chooser.index(goal))
+        self.assertEqual(positions, sorted(positions))
 
     def test_visitor_journey_is_explicit_and_ordered(self):
         positions = [
