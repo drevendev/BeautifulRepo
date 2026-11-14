@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Document a version-aware optional `claude plugin validate` preflight
+  for the pinned four-skill development candidate, including limitations
+  and exit codes. This checks source packaging only; it is not an installed
+  cache, Codex or real-model acceptance test (#257).
+
 - Add a Markdown output mode to the offline entry-point audit delta, with
   severity/rule tables, explicit coverage changes and no input document paths.
   Tests cover changed/unchanged counts and profile refusal. These counts are
