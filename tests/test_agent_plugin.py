@@ -135,7 +135,7 @@ class PluginManifestTests(unittest.TestCase):
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
         section = guide.split("## Verify cached skill definitions", 1)[1]
         candidate = "8947574399df2cc11e8ded41cecbef70be4808c6"
-        verifier = "207ea2c37bb095389d6141cb1ab173cc6873c1f6"
+        verifier = "56d1c0236000354647cd1ea1987354a3c0025e70"
         self.assertNotEqual(candidate, verifier)
         self.assertIn(
             f"git -C BeautifulRepo-verifier checkout --detach {verifier}",
@@ -155,6 +155,15 @@ class PluginManifestTests(unittest.TestCase):
         self.assertIn("`different_skill_assets`", section)
         self.assertIn("all Git-tracked, non-`SKILL.md` files", section)
         self.assertIn("The older `ac28c4f6` verifier", section)
+        self.assertIn("The intermediate `207ea2c` verifier", section)
+        self.assertIn("Unexpected", section)
+        self.assertIn("skill-local files", section)
+        self.assertIn("up to 1,024 visited entries", section)
+        self.assertIn("Extra files **outside**", section)
+        self.assertEqual(
+            re.findall(r"(?m)^git -C BeautifulRepo-verifier checkout --detach ([0-9a-f]{40})$", section),
+            [verifier],
+        )
         self.assertNotIn(
             'python -I "/absolute/path/to/pinned-source/scripts/plugin_install_verify.py"',
             section,
