@@ -16,10 +16,9 @@ keep their original themed headings.
 - Extend the offline installed-plugin cache verifier to compare all Git-tracked
   non-`SKILL.md` assets bundled inside the four candidate skill directories,
   including copied helper scripts and references. Changed files are reported as
-  MISMATCH and missing/redirected files as INCOMPLETE; extra untracked cache
-  files, actual host installation, discovery and model behavior remain
-  unverified (#257). The previously documented pinned verifier SHA does not
-  contain this change.
+  MISMATCH and missing/redirected files as INCOMPLETE; the older pinned
+  verifier still cannot assess extra untracked cache files. Neither verifier
+  proves actual host installation, discovery or model behavior (#257).
 
 - Add a source-backed game README guide and editable template for verified first
   play, exact build steps, screenshots/text alternatives and separate code/asset
@@ -822,6 +821,14 @@ keep their original themed headings.
   public guidance and issue history remain available.
 
 ### Fixed
+
+- Reject unexpected files or redirected entries inside the four installed skill
+  directories during the offline pinned-cache comparison. Previously, matching
+  tracked files could report MATCH despite additional untracked skill-local
+  instructions. Such installs now return INCOMPLETE (exit 2), with a bounded
+  read-only inventory and regressions. This does not authenticate a host, inspect
+  files outside these skill directories or certify Claude Code/Codex behavior
+  (#257). The historical pinned verifier commit still lacks this enhancement.
 
 - Keep actionable, path-free validation errors when the offline audit-delta
   reader detects a redirected input, duplicate JSON keys or an oversized report.

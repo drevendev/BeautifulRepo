@@ -48,6 +48,7 @@ DEPENDENCIES = (
 OPTIONAL_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
 MAX_SKILL_BYTES = 256 * 1024
 MAX_TRACKED_SKILL_FILES = 512
+MAX_INSTALLED_SKILL_ENTRIES = 1024
 MAX_SKILL_TREE_BYTES = 128 * 1024
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 
@@ -122,6 +123,48 @@ def _skill_names(root: Path) -> set[str]:
         return {entry.name for entry in directory.iterdir() if entry.is_dir()}
     except OSError as exc:
         raise VerificationError("skills directory cannot be listed") from exc
+
+
+def _installed_skill_files(root: Path) -> set[str]:
+    """Inventory files in installed skill folders without following redirects.
+
+    Unexpected files can affect runtime skill selection even if all pinned
+    files match. Do not call such a copied package MATCH.
+    """
+    files: set[str] = set()
+    visited = 0
+    for skill in SKILLS:
+        stack = [Path("skills") / skill]
+        while stack:
+            relative_dir = stack.pop()
+            directory = root / relative_dir
+            try:
+                directory_info = directory.lstat()
+                if _is_redirected(directory, directory_info):
+                    raise VerificationError("installed skill inventory has a redirected directory")
+                if not stat.S_ISDIR(directory_info.st_mode):
+                    raise VerificationError("installed skill inventory has a non-directory component")
+                entries = sorted(directory.iterdir(), key=lambda entry: entry.name)
+            except OSError as exc:
+                raise VerificationError("installed skill inventory cannot be inspected") from exc
+            for entry in entries:
+                visited += 1
+                if visited > MAX_INSTALLED_SKILL_ENTRIES:
+                    raise VerificationError("installed skill inventory exceeds the entry limit")
+                try:
+                    info = entry.lstat()
+                except OSError as exc:
+                    raise VerificationError("installed skill inventory cannot be inspected") from exc
+                if _is_redirected(entry, info):
+                    raise VerificationError("installed skill inventory has a redirected entry")
+                relative = relative_dir / entry.name
+                if stat.S_ISDIR(info.st_mode):
+                    stack.append(relative)
+                elif stat.S_ISREG(info.st_mode):
+                    files.add(relative.as_posix())
+                else:
+                    raise VerificationError("installed skill inventory has an unsupported entry")
+    return files
 
 
 def _source_commit(root: Path) -> str:
@@ -236,6 +279,14 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
                 _regular_bytes(installed, relative)).digest():
             mismatch.append(skill)
     skill_assets = _committed_skill_assets(source, actual_commit)
+    expected_skill_files = {f"skills/{skill}/SKILL.md" for skill in SKILLS}
+    expected_skill_files.update(path.as_posix() for path in skill_assets)
+    unexpected = _installed_skill_files(installed) - expected_skill_files
+    if unexpected:
+        raise VerificationError(
+            f"installed skill directories contain {len(unexpected)} extra file(s) "
+            "outside the pinned source inventory"
+        )
     different_assets = []
     for relative in skill_assets:
         if hashlib.sha256(_committed_bytes(source, actual_commit, relative)).digest() != hashlib.sha256(
@@ -292,7 +343,8 @@ def verify(source: Path, installed: Path, expected_commit: str) -> dict:
         "limitations": (
             "Byte match of pinned skill definitions, tracked skill assets, named "
             "shared dependencies and present optional manifests only. Missing "
-            "manifests and untracked extra cache files are unverified; this is "
+            "manifests and extra files outside the four skill folders are "
+            "unverified; this is "
             "not a full plugin attestation or proof of installation, discovery, "
             "invocation or model behavior."
         ),

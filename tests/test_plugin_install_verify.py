@@ -96,16 +96,43 @@ class PluginInstallVerificationTests(unittest.TestCase):
             target.symlink_to(self.source / self.sample_assets[0])
         except (OSError, NotImplementedError):
             self.skipTest("symlinks unavailable")
-        with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
+        with self.assertRaisesRegex(verifier.VerificationError, "redirected entry"):
             verifier.verify(self.source, self.installed, self.sha)
 
-    def test_untracked_extra_cache_file_is_not_attested(self):
+    def test_untracked_extra_cache_file_is_incomplete_not_match(self):
         target = self.installed / "skills" / "audit-repo" / "untracked.txt"
         target.write_bytes(b"not from pinned source\n")
+        with self.assertRaisesRegex(verifier.VerificationError, "extra file"):
+            verifier.verify(self.source, self.installed, self.sha)
+        result = subprocess.run(
+            [sys.executable, "-I", str(MODULE_PATH), "--source", str(self.source),
+             "--installed", str(self.installed), "--expected-commit", self.sha],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["state"], "incomplete")
+
+    def test_nested_untracked_skill_file_is_incomplete(self):
+        target = self.installed / "skills" / "improve-readme" / "references" / "injected.md"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"untracked instructions\n")
+        with self.assertRaisesRegex(verifier.VerificationError, "extra file"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_untracked_symlink_in_skill_is_rejected_without_following(self):
+        target = self.installed / "skills" / "audit-repo" / "injected.md"
+        try:
+            target.symlink_to(self.source / self.sample_assets[0])
+        except (OSError, NotImplementedError):
+            self.skipTest("symlinks unavailable")
+        with self.assertRaisesRegex(verifier.VerificationError, "redirected entry"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_files_outside_skill_folders_remain_unverified(self):
+        (self.installed / "cache-metadata.json").write_bytes(b"host data\n")
         result = verifier.verify(self.source, self.installed, self.sha)
         self.assertEqual(result["state"], "match")
-        self.assertIn("untracked extra", result["limitations"])
-        self.assertNotIn("skills/audit-repo/untracked.txt", result["checked_skill_assets"])
+        self.assertIn("outside the four skill folders", result["limitations"])
 
     def add_optional_manifests(self):
         # Add metadata after the fixture's first commit so both snapshots are
