@@ -32,6 +32,15 @@ class PluginInstallVerificationTests(unittest.TestCase):
                 destination = root / "skills" / name / "SKILL.md"
                 destination.parent.mkdir(parents=True)
                 destination.write_bytes(f"---\nname: {name}\n---\n# Example\n".encode("utf-8"))
+        self.sample_assets = (
+            "skills/audit-repo/scripts/probe.py",
+            "skills/improve-readme/references/preview.md",
+        )
+        for root in (self.source, self.installed):
+            for relative in self.sample_assets:
+                destination = root / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(f"# bundled {relative}\n".encode("utf-8"))
         for root in (self.source, self.installed):
             for relative in verifier.DEPENDENCIES:
                 destination = root / relative
@@ -49,7 +58,54 @@ class PluginInstallVerificationTests(unittest.TestCase):
         self.assertEqual(result["state"], "match")
         self.assertEqual(result["checked_plugin_dependencies"], list(verifier.DEPENDENCIES))
         self.assertEqual(result["different_plugin_dependencies"], [])
+        self.assertEqual(result["checked_skill_assets"], list(self.sample_assets))
+        self.assertEqual(result["different_skill_assets"], [])
         self.assertIn("proof of", result["limitations"])
+
+    def test_changed_copied_helper_is_not_a_false_match(self):
+        target = self.installed / self.sample_assets[0]
+        target.write_bytes(b"# corrupted bundled helper\n")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "mismatch")
+        self.assertEqual(result["different_skill_assets"], [self.sample_assets[0]])
+        self.assertEqual(result["different_skill_definitions"], [])
+
+    def test_changed_copied_reference_is_not_a_false_match(self):
+        target = self.installed / self.sample_assets[1]
+        target.write_bytes(b"# changed task instructions\n")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "mismatch")
+        self.assertEqual(result["different_skill_assets"], [self.sample_assets[1]])
+
+    def test_dirty_source_and_copy_cannot_erase_committed_asset_baseline(self):
+        for root in (self.source, self.installed):
+            (root / self.sample_assets[0]).write_bytes(b"# identical dirty change\n")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "mismatch")
+        self.assertEqual(result["different_skill_assets"], [self.sample_assets[0]])
+
+    def test_missing_copied_asset_is_incomplete_not_match(self):
+        (self.installed / self.sample_assets[0]).unlink()
+        with self.assertRaisesRegex(verifier.VerificationError, "missing"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_redirected_copied_asset_is_incomplete(self):
+        target = self.installed / self.sample_assets[0]
+        target.unlink()
+        try:
+            target.symlink_to(self.source / self.sample_assets[0])
+        except (OSError, NotImplementedError):
+            self.skipTest("symlinks unavailable")
+        with self.assertRaisesRegex(verifier.VerificationError, "symbolic link"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_untracked_extra_cache_file_is_not_attested(self):
+        target = self.installed / "skills" / "audit-repo" / "untracked.txt"
+        target.write_bytes(b"not from pinned source\n")
+        result = verifier.verify(self.source, self.installed, self.sha)
+        self.assertEqual(result["state"], "match")
+        self.assertIn("untracked extra", result["limitations"])
+        self.assertNotIn("skills/audit-repo/untracked.txt", result["checked_skill_assets"])
 
     def add_optional_manifests(self):
         # Add metadata after the fixture's first commit so both snapshots are
