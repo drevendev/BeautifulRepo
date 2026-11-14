@@ -11,16 +11,6 @@ keep their original themed headings.
 
 ## [Unreleased]
 
-### Fixed
-
-- Reject unexpected files or redirected entries inside the four installed skill
-  directories during the offline pinned-cache comparison. Previously, matching
-  tracked files could report MATCH despite additional untracked skill-local
-  instructions. Such installs now return INCOMPLETE (exit 2), with a bounded
-  read-only inventory and regressions. This does not authenticate a host, inspect
-  files outside these skill directories or certify Claude Code/Codex behavior
-  (#257). The historical pinned verifier commit still lacks this enhancement.
-
 ### Added
 
 - Extend the offline installed-plugin cache verifier to compare all Git-tracked
@@ -831,6 +821,14 @@ keep their original themed headings.
   public guidance and issue history remain available.
 
 ### Fixed
+
+- Reject unexpected files or redirected entries inside the four installed skill
+  directories during the offline pinned-cache comparison. Previously, matching
+  tracked files could report MATCH despite additional untracked skill-local
+  instructions. Such installs now return INCOMPLETE (exit 2), with a bounded
+  read-only inventory and regressions. This does not authenticate a host, inspect
+  files outside these skill directories or certify Claude Code/Codex behavior
+  (#257). The historical pinned verifier commit still lacks this enhancement.
 
 - Keep actionable, path-free validation errors when the offline audit-delta
   reader detects a redirected input, duplicate JSON keys or an oversized report.
