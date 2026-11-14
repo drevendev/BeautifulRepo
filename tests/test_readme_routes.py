@@ -4,6 +4,14 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 README = (ROOT / "README.md").read_text(encoding="utf-8")
+PROOF = (ROOT / "guides/working-proof.md").read_text(encoding="utf-8")
+
+
+def first_screen() -> str:
+    """The quickstart alone, not the entire homepage after its heading."""
+    return README.split("## Working proof\n", 1)[1].split(
+        "\n## The visitor journey", 1
+    )[0]
 
 
 class ReaderRoutesTests(unittest.TestCase):
@@ -21,36 +29,54 @@ class ReaderRoutesTests(unittest.TestCase):
         self.assertIn("examples/README.md", section)
 
     def test_proof_names_actual_checkout_command_and_output(self):
-        top = README.split("## Working proof\n", 1)[1].split(
-            "\n## Start here", 1
-        )[0]
-        self.assertIn("Python 3.11+", top)
+        quickstart = first_screen()
+        self.assertIn("Python 3.11+", quickstart)
+        self.assertIn("guides/working-proof.md", quickstart)
+        self.assertIn(
+            "python -I tools/audit_bundle.py ../your-repository --fail-on never",
+            quickstart,
+        )
         self.assertIn(
             "python examples/cli-starter/rowcount.py "
-            "examples/cli-starter/sample.csv", top
+            "examples/cli-starter/sample.csv", PROOF
         )
-        self.assertIn("Data rows: 3", top)
-        self.assertIn("From the repository root:", top)
-        self.assertIn("not a schema validator or a hosted service", " ".join(top.split()))
+        self.assertIn("Data rows: 3", PROOF)
+        self.assertIn("From the repository root:", PROOF)
+        self.assertIn("not a schema validator or a hosted service",
+                      " ".join(PROOF.split()))
 
     def test_first_screen_leads_with_the_real_audit_and_discloses_limits(self):
-        section = README.split("## Working proof\n", 1)[1].split(
-            "\n## Start here", 1
-        )[0]
-        self.assertLess(
-            section.index("python -I tools/audit_bundle.py ../your-repository --fail-on never"),
-            section.index("python examples/cli-starter/rowcount.py"),
+        quickstart = first_screen()
+        flat = " ".join(quickstart.split())
+        self.assertIn(
+            "python -I tools/audit_bundle.py ../your-repository --fail-on never",
+            quickstart,
         )
-        self.assertIn("To audit BeautifulRepo itself instead", section)
-        self.assertIn("python examples/repository-audit/demo.py", section)
-        self.assertIn("python -I examples/combined-audit/demo.py", section)
-        self.assertIn("python -I tools/audit_bundle.py ../your-repository --fail-on never",
-                      section)
-        self.assertIn("broken local links still produce exit **1**", " ".join(section.split()))
-        self.assertIn("guides/adopting-the-checks.md", section)
-        self.assertIn("not a beauty score", section)
-        self.assertIn("invalid root or incomplete evidence", " ".join(section.split()))
-        self.assertIn("fictional", section)
+        self.assertIn("broken local destinations even with `--fail-on never`", flat)
+        self.assertIn("invalid input or incomplete evidence", flat)
+        self.assertIn("guides/adopting-the-checks.md", quickstart)
+        self.assertIn("fictional", quickstart)
+        self.assertIn("guides/working-proof.md", quickstart)
+        self.assertNotIn("python examples/cli-starter/rowcount.py", quickstart)
+
+        # The companion retains actual commands, caveats and reader destinations.
+        self.assertLess(
+            PROOF.index("python -I tools/audit_bundle.py ../your-repository --fail-on never"),
+            PROOF.index("python examples/cli-starter/rowcount.py"),
+        )
+        for claim in (
+            "To audit BeautifulRepo itself instead",
+            "python examples/repository-audit/demo.py",
+            "python -I examples/combined-audit/demo.py",
+            "broken local links still produce exit **1**",
+            "not a beauty score",
+            "invalid root or incomplete evidence",
+        ):
+            with self.subTest(claim=claim):
+                self.assertIn(claim, " ".join(PROOF.split()))
+        for destination in ("../SHOWCASE.md", "../case-studies/patchpitch.md",
+                            "../examples/combined-audit/README.md"):
+            self.assertIn(f"]({destination})", PROOF)
 
     def test_first_screen_before_after_numbers_match_real_demo(self):
         import json
@@ -62,9 +88,7 @@ class ReaderRoutesTests(unittest.TestCase):
             cwd=ROOT, capture_output=True, text=True, timeout=30, check=True,
         )
         reports = json.loads(result.stdout)
-        section = README.split("## Working proof\n", 1)[1].split(
-            "\n## Start here", 1
-        )[0]
+        self.assertIn("guides/working-proof.md", first_screen())
         for label, counts in (
             ("before", (0, 4, 1)),
             ("after", (0, 1, 1)),
@@ -79,7 +103,7 @@ class ReaderRoutesTests(unittest.TestCase):
                     if label == "before"
                     else "after:  0 errors, 1 warning,  1 informational finding"
                 )
-                self.assertIn(expected_line, section)
+                self.assertIn(expected_line, PROOF)
 
     def test_demo_text_mode_exposes_observed_rules_without_a_score(self):
         import subprocess
@@ -107,11 +131,12 @@ class ReaderRoutesTests(unittest.TestCase):
         self.assertNotIn("\x1b", output)  # easily capturable plain text
 
     def test_real_repository_audit_proof_is_pinned_and_candid(self):
-        """Do not silently detach homepage evidence from the original case."""
+        """The shorter homepage must still lead to exact real-repo evidence."""
         case = (ROOT / "case-studies/patchpitch.md").read_text(encoding="utf-8")
-        top = README.split("## Working proof\n", 1)[1].split(
-            "\n## Start here", 1
-        )[0]
+        top = PROOF
+        quickstart = first_screen()
+        self.assertIn("guides/working-proof.md", quickstart)
+        self.assertIn("case-studies/patchpitch.md", quickstart)
         self.assertIn("Recorded result on a real repository", top)
         for revision in (
             "1424fc8fbfef82a5cd473272843e0c5cdc097b36",

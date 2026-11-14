@@ -672,6 +672,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Refocus the README's first screen on one pinned offline audit and its
+  observable exit codes. Move the full synthetic demonstrations, real-revision
+  audit evidence, optional browser capture and Rowcount example into a linked
+  working-proof companion. This is a documentation hierarchy change, not a
+  new audit run, release or independent user test.
+
 - Repin the four-skill development cache-check instructions to the immutable
   strict verifier from #371. Unlike the previous pin, it rejects additional
   untracked or redirected files **inside** the installed skill folders as
