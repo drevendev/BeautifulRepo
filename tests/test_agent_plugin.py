@@ -208,7 +208,7 @@ class PluginManifestTests(unittest.TestCase):
         self.assertRegex(
             released,
             r"(?s)`codex plugin marketplace add`.{0,90}registers a source;"
-            r" it does\\s+not install the plugin",
+            r" it does\s+not install the plugin",
         )
         self.assertIn("Registration alone is **not** installation", candidate)
         for name, section in (("release", released), ("candidate", candidate)):
@@ -227,7 +227,7 @@ class PluginManifestTests(unittest.TestCase):
             with self.subTest(command=unsupported_command):
                 self.assertNotRegex(
                     guide,
-                    rf"(?m)^\\s*codex plugin {unsupported_command}\\s",
+                    rf"(?m)^\s*codex plugin {unsupported_command}\s",
                     "Do not advertise an unverified Codex plugin-management command",
                 )
 
