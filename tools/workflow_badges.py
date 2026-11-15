@@ -44,13 +44,15 @@ class InputError(ValueError):
 
 def _safe_read(path: Path) -> str:
     try:
-        if not stat.S_ISREG(path.lstat().st_mode):
-            raise InputError("README.md must be an ordinary file, not a link.")
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            raise InputError("README.md must be a single-linked ordinary file, not an alias.")
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
         fd = os.open(path, flags)
         with os.fdopen(fd, "rb") as handle:
-            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
-                raise InputError("README.md is not an ordinary file.")
+            opened = os.fstat(handle.fileno())
+            if not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1:
+                raise InputError("README.md is not a single-linked ordinary file.")
             raw = handle.read(MAX_README_BYTES + 1)
         if len(raw) > MAX_README_BYTES:
             raise InputError("README.md exceeds the 256 KiB scan limit.")

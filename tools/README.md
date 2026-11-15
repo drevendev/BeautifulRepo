@@ -301,7 +301,8 @@ Use your own GitHub `owner/repo` when checking another checkout. The tool is
 offline, read-only, Python 3.11+ and standard-library-only. It does not run
 workflows, target project code, `git` or network requests. Common fenced/inline
 code samples and HTML comments are excluded, but this is not a complete GFM
-renderer. It reads only the root README (up to 256 KiB), checks literal local
+renderer. It reads only a single-linked, ordinary root README (up to 256 KiB),
+refusing hard-link aliases before and after opening. It checks literal local
 workflow filenames without following symlinks or Windows junctions, and prints
 file/line diagnostics when the workflow is missing. By default, exit 0 means the
 checked references exist, **even if zero were found**. With `--require-badge`,

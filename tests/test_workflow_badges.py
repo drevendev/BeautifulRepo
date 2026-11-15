@@ -102,6 +102,24 @@ class WorkflowBadgeTests(unittest.TestCase):
         self.assertEqual(out.returncode, 1)
         self.assertIn("missing or redirected", out.stderr)
 
+    def test_hard_link_to_external_readme_is_rejected_without_reading(self):
+        # An ordinary-looking hard link can point to source outside the target.
+        # Before this regression the existing workflow and outside badge passed.
+        self.workflow()
+        with tempfile.TemporaryDirectory() as outside:
+            original = Path(outside) / "external-readme.md"
+            original.write_text(f"![CI]({BADGE})\n", encoding="utf-8")
+            (self.root / "README.md").unlink()
+            try:
+                (self.root / "README.md").hardlink_to(original)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"hard links unavailable: {type(exc).__name__}")
+            before = original.read_bytes()
+            out = self.run_tool(require_badge=True)
+            self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
+            self.assertIn("single-linked", out.stderr)
+            self.assertEqual(before, original.read_bytes())
+
     def test_unsupported_escaped_name_fails_closed(self):
         (self.root / "README.md").write_text(
             "![CI](https://github.com/drevendev/BeautifulRepo/actions/workflows/"
