@@ -151,7 +151,8 @@ class PluginManifestTests(unittest.TestCase):
         self.assertIn("exit 0", section)
         self.assertIn("missing optional", section)
         self.assertIn("56d1c0236000354647cd1ea1987354a3c0025e70", section)
-        self.assertIn("8947574399df2cc11e8ded41cecbef70be4808c6", section)
+        self.assertIn("8947574…", section)
+        self.assertIn("8947574399df2cc11e8ded41cecbef70be4808c6", guide)
         self.assertNotIn("git -C BeautifulRepo-verifier checkout --detach", guide)
         self.assertIn("host cache provenance separately", section)
 
