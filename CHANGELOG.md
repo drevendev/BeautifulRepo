@@ -851,6 +851,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Refuse hard-linked root README files in the standalone workflow-badge
+  checker before and after opening. A synthetic external-file alias regression
+  verifies fail-closed input handling without changing the external fixture;
+  this is stable-checkout protection, not a concurrent-filesystem sandbox.
+
 - Refuse hard-linked Markdown sources in standalone Markdown-link and HTML/fragment
   checkers, including hard-linked anchor targets reached from an ordinary README.
   Both checks reject aliased files before and after opening; synthetic outside-file
