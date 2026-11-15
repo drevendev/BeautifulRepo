@@ -31,6 +31,21 @@ class CiTrustRecipeTests(unittest.TestCase):
                     r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{40}$",
                 )
 
+    def test_released_action_pin_discloses_missing_later_hardlink_guards(self):
+        """A tagged source pin must not inherit safeguards from moving master."""
+        section = GUIDE.split("## Add it to a workflow\\n", 1)[1].split(
+            "\\n## Check the fork-PR trust boundary", 1
+        )[0]
+        for phrase in (
+            "v0.2.0", "4f06f26ccef6e8b28d77c71633482b7a1a68518a",
+            "Released-pin safety boundary", "2026-11-16",
+            "PR #381", "PR #382", "st_nlink",
+            "does not test or include the later hard-link protections",
+            "not a filesystem sandbox", "later exact commit",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, section)
+
     def test_actual_quality_workflow_keeps_same_basic_boundary(self):
         self.assertIn("  pull_request:\n", QUALITY)
         self.assertIn("permissions:\n  contents: read\n", QUALITY)
