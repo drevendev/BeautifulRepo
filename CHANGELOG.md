@@ -1221,6 +1221,13 @@ keep their original themed headings.
 
 ### Security
 
+- Reject hard-linked README and proposed README inputs in the offline
+  preview/apply helpers, including approved-hash attempts. A regular-looking
+  hard link can alias a file outside the selected checkout; fail closed
+  before printing a diff or replacing the target. Synthetic POSIX/Windows
+  regression cases check both inputs and unchanged outside content. This
+  rejects stable hard-link aliases, not concurrent filesystem swaps (#70).
+
 - Fail closed on out-of-checkout **non-Markdown file symlinks** (such as
   LICENSE, README.rst and image assets) before any MCP checker starts.
   Previously the preflight validated Markdown aliases but silently skipped
