@@ -11,6 +11,15 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Changed
+
+- Document a successor four-skill **development** test pin at commit
+  `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` with source inventory and exact-push CI evidence,
+  local-marketplace steps and same-revision cache comparison. Retain the
+  older `8947574…` candidate for historical reproduction. No real
+  Claude Code/Codex model tests, external acceptance or stable release is
+  implied (#257, #258).
+
 ### Added
 
 - Add a regression for an already-connected MCP stdio session whose
