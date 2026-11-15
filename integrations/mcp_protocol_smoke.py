@@ -201,6 +201,60 @@ async def probe_refused_alias(root: Path, *, mode: str, label: str) -> str:
     return version
 
 
+async def probe_redirected_root(root: Path, *, mode: str) -> bool:
+    """Fail closed when a running MCP session's configured root becomes a symlink.
+
+    This is stronger evidence than a startup-only rejection: the already
+    connected client must not read a newly redirected outside directory.
+    Windows without symlink permission is explicitly untested, not PASS.
+    """
+    outside = root.parent / "synthetic-outside-root"
+    outside.mkdir(exist_ok=True)
+    (outside / "README.md").write_text(
+        "# Outside synthetic document\\n", encoding="utf-8"
+    )
+    before = snapshot(root)
+    outside_before = snapshot(outside)
+    params = StdioServerParameters(
+        command=sys.executable,
+        args=["-I", "-B", str(SERVER), "--root", str(root)],
+    )
+    created = False
+    async with Client(params, mode=mode) as client:
+        version = str(client.protocol_version)
+        expected_version = {"auto": "2026-07-28", "legacy": "2025-11-25"}[mode]
+        if version != expected_version:
+            raise AssertionError(f"{mode}: root redirect probe negotiated {version}")
+        parked = root.parent / "temporarily-parked-root"
+        root.rename(parked)
+        try:
+            try:
+                root.symlink_to(outside, target_is_directory=True)
+                created = True
+            except (OSError, NotImplementedError) as exc:
+                if os.name != "nt":
+                    raise AssertionError("cannot create root-redirect regression fixture") from exc
+            if created:
+                for name, check in CHECKS.items():
+                    response = await client.call_tool(name, {})
+                    expected = {
+                        "checker": check, "state": "incomplete", "exit_code": 2,
+                        "reason": "configured repository root is no longer safe or available",
+                        "coverage": COVERAGE,
+                    }
+                    if response.is_error or response.structured_content != expected:
+                        raise AssertionError(
+                            f"{mode} {name}: active-session root redirect was not refused"
+                        )
+        finally:
+            if created:
+                root.unlink()
+            parked.rename(root)
+    if before != snapshot(root) or outside_before != snapshot(outside):
+        raise AssertionError("active-session root redirect changed synthetic documents")
+    return created
+
+
 async def check_external_document_aliases(root: Path) -> tuple[list[str], list[str]]:
     """Probe a non-Markdown hard link and an outside Markdown symlink.
 
@@ -263,6 +317,10 @@ async def main() -> None:
         legacy_broken = await probe(root, broken=True, mode="legacy")
         if modern_healthy != modern_broken or legacy_healthy != legacy_broken:
             raise AssertionError("protocol version changed within an MCP lifecycle")
+        redirected_modes = [
+            mode for mode in ("auto", "legacy")
+            if await probe_redirected_root(root, mode=mode)
+        ]
         aliases_exercised, aliases_skipped = await check_external_document_aliases(root)
         print(
             f"MCP stdio SDK smoke PASS; modern discovery {modern_healthy}; "
@@ -274,6 +332,9 @@ async def main() -> None:
             "session returns incomplete evidence for all 3 tools in both lifecycles; "
             f"outside-document aliases refused: {', '.join(aliases_exercised) or 'none'} "
             f"(untested on this platform: {', '.join(aliases_skipped) or 'none'}). "
+            f"active-session symlink-root replacement refused in: "
+            f"{', '.join(redirected_modes) or 'none'} "
+            f"(untested: {', '.join(mode for mode in ('auto', 'legacy') if mode not in redirected_modes) or 'none'}). "
             "Not a Claude Code/Codex host test."
         )
 
