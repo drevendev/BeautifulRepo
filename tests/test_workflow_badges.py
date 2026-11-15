@@ -108,7 +108,7 @@ class WorkflowBadgeTests(unittest.TestCase):
         self.workflow()
         with tempfile.TemporaryDirectory() as outside:
             original = Path(outside) / "external-readme.md"
-            original.write_text(f"![CI]({BADGE})\\n", encoding="utf-8")
+            original.write_text(f"![CI]({BADGE})\n", encoding="utf-8")
             (self.root / "README.md").unlink()
             try:
                 (self.root / "README.md").hardlink_to(original)
