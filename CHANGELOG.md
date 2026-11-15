@@ -679,6 +679,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Clarify that the copyable SHA-pinned `v0.2.0` GitHub Action
+  **does not include** later hard-link input guards in the standalone audit
+  and Markdown/HTML scanners (#381–#382). Distinguish released-pin evidence
+  from unreleased `master` and explicitly retain the untrusted-workspace
+  safety boundary; add a source-contract regression. No release, tag or
+  newly tested runner is claimed.
+
 - Document a successor four-skill **development** test pin at commit
   `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` with source inventory and exact-push CI evidence,
   local-marketplace steps and same-revision cache comparison. Retain the
