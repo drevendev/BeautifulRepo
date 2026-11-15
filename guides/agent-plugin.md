@@ -124,8 +124,11 @@ claude plugin details beautifulrepo
 ```
 
 For Codex, register the same directory and then open `/plugins`, select
-BeautifulRepo, choose **Install plugin**, and begin a new chat. Registration
-alone is **not** installation:
+BeautifulRepo, choose **Install plugin**, and begin a new chat, following
+[Codex CLI plugin installation guidance](https://developers.openai.com/learn/developers-codex-plugin)
+and the [plugin packaging guide](https://developers.openai.com/plugins/build/plugins)
+for host-specific steps (including the desktop **Plugins Directory**).
+Registration alone is **not** installation:
 
 ```sh
 codex plugin marketplace add ./BeautifulRepo-candidate
