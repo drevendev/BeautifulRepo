@@ -104,6 +104,8 @@ class AgentEvalCaseContracts(unittest.TestCase):
             "marketplace registration is not installation",
             "installed/cached",
             "not an observed host PASS",
+            "Run each prompt, fixture, grader and skill asset",
+            "not from mutable",
         ):
             with self.subTest(required=required):
                 self.assertIn(required, matrix)
