@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add a regression for an already-connected MCP stdio session whose
+  configured synthetic repository root is replaced by a symlink to an outside
+  fixture. Both modern and legacy protocol tests require all three tools to
+  return explicit `incomplete` evidence without altering either fixture.
+  On Windows, unavailable symlink creation is reported as untested, not PASS.
+  This is bounded SDK evidence, not Claude Code/Codex host acceptance (#255).
+
 - Add a source-backed, reusable GSoC project-idea card with bounded outcomes,
   first-contribution verification, actual mentor availability and an explicit
   AI-tooling policy. The programs guide includes a clearly hypothetical
