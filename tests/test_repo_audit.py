@@ -360,6 +360,24 @@ class AuditTests(unittest.TestCase):
         self.assertNotIn("PRIVATE", json.dumps(report))
         self.assertNotIn("README.md", report["read_files"])
 
+    def test_selected_file_hard_link_outside_root_is_not_read(self):
+        # Hard links have ordinary file modes but can alias outside contents.
+        # Use only disposable synthetic text, never a real private file.
+        with tempfile.TemporaryDirectory() as external_dir:
+            external = Path(external_dir) / "synthetic-external.txt"
+            payload = "# Synthetic outside source\n\nUNTRUSTED_OUTSIDE_SENTINEL\n"
+            external.write_text(payload, encoding="utf-8")
+            (self.root / "README.md").unlink()
+            try:
+                os.link(external, self.root / "README.md")
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"hard links unavailable: {type(exc).__name__}")
+            report = self.report()
+            self.assertIn("path.non_regular", self.codes(report))
+            self.assertNotIn("README.md", report["read_files"])
+            self.assertNotIn("UNTRUSTED_OUTSIDE_SENTINEL", json.dumps(report))
+            self.assertEqual(external.read_text(encoding="utf-8"), payload)
+
     def test_directory_symlink_is_not_followed(self):
         target = self.root / "elsewhere"
         target.mkdir()
