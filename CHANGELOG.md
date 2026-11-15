@@ -1221,6 +1221,13 @@ keep their original themed headings.
 
 ### Security
 
+- Refuse hard-linked entry-point documents in the direct offline repository
+  auditor, not only in the optional MCP preflight. A hard link can point to
+  an external file while appearing regular; pre-open and descriptor checks
+  now return `path.non_regular` without reading its content. The two
+  standalone skill copies and a synthetic regression stay synchronized.
+  This is not a defense against concurrent filesystem replacement.
+
 - Reject hard-linked README and proposed README inputs in the offline
   preview/apply helpers, including approved-hash attempts. A regular-looking
   hard link can alias a file outside the selected checkout; fail closed

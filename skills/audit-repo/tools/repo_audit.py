@@ -120,16 +120,22 @@ def _read_document(path: Path, root: Path, findings: list[dict[str, Any]],
     relative = path.relative_to(root).as_posix()
     try:
         # A stable checkout is required: these checks are not a hostile-filesystem sandbox.
-        if _is_redirect(path) or not stat.S_ISREG(path.lstat().st_mode):
+        source_info = path.lstat()
+        # A hard link can refer to an outside file while appearing ordinary.
+        # Refuse aliases before opening; check again on the open descriptor.
+        if (_is_redirect(path) or not stat.S_ISREG(source_info.st_mode)
+                or source_info.st_nlink > 1):
             findings.append(finding("path.non_regular", "error", relative, None,
-                                    "Selected document is not an ordinary file; it was not read.",
-                                    "Use a regular file rather than a symlink or special device."))
+                                    "Selected document is not a single-linked regular file; it was not read.",
+                                    "Use a single-linked regular file, not a redirect, alias or special device."))
             return None
         flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0)
         fd = os.open(path, flags)
         with os.fdopen(fd, "rb") as handle:
-            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
-                raise OSError("not regular")
+            opened_info = os.fstat(handle.fileno())
+            if (not stat.S_ISREG(opened_info.st_mode)
+                    or opened_info.st_nlink > 1):
+                raise OSError("not regular, single-linked file")
             raw = handle.read(MAX_DOCUMENT_BYTES + 1)
         if len(raw) > MAX_DOCUMENT_BYTES:
             findings.append(finding("document.too_large", "error", relative, None,
