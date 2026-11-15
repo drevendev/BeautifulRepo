@@ -126,8 +126,8 @@ def _read_document(path: Path, root: Path, findings: list[dict[str, Any]],
         if (_is_redirect(path) or not stat.S_ISREG(source_info.st_mode)
                 or source_info.st_nlink > 1):
             findings.append(finding("path.non_regular", "error", relative, None,
-                                    "Selected document is not an ordinary file; it was not read.",
-                                    "Use a regular file rather than a symlink or special device."))
+                                    "Selected document is not a single-linked regular file; it was not read.",
+                                    "Use a single-linked regular file, not a redirect, alias or special device."))
             return None
         flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0)
         fd = os.open(path, flags)
