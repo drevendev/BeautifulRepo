@@ -82,6 +82,93 @@ checkout as evidence for a tested release candidate**.
 
 ## Try all four skills from a pinned development candidate
 
+### Successor source pin — 15 November 2026 (development, not released)
+
+The newer four-skill candidate is the immutable [commit `70b792b`](https://github.com/drevendev/BeautifulRepo/tree/70b792b7f09d4bd03e36b6ca1cf6c869e5036872)
+(full SHA: `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`), manifest version `0.3.0-dev.0`.
+At that exact commit, GitHub source inspection confirmed all four
+`skills/<name>/SKILL.md` files, both plugin manifests and both marketplace
+manifests. This source includes the later hard-link input fixes in
+[#380](https://github.com/drevendev/BeautifulRepo/pull/380),
+[#381](https://github.com/drevendev/BeautifulRepo/pull/381),
+[#382](https://github.com/drevendev/BeautifulRepo/pull/382) and
+[#383](https://github.com/drevendev/BeautifulRepo/pull/383).
+The [exact-commit push CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43740775213)
+completed **six of six jobs successfully** on Linux and Windows. This is
+source and deterministic CI evidence only: **no current Claude Code or Codex
+host installation, skill discovery, actual model invocation or external
+acceptance is verified**. The released `v0.2.0` still contains only
+`audit-repo`.
+
+Use a clean disposable **parent** directory, Git and Python 3.11+:
+
+```sh
+git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
+git -C BeautifulRepo-candidate checkout --detach 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
+git -C BeautifulRepo-candidate rev-parse HEAD
+```
+
+**Stop** unless `rev-parse HEAD` prints the full SHA above. Neither host's
+remote marketplace ref syntax has been demonstrated to accept a raw commit
+hash. These are **local-source marketplace trial steps**, not observed host
+successes; check the currently installed host version and official guidance
+before invoking them. If using Claude Code, optionally preflight the source
+with `claude plugin validate ./BeautifulRepo-candidate` (validator coverage
+is version-dependent), then:
+
+```sh
+claude plugin marketplace add ./BeautifulRepo-candidate
+claude plugin install beautifulrepo@beautifulrepo
+claude plugin list
+claude plugin details beautifulrepo
+```
+
+For Codex, register the same directory and then open `/plugins`, select
+BeautifulRepo, choose **Install plugin**, and begin a new chat. Registration
+alone is **not** installation:
+
+```sh
+codex plugin marketplace add ./BeautifulRepo-candidate
+codex plugin marketplace list
+```
+
+Inspect the **actual installed host cache**, not the source checkout.
+The candidate already contains the current strict offline inventory checker,
+so a *third verifier checkout is not required* for this successor pin. Using
+physical absolute directories for the source and a **different** installed
+cache root, run:
+
+```sh
+python -I /absolute/path/to/BeautifulRepo-candidate/scripts/plugin_install_verify.py --source /absolute/path/to/BeautifulRepo-candidate --installed /absolute/path/to/actual-installed-plugin-cache --expected-commit 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
+```
+
+Exit 0 with state `match` compares committed skill assets and known shared
+dependencies; check the JSON for missing optional manifests. Exit 1 means a
+mismatch and exit 2 means incomplete evidence. This comparison cannot prove
+host provenance, discovery, agent tool execution, absence of writes outside
+the inspected target or prompt-injection resistance.
+
+For model tests, take the **prompts, synthetic resources and graders** from
+[`evals/` at this exact source SHA](https://github.com/drevendev/BeautifulRepo/tree/70b792b7f09d4bd03e36b6ca1cf6c869e5036872/evals),
+not from moving `master`. The matrix *embedded at this source commit* still
+pins the **earlier** candidate and its installer. For successor tests use
+**this installation procedure** and the [maintained smoke scoring guide](../evals/manual-smoke.md),
+while pinning every tested fixture byte to `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`. Capture host version,
+cache evidence, complete tool trace, actual fixture reads, before/after
+snapshots, positive and unrelated triggers and hostile-source outcomes.
+Record PASS, FAIL or INCONCLUSIVE against **this SHA** in
+[#258](https://github.com/drevendev/BeautifulRepo/issues/258) and track
+release readiness in [#257](https://github.com/drevendev/BeautifulRepo/issues/257).
+No model costs, settings changes, tags or releases are authorized by this
+preparation.
+
+### Historical source pin — 11 November 2026 (reproduction only)
+
+The following older `8947574…` procedure is retained for reproducing
+historical four-skill development-candidate trials. Its PASS results cannot
+be transferred to the successor commit above.
+
+
 The source candidate at [commit `8947574399df`](https://github.com/drevendev/BeautifulRepo/tree/8947574399df2cc11e8ded41cecbef70be4808c6)
 contains `audit-repo`, `improve-readme`, `trust-surfaces` and
 `draft-release-notes` (manifest version `0.3.0-dev.0`). It is **not a
