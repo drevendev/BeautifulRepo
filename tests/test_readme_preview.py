@@ -83,6 +83,34 @@ class ReadmePreviewTests(unittest.TestCase):
                 self.assertEqual(2, result.returncode)
                 self.assertEqual("", result.stdout)
 
+    def test_hardlinked_target_or_proposal_refuses_external_document(self):
+        # A hard link looks like a regular file and bypasses symlink-only checks.
+        # Never print outside content as a preview from a target checkout.
+        external = self.tmp / "external-not-part-of-checkout.md"
+        secret = b"# Outside checkout\n\nSYNTHETIC_PRIVATE_MARKER\n"
+        external.write_bytes(secret)
+        for source in (self.readme, self.proposal):
+            with self.subTest(source=source.name):
+                original = source.read_bytes()
+                source.unlink()
+                try:
+                    os.link(external, source)
+                except (OSError, NotImplementedError) as exc:
+                    source.write_bytes(original)
+                    if os.name == "nt":
+                        self.skipTest(f"hard-link creation unavailable: {exc}")
+                    raise
+                try:
+                    result = self.command()
+                    self.assertEqual(2, result.returncode, result.stderr)
+                    self.assertEqual("", result.stdout)
+                    self.assertIn("single-linked", result.stderr)
+                    self.assertNotIn("SYNTHETIC_PRIVATE_MARKER", result.stderr)
+                    self.assertEqual(secret, external.read_bytes())
+                finally:
+                    source.unlink()
+                    source.write_bytes(original)
+
     def test_bounded_and_missing_input(self):
         self.proposal.write_bytes(b"a" * (256 * 1024 + 1))
         result = self.command()
