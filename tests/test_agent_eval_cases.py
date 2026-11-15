@@ -87,6 +87,29 @@ class AgentEvalCaseContracts(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, guide)
 
+    def test_manual_smoke_candidate_matches_plugin_install_guide(self):
+        """Source-locked eval instructions must not silently test moving master."""
+        matrix = (EVALS / "manual-smoke.md").read_text(encoding="utf-8")
+        plugin = (ROOT / "guides" / "agent-plugin.md").read_text(encoding="utf-8")
+        checkout = r"git -C BeautifulRepo-candidate checkout --detach ([0-9a-f]{40})"
+        m = re.search(checkout, matrix)
+        p = re.search(checkout, plugin)
+        self.assertIsNotNone(m, "manual matrix must pin a full candidate SHA")
+        self.assertIsNotNone(p, "plugin install guide must pin a full candidate SHA")
+        self.assertEqual(m.group(1), p.group(1), "manual/guide candidate drift")
+        for required in (
+            "git -C BeautifulRepo-candidate rev-parse HEAD",
+            "claude plugin marketplace add ./BeautifulRepo-candidate",
+            "codex plugin marketplace add ./BeautifulRepo-candidate",
+            "marketplace registration is not installation",
+            "installed/cached",
+            "not an observed host PASS",
+            "Run each prompt, fixture, grader and skill asset",
+            "not from mutable",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, matrix)
+
     def test_manual_smoke_grading_distinguishes_fixture_free_negative_cases(self):
         """A correct negative trigger without resources can be graded PASS."""
         guide = (EVALS / "manual-smoke.md").read_text(encoding="utf-8")

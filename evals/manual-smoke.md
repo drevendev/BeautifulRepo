@@ -1,6 +1,6 @@
 # Manual smoke matrix for BeautifulRepo Agent Skills
 
-**Prepared 2026-10-25; no model runs claimed.** This procedure is for a
+**Prepared 2026-10-25; setup reviewed 2026-11-15; no model runs claimed.** This procedure is for a
 maintainer who has separately authorized model usage. It is not part of CI,
 does not install or invoke an agent automatically, and is not a security
 certification. The static [eval case definitions](README.md) are inputs, not
@@ -12,16 +12,55 @@ results. Never report PASS based on reading this page or on green unit tests.
    checkout and a Linux/WSL2 sandbox. Do not test with secrets, personal
    documents, private project history or your actual home directory. The
    agent's model provider may receive the inspected repository content.
-2. Record the BeautifulRepo **full commit SHA**, plugin source, agent name,
-   agent version, model/provider, host OS, sandbox, permissions and exact
-   target directory. The pinned `v0.2.0` plugin has only `audit-repo`;
-   the other three skills require a newer **reviewed** development checkout
-   until a separately authorized release includes them.
-3. Install from that reviewed source using
-   [the plugin installation guide](../guides/agent-plugin.md). Start a fresh
-   session for each case. Do not assume the agent loaded the changed plugin
-   just because a marketplace was refreshed: inspect the installed
-   `skills/<name>/SKILL.md` and compare it with the reviewed source.
+2. For the **four-skill development-candidate** matrix, use exactly
+   [commit `8947574399df2cc11e8ded41cecbef70be4808c6`](https://github.com/drevendev/BeautifulRepo/tree/8947574399df2cc11e8ded41cecbef70be4808c6)
+   (`0.3.0-dev.0`). Record the full SHA, plugin source, agent name/version,
+   model/provider, host OS, sandbox, permissions and target directory.
+   Released `v0.2.0` contains only `audit-repo` and **cannot** satisfy this
+   four-skill matrix. Do not substitute mutable `master` or a later commit.
+3. From an empty, disposable **parent** directory, prepare the same pinned
+   checkout for either host (Git and Python 3.11+ required):
+
+   ```sh
+   git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
+   git -C BeautifulRepo-candidate checkout --detach 8947574399df2cc11e8ded41cecbef70be4808c6
+   git -C BeautifulRepo-candidate rev-parse HEAD
+   ```
+
+   Stop if `rev-parse HEAD` is not exactly `8947574399df2cc11e8ded41cecbef70be4808c6`. Do not assume
+   that a host's remote `@<SHA>` or `--ref <SHA>` installer accepts raw
+   commit hashes: the documented selectors describe refs, not verified
+   raw-commit installation. Use the source-locked local marketplace:
+
+   **Claude Code**, from that parent directory:
+
+   ```sh
+   claude plugin marketplace add ./BeautifulRepo-candidate
+   claude plugin install beautifulrepo@beautifulrepo
+   claude plugin list
+   claude plugin details beautifulrepo
+   ```
+
+   **Codex**, from the same parent directory:
+
+   ```sh
+   codex plugin marketplace add ./BeautifulRepo-candidate
+   codex plugin marketplace list
+   ```
+
+   In Codex, **marketplace registration is not installation**. Open the
+   plugin browser (`/plugins` in a supported Codex CLI), install
+   **BeautifulRepo**, and start a new chat. In either host, restart as
+   needed and compare the **installed/cached** four
+   `skills/<name>/SKILL.md` files with the pinned source, not just the
+   GitHub checkout. Use the [offline cache-check procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
+   as extra byte-level evidence, not as proof of discovery or execution.
+   If a host fails to install, inspect its actual version and report
+   **FAIL/INCONCLUSIVE** with the error. The [candidate test request](https://github.com/drevendev/BeautifulRepo/issues/258)
+   carries the same full SHA. These commands are **untested setup
+   instructions**, not an observed host PASS, GitHub-source marketplace
+   acceptance or authorization to run a model.
+
 4. For **negative-trigger** and read-only preview runs, allow file-reading and
    skill invocation only. Block editing, outbound browsing, remote services,
    publishing, package installation and target-code execution. An agent may
@@ -38,6 +77,14 @@ results. Never report PASS based on reading this page or on green unit tests.
    do not assume a Claude eval command exists in Codex.
 
 ## Cases to run — the same requests in both agents
+
+**Revision boundary:** This maintained matrix can be newer than the pinned
+candidate checkout. Run each prompt, fixture, grader and skill asset **from
+`BeautifulRepo-candidate/` at the verified candidate SHA**, not from mutable
+`master` or another checkout. The historical `manual-smoke.md` embedded in
+that older commit may link to an obsolete installer; use the source-locked
+setup above instead. Do not attribute tests of newer fixture bytes to the
+older plugin candidate.
 
 Use the text in each named `evals/<case>/prompt.md` as the starting request.
 Mount the matching synthetic `resources/` directory **when the case provides

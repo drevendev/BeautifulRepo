@@ -844,6 +844,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Pin the four-skill manual smoke matrix to the same immutable development
+  candidate as the plugin installation guide, with source-locked local
+  marketplace setup and an explicit Codex registration-versus-install boundary.
+  Static contract tests reject mismatched candidate revisions; no Claude Code
+  or Codex host invocation, model evaluation or release is claimed (#257).
+
 - Restore discovery of the GSoC project-idea template from the public
   template index and roadmap. Both routes identify it as a draft and point to
   the dated programs guide, not as proof of enrollment or mentor availability.
