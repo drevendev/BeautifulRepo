@@ -33,8 +33,8 @@ class CiTrustRecipeTests(unittest.TestCase):
 
     def test_released_action_pin_discloses_missing_later_hardlink_guards(self):
         """A tagged source pin must not inherit safeguards from moving master."""
-        section = GUIDE.split("## Add it to a workflow\\n", 1)[1].split(
-            "\\n## Check the fork-PR trust boundary", 1
+        section = GUIDE.split("## Add it to a workflow\n", 1)[1].split(
+            "\n## Check the fork-PR trust boundary", 1
         )[0]
         for phrase in (
             "v0.2.0", "4f06f26ccef6e8b28d77c71633482b7a1a68518a",
