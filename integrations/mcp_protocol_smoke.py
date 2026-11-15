@@ -211,7 +211,7 @@ async def probe_redirected_root(root: Path, *, mode: str) -> bool:
     outside = root.parent / "synthetic-outside-root"
     outside.mkdir(exist_ok=True)
     (outside / "README.md").write_text(
-        "# Outside synthetic document\\n", encoding="utf-8"
+        "# Outside synthetic document\n", encoding="utf-8"
     )
     before = snapshot(root)
     outside_before = snapshot(outside)
@@ -332,7 +332,7 @@ async def main() -> None:
             "session returns incomplete evidence for all 3 tools in both lifecycles; "
             f"outside-document aliases refused: {', '.join(aliases_exercised) or 'none'} "
             f"(untested on this platform: {', '.join(aliases_skipped) or 'none'}). "
-            f"active-session symlink-root replacement refused in: "
+            "active-session symlink-root replacement refused in: "
             f"{', '.join(redirected_modes) or 'none'} "
             f"(untested: {', '.join(mode for mode in ('auto', 'legacy') if mode not in redirected_modes) or 'none'}). "
             "Not a Claude Code/Codex host test."
