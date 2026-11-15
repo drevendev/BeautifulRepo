@@ -62,10 +62,15 @@ results. Never report PASS based on reading this page or on green unit tests.
    GitHub checkout. Use the [offline cache-check procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
    as extra byte-level evidence, not as proof of discovery or execution.
    If a host fails to install, inspect its actual version and report
-   **FAIL/INCONCLUSIVE** with the error. The [candidate test request](https://github.com/drevendev/BeautifulRepo/issues/258)
-   carries the same full SHA. These commands are **untested setup
-   instructions**, not an observed host PASS, GitHub-source marketplace
-   acceptance or authorization to run a model.
+   **FAIL/INCONCLUSIVE** with the error. **Issue handoff boundary
+   (reviewed 2026-11-15):** [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
+   still documents the historical `8947574399df2cc11e8ded41cecbef70be4808c6`
+   checkout and fixtures, **not** the successor SHA above. Issue #258 must
+   be repinned after this documentation PR is integrated and before
+   successor-host trial reports can be accepted. Until then, do not follow
+   its older checkout or attribute its results to the successor. These
+   commands are **untested setup instructions**, not an observed host PASS,
+   GitHub-source marketplace acceptance or authorization to run a model.
 
 4. For **negative-trigger** and read-only preview runs, allow file-reading and
    skill invocation only. Block editing, outbound browsing, remote services,
