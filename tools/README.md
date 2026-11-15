@@ -14,6 +14,11 @@ python -m unittest discover -s tests -v
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
 repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 
+The Markdown and HTML/fragment scanners refuse hard-linked Markdown source files
+and anchor targets rather than reading aliases to files outside the checkout.
+These read-only checks assume a stable checkout; they are not a sandbox against
+concurrent filesystem replacement.
+
 ## All three checks in one local run
 
 Run the [combined offline audit](../guides/combined-audit.md) to invoke the

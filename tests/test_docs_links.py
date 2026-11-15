@@ -1,4 +1,5 @@
 """Behavioral tests for the offline Markdown destination checker."""
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -10,6 +11,24 @@ SCRIPT = ROOT / "tools/docs_links.py"
 
 
 class DocsLinksTests(unittest.TestCase):
+    def test_hardlink_markdown_source_is_refused_without_reading_outside(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            outside = base / "outside.md"
+            outside.write_text("[Private](must-not-leak.md)\n", encoding="utf-8")
+            root = base / "repo"
+            root.mkdir()
+            try:
+                os.link(outside, root / "README.md")
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"hard links unavailable: {exc}")
+            original = outside.read_bytes()
+            result = self.run_checker(root)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn("README.md: cannot read Markdown source", result.stderr)
+            self.assertNotIn("must-not-leak", result.stderr)
+            self.assertEqual(outside.read_bytes(), original)
+
     def run_checker(self, root: Path):
         return subprocess.run(
             [sys.executable, str(SCRIPT), "--root", str(root)],
