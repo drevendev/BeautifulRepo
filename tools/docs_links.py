@@ -1302,13 +1302,31 @@ def _interval_contains(index, position):
     return previous >= 0 and furthest_ends[previous] > position
 
 
+def read_markdown_source(path: Path) -> str:
+    """Read a single-linked regular Markdown file; reject aliases before opening.
+
+    These checks assume a stable checkout, not a concurrently hostile filesystem.
+    Both link checkers share this boundary, including HTML fragment targets.
+    """
+    info = os.lstat(path)
+    if (_is_redirect(info) or not stat.S_ISREG(info.st_mode)
+            or info.st_nlink != 1):
+        raise OSError("Markdown source is not a single-linked regular file")
+    flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0)
+    with os.fdopen(os.open(path, flags), "r", encoding="utf-8") as source:
+        opened = os.fstat(source.fileno())
+        if not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1:
+            raise OSError("Markdown source changed to an unsafe file")
+        return source.read()
+
+
 def iter_markdown_locations(path: Path):
     """Yield link-use source anchors without changing the legacy checker.
 
     Columns count Unicode code points in the decoded Markdown line, starting
     with one. These are not UTF-8 byte offsets or decoded destination offsets.
     """
-    text = path.read_text(encoding="utf-8")
+    text = read_markdown_source(path)
     masked = _mask_markdown_code(text)
     definitions, visible = _extract_reference_definitions(masked)
 

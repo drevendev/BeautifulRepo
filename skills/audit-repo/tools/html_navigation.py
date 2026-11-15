@@ -333,7 +333,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
     def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]],
                                              list[int], list[tuple[int, str, str]]]:
         if path not in parsed_files:
-            content = path.read_text(encoding="utf-8")
+            content = docs_links.read_markdown_source(path)
             # A type-6 HTML block is literal Markdown but its real <a>/<img>
             # elements still need destination, alt and duplicate-attribute checks.
             # Markdown backslash escapes apply outside raw HTML, but not

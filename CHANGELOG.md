@@ -851,6 +851,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Refuse hard-linked Markdown sources in standalone Markdown-link and HTML/fragment
+  checkers, including hard-linked anchor targets reached from an ordinary README.
+  Both checks reject aliased files before and after opening; synthetic outside-file
+  regressions and synchronized standalone skill copies cover this boundary.
+  This assumes a stable checkout, not a hostile concurrent-filesystem sandbox.
+
 - Pin the four-skill manual smoke matrix to the same immutable development
   candidate as the plugin installation guide, with source-locked local
   marketplace setup and an explicit Codex registration-versus-install boundary.

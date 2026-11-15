@@ -1,6 +1,7 @@
 """Offline contract for HTML navigation and fragments in Markdown documents."""
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -12,6 +13,25 @@ import html_navigation  # noqa: E402
 
 
 class HtmlNavigationTests(unittest.TestCase):
+    def test_hardlink_markdown_anchor_target_is_refused_without_reading_outside(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            outside = base / "outside.md"
+            outside.write_text("# Private\n[Private](must-not-leak.md)\n", encoding="utf-8")
+            root = base / "repo"
+            root.mkdir()
+            (root / "README.md").write_text("[Link](linked.md#private)\n", encoding="utf-8")
+            try:
+                os.link(outside, root / "linked.md")
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"hard links unavailable: {exc}")
+            original = outside.read_bytes()
+            errors, _, _ = html_navigation.check_repo(root)
+            self.assertTrue(any("README.md:1: cannot read anchor target" in e for e in errors), errors)
+            self.assertTrue(any("linked.md: cannot decode Markdown source" in e for e in errors), errors)
+            self.assertNotIn("must-not-leak", repr(errors))
+            self.assertEqual(outside.read_bytes(), original)
+
     def check(self, markdown: str, assets: dict[str, str] | None = None):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
