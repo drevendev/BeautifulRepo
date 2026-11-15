@@ -679,6 +679,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Clarify that the reproducible four-skill `8947574…` development
+  candidate predates the November 15 hard-link input fixes included in the
+  current skill source (#380–#382). Historical agent trials at that exact
+  SHA must not be described as testing newer hardened files; any successor
+  candidate requires new installed-file and real-host acceptance evidence
+  (#257, #258). No plugin release or installed-agent PASS is claimed.
+
 - Present the three first-visit choices in the root README as a linear, linked list rather than a three-column navigation table. Keep outcomes and destinations unchanged; add a structural regression. This follows GitHub's table-for-tabular-data guidance (reviewed 2026-11-15); it is not a manual narrow-screen or screen-reader acceptance claim.
 
 - Refocus the README's first screen on one pinned offline audit and its
