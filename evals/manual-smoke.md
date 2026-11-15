@@ -1,6 +1,6 @@
 # Manual smoke matrix for BeautifulRepo Agent Skills
 
-**Prepared 2026-10-25; setup reviewed 2026-11-15; no model runs claimed.** This procedure is for a
+**Prepared 2026-10-25; successor candidate source reviewed 2026-11-15; no model runs claimed.** This procedure is for a
 maintainer who has separately authorized model usage. It is not part of CI,
 does not install or invoke an agent automatically, and is not a security
 certification. The static [eval case definitions](README.md) are inputs, not
@@ -13,28 +13,27 @@ results. Never report PASS based on reading this page or on green unit tests.
    documents, private project history or your actual home directory. The
    agent's model provider may receive the inspected repository content.
 2. For the **four-skill development-candidate** matrix, use exactly
-   [commit `8947574399df2cc11e8ded41cecbef70be4808c6`](https://github.com/drevendev/BeautifulRepo/tree/8947574399df2cc11e8ded41cecbef70be4808c6)
+   [commit `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`](https://github.com/drevendev/BeautifulRepo/tree/70b792b7f09d4bd03e36b6ca1cf6c869e5036872)
    (`0.3.0-dev.0`). Record the full SHA, plugin source, agent name/version,
    model/provider, host OS, sandbox, permissions and target directory.
    Released `v0.2.0` contains only `audit-repo` and **cannot** satisfy this
    four-skill matrix. Do not substitute mutable `master` or a later commit.
-   **Revision limitation, reviewed 2026-11-15:** this candidate predates
-   merged hard-link input fixes in the README preview (#380), repository
-   audit (#381) and skill-local Markdown/HTML scanners (#382). A test here
-   evaluates that historical source, not the hardened current `master`
-   or a future release candidate. Record this limitation with every PASS.
-   Any successor candidate needs a new full SHA, installed-cache comparison
-   and fresh host acceptance, not inherited results.
+   **Revision boundary, reviewed 2026-11-15:** this successor commit includes
+   the hard-link input fixes from PRs #380–#383 and supersedes the older
+   `8947574…` **source pin**, but does **not** inherit any earlier
+   model-evaluation PASS. Test the candidate's actual installed assets and
+   fixtures; neither successful CI nor a matching cache proves a host model
+   invoked a skill. Prior candidate evidence remains historical.
 3. From an empty, disposable **parent** directory, prepare the same pinned
    checkout for either host (Git and Python 3.11+ required):
 
    ```sh
    git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
-   git -C BeautifulRepo-candidate checkout --detach 8947574399df2cc11e8ded41cecbef70be4808c6
+   git -C BeautifulRepo-candidate checkout --detach 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
    git -C BeautifulRepo-candidate rev-parse HEAD
    ```
 
-   Stop if `rev-parse HEAD` is not exactly `8947574399df2cc11e8ded41cecbef70be4808c6`. Do not assume
+   Stop if `rev-parse HEAD` is not exactly `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`. Do not assume
    that a host's remote `@<SHA>` or `--ref <SHA>` installer accepts raw
    commit hashes: the documented selectors describe refs, not verified
    raw-commit installation. Use the source-locked local marketplace:
