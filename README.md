@@ -27,11 +27,11 @@
 
 ## Start here
 
-| Your goal | First step | Visible result |
-| --- | --- | --- |
-| Diagnose an existing repository | Run the [offline audit](guides/repository-audit.md) and use the [repository checklist](checklists/repository.md) | Specific findings, not a beauty score |
-| Start a new one | Adapt the [README scaffold](templates/README.template.md) with the [first-success checklist](checklists/first-success.md) | A reproducible command and an honest scope |
-| Borrow a working example | Choose from [five starter types](examples/README.md) | Real source, tests and exact limitations |
+Choose the result you need:
+
+- **Diagnose an existing repository:** run the [offline audit](guides/repository-audit.md) with the [repository checklist](checklists/repository.md) to get specific findings, not a beauty score.
+- **Start a new repository:** adapt the [README scaffold](templates/README.template.md) using the [first-success checklist](checklists/first-success.md) to provide a reproducible command and honest scope.
+- **Borrow a working example:** explore [five starter types](examples/README.md) for runnable source, tests and documented limitations.
 
 ## Working proof
 
