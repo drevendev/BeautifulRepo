@@ -109,6 +109,34 @@ class ReadmeApplyTests(unittest.TestCase):
         self.assertIn("No change", result.stdout)
         self.assert_clean()
 
+    def test_approved_hardlinked_readme_or_proposal_is_refused(self):
+        # Exact approved hashes cannot authorize a redirected outside file.
+        external = self.tmp / "external-not-part-of-checkout.md"
+        content = b"# Outside checkout\n\nSYNTHETIC_PRIVATE_MARKER\n"
+        external.write_bytes(content)
+        for source in (self.readme, self.proposal):
+            with self.subTest(source=source.name):
+                original = source.read_bytes()
+                source.unlink()
+                try:
+                    os.link(external, source)
+                except (OSError, NotImplementedError) as exc:
+                    source.write_bytes(original)
+                    if os.name == "nt":
+                        self.skipTest(f"hard-link creation unavailable: {exc}")
+                    raise
+                try:
+                    result = self.approved()
+                    self.assertEqual(2, result.returncode, result.stderr)
+                    self.assertEqual("", result.stdout)
+                    self.assertIn("single-linked", result.stderr)
+                    self.assertNotIn("SYNTHETIC_PRIVATE_MARKER", result.stderr)
+                    self.assertEqual(content, external.read_bytes())
+                    self.assert_clean()
+                finally:
+                    source.unlink()
+                    source.write_bytes(original)
+
     def test_rejects_candidate_inside_checkout(self):
         proposed = self.root / "candidate.md"
         proposed.write_bytes(self.proposal.read_bytes())
