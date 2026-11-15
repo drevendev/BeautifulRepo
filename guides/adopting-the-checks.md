@@ -59,6 +59,22 @@ git ls-remote https://github.com/drevendev/BeautifulRepo refs/tags/v0.2.0
 Each check also runs on Ubuntu and Windows runners in BeautifulRepo's own CI.
 macOS runners are not tested.
 
+**Released-pin safety boundary (checked 2026-11-16):** the exact
+`v0.2.0` Action commit above **predates** the hard-link input checks later
+added to the standalone entry-point audit
+([PR #381](https://github.com/drevendev/BeautifulRepo/pull/381)) and
+Markdown/HTML link scanners
+([PR #382](https://github.com/drevendev/BeautifulRepo/pull/382)).
+At the `v0.2.0` commit, the three checker sources do not contain the
+`st_nlink` check used by those later fixes. A PASS using this pinned Action
+**does not test or include the later hard-link protections**. Treat untrusted
+PR checkouts and hard-linked external file aliases as a separate risk; the
+workflow is **not a filesystem sandbox**. Newer `master` contains the
+fixes but is mutable and not an equivalent released Action pin. Review and
+pin a later exact commit separately before depending on newer behavior.
+Even the later guards do not establish protection against hostile concurrent
+filesystem changes.
+
 
 ## Check the fork-PR trust boundary
 
