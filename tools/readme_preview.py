@@ -48,13 +48,17 @@ def _unsafe_display_character(ch: str) -> bool:
 
 def read_file(path: Path, label: str) -> tuple[bytes, str]:
     try:
-        if _redirect(path) or not stat.S_ISREG(path.lstat().st_mode):
-            raise PreviewError(f"{label}: expected a regular, non-symlinked UTF-8 file.")
+        if _redirect(path):
+            raise PreviewError(f"{label}: expected a regular, non-redirected UTF-8 file.")
+        source_info = path.lstat()
+        if not stat.S_ISREG(source_info.st_mode) or source_info.st_nlink > 1:
+            raise PreviewError(f"{label}: expected a regular, single-linked UTF-8 file.")
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
         fd = os.open(path, flags)
         with os.fdopen(fd, "rb") as handle:
-            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
-                raise PreviewError(f"{label}: not a regular file.")
+            opened_info = os.fstat(handle.fileno())
+            if not stat.S_ISREG(opened_info.st_mode) or opened_info.st_nlink > 1:
+                raise PreviewError(f"{label}: not a regular, single-linked file.")
             data = handle.read(MAX_BYTES + 1)
         if len(data) > MAX_BYTES:
             raise PreviewError(f"{label}: exceeds the 256 KiB limit.")
