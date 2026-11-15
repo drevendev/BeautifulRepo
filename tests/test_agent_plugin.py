@@ -62,120 +62,99 @@ class PluginManifestTests(unittest.TestCase):
                     self.assertIn(capability, description.lower())
 
     def test_development_install_examples_share_one_immutable_candidate(self):
-        """Keep Claude/Codex and the manual matrix pinned to one actual commit."""
+        """One pinned source must govern both host instructions and evaluation fixtures."""
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        checkout = re.findall(
+        checkouts = re.findall(
             r"(?m)^git -C BeautifulRepo-candidate checkout --detach ([a-f0-9]{40})$",
             guide,
         )
+        self.assertEqual(len(checkouts), 1, "need one active full-SHA checkout")
+        candidate = checkouts[0]
+        self.assertEqual(candidate, "70b792b7f09d4bd03e36b6ca1cf6c869e5036872")
         self.assertIn("git -C BeautifulRepo-candidate rev-parse HEAD", guide)
         self.assertIn("claude plugin marketplace add ./BeautifulRepo-candidate", guide)
         self.assertIn("codex plugin marketplace add ./BeautifulRepo-candidate", guide)
-        # Optional source validation runs before marketplace registration.
-        # It does not exercise installed files or model selection.
+        self.assertIn("claude plugin install beautifulrepo@beautifulrepo", guide)
         preflight = "claude plugin validate ./BeautifulRepo-candidate"
         self.assertIn(preflight, guide)
         self.assertLess(
             guide.index(preflight),
             guide.index("claude plugin marketplace add ./BeautifulRepo-candidate"),
         )
-        self.assertIn("v2.1.289+", guide)
-        self.assertIn("not an installed-host", guide)
         self.assertNotRegex(
             guide,
             r"(?m)^claude plugin marketplace add drevendev/BeautifulRepo@[a-f0-9]{40}$",
         )
-        linked = re.findall(
-            r"https://github\.com/drevendev/BeautifulRepo/tree/([a-f0-9]{40})",
-            guide,
-        )
-        self.assertEqual(len(checkout), 1, "need one full-SHA local candidate checkout")
-        self.assertEqual(len(linked), 1, "need one matching immutable source link")
-        self.assertEqual(checkout, linked)
-        roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
-        roadmap_pins = re.findall(r"is pinned to `([a-f0-9]{40})`", roadmap)
-        self.assertEqual(roadmap_pins, checkout, "roadmap candidate must match the checkout")
         self.assertIn(
-            f"https://github.com/drevendev/BeautifulRepo/blob/{checkout[0]}/evals/manual-smoke.md",
+            f"https://github.com/drevendev/BeautifulRepo/tree/{candidate}",
             guide,
         )
 
+        roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+        roadmap_pins = re.findall(r"is pinned to `([a-f0-9]{40})`", roadmap)
+        self.assertEqual(roadmap_pins, [candidate])
         comparison = (ROOT / "evals/three-arm-comparison.md").read_text(
             encoding="utf-8"
         )
         self.assertIn(
-            f"https://github.com/drevendev/BeautifulRepo/tree/{checkout[0]}",
+            f"https://github.com/drevendev/BeautifulRepo/tree/{candidate}",
             comparison,
-            "the three-arm protocol must use the same immutable candidate",
+        )
+        matrix = (ROOT / "evals/manual-smoke.md").read_text(encoding="utf-8")
+        self.assertIn(
+            f"https://github.com/drevendev/BeautifulRepo/tree/{candidate}",
+            matrix,
         )
         self.assertIn(
-            f"--expected-commit {checkout[0]}",
+            f"git -C BeautifulRepo-candidate checkout --detach {candidate}",
+            matrix,
+        )
+        self.assertIn(
+            f"--expected-commit {candidate}",
             guide,
-            "offline cache verification must pin the tested candidate",
+            "cache comparison must verify the same source as the host trial",
+        )
+        self.assertIn(
+            f"https://github.com/drevendev/BeautifulRepo/tree/{candidate}/evals",
+            guide,
+            "fixture files must be taken from the tested source revision",
         )
 
-        # The immutable matrix's step 3 links to a historical installation
-        # guide. Without an explicit warning, following that link silently
-        # changes the tested source even though all current-checkout pins agree.
-        self.assertIn(
-            "**Do not follow the matrix's relative installation-guide link.**",
-            guide,
-        )
-        self.assertIn(
-            "still installs `cf8ac81ddabb5e2006913e65a2f980ef201baf5c` instead.",
-            guide,
-        )
-        self.assertIn(
-            f"`--expected-commit {checkout[0]}` cache",
-            guide,
-        )
+        # Keep the earlier pin reproducible without mixing its evaluation
+        # fixtures, cache hashes, or installation instructions with the new pin.
+        historical = "8947574399df2cc11e8ded41cecbef70be4808c6"
+        self.assertNotEqual(candidate, historical)
+        self.assertIn("Historical source pin", guide)
+        self.assertIn(historical, guide)
+        self.assertIn(historical, comparison)
+        self.assertIn("**historical**", comparison)
+        self.assertIn("earlier", guide)
+        self.assertIn("embedded at this source commit", guide)
 
-    def test_cache_verifier_is_separately_pinned_from_immutable_candidate(self):
-        """The corrected tool must not be attributed to an older source pin."""
+    def test_cache_verifier_uses_candidate_source_and_preserves_older_procedure(self):
+        """The new source contains a verifier; legacy trials retain their own pin."""
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        section = guide.split("## Verify cached skill definitions", 1)[1]
-        candidate = "8947574399df2cc11e8ded41cecbef70be4808c6"
-        verifier = "56d1c0236000354647cd1ea1987354a3c0025e70"
-        self.assertNotEqual(candidate, verifier)
+        candidate = "70b792b7f09d4bd03e36b6ca1cf6c869e5036872"
+        section = guide.split("## Verify cached skill definitions", 1)[1].split(
+            "## Standalone skill-manager installations", 1
+        )[0]
         self.assertIn(
-            f"git -C BeautifulRepo-verifier checkout --detach {verifier}",
-            section,
+            "BeautifulRepo-candidate/scripts/plugin_install_verify.py", guide
         )
-        self.assertIn("git -C BeautifulRepo-verifier rev-parse HEAD", section)
-        self.assertIn(
-            'python -I "/absolute/path/to/BeautifulRepo-verifier/scripts/plugin_install_verify.py"',
-            section,
-        )
-        self.assertIn('--source "/absolute/path/to/BeautifulRepo-candidate"', section)
-        self.assertIn(f"--expected-commit {candidate}", section)
-        self.assertIn("three distinct physical directories", section)
-        self.assertIn("`checked_present_manifests`", section)
-        self.assertIn("`missing_optional_manifests`", section)
-        self.assertIn("`checked_skill_assets`", section)
-        self.assertIn("`different_skill_assets`", section)
-        self.assertIn("all Git-tracked, non-`SKILL.md` files", section)
-        self.assertIn("The older `ac28c4f6` verifier", section)
-        self.assertIn("The intermediate `207ea2c` verifier", section)
-        self.assertIn("Unexpected", section)
-        self.assertIn("skill-local files", section)
-        self.assertIn("up to 1,024 visited entries", section)
-        self.assertIn("Extra files **outside**", section)
-        pinned_checkouts = re.findall(
-            r"(?m)^git -C BeautifulRepo-verifier checkout --detach ([0-9a-f]{40})$",
-            section,
-        )
-        self.assertEqual(pinned_checkouts, [verifier])
-        tools_guide = (ROOT / "tools/README.md").read_text(encoding="utf-8")
-        self.assertIn("inside the four installed skill folders", tools_guide)
-        self.assertIn("Extra files elsewhere in the plugin", tools_guide)
-        self.assertNotIn(
-            "Extra untracked cache files and missing optional",
-            tools_guide,
-        )
-        self.assertNotIn(
-            'python -I "/absolute/path/to/pinned-source/scripts/plugin_install_verify.py"',
-            section,
-        )
+        self.assertIn(f"--expected-commit {candidate}", guide)
+        self.assertIn("--source /absolute/path/to/BeautifulRepo-candidate", guide)
+        self.assertIn("--installed /absolute/path/to/actual-installed-plugin-cache", guide)
+        self.assertIn("two distinct physical roots", section)
+        self.assertIn(f"HEAD == {candidate}", section)
+        self.assertIn("INCOMPLETE (exit 2)", section)
+        self.assertIn("MISMATCH", section)
+        self.assertIn("exit 0", section)
+        self.assertIn("missing optional", section)
+        self.assertIn("56d1c0236000354647cd1ea1987354a3c0025e70", section)
+        self.assertIn("8947574…", section)
+        self.assertIn("8947574399df2cc11e8ded41cecbef70be4808c6", guide)
+        self.assertNotIn("git -C BeautifulRepo-verifier checkout --detach", guide)
+        self.assertIn("host cache provenance separately", section)
 
     def test_manifest_versions_are_valid(self):
         for path in (".claude-plugin/plugin.json", "plugin.json"):
@@ -215,7 +194,7 @@ class PluginManifestTests(unittest.TestCase):
         )
         self.assertIn("codex plugin marketplace list", guide)
         self.assertIn("Plugins Directory", guide)
-        self.assertIn("**INCONCLUSIVE/FAIL**", guide)
+        self.assertIn("FAIL/INCONCLUSIVE", guide)
 
     def test_codex_guide_distinguishes_marketplace_from_plugin_install(self):
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
@@ -226,25 +205,24 @@ class PluginManifestTests(unittest.TestCase):
             "## Try all four skills from a pinned development candidate", 1
         )[1].split("## Verify cached skill definitions", 1)[0]
 
-        # A marketplace registration is not proof of plugin installation.
-        # Keep both official installation routes discoverable in both paths.
+        # Marketplace registration is not installation in either route.
         self.assertRegex(
             released,
             r"(?s)`codex plugin marketplace add`.{0,90}registers a source;"
             r" it does\s+not install the plugin",
         )
-        self.assertIn("only **register and list** the source", candidate)
-        self.assertIn("**not** installation evidence", candidate)
+        self.assertIn("Registration alone is **not** installation", candidate)
         for name, section in (("release", released), ("candidate", candidate)):
             with self.subTest(path=name):
                 self.assertIn(
                     "https://developers.openai.com/learn/developers-codex-plugin",
                     section,
                 )
+                self.assertIn("https://developers.openai.com/plugins/build/plugins", section)
                 self.assertIn("`/plugins`", section)
                 self.assertIn("**Install plugin**", section)
                 self.assertIn("Plugins Directory", section)
-                self.assertIn("installed/cached", section)
+                self.assertRegex(section, r"(?s)installed.*cache")
 
         for unsupported_command in ("add", "remove", "update"):
             with self.subTest(command=unsupported_command):

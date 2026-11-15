@@ -1,13 +1,17 @@
 # Three-arm comparison: before, ordinary prompt, installed skill
 
-**Protocol prepared 2026-11-06, candidate repinned 2026-11-11; no agent or model runs are reported here.**
+**Protocol prepared 2026-11-06; successor candidate reviewed 2026-11-15; no agent or model runs are reported here.**
 This is a reproducible companion to the [manual smoke matrix](manual-smoke.md),
 not a new eval harness, a passing result, or permission to spend money.
 The four-skill development candidate is
-[`8947574399df2cc11e8ded41cecbef70be4808c6`](https://github.com/drevendev/BeautifulRepo/tree/8947574399df2cc11e8ded41cecbef70be4808c6),
+[`70b792b7f09d4bd03e36b6ca1cf6c869e5036872`](https://github.com/drevendev/BeautifulRepo/tree/70b792b7f09d4bd03e36b6ca1cf6c869e5036872),
 **not** the released v0.2.0 one-skill plugin. Test that exact source
 revision, including any defects it has, rather than silently using moving
-`master`. Read [the install guide](../guides/agent-plugin.md) first.
+`master`. Read [the successor install guide](../guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate) first.
+The older `8947574399df2cc11e8ded41cecbef70be4808c6` test pin remains a **historical** reference only:
+do not mix its installer, fixtures, cache hashes or trial results with this protocol.
+The successor source commit embeds an older manual matrix; use the maintained
+installation procedure while loading fixtures **from the successor SHA**.
 Fresh client installation, discovery and model behavior remain **unverified**.
 
 ## The three arms
