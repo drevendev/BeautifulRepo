@@ -124,7 +124,7 @@ class PluginManifestTests(unittest.TestCase):
         # fixtures, cache hashes, or installation instructions with the new pin.
         historical = "8947574399df2cc11e8ded41cecbef70be4808c6"
         self.assertNotEqual(candidate, historical)
-        self.assertIn(f"Historical source pin", guide)
+        self.assertIn("Historical source pin", guide)
         self.assertIn(historical, guide)
         self.assertIn(historical, comparison)
         self.assertIn("**historical**", comparison)
