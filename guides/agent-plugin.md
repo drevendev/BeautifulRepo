@@ -92,6 +92,19 @@ installed-cache verifier. The development source was accepted through
 GitHub PRs #337–#343 on 2026-11-11; their CI results belong to the specific
 PR heads, not automatically to this merged squash SHA. **No fresh Claude Code
 or Codex installation, skill discovery or model invocation has been proven.**
+
+**Revision boundary (reviewed 2026-11-15):** This frozen `8947574…`
+candidate predates the hard-link input fixes to the skill-local README
+preview ([#380](https://github.com/drevendev/BeautifulRepo/pull/380)),
+repository audit ([#381](https://github.com/drevendev/BeautifulRepo/pull/381))
+and Markdown/HTML link scanners
+([#382](https://github.com/drevendev/BeautifulRepo/pull/382)).
+Those changes are on newer `master`, **not** in this candidate. A host
+test pinned here may be useful historical evidence, but it must not be
+presented as acceptance of the current hardened skill files. A future
+release candidate needs its own immutable SHA, verified installed assets
+and fresh host tests; do not silently substitute `master` in this trial.
+
 Record the full SHA for each trial. Use the official
 [Claude Code CLI reference](https://code.claude.com/docs/en/plugins/cli-reference)
 and [Codex plugin guide](https://developers.openai.com/plugins/build/plugins)
