@@ -78,6 +78,14 @@ results. Never report PASS based on reading this page or on green unit tests.
 
 ## Cases to run — the same requests in both agents
 
+**Revision boundary:** This maintained matrix can be newer than the pinned
+candidate checkout. Run each prompt, fixture, grader and skill asset **from
+`BeautifulRepo-candidate/` at the verified candidate SHA**, not from mutable
+`master` or another checkout. The historical `manual-smoke.md` embedded in
+that older commit may link to an obsolete installer; use the source-locked
+setup above instead. Do not attribute tests of newer fixture bytes to the
+older plugin candidate.
+
 Use the text in each named `evals/<case>/prompt.md` as the starting request.
 Mount the matching synthetic `resources/` directory **when the case provides
 one**; some negative-trigger cases intentionally have no fixture directory.
