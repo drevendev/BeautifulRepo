@@ -18,6 +18,13 @@ results. Never report PASS based on reading this page or on green unit tests.
    model/provider, host OS, sandbox, permissions and target directory.
    Released `v0.2.0` contains only `audit-repo` and **cannot** satisfy this
    four-skill matrix. Do not substitute mutable `master` or a later commit.
+   **Revision limitation, reviewed 2026-11-15:** this candidate predates
+   merged hard-link input fixes in the README preview (#380), repository
+   audit (#381) and skill-local Markdown/HTML scanners (#382). A test here
+   evaluates that historical source, not the hardened current `master`
+   or a future release candidate. Record this limitation with every PASS.
+   Any successor candidate needs a new full SHA, installed-cache comparison
+   and fresh host acceptance, not inherited results.
 3. From an empty, disposable **parent** directory, prepare the same pinned
    checkout for either host (Git and Python 3.11+ required):
 
