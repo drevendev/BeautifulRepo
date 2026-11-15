@@ -38,7 +38,7 @@ class CiTrustRecipeTests(unittest.TestCase):
         )[0]
         for phrase in (
             "v0.2.0", "4f06f26ccef6e8b28d77c71633482b7a1a68518a",
-            "Released-pin safety boundary", "2026-11-16",
+            "Released-pin safety boundary", "2026-11-15",
             "PR #381", "PR #382", "st_nlink",
             "does not test or include the later hard-link protections",
             "not a filesystem sandbox", "later exact commit",
