@@ -59,7 +59,7 @@ git ls-remote https://github.com/drevendev/BeautifulRepo refs/tags/v0.2.0
 Each check also runs on Ubuntu and Windows runners in BeautifulRepo's own CI.
 macOS runners are not tested.
 
-**Released-pin safety boundary (checked 2026-11-16):** the exact
+**Released-pin safety boundary (checked 2026-11-15):** the exact
 `v0.2.0` Action commit above **predates** the hard-link input checks later
 added to the standalone entry-point audit
 ([PR #381](https://github.com/drevendev/BeautifulRepo/pull/381)) and
