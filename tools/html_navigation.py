@@ -95,6 +95,18 @@ def srcset_urls(value: str) -> list[str]:
     return urls
 
 
+# Local URL-bearing HTML attributes inspected in active Markdown blocks.
+# This is not a browser renderer or GitHub's HTML sanitizer.
+HTML_URL_ATTRIBUTES = {
+    "a": ("href",),
+    "img": ("src", "srcset"),
+    "source": ("src", "srcset"),
+    "video": ("src", "poster"),
+    "audio": ("src",),
+    "track": ("src",),
+}
+
+
 class MarkupReferences(HTMLParser):
     """Collect active HTML destinations and explicit IDs with source lines."""
 
@@ -112,7 +124,7 @@ class MarkupReferences(HTMLParser):
         attributes: dict[str, str | None] = {}
         for attribute, value in attrs:
             if attribute in attributes:
-                if (attribute in {"href", "src", "srcset", "alt", "id", "name", "role"}
+                if (attribute in {"href", "src", "srcset", "poster", "alt", "id", "name", "role"}
                         or attribute.startswith("aria-")):
                     self.duplicate_attributes.append((self.getpos()[0], tag, attribute))
                 continue
@@ -125,8 +137,7 @@ class MarkupReferences(HTMLParser):
         named_anchor = attributes.get("name") if tag == "a" else None
         if named_anchor:
             self.ids.add(named_anchor)
-        for attribute in (("href",) if tag == "a" else
-                          ("src", "srcset") if tag in {"img", "source"} else ()):
+        for attribute in HTML_URL_ATTRIBUTES.get(tag, ()):
             value = attributes.get(attribute)
             if not value:
                 continue
