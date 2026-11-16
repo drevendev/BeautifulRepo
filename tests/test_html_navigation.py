@@ -1,470 +1,411 @@
-#!/usr/bin/env python3
-"""Check local HTML links/assets and section fragments in repository Markdown.
-
-Offline companion to docs_links.py. This is a bounded source check, not a
-complete GitHub-Flavored Markdown renderer or a network accessibility audit.
-"""
+"""Offline contract for HTML navigation and fragments in Markdown documents."""
 from __future__ import annotations
 
-import argparse
-from html import unescape
-import importlib.util
-from html.parser import HTMLParser
+import os
 from pathlib import Path
-import re
 import sys
-import unicodedata
-from urllib.parse import unquote, urlsplit
+import tempfile
+import unittest
 
-try:
-    from . import docs_links
-except ImportError:
-    # Direct invocation. Load the sibling by path: `python -I` drops the script's
-    # directory from sys.path, so a plain `import docs_links` would fail there.
-    _SIBLING = Path(__file__).resolve().with_name("docs_links.py")
-    docs_links = sys.modules.get("docs_links")
-    if docs_links is None or Path(getattr(docs_links, "__file__", "")).resolve() != _SIBLING:
-        _spec = importlib.util.spec_from_file_location("docs_links", _SIBLING)
-        assert _spec is not None and _spec.loader is not None
-        docs_links = importlib.util.module_from_spec(_spec)
-        sys.modules["docs_links"] = docs_links
-        # -I alone does not suppress sibling .pyc writes on first use.
-        _prior_bytecode = sys.dont_write_bytecode
-        sys.dont_write_bytecode = True
-        try:
-            _spec.loader.exec_module(docs_links)
-        except Exception:
-            sys.modules.pop("docs_links", None)
-            raise
-        finally:
-            sys.dont_write_bytecode = _prior_bytecode
-
-HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$")
-SETEXT_UNDERLINE = re.compile(r"^ {0,3}(?:=+|-{2,})[ \t]*$")
-REFERENCE_DEFINITION = re.compile(r"^\[[^\]]+\]:")
-LINK = re.compile(r"\[([^\]]+)\]\([^)]*\)")
-IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
-TAG = re.compile(r"<[^>]+>")
-# Backslash-escaped ASCII punctuation is set aside in a private-use range while links,
-# tags and emphasis are removed, then restored as the literal character.
-ESCAPED_PUNCTUATION = re.compile(r"\\([!-/:-@\[-`{-~])")
-ESCAPE_BASE = 0xE000
-SET_ASIDE = re.compile("[\uE021-\uE07E]")
-# An underscore run opens emphasis only when not preceded by a letter or digit,
-# and closes it only when not followed by one, so snake_case stays intact.
-UNDERSCORE_EMPHASIS = re.compile(r"(?<![^\W_])(_+)(?=\S)(.+?)(?<=\S)\1(?![^\W_])")
-CLOSING_HASHES = re.compile(r"(?:^|[ \t]+)#+[ \t]*$")
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+import html_navigation  # noqa: E402
 
 
-def srcset_urls(value: str) -> list[str]:
-    """Collect srcset candidate URLs without splitting commas inside data URLs.
-
-    This scans the HTML candidate boundaries (URL, optional descriptor, comma),
-    but intentionally does not validate descriptors or image capabilities.
-    """
-    urls: list[str] = []
-    index = 0
-    while index < len(value):
-        while index < len(value) and (value[index].isspace() or value[index] == ","):
-            index += 1
-        start = index
-        while index < len(value) and not value[index].isspace():
-            index += 1
-        url = value[start:index]
-        if not url:
-            break
-        end_of_candidate = url.endswith(",")
-        url = url.rstrip(",")
-        if url:
-            urls.append(url)
-        if end_of_candidate:
-            continue
-        # Skip descriptors through the next candidate delimiter. A comma within
-        # CSS-style parentheses is not a descriptor separator.
-        nesting = 0
-        while index < len(value):
-            char = value[index]
-            if char == "(":
-                nesting += 1
-            elif char == ")" and nesting:
-                nesting -= 1
-            elif char == "," and not nesting:
-                index += 1
-                break
-            index += 1
-    return urls
-
-
-# Local URL-bearing HTML attributes inspected in active Markdown blocks.
-# This is not a browser renderer or GitHub's HTML sanitizer.
-HTML_URL_ATTRIBUTES = {
-    "a": ("href",),
-    "img": ("src", "srcset"),
-    "source": ("src", "srcset"),
-    "video": ("src", "poster"),
-    "audio": ("src",),
-    "track": ("src",),
-}
-
-
-class MarkupReferences(HTMLParser):
-    """Collect active HTML destinations and explicit IDs with source lines."""
-
-    def __init__(self) -> None:
-        super().__init__(convert_charrefs=True)
-        self.refs: list[tuple[int, str, str]] = []
-        self.ids: set[str] = set()
-        self.images_without_alt: list[int] = []
-        self.duplicate_attributes: list[tuple[int, str, str]] = []
-        self.empty_url_attributes: list[tuple[int, str, str]] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        # HTML's parser retains the first attribute of a repeated name, whereas
-        # dict(attrs) retains the last. Follow the browser and report relevant
-        # malformed duplicates so they cannot disguise a broken link or alt.
-        attributes: dict[str, str | None] = {}
-        for attribute, value in attrs:
-            if attribute in attributes:
-                if (attribute in {"href", "src", "srcset", "poster", "alt", "id", "name", "role"}
-                        or attribute.startswith("aria-")):
-                    self.duplicate_attributes.append((self.getpos()[0], tag, attribute))
-                continue
-            attributes[attribute] = value
-        if tag == "img" and "alt" not in attributes:
-            self.images_without_alt.append(self.getpos()[0])
-        identifier = attributes.get("id")
-        if identifier:
-            self.ids.add(identifier)
-        named_anchor = attributes.get("name") if tag == "a" else None
-        if named_anchor:
-            self.ids.add(named_anchor)
-        for attribute in HTML_URL_ATTRIBUTES.get(tag, ()):
-            value = attributes.get(attribute)
-            # Explicitly empty media sources are invalid even though there is
-            # no path for the offline destination resolver to inspect.
-            # Missing src is different: video/audio and img with srcset may
-            # legitimately omit it. Empty href and optional poster are not
-            # treated as broken media URLs.
-            if attribute in ("src", "srcset") and attribute in attributes and (
-                value is None or not value.strip()
-            ):
-                self.empty_url_attributes.append((self.getpos()[0], tag, attribute))
-                continue
-            if not value:
-                continue
-            if attribute == "srcset":
-                # Do not split on every comma: data: URLs contain literal commas.
-                # A remote/data candidate must not hide a later local asset.
-                for candidate in srcset_urls(value):
-                    self.refs.append((self.getpos()[0], tag, candidate))
-            else:
-                self.refs.append((self.getpos()[0], tag, value))
-
-    handle_startendtag = handle_starttag
-
-
-def mask_escaped_html_openers(markdown: str) -> str:
-    """Prevent Markdown backslash-escaped `<` from becoming live HTML.
-
-    The existing code-region masker preserves line numbers; preserve them here too.
-    An even-length run of preceding backslashes does not escape `<`.
-    """
-    chars = list(markdown)
-    for index, char in enumerate(markdown):
-        if char == "<" and docs_links._is_backslash_escaped(markdown, index):
-            chars[index] = " "
-    return "".join(chars)
-
-
-def _lines(text: str) -> list[str]:
-    return [line.rstrip("\r\n") for line in docs_links.split_markdown_lines(text)]
-
-
-def _heading_segments(label: str) -> list[tuple[bool, str]]:
-    """Split heading text into (is_code, text) parts at paired equal-length backtick runs."""
-    segments: list[tuple[bool, str]] = []
-    cursor = plain_start = 0
-    while cursor < len(label):
-        if label[cursor] != "`":
-            cursor += 1
-            continue
-        opening_end = cursor
-        while opening_end < len(label) and label[opening_end] == "`":
-            opening_end += 1
-        if docs_links._is_backslash_escaped(label, cursor):
-            cursor = opening_end
-            continue
-        length = opening_end - cursor
-        search = opening_end
-        while True:
-            close = label.find("`", search)
-            if close == -1:
-                cursor = opening_end
-                break
-            closing_end = close
-            while closing_end < len(label) and label[closing_end] == "`":
-                closing_end += 1
-            if closing_end - close == length:
-                code = label[opening_end:close]
-                if len(code) > 2 and code[0] == code[-1] == " " and code.strip():
-                    code = code[1:-1]
-                segments.append((False, label[plain_start:cursor]))
-                segments.append((True, code))
-                cursor = plain_start = closing_end
-                break
-            search = closing_end
-    segments.append((False, label[plain_start:]))
-    return segments
-
-
-def _rendered_text(markdown: str) -> str:
-    """Approximate the visible text GitHub renders for non-code heading Markdown."""
-    text = ESCAPED_PUNCTUATION.sub(lambda m: chr(ESCAPE_BASE + ord(m.group(1))), markdown)
-    text = IMAGE.sub("", text)  # an image contributes no text, not even its alt
-    text = LINK.sub(r"\1", text)
-    text = TAG.sub("", text)  # tags and comments first, then entities
-    previous = None
-    while previous != text:
-        previous, text = text, UNDERSCORE_EMPHASIS.sub(r"\2", text)
-    text = SET_ASIDE.sub(lambda m: chr(ord(m.group()) - ESCAPE_BASE), text)
-    return unescape(text)
-
-
-def github_heading_slug(label: str) -> str:
-    """Return the anchor GitHub generates for ATX heading text, before duplicate suffixes.
-
-    GitHub lowercases the rendered text, removes every character that is not a
-    letter, mark, decimal digit, connector punctuation, hyphen or space, and turns
-    each space into a hyphen. Code-span text counts literally; images, tags and
-    emphasis markers do not.
-    """
-    text = "".join(part if is_code else _rendered_text(part)
-                   for is_code, part in _heading_segments(label))
-    return "".join(char for char in text.lower() if _kept_in_slug(char)).replace(" ", "-")
-
-
-def _kept_in_slug(char: str) -> bool:
-    """Approximate the \\p{Word} class GitHub's Ruby regex keeps, plus hyphen and space.
-
-    \\p{Word} is Alphabetic, marks, decimal digits and connector punctuation. Python
-    has no Alphabetic property, so letters, letter numbers and the enclosed Latin
-    letters (circled and squared) stand in for it.
-    """
-    if char in "- ":
-        return True
-    category = unicodedata.category(char)
-    return (category[0] in "LM" or category in ("Nd", "Nl", "Pc")
-            or "Ⓐ" <= char <= "ⓩ"  # circled A-Z and a-z
-            or any(start <= ord(char) < start + 26  # squared, negative circled, negative squared
-                   for start in (0x1F130, 0x1F150, 0x1F170)))
-
-
-def _plain_setext_line(line: str) -> bool:
-    """Conservatively identify a top-level paragraph line, not a block opener."""
-    columns, start = docs_links._leading_indent_columns(line)
-    if columns > 3:
-        return False
-    body = line[start:]
-    return bool(body.strip()) and not (
-        docs_links._starts_nonparagraph_block(line)
-        or docs_links._list_item_details(line) is not None
-        or body.startswith("<")
-        or REFERENCE_DEFINITION.match(body)
-    )
-
-
-def heading_ids(markdown_without_code: str, explicit_ids: set[str],
-                original_markdown: str | None = None) -> set[str]:
-    """Approximate GitHub ATX and simple top-level setext heading anchors.
-
-    The masked copy excludes fenced/indented code; the original supplies inline
-    Markdown for the slug. List/quote-lazy and HTML-block paragraphs are skipped
-    rather than inventing anchors for content the checker cannot parse fully.
-    """
-    found = set(explicit_ids)
-    used_heading_ids: set[str] = set()
-    masked_lines = _lines(markdown_without_code)
-    source_lines = _lines(original_markdown if original_markdown is not None
-                          else markdown_without_code)
-    paragraph_start: int | None = None
-    lazy_container = False
-
-    def add_heading(label: str) -> None:
-        slug = github_heading_slug(label)
-        if not slug:
-            return
-        candidate = slug
-        suffix = 0
-        while candidate in used_heading_ids:
-            suffix += 1
-            candidate = f"{slug}-{suffix}"
-        used_heading_ids.add(candidate)
-        found.add(candidate)
-
-    for index, (line, source_line) in enumerate(
-            zip(masked_lines, source_lines, strict=True)):
-        if not line.strip():
-            paragraph_start = None
-            lazy_container = False
-            continue
-
-        match = HEADING.match(line)
-        if match is not None:
-            source_match = HEADING.match(source_line) or match
-            label = CLOSING_HASHES.sub("", source_match.group(1).strip()).strip()
-            add_heading(label)
-            paragraph_start = None
-            lazy_container = False
-            continue
-
-        if SETEXT_UNDERLINE.match(line):
-            if paragraph_start is not None and not lazy_container:
-                label = " ".join(part.strip() for part in
-                                 source_lines[paragraph_start:index])
-                add_heading(label)
-            paragraph_start = None
-            lazy_container = False
-            continue
-
-        if _plain_setext_line(line):
-            if not lazy_container and paragraph_start is None:
-                paragraph_start = index
-            continue
-
-        paragraph_start = None
-        columns, start = docs_links._leading_indent_columns(line)
-        body = line[start:] if columns <= 3 else ""
-        lazy_container = bool(
-            docs_links._list_item_details(line) is not None
-            or docs_links.BLOCK_QUOTE_RE.match(body)
-            or body.startswith("<")
-        )
-    return found
-
-
-def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
-    """Return (errors, checked_local_destinations, Markdown files inspected)."""
-    root = root.resolve()
-    errors: list[str] = []
-    checked = 0
-    inspected = 0
-    parsed_files: dict[Path, tuple[set[str], list[tuple[int, str, str]],
-                                   list[int], list[tuple[int, str, str]],
-                                   list[tuple[int, str, str]]]] = {}
-    names: dict = {}  # directory listings shared by every resolution in this scan
-
-    def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]],
-                                             list[int], list[tuple[int, str, str]],
-                                             list[tuple[int, str, str]]]:
-        if path not in parsed_files:
-            content = docs_links.read_markdown_source(path)
-            # A type-6 HTML block is literal Markdown but its real <a>/<img>
-            # elements still need destination, alt and duplicate-attribute checks.
-            # Markdown backslash escapes apply outside raw HTML, but not
-            # inside type-6 blocks. Mask escaped openers *before* restoring
-            # raw HTML, so a literal backslash before <img> within a block
-            # cannot hide the real HTML asset from the checker.
-            markdown_masked = docs_links._mask_markdown_code(content)
-            heading_masked = mask_escaped_html_openers(markdown_masked)
-            raw_html_view = docs_links._mask_markdown_code(
-                content, mask_type6=False)
-            html_masked = "".join(
-                raw if raw != markdown else escaped
-                for markdown, raw, escaped in zip(
-                    markdown_masked, raw_html_view, heading_masked, strict=True)
-            )
-            markup = MarkupReferences()
-            markup.feed(html_masked)
-            parsed_files[path] = (
-                heading_ids(heading_masked, markup.ids, content),
-                markup.refs, markup.images_without_alt,
-                markup.duplicate_attributes, markup.empty_url_attributes,
-            )
-        return parsed_files[path]
-
-    for source in docs_links.iter_markdown_files(root, exclude):
-        name = source.relative_to(root).as_posix()
-        resolved_source, error = docs_links.resolve_markdown_source(root, source, names)
-        if error:
-            errors.append(f"{name}: invalid Markdown source location")
-            continue
-        inspected += 1
-        try:
-            _, refs, images_without_alt, duplicate_attributes, empty_urls = (
-                parse_document(resolved_source)
-            )
-        except (OSError, UnicodeError):
-            errors.append(f"{name}: cannot decode Markdown source")
-            continue
-
-        for line, tag, attribute in duplicate_attributes:
-            errors.append(f"{name}:{line}: HTML {tag} duplicate {attribute} attribute")
-        for line, tag, attribute in empty_urls:
-            errors.append(f"{name}:{line}: HTML {tag} empty {attribute} attribute")
-
-        # Unlike alt="", omitting alt leaves a raw HTML image without a text
-        # alternative. An empty alt is valid for purely decorative images;
-        # semantic suitability still needs human review.
-        for line in images_without_alt:
-            errors.append(f'{name}:{line}: HTML img missing alt attribute')
-
-        # HTML attributes and Markdown inline links share fragment validation.
-        destinations = [(line, f"HTML {tag}", value) for line, tag, value in refs]
-        destinations += [(line, "Markdown", value)
-                         for line, value in docs_links.iter_markdown_destinations(resolved_source)]
-        for line, kind, value in destinations:
+class HtmlNavigationTests(unittest.TestCase):
+    def test_hardlink_markdown_anchor_target_is_refused_without_reading_outside(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            outside = base / "outside.md"
+            outside.write_text("# Private\n[Private](must-not-leak.md)\n", encoding="utf-8")
+            root = base / "repo"
+            root.mkdir()
+            (root / "README.md").write_text("[Link](linked.md#private)\n", encoding="utf-8")
             try:
-                parsed = urlsplit(docs_links._decode_character_references(value))
-            except ValueError:
-                # Malformed remote URLs are outside the offline contract.
-                continue
-            if parsed.scheme or parsed.netloc:
-                continue
-            target, error = docs_links.resolve_local_destination(root, source, value, names)
-            if target is None and error is None:
-                if parsed.path:
-                    continue
-                target = resolved_source  # same-file #fragment link
-            checked += 1
-            if error:
-                errors.append(f"{name}:{line}: {kind} {error}: {value!r}")
-                continue
-            assert target is not None
-            if not target.is_file() and not target.is_dir():
-                errors.append(f"{name}:{line}: missing {kind} destination: {value!r}")
-                continue
-            if parsed.fragment and target.suffix.lower() in {".md", ".markdown"}:
-                try:
-                    anchors, _, _, _, _ = parse_document(target)
-                except (OSError, UnicodeError):
-                    errors.append(f"{name}:{line}: cannot read anchor target: {value!r}")
-                    continue
-                fragment = unquote(parsed.fragment)
-                if fragment.startswith("user-content-"):
-                    fragment = fragment[len("user-content-"):]
-                if fragment not in anchors:
-                    errors.append(f"{name}:{line}: missing section anchor: {value!r}")
+                os.link(outside, root / "linked.md")
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"hard links unavailable: {exc}")
+            original = outside.read_bytes()
+            errors, _, _ = html_navigation.check_repo(root)
+            self.assertTrue(any("README.md:1: cannot read anchor target" in e for e in errors), errors)
+            self.assertTrue(any("linked.md: cannot decode Markdown source" in e for e in errors), errors)
+            self.assertNotIn("must-not-leak", repr(errors))
+            self.assertEqual(outside.read_bytes(), original)
 
-    return errors, checked, inspected
+    def check(self, markdown: str, assets: dict[str, str] | None = None):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "README.md").write_text(markdown, encoding="utf-8")
+            for path, body in (assets or {}).items():
+                item = root / path
+                item.parent.mkdir(parents=True, exist_ok=True)
+                item.write_text(body, encoding="utf-8")
+            return html_navigation.check_repo(root)
+
+    def test_html_navigation_and_heading_fragment_resolve(self):
+        errors, checked, documents = self.check(
+            '<a href="#start-here">Start</a>\n'
+            '<img src="assets/diagram.svg" alt="Diagram">\n'
+            '<source srcset="assets/a.svg 1x, assets/b.svg 2x">\n'
+            '<a href="guide.md#usage">Guide</a>\n'
+            '<a href="https://example.org/not-local">External</a>\n'
+            '\n'  # GFM type-6 <source> block ends before the Markdown heading.
+            '## Start here\n',
+            {"assets/diagram.svg": "svg", "assets/a.svg": "svg", "assets/b.svg": "svg",
+             "guide.md": "# Usage\n"},
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 5)
+        self.assertEqual(documents, 2)
+
+    def test_empty_media_url_values_are_not_silently_ignored(self):
+        errors, checked, documents = self.check(
+            '<img src="" alt="Blank image">\n'
+            '<img src=" \t " alt="Whitespace image">\n'
+            '<img srcset="" alt="No candidates">\n'
+            '<source src=" ">\n'
+            '<track src>\n'
+            '<video src="" controls></video>\n'
+            '<audio src="" controls></audio>\n'
+            '<img srcset="valid.svg 1x" alt="Valid source-only image">\n'
+            '<video poster="" controls></video>\n'
+            '<a href="">Same page</a>\n',
+            {"valid.svg": "svg"},
+        )
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+        self.assertEqual(errors, [
+            "README.md:1: HTML img empty src attribute",
+            "README.md:2: HTML img empty src attribute",
+            "README.md:3: HTML img empty srcset attribute",
+            "README.md:4: HTML source empty src attribute",
+            "README.md:5: HTML track empty src attribute",
+            "README.md:6: HTML video empty src attribute",
+            "README.md:7: HTML audio empty src attribute",
+        ])
+
+    def test_empty_media_urls_in_code_are_not_active(self):
+        errors, checked, documents = self.check(
+            '`<img src="">`\n'
+            '```html\n<source src=""><track src>\n```\n'
+            '<img src="present.svg" alt="Present">\n',
+            {"present.svg": "svg"},
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+
+    def test_video_audio_poster_and_caption_assets_are_checked(self):
+        errors, checked, documents = self.check(
+            '<video src="media/preview.webm" poster="media/poster.png" controls></video>\n'
+            '<audio src="media/voice.ogg" controls></audio>\n'
+            '<video controls><source src="media/fallback.webm">'
+            '<track src="media/captions.vtt" kind="captions"></video>\n',
+            {
+                "media/preview.webm": "video",
+                "media/poster.png": "poster",
+                "media/voice.ogg": "audio",
+                "media/fallback.webm": "fallback",
+                "media/captions.vtt": "captions",
+            },
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 5)
+        self.assertEqual(documents, 1)
+
+    def test_missing_media_urls_and_duplicate_video_posters_are_reported(self):
+        errors, checked, documents = self.check(
+            '<video poster="missing-poster.png" poster="present.png" '
+            'src="missing-video.webm"></video>\n'
+            '<audio src="missing-audio.ogg"></audio>\n'
+            '<track src="missing-captions.vtt" kind="captions">\n',
+            {"present.png": "not selected"},
+        )
+        self.assertEqual(checked, 4)
+        self.assertEqual(documents, 1)
+        for expected in (
+            "README.md:1: HTML video duplicate poster attribute",
+            "missing HTML video destination: 'missing-poster.png'",
+            "missing HTML video destination: 'missing-video.webm'",
+            "missing HTML audio destination: 'missing-audio.ogg'",
+            "missing HTML track destination: 'missing-captions.vtt'",
+        ):
+            with self.subTest(expected=expected):
+                self.assertTrue(any(expected in error for error in errors), errors)
+        self.assertEqual(len(errors), 5, errors)
+
+    def test_remote_media_and_literal_code_examples_stay_out_of_scope(self):
+        errors, checked, documents = self.check(
+            '`<video poster="missing.png" src="missing.webm"></video>`\n'
+            '```html\n<audio src="missing.ogg"></audio>\n```\n'
+            '<video src="https://example.org/video.webm" '
+            'poster="data:image/png;base64,AAAA"></video>\n'
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 0)
+        self.assertEqual(documents, 1)
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path("."),
-                        help="repository root to scan (default: current directory)")
-    docs_links.add_exclude_argument(parser)
-    args = parser.parse_args(argv)
-    if not args.root.is_dir():
-        parser.error("root must be an existing directory")
-    errors, checked, inspected = check_repo(args.root, args.exclude)
-    for error in errors:
-        print(error, file=sys.stderr)
-    if errors:
-        print(f"ERROR: {len(errors)} local HTML/fragment issue(s)", file=sys.stderr)
-        return 1
-    print(f"OK: {checked} local HTML/fragment destinations across {inspected} Markdown files")
-    return 0
+    def test_markdown_extension_fragments_are_checked(self):
+        errors, checked, documents = self.check(
+            '[Valid](guide.markdown#usage)\n'
+            '<a href="guide.markdown#missing">Bad fragment</a>\n'
+            '## Here\n',
+            {"guide.markdown": "# Usage\n"},
+        )
+        self.assertEqual(checked, 2)
+        self.assertEqual(documents, 2)
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn(
+            "missing section anchor: 'guide.markdown#missing'", errors[0]
+        )
+
+    def test_html_img_requires_explicit_alt_but_empty_can_be_decorative(self):
+        errors, checked, documents = self.check(
+            '<img src="missing-alt.svg">\n'
+            '<img src="decorative.svg" alt="">\n'
+            '<img src="informative.svg" alt="Inputs and output">\n'
+            '<picture><source srcset="dark.svg"><img src="fallback.svg"></picture>\n',
+            {
+                "missing-alt.svg": "svg",
+                "decorative.svg": "svg",
+                "informative.svg": "svg",
+                "dark.svg": "svg",
+                "fallback.svg": "svg",
+            },
+        )
+        self.assertEqual(checked, 5)
+        self.assertEqual(documents, 1)
+        self.assertEqual(len(errors), 2, errors)
+        self.assertTrue(any("README.md:1: HTML img missing alt attribute" in e
+                            for e in errors))
+        self.assertTrue(any("README.md:4: HTML img missing alt attribute" in e
+                            for e in errors))
+
+
+    def test_duplicate_html_attributes_cannot_hide_broken_targets(self):
+        errors, checked, documents = self.check(
+            '# Intro\n'
+            '<a href="missing.md" href="#intro">Bad link</a>\n'
+            '<img src="missing.svg" src="present.svg" alt="Diagram">\n'
+            '<img src="present.svg" alt="" alt="Description">\n'
+            '<span id="original" id="alias"></span>\n'
+            '<a href="#alias">Bad anchor</a>\n',
+            {"present.svg": "svg"},
+        )
+        self.assertEqual(checked, 4)
+        self.assertEqual(documents, 1)
+        for expected in (
+            "README.md:2: HTML a duplicate href attribute",
+            "README.md:3: HTML img duplicate src attribute",
+            "README.md:4: HTML img duplicate alt attribute",
+            "README.md:5: HTML span duplicate id attribute",
+            "missing HTML a destination: 'missing.md'",
+            "missing HTML img destination: 'missing.svg'",
+            "missing section anchor: '#alias'",
+        ):
+            with self.subTest(expected=expected):
+                self.assertTrue(any(expected in error for error in errors), errors)
+
+    def test_duplicate_accessibility_attributes_are_reported(self):
+        # The HTML parser keeps the first repeated attribute; later ARIA/role
+        # values must not silently imply a different accessible name or role.
+        errors, checked, documents = self.check(
+            '<img src="art.svg" alt="Art" aria-label="First" aria-label="Last">\n'
+            '<span role="img" role="presentation" '
+            'aria-labelledby="first" aria-labelledby="second"></span>\n'
+            '<div aria-hidden="true" aria-hidden="false"></div>\n'
+            '\n'  # End type-6 raw HTML before Markdown code examples.
+            '`<span role="img" role="presentation">example</span>`\n'
+            '```html\n<div aria-label="first" aria-label="second"></div>\n```\n',
+            {"art.svg": "svg"},
+        )
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+        self.assertEqual(errors, [
+            "README.md:1: HTML img duplicate aria-label attribute",
+            "README.md:2: HTML span duplicate role attribute",
+            "README.md:2: HTML span duplicate aria-labelledby attribute",
+            "README.md:3: HTML div duplicate aria-hidden attribute",
+        ])
+
+    def test_duplicate_html_attributes_ignore_inactive_code(self):
+        errors, checked, documents = self.check(
+            '`<a href="missing.md" href="#real">example</a>`\n'
+            '```html\n<img src="missing.svg" src="present.svg">\n```\n'
+            '## Real\n'
+            '<a href="#real">Active</a>\n',
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+
+    def test_inline_code_heading_text_is_part_of_github_anchor(self):
+        errors, checked, _ = self.check(
+            '## Run `python -m unittest`\n'
+            '[Jump](#run-python--m-unittest)\n'
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+
+    def test_inline_code_looking_like_html_keeps_visible_heading_text(self):
+        examples = (
+            ("## Configure `<token>`\n", "configure-token"),
+            ("## Use ``<a href>`` with <em>HTML</em>\n", "use-a-href-with-html"),
+        )
+        for markdown, expected in examples:
+            with self.subTest(markdown=markdown):
+                # The source checker masks code spans to prevent spurious HTML
+                # links. Recreate only that mask for the heading-slug contract.
+                masked = html_navigation.docs_links._mask_markdown_code(markdown)
+                found = html_navigation.heading_ids(masked, set(), markdown)
+                self.assertIn(expected, found)
+
+    def test_data_url_does_not_hide_later_local_srcset_asset(self):
+        errors, checked, _ = self.check(
+            '<source srcset="data:image/png;base64,AAAA 1x, missing.svg 2x">\n'
+        )
+        self.assertEqual(checked, 1)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("missing.svg", errors[0])
+
+    def test_srcset_candidates_keep_commas_inside_data_urls(self):
+        urls = html_navigation.srcset_urls(
+            "data:image/png;base64,AAAA 1x, assets/real.svg 2x, "
+            "assets/second.svg, assets/third.svg 3x"
+        )
+        self.assertEqual(urls, [
+            "data:image/png;base64,AAAA", "assets/real.svg",
+            "assets/second.svg", "assets/third.svg",
+        ])
+
+    def test_missing_asset_and_section_are_reported(self):
+        errors, _, _ = self.check('<a href="#missing">Bad</a>\n<img src="no.png" alt="Broken demo">\n## Present\n')
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(any("missing section anchor" in msg for msg in errors))
+        self.assertTrue(any("missing HTML img destination" in msg for msg in errors))
+
+    def test_fenced_and_inline_examples_are_not_live_html(self):
+        errors, checked, _ = self.check(
+            '```html\n<picture><img src="does-not-exist.svg"></picture>\n```\n'
+            '`<a href="missing.md">not active</a>`\n'
+            '<!-- <img src="also-missing.png"> -->\n'
+            '<a href="#real">Active</a>\n'
+            '## Real\n'
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+
+    def test_backslash_escaped_html_openers_are_literal(self):
+        errors, checked, _ = self.check(
+            '\\<img src="missing.png">\n'
+            '\\<a href="#missing">not active</a>\n'
+            '<img src="real.svg" alt="Real">\n',
+            {"real.svg": "svg"},
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+
+    def test_duplicate_markdown_headings_and_explicit_html_ids(self):
+        errors, _, _ = self.check(
+            '# Overview\n# Overview\n<a href="#overview-1">Second</a>\n'
+            '<span id="handmade"></span><a href="#handmade">Explicit</a>\n'
+            '[Markdown fragment](#overview)\n'
+        )
+        self.assertEqual(errors, [])
+
+    def test_generated_heading_suffix_does_not_collide_with_literal_suffix(self):
+        errors, checked, _ = self.check(
+            "## Intro\n## Intro-1\n## Intro\n"
+            "[Third heading](#intro-2)\n"
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+        self.assertEqual(
+            html_navigation.heading_ids("## Intro\n## Intro-1\n## Intro\n", set()),
+            {"intro", "intro-1", "intro-2"},
+        )
+
+    def test_named_html_anchor_is_resolved(self):
+        errors, checked, _ = self.check(
+            '<a name="handmade"></a>\n'
+            '<a href="#handmade">Jump</a>\n'
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+
+    def test_escape_from_root_is_not_silently_ignored(self):
+        errors, _, _ = self.check('<a href="../outside.txt">Outside</a>\n')
+        self.assertTrue(any("escapes repository root" in msg for msg in errors))
+
+    def test_remote_and_data_sources_are_outside_offline_scope(self):
+        errors, checked, _ = self.check(
+            '<img src="data:image/svg+xml,%3Csvg%3E" alt="">\n'
+            '<source srcset="data:image/png;base64,AAAA">\n'
+            '<a href="mailto:team@example.org">Email</a>\n'
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 0)
+
+
+    def test_setext_headings_resolve_local_and_cross_file_fragments(self):
+        errors, checked, documents = self.check(
+            "Project overview\n"
+            "================\n"
+            "Install here\n"
+            "------------\n"
+            "[Local](#project-overview)\n"
+            '<a href="#install-here">Install</a>\n'
+            "[Guide](guide.md#install-guidelines)\n",
+            {"guide.md": "Install *guidelines*\n--------------------\n"},
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 3)
+        self.assertEqual(documents, 2)
+
+    def test_setext_multiline_text_shares_atx_duplicate_suffixes(self):
+        errors, checked, _ = self.check(
+            "# Intro\n"
+            "Intro\n"
+            "=====\n"
+            "Intro\n"
+            "-----\n"
+            "Long *heading*\n"
+            "with code\n"
+            "---------\n"
+            "[Second](#intro-1)\n"
+            "[Third](#intro-2)\n"
+            "[Multiline](#long-heading-with-code)\n"
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 3)
+
+    def test_setext_underline_does_not_invent_list_quote_or_code_anchors(self):
+        errors, checked, _ = self.check(
+            "~~~md\n"
+            "Hidden\n"
+            "------\n"
+            "~~~\n"
+            "- Listed\n"
+            "continued\n"
+            "---\n"
+            "> Quoted\n"
+            "---\n"
+            "# Actual\n"
+            "---\n"
+            "[Code](#hidden)\n"
+            "[List](#listed-continued)\n"
+            "[Quote](#quoted)\n"
+            "[Real](#actual)\n"
+        )
+        self.assertEqual(checked, 4)
+        self.assertEqual(len(errors), 3, errors)
+        self.assertTrue(all("missing section anchor" in error for error in errors))
+        self.assertTrue(any("'#hidden'" in error for error in errors))
+        self.assertTrue(any("'#listed-continued'" in error for error in errors))
+        self.assertTrue(any("'#quoted'" in error for error in errors))
+
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    unittest.main()
