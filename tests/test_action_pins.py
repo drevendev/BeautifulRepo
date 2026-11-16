@@ -51,6 +51,41 @@ class ActionPinTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("2 reviewed external action references", result.stdout)
 
+    def test_single_and_double_quoted_uses_are_checked_normally(self):
+        source = (self.root / ".github/workflows/ci.yml").read_text()
+        source = source.replace(
+            f"actions/checkout@{CHECKOUT}",
+            f"'actions/checkout@{CHECKOUT}'",
+        ).replace(
+            f"actions/setup-python@{PYTHON}",
+            f'"actions/setup-python@{PYTHON}"',
+        ).replace("- uses: ./", '- uses: "./"').replace(
+            "- uses: docker://alpine:3.19",
+            "- uses: 'docker://alpine:3.19'",
+        )
+        self.write_workflow(source)
+        result = self.run_tool()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("2 reviewed external action references", result.stdout)
+
+    def test_quoted_unpinned_and_unreviewed_uses_still_fail(self):
+        source = (self.root / ".github/workflows/ci.yml").read_text()
+        self.write_workflow(source.replace(
+            f"actions/checkout@{CHECKOUT}",
+            "'actions/checkout@v7'",
+        ))
+        result = self.run_tool()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("40-character commit SHA", result.stderr)
+
+        self.write_workflow(source.replace(
+            f"actions/checkout@{CHECKOUT}",
+            f'"other/unreviewed@{CHECKOUT}"',
+        ))
+        result = self.run_tool()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("no reviewed manifest entry", result.stderr)
+
     def test_dependabot_sha_bump_without_review_fails(self):
         source = (self.root / ".github/workflows/ci.yml").read_text()
         self.write_workflow(source.replace(CHECKOUT, "a" * 40))
