@@ -464,15 +464,22 @@ reader is viewing and remain useful in clones. Source reviewed 2026-10-04:
 ## HTML navigation and fragment checker
 
 `html_navigation.py` complements `docs_links.py`: it checks repository-local
-`a href`, `img src` and `source srcset` destinations in active Markdown
-HTML, plus local section fragments in HTML and inline Markdown links to `.md` and
-`.markdown` targets.
+`a href`, `img src/srcset`, `source src/srcset`, `video src/poster`,
+`audio src` and `track src` destinations in active Markdown HTML, plus local
+section fragments in HTML and inline Markdown links to `.md` and `.markdown`
+targets. Media URL attributes follow the HTML resource semantics
+([video and poster](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/video),
+[source](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/source);
+reviewed 2026-11-16). A missing local video poster, audio file or caption track
+is a normal link failure; remote and data URLs remain outside offline checking.
+This is **source inspection**, not proof GitHub renders the tag or that a browser
+can decode the media format.
 It ignores code examples using the same GFM literal-region masking as the
 existing checker. It also flags live raw HTML `<img>` elements with no `alt`
 attribute. An explicit `alt=""` is allowed for decorative images; the tool
 cannot judge whether the alternative is appropriate or certify accessibility.
 Markdown image syntax is not graded for descriptive quality.
-Duplicate HTML `href`, `src`, `srcset`, `alt`, `id`, `name`, `role` and
+Duplicate HTML `href`, `src`, `srcset`, `poster`, `alt`, `id`, `name`, `role` and
 `aria-*` attributes are reported. The first occurrence is retained for the
 checker’s destination and `alt` logic, as specified by the
 [HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#parse-error-duplicate-attribute)
