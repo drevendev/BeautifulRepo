@@ -144,14 +144,39 @@ codex plugin marketplace list
 ```
 
 Inspect the **actual installed host cache**, not the source checkout.
-The candidate already contains the current strict offline inventory checker,
-so a *third verifier checkout is not required* for this successor pin. Using
-physical absolute directories for the source and a **different** installed
-cache root, run:
+**Verifier-version boundary (2026-11-16):** the candidate's embedded
+`scripts/plugin_install_verify.py` predates [PR #387](https://github.com/drevendev/BeautifulRepo/pull/387).
+It can report a byte match for an installed **hard-linked file** whose bytes
+also have an alias outside the selected cache. Do not call that embedded
+verifier's exit 0 a hard-link-safe cache inventory. Keep the **tested plugin
+source** at 70b792b7f09d4bd03e36b6ca1cf6c869e5036872, and use a **separately pinned verifier**
+at [`a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc`](https://github.com/drevendev/BeautifulRepo/tree/a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc)
+for the stronger installed-file check.
+
+In the same disposable parent directory, prepare the verifier's **own**
+clean checkout. This checkout is **not** installed as a plugin or used as
+a source of prompts, skills or test fixtures:
 
 ```sh
-python -I /absolute/path/to/BeautifulRepo-candidate/scripts/plugin_install_verify.py --source /absolute/path/to/BeautifulRepo-candidate --installed /absolute/path/to/actual-installed-plugin-cache --expected-commit 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
+git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-verifier
+git -C BeautifulRepo-verifier checkout --detach a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc
+git -C BeautifulRepo-verifier rev-parse HEAD
+git -C BeautifulRepo-verifier status --porcelain --untracked-files=all
+git -C BeautifulRepo-verifier clean -ndx
 ```
+
+Stop unless `rev-parse HEAD` prints **exactly** a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc
+and both subsequent commands are silent; the final command is a
+non-destructive dry run. Then use **physical absolute** source/cache paths:
+
+```sh
+python -I /absolute/path/to/BeautifulRepo-verifier/scripts/plugin_install_verify.py --source /absolute/path/to/BeautifulRepo-candidate --installed /absolute/path/to/actual-installed-plugin-cache --expected-commit 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
+```
+
+A verifier with newer safety guards does not change, repair or replace the
+candidate under evaluation. If the separate verifier cannot be obtained,
+record the **cache-hard-link check as unverified** rather than claiming an
+equivalent result from the embedded older checker.
 
 Exit 0 with state `match` compares committed skill assets and known shared
 dependencies; check the JSON for missing optional manifests. Exit 1 means a
@@ -186,15 +211,17 @@ the successor pinned above. The older tree lacks the later hard-link fixes.
 
 ## Verify cached skill definitions against the pinned commit (offline)
 
-For the successor pin, run the candidate's own
-[`scripts/plugin_install_verify.py`](https://github.com/drevendev/BeautifulRepo/blob/70b792b7f09d4bd03e36b6ca1cf6c869e5036872/scripts/plugin_install_verify.py)
-as shown above. It requires **two distinct physical roots**: a clean Git
-source checkout with `HEAD == 70b792b7f09d4bd03e36b6ca1cf6c869e5036872` and the actual installed
-plugin cache reported by Claude Code or Codex. Aliased/symlinked root paths,
-missing required assets or unknown local files inside the skill directories
-return **INCOMPLETE (exit 2)**; altered tracked files return **MISMATCH
-(exit 1)**. A matching checked inventory is exit 0, but missing optional
-plugin manifests are still explicitly listed as unverified.
+For the successor pin, run the **separate hard-link-aware verifier**
+[`scripts/plugin_install_verify.py`](https://github.com/drevendev/BeautifulRepo/blob/a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc/scripts/plugin_install_verify.py)
+at `a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc` as shown above, not the older verifier embedded in the candidate.
+It requires **two distinct physical roots** for the inputs: a clean Git source
+checkout with `HEAD == 70b792b7f09d4bd03e36b6ca1cf6c869e5036872` and the actual installed
+plugin cache reported by Claude Code or Codex. The executable verifier comes
+from the separately verified third checkout. Aliased/symlinked root paths,
+hard-linked installed files, missing required assets or unknown local files
+inside the skill directories return **INCOMPLETE (exit 2)**; altered tracked
+files return **MISMATCH (exit 1)**. A matching checked inventory is exit 0,
+but missing optional plugin manifests are still explicitly listed as unverified.
 
 Only the committed Git source is treated as expected content; verify the
 Git remote and host cache provenance separately. A matching inventory does
