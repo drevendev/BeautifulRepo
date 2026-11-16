@@ -144,6 +144,25 @@ codex plugin marketplace list
 ```
 
 Inspect the **actual installed host cache**, not the source checkout.
+
+**Find the Codex local installation (source-backed locator, not a host test).**
+The [official plugin packaging guide](https://developers.openai.com/plugins/build/plugins)
+(reviewed **2026-11-16**) documents local marketplace plugin caches under
+`~/.codex/plugins/cache/$MARKETPLACE_NAME/$PLUGIN_NAME/$VERSION/`.
+For BeautifulRepo's checked-in marketplace and plugin names (both
+`beautifulrepo`), a **local** installation would normally be at
+`~/.codex/plugins/cache/beautifulrepo/beautifulrepo/local/`, relative to
+the Codex host user's home directory. This is an **expected location, not
+proof of installation**, and a particular client or OS can use a different
+location. First confirm the plugin is actually installed in that host's
+Plugins Directory, then locate its installed files and confirm the four
+`skills/<name>/SKILL.md` paths. Use the installed directory's **physical
+absolute path** for `--installed` below; never substitute the source
+checkout, manufacture a cache directory or count `codex plugin marketplace
+list` as an install. If the host has no installed copy, report the observed
+failure or **INCONCLUSIVE**, not PASS. Matching bytes still cannot establish
+actual skill discovery, selection or model execution.
+
 **Verifier-version boundary (2026-11-16):** the candidate's embedded
 `scripts/plugin_install_verify.py` predates [PR #387](https://github.com/drevendev/BeautifulRepo/pull/387).
 It can report a byte match for an installed **hard-linked file** whose bytes
