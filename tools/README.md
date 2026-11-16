@@ -19,6 +19,14 @@ and anchor targets rather than reading aliases to files outside the checkout.
 These read-only checks assume a stable checkout; they are not a sandbox against
 concurrent filesystem replacement.
 
+The HTML navigation checker reports explicit empty or whitespace-only `src` and
+`srcset` attributes on active `img`, `source`, `video`, `audio` and `track`
+markup, including valueless attributes. Omitting an optional `src` (for example
+when an image has a valid `srcset`) is not treated as an empty value, nor is
+an empty optional `poster`. This follows the [HTML Standard's non-empty image
+source requirement](https://html.spec.whatwg.org/multipage/embedded-content.html)
+but is a bounded static check, not playback or browser accessibility evidence.
+
 ## All three checks in one local run
 
 Run the [combined offline audit](../guides/combined-audit.md) to invoke the

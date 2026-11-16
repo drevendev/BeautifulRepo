@@ -116,6 +116,7 @@ class MarkupReferences(HTMLParser):
         self.ids: set[str] = set()
         self.images_without_alt: list[int] = []
         self.duplicate_attributes: list[tuple[int, str, str]] = []
+        self.empty_url_attributes: list[tuple[int, str, str]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         # HTML's parser retains the first attribute of a repeated name, whereas
@@ -139,6 +140,16 @@ class MarkupReferences(HTMLParser):
             self.ids.add(named_anchor)
         for attribute in HTML_URL_ATTRIBUTES.get(tag, ()):
             value = attributes.get(attribute)
+            # Explicitly empty media sources are invalid even though there is
+            # no path for the offline destination resolver to inspect.
+            # Missing src is different: video/audio and img with srcset may
+            # legitimately omit it. Empty href and optional poster are not
+            # treated as broken media URLs.
+            if attribute in ("src", "srcset") and attribute in attributes and (
+                value is None or not value.strip()
+            ):
+                self.empty_url_attributes.append((self.getpos()[0], tag, attribute))
+                continue
             if not value:
                 continue
             if attribute == "srcset":
@@ -338,11 +349,13 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
     checked = 0
     inspected = 0
     parsed_files: dict[Path, tuple[set[str], list[tuple[int, str, str]],
-                                   list[int], list[tuple[int, str, str]]]] = {}
+                                   list[int], list[tuple[int, str, str]],
+                                   list[tuple[int, str, str]]]] = {}
     names: dict = {}  # directory listings shared by every resolution in this scan
 
     def parse_document(path: Path) -> tuple[set[str], list[tuple[int, str, str]],
-                                             list[int], list[tuple[int, str, str]]]:
+                                             list[int], list[tuple[int, str, str]],
+                                             list[tuple[int, str, str]]]:
         if path not in parsed_files:
             content = docs_links.read_markdown_source(path)
             # A type-6 HTML block is literal Markdown but its real <a>/<img>
@@ -362,8 +375,11 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
             )
             markup = MarkupReferences()
             markup.feed(html_masked)
-            parsed_files[path] = (heading_ids(heading_masked, markup.ids, content), markup.refs,
-                                  markup.images_without_alt, markup.duplicate_attributes)
+            parsed_files[path] = (
+                heading_ids(heading_masked, markup.ids, content),
+                markup.refs, markup.images_without_alt,
+                markup.duplicate_attributes, markup.empty_url_attributes,
+            )
         return parsed_files[path]
 
     for source in docs_links.iter_markdown_files(root, exclude):
@@ -374,13 +390,17 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
             continue
         inspected += 1
         try:
-            _, refs, images_without_alt, duplicate_attributes = parse_document(resolved_source)
+            _, refs, images_without_alt, duplicate_attributes, empty_urls = (
+                parse_document(resolved_source)
+            )
         except (OSError, UnicodeError):
             errors.append(f"{name}: cannot decode Markdown source")
             continue
 
         for line, tag, attribute in duplicate_attributes:
             errors.append(f"{name}:{line}: HTML {tag} duplicate {attribute} attribute")
+        for line, tag, attribute in empty_urls:
+            errors.append(f"{name}:{line}: HTML {tag} empty {attribute} attribute")
 
         # Unlike alt="", omitting alt leaves a raw HTML image without a text
         # alternative. An empty alt is valid for purely decorative images;
@@ -415,7 +435,7 @@ def check_repo(root: Path, exclude=()) -> tuple[list[str], int, int]:
                 continue
             if parsed.fragment and target.suffix.lower() in {".md", ".markdown"}:
                 try:
-                    anchors, _, _, _ = parse_document(target)
+                    anchors, _, _, _, _ = parse_document(target)
                 except (OSError, UnicodeError):
                     errors.append(f"{name}:{line}: cannot read anchor target: {value!r}")
                     continue
