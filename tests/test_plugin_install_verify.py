@@ -100,7 +100,6 @@ class PluginInstallVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(verifier.VerificationError, "redirected entry"):
             verifier.verify(self.source, self.installed, self.sha)
 
-
     def test_hard_linked_installed_skill_definition_is_incomplete(self):
         target = self.installed / "skills" / "audit-repo" / "SKILL.md"
         external_alias = self.installed.parent / "external-skill-alias.md"
@@ -137,12 +136,15 @@ class PluginInstallVerificationTests(unittest.TestCase):
 
     def test_hard_linked_extra_skill_asset_is_incomplete(self):
         target = self.installed / "skills" / "audit-repo" / "untracked.txt"
-        existing = self.installed / "skills" / "audit-repo" / "SKILL.md"
+        external = self.installed.parent / "untrusted-extra.txt"
+        external.write_bytes(b"untracked instructions\n")
         try:
-            os.link(existing, target)
+            os.link(external, target)
         except (OSError, NotImplementedError):
             self.skipTest("hard links unavailable")
-        with self.assertRaisesRegex(verifier.VerificationError, "hard-linked"):
+        # Keep the four expected SKILL.md files ordinary, so this probes the
+        # recursive installed-asset inventory rather than _regular_bytes.
+        with self.assertRaisesRegex(verifier.VerificationError, "inventory has a hard-linked"):
             verifier.verify(self.source, self.installed, self.sha)
 
     def test_untracked_extra_cache_file_is_incomplete_not_match(self):
