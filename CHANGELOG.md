@@ -872,6 +872,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Require clean tracked/untracked/**ignored** worktrees before the pinned
+  four-skill local-marketplace trials in Claude Code or Codex. A detached HEAD
+  alone does not exclude extra installed source bytes. Correct the smoke
+  matrix's outdated claim that tester issue #258 still targets the old SHA.
+  These are instructions, not real-client acceptance evidence (#257, #258).
+
 - Reject hard-linked files in installed Agent Skill cache verification,
   including definitions, required helpers, optional manifests and extra skill
   files. Hard links can alias content outside the selected cache while looking
