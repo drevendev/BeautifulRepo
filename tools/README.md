@@ -11,6 +11,11 @@ python -I tools/action_pins.py --root .    # check reviewed GitHub Actions SHA a
 python -m unittest discover -s tests -v
 ```
 
+The reviewed Actions pin check accepts ordinary `uses:` values and whole
+single- or double-quoted `uses:` YAML scalars. Quoting does not bypass SHA,
+manifest or annotation validation. This is a bounded line-oriented check,
+not a complete YAML parser or a verification of remote action provenance.
+
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
 repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 
