@@ -100,6 +100,11 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
         for match in USE_LINE.finditer(source):
             line = source.count("\n", 0, match.start()) + 1
             ref = match.group(1).strip()
+            # GitHub Actions YAML allows plain and whole quoted uses scalars.
+            # Action references contain no YAML escapes, so unwrap only a
+            # complete matching quote pair. Invalid quoting still fails.
+            if len(ref) >= 2 and ref[0] in ("'", '"') and ref[-1] == ref[0]:
+                ref = ref[1:-1]
             comment = (match.group(2) or "").strip()
             if ref.startswith("./") or ref.startswith("docker://"):
                 continue  # Local and container actions have no GitHub commit SHA.

@@ -884,6 +884,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Accept whole single- or double-quoted GitHub Actions `uses:` values
+  in the offline reviewed SHA-pin checker. Preserve pin, manifest and annotation
+  checks for quoted external actions, and skip quoted local/container actions.
+  Source reviewed: GitHub workflow syntax, 2026-11-16. This is not a full
+  YAML parser or a remote provenance check.
+
 - Correct the four-skill candidate's installed-cache verification instructions:
   the immutable `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` source contains a verifier that **predates**
   the installed-file hard-link guard in PR #387. Pin a **separate**
