@@ -103,6 +103,10 @@ def _regular_bytes(root: Path, relative: Path) -> bytes:
             raise VerificationError("skill path has a non-directory component")
     if not stat.S_ISREG(info.st_mode):
         raise VerificationError("skill definition is not a regular file")
+    # A hard link to an outside file looks ordinary in the selected cache.
+    # Refuse that alias before hashing or claiming a matching install.
+    if info.st_nlink > 1:
+        raise VerificationError("installed skill file must not be hard-linked")
     if info.st_size > MAX_SKILL_BYTES:
         raise VerificationError("skill definition exceeds 256 KiB")
     try:
@@ -161,6 +165,8 @@ def _installed_skill_files(root: Path) -> set[str]:
                 if stat.S_ISDIR(info.st_mode):
                     stack.append(relative)
                 elif stat.S_ISREG(info.st_mode):
+                    if info.st_nlink > 1:
+                        raise VerificationError("installed skill inventory has a hard-linked file")
                     files.add(relative.as_posix())
                 else:
                     raise VerificationError("installed skill inventory has an unsupported entry")
