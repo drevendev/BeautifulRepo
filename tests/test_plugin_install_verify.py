@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -97,6 +98,53 @@ class PluginInstallVerificationTests(unittest.TestCase):
         except (OSError, NotImplementedError):
             self.skipTest("symlinks unavailable")
         with self.assertRaisesRegex(verifier.VerificationError, "redirected entry"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_hard_linked_installed_skill_definition_is_incomplete(self):
+        target = self.installed / "skills" / "audit-repo" / "SKILL.md"
+        external_alias = self.installed.parent / "external-skill-alias.md"
+        try:
+            os.link(target, external_alias)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        self.assertGreater(target.stat().st_nlink, 1)
+        with self.assertRaisesRegex(verifier.VerificationError, "hard-linked"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_hard_linked_installed_dependency_is_incomplete(self):
+        target = self.installed / "tools" / "repo_audit.py"
+        external_alias = self.installed.parent / "external-checker-alias.py"
+        try:
+            os.link(target, external_alias)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        self.assertGreater(target.stat().st_nlink, 1)
+        with self.assertRaisesRegex(verifier.VerificationError, "hard-linked"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_hard_linked_optional_manifest_is_incomplete(self):
+        self.add_optional_manifests()
+        target = self.installed / "plugin.json"
+        external_alias = self.installed.parent / "external-plugin-alias.json"
+        try:
+            os.link(target, external_alias)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        self.assertGreater(target.stat().st_nlink, 1)
+        with self.assertRaisesRegex(verifier.VerificationError, "hard-linked"):
+            verifier.verify(self.source, self.installed, self.sha)
+
+    def test_hard_linked_extra_skill_asset_is_incomplete(self):
+        target = self.installed / "skills" / "audit-repo" / "untracked.txt"
+        external = self.installed.parent / "untrusted-extra.txt"
+        external.write_bytes(b"untracked instructions\n")
+        try:
+            os.link(external, target)
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        # Keep the four expected SKILL.md files ordinary, so this probes the
+        # recursive installed-asset inventory rather than _regular_bytes.
+        with self.assertRaisesRegex(verifier.VerificationError, "inventory has a hard-linked"):
             verifier.verify(self.source, self.installed, self.sha)
 
     def test_untracked_extra_cache_file_is_incomplete_not_match(self):

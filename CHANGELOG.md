@@ -872,6 +872,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject hard-linked files in installed Agent Skill cache verification,
+  including definitions, required helpers, optional manifests and extra skill
+  files. Hard links can alias content outside the selected cache while looking
+  ordinary; report incomplete evidence, not a false byte-match. Four offline
+  regressions cover the boundary; real Claude Code/Codex host acceptance
+  remains unverified (#257).
+
 - Refuse hard-linked root README files in the standalone workflow-badge
   checker before and after opening. A synthetic external-file alias regression
   verifies fail-closed input handling without changing the external fixture;
