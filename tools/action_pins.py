@@ -84,10 +84,15 @@ def load_manifest(path: Path) -> dict[str, dict[str, str]]:
 
 def check_repo(root: Path) -> tuple[list[str], int, int]:
     root = root.resolve()
-    directory = root / ".github" / "workflows"
+    github = root / ".github"
+    # Checking the final workflows directory alone misses a redirected
+    # .github parent: the final path still looks like an ordinary directory.
+    if not github.is_dir() or github.is_symlink():
+        raise InputError(".github must be an ordinary directory")
+    directory = github / "workflows"
     if not directory.is_dir() or directory.is_symlink():
         raise InputError(".github/workflows must be an ordinary directory")
-    pins = load_manifest(root / ".github" / "action-pins.json")
+    pins = load_manifest(github / "action-pins.json")
     paths = sorted(path for path in directory.iterdir()
                    if path.suffix.lower() in {".yml", ".yaml"})
     if not paths or len(paths) > MAX_WORKFLOWS:

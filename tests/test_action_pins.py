@@ -131,6 +131,22 @@ class ActionPinTests(unittest.TestCase):
             self.skipTest(f"no symlink support: {exc}")
         self.assertEqual(self.run_tool().returncode, 2)
 
+    def test_github_parent_directory_symlink_outside_root_fails_closed(self):
+        # A symlink on .github bypassed the old workflows-only symlink check.
+        external = tempfile.TemporaryDirectory()
+        self.addCleanup(external.cleanup)
+        source = self.root / ".github"
+        outside = Path(external.name) / "github-outside-root"
+        source.rename(outside)
+        try:
+            source.symlink_to(outside, target_is_directory=True)
+        except OSError as exc:
+            self.skipTest(f"directory symlinks unavailable: {exc}")
+        result = self.run_tool()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn(".github must be an ordinary directory", result.stderr)
+        self.assertTrue((outside / "workflows/ci.yml").is_file())
+
     def test_missing_manifest_or_workflow_fails_closed(self):
         (self.root / ".github/action-pins.json").unlink()
         self.assertEqual(self.run_tool().returncode, 2)
