@@ -97,6 +97,16 @@ class AgentEvalCaseContracts(unittest.TestCase):
         self.assertIsNotNone(m, "manual matrix must pin a full candidate SHA")
         self.assertIsNotNone(p, "plugin install guide must pin a full candidate SHA")
         self.assertEqual(m.group(1), p.group(1), "manual/guide candidate drift")
+        # A detached HEAD does not exclude modified, untracked or ignored local files.
+        for source_name, source in (("manual matrix", matrix), ("install guide", plugin)):
+            with self.subTest(source=source_name):
+                self.assertIn(
+                    "git -C BeautifulRepo-candidate status --porcelain --untracked-files=all",
+                    source,
+                )
+                self.assertIn("git -C BeautifulRepo-candidate clean -ndx", source)
+                self.assertIn("dry run", source)
+        self.assertNotIn("still documents the historical", matrix)
         for required in (
             "git -C BeautifulRepo-candidate rev-parse HEAD",
             "claude plugin marketplace add ./BeautifulRepo-candidate",
