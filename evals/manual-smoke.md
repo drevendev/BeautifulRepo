@@ -31,10 +31,17 @@ results. Never report PASS based on reading this page or on green unit tests.
    git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
    git -C BeautifulRepo-candidate checkout --detach 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
    git -C BeautifulRepo-candidate rev-parse HEAD
+   git -C BeautifulRepo-candidate status --porcelain --untracked-files=all
+   git -C BeautifulRepo-candidate clean -ndx
    ```
 
-   Stop if `rev-parse HEAD` is not exactly `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`. Do not assume
-   that a host's remote `@<SHA>` or `--ref <SHA>` installer accepts raw
+   Stop unless `rev-parse HEAD` is exactly `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`
+   **and both following commands are silent**. `status` catches tracked
+   changes and ordinary untracked files; `git clean -ndx` is a **dry run**
+   that also reports ignored/untracked files, without deleting anything.
+   A dirty local checkout is not a reproducible source pin, even if HEAD is
+   correct. Recreate the disposable clone rather than deleting valued files.
+   Do not assume that a host's remote `@<SHA>` or `--ref <SHA>` installer accepts raw
    commit hashes: the documented selectors describe refs, not verified
    raw-commit installation. Use the source-locked local marketplace:
 
@@ -62,13 +69,11 @@ results. Never report PASS based on reading this page or on green unit tests.
    GitHub checkout. Use the [offline cache-check procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
    as extra byte-level evidence, not as proof of discovery or execution.
    If a host fails to install, inspect its actual version and report
-   **FAIL/INCONCLUSIVE** with the error. **Issue handoff boundary
-   (reviewed 2026-11-15):** [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
-   still documents the historical `8947574399df2cc11e8ded41cecbef70be4808c6`
-   checkout and fixtures, **not** the successor SHA above. Issue #258 must
-   be repinned after this documentation PR is integrated and before
-   successor-host trial reports can be accepted. Until then, do not follow
-   its older checkout or attribute its results to the successor. These
+   **FAIL/INCONCLUSIVE** with the error. **Issue handoff (checked 2026-11-16):**
+   [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
+   now pins the same successor SHA and separates older trials from current
+   acceptance. Follow its candidate-specific instructions, but do not treat
+   the issue or this matrix as evidence that a host installed or ran a skill. These
    commands are **untested setup instructions**, not an observed host PASS,
    GitHub-source marketplace acceptance or authorization to run a model.
 
