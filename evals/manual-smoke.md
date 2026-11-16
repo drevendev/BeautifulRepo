@@ -66,8 +66,12 @@ results. Never report PASS based on reading this page or on green unit tests.
    **BeautifulRepo**, and start a new chat. In either host, restart as
    needed and compare the **installed/cached** four
    `skills/<name>/SKILL.md` files with the pinned source, not just the
-   GitHub checkout. Use the [offline cache-check procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
+   GitHub checkout. Use the [separately pinned hard-link-aware offline
+   cache-check procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
    as extra byte-level evidence, not as proof of discovery or execution.
+   The verifier **embedded in the candidate source** predates PR #387 and
+   cannot reject hard-linked installed cache files; do not silently treat
+   its exit 0 as equivalent to the separate verifier's result.
    If a host fails to install, inspect its actual version and report
    **FAIL/INCONCLUSIVE** with the error. **Issue handoff (checked 2026-11-16):**
    [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
