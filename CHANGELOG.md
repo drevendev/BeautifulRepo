@@ -878,6 +878,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Report explicit empty or whitespace-only HTML media `src` / `srcset`
+  attributes, including valueless attributes, in active Markdown HTML. The
+  offline checker previously skipped them because they lacked a path to
+  resolve. Preserve optional omitted media sources, empty `poster` and
+  inert code examples; add regressions and synchronize both standalone
+  Agent Skills copies. This is not a rendered media or accessibility test.
+
 - Require clean tracked/untracked/**ignored** worktrees before the pinned
   four-skill local-marketplace trials in Claude Code or Codex. A detached HEAD
   alone does not exclude extra installed source bytes. Correct the smoke

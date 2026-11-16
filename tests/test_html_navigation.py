@@ -58,6 +58,43 @@ class HtmlNavigationTests(unittest.TestCase):
         self.assertEqual(checked, 5)
         self.assertEqual(documents, 2)
 
+    def test_empty_media_url_values_are_not_silently_ignored(self):
+        errors, checked, documents = self.check(
+            '<img src="" alt="Blank image">\n'
+            '<img src=" \t " alt="Whitespace image">\n'
+            '<img srcset="" alt="No candidates">\n'
+            '<source src=" ">\n'
+            '<track src>\n'
+            '<video src="" controls></video>\n'
+            '<audio src="" controls></audio>\n'
+            '<img srcset="valid.svg 1x" alt="Valid source-only image">\n'
+            '<video poster="" controls></video>\n'
+            '<a href="">Same page</a>\n',
+            {"valid.svg": "svg"},
+        )
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+        self.assertEqual(errors, [
+            "README.md:1: HTML img empty src attribute",
+            "README.md:2: HTML img empty src attribute",
+            "README.md:3: HTML img empty srcset attribute",
+            "README.md:4: HTML source empty src attribute",
+            "README.md:5: HTML track empty src attribute",
+            "README.md:6: HTML video empty src attribute",
+            "README.md:7: HTML audio empty src attribute",
+        ])
+
+    def test_empty_media_urls_in_code_are_not_active(self):
+        errors, checked, documents = self.check(
+            '`<img src="">`\n'
+            '```html\n<source src=""><track src>\n```\n'
+            '<img src="present.svg" alt="Present">\n',
+            {"present.svg": "svg"},
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 1)
+        self.assertEqual(documents, 1)
+
     def test_video_audio_poster_and_caption_assets_are_checked(self):
         errors, checked, documents = self.check(
             '<video src="media/preview.webm" poster="media/poster.png" controls></video>\n'
