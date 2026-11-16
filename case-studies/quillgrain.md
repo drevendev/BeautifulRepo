@@ -116,7 +116,7 @@ silently replacing them with newer source.
 
 - The [engine at `6b022c2e51c688ee3639628551aa5a2d80e5568a`](https://github.com/drevendev/Quillgrain/tree/6b022c2e51c688ee3639628551aa5a2d80e5568a)
   now declares **0.1.0rc5** in `pyproject.toml`. Its README starts with an
-  **agent-skill** route, `qg skill install --agent codex|claude --project ...`,
+  **agent-skill** route (`qg skill install` with `--agent codex` or `--agent claude`),
   **after** installing the engine. This is a different reader promise from
   running deterministic `qg check` alone. The detailed first-run command block
   is still PowerShell-first, with POSIX executable substitutions rather than
