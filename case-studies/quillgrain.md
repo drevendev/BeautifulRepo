@@ -106,3 +106,41 @@ accessibility and human-review limits. None is asserted here.
 **Current decision:** preserve this as a traceable baseline for
 [case #83](https://github.com/drevendev/BeautifulRepo/issues/83);
 do not call the case complete or claim a target change.
+
+## Follow-up: the first-success route changed (source review, 2026-11-16)
+
+This is a **second source snapshot**, not an after-merge test. No target PR,
+clean install, model-host invocation or CLI output was observed for this follow-up.
+Keep the 2026-11-01 revisions above as the original intake, rather than
+silently replacing them with newer source.
+
+- The [engine at `6b022c2e51c688ee3639628551aa5a2d80e5568a`](https://github.com/drevendev/Quillgrain/tree/6b022c2e51c688ee3639628551aa5a2d80e5568a)
+  now declares **0.1.0rc5** in `pyproject.toml`. Its README starts with an
+  **agent-skill** route, `qg skill install --agent codex|claude --project ...`,
+  **after** installing the engine. This is a different reader promise from
+  running deterministic `qg check` alone. The detailed first-run command block
+  is still PowerShell-first, with POSIX executable substitutions rather than
+  a complete copyable POSIX sequence. Neither a `qg check` output example nor
+  evidence of host skill discovery/invocation is present in the inspected
+  landing page. These are source observations, **not** failed runtime tests.
+- The [Common pack at `263a6bf82f7fb258828e3251d6c72f885deff907`](https://github.com/drevendev/Quillgrain_Voice_Common/tree/263a6bf82f7fb258828e3251d6c72f885deff907)
+  now calls itself a **0.6.0 candidate, human review pending**. Its README
+  reports targeted R03 checks through Codex as passed; BeautifulRepo did not
+  reproduce or independently verify those checks, and the text does not claim
+  broad editorial acceptance. The public workflow still pins engine
+  `fd15cc3f13ebfc86d5634e3d03e408886f3334a7`, while the Common README
+  calls that public-CI engine **0.1.0rc4**. Both README and CI retain
+  `--public` for builds. Do not substitute the 0.1.0rc5 engine for the
+  workflow's pin without an actual compatibility test.
+
+**Case-design consequence:** there are now **two separate first-success claims**
+that should not be conflated. First, demonstrate the *deterministic engine* in
+an authorized fresh checkout with observed `doctor`, pack validation/build,
+`qg check` output and a missing-input failure, including process exit codes.
+Second, if an *agent-skill* route is advertised as working, independently record
+Claude Code/Codex version, installed skill files, observed discovery/invocation,
+model-provider data implications and any target-file changes. A source README
+claim, a Codex check reported by the pack, or an ordinary schema test cannot
+stand in for those host observations. Both tracks still require permission to
+change the target repos and an actual target-side PR before this becomes a
+completed before/after case.
