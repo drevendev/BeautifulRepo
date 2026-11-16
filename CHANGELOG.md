@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Check local `video src/poster`, `audio src` and `track src` destinations
+  in active Markdown HTML in addition to existing image and source checks.
+  Report duplicate poster attributes using the first value. Regressions cover
+  present and missing media, external/data URLs and literal code examples.
+  This is source inspection, not media playback or rendered GitHub verification.
+
 - Add a regression for an already-connected MCP stdio session whose
   configured synthetic repository root is replaced by a symlink to an outside
   fixture. Both modern and legacy protocol tests require all three tools to
