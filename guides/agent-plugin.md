@@ -106,11 +106,19 @@ Use a clean disposable **parent** directory, Git and Python 3.11+:
 git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
 git -C BeautifulRepo-candidate checkout --detach 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
 git -C BeautifulRepo-candidate rev-parse HEAD
+git -C BeautifulRepo-candidate status --porcelain --untracked-files=all
+git -C BeautifulRepo-candidate clean -ndx
 ```
 
-**Stop** unless `rev-parse HEAD` prints the full SHA above. Neither host's
-remote marketplace ref syntax has been demonstrated to accept a raw commit
-hash. These are **local-source marketplace trial steps**, not observed host
+**Stop** unless `rev-parse HEAD` prints the full SHA above **and both
+subsequent commands print nothing**. The `status` check catches tracked
+changes and ordinary untracked files; `git clean -ndx` is a **dry run** that
+also reports ignored/untracked files, without deleting them. A correct HEAD
+with extra working-tree content is **not** a source-locked local marketplace:
+a host may package files that are not present in the pinned Git commit. Do not
+run a destructive cleanup on a valued checkout; recreate the disposable clone
+instead. Neither host's remote marketplace ref syntax has been demonstrated
+to accept a raw commit hash. These are **local-source marketplace trial steps**, not observed host
 successes; check the currently installed host version and official guidance
 before invoking them. If using Claude Code, optionally preflight the source
 with `claude plugin validate ./BeautifulRepo-candidate` (validator coverage
