@@ -58,6 +58,57 @@ class HtmlNavigationTests(unittest.TestCase):
         self.assertEqual(checked, 5)
         self.assertEqual(documents, 2)
 
+    def test_video_audio_poster_and_caption_assets_are_checked(self):
+        errors, checked, documents = self.check(
+            '<video src="media/preview.webm" poster="media/poster.png" controls></video>\n'
+            '<audio src="media/voice.ogg" controls></audio>\n'
+            '<video controls><source src="media/fallback.webm">'
+            '<track src="media/captions.vtt" kind="captions"></video>\n',
+            {
+                "media/preview.webm": "video",
+                "media/poster.png": "poster",
+                "media/voice.ogg": "audio",
+                "media/fallback.webm": "fallback",
+                "media/captions.vtt": "captions",
+            },
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 5)
+        self.assertEqual(documents, 1)
+
+    def test_missing_media_urls_and_duplicate_video_posters_are_reported(self):
+        errors, checked, documents = self.check(
+            '<video poster="missing-poster.png" poster="present.png" '
+            'src="missing-video.webm"></video>\n'
+            '<audio src="missing-audio.ogg"></audio>\n'
+            '<track src="missing-captions.vtt" kind="captions">\n',
+            {"present.png": "not selected"},
+        )
+        self.assertEqual(checked, 4)
+        self.assertEqual(documents, 1)
+        for expected in (
+            "README.md:1: HTML video duplicate poster attribute",
+            "missing HTML video destination: 'missing-poster.png'",
+            "missing HTML video destination: 'missing-video.webm'",
+            "missing HTML audio destination: 'missing-audio.ogg'",
+            "missing HTML track destination: 'missing-captions.vtt'",
+        ):
+            with self.subTest(expected=expected):
+                self.assertTrue(any(expected in error for error in errors), errors)
+        self.assertEqual(len(errors), 5, errors)
+
+    def test_remote_media_and_literal_code_examples_stay_out_of_scope(self):
+        errors, checked, documents = self.check(
+            '`<video poster="missing.png" src="missing.webm"></video>`\n'
+            '```html\n<audio src="missing.ogg"></audio>\n```\n'
+            '<video src="https://example.org/video.webm" '
+            'poster="data:image/png;base64,AAAA"></video>\n'
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(checked, 0)
+        self.assertEqual(documents, 1)
+
+
     def test_markdown_extension_fragments_are_checked(self):
         errors, checked, documents = self.check(
             '[Valid](guide.markdown#usage)\n'
