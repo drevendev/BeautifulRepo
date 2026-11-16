@@ -884,6 +884,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject a symlinked `.github` parent before reading the reviewed-action
+  manifest or workflow files. Checking only the final `workflows` directory
+  could follow a redirected parent and inspect files outside the selected
+  repository. Add an outside-root directory-symlink regression; platforms
+  without symlink support report the case as untested. This is not a
+  race-proof filesystem sandbox.
+
 - Accept whole single- or double-quoted GitHub Actions `uses:` values
   in the offline reviewed SHA-pin checker. Preserve pin, manifest and annotation
   checks for quoted external actions, and skip quoted local/container actions.
