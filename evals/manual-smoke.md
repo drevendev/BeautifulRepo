@@ -69,6 +69,11 @@ results. Never report PASS based on reading this page or on green unit tests.
    GitHub checkout. Use the [separately pinned hard-link-aware offline
    cache-check procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
    as extra byte-level evidence, not as proof of discovery or execution.
+   For a **Codex local-marketplace** install, the
+   [source-backed cache locator](../guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate)
+   explains the typical `~/.codex/plugins/cache/beautifulrepo/beautifulrepo/local/`
+   path. Confirm the **actual host installation** and use its physical path;
+   that example path is not a PASS and `marketplace list` is not installation.
    The verifier **embedded in the candidate source** predates PR #387 and
    cannot reject hard-linked installed cache files; do not silently treat
    its exit 0 as equivalent to the separate verifier's result.

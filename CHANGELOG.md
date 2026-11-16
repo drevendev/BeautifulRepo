@@ -685,6 +685,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Document the official Codex local-marketplace installed-cache layout and
+  show how to distinguish the **installed host copy** from the source checkout
+  or merely registered marketplace during four-skill trials (#257). The
+  expected local cache path is not a claim of an observed installation,
+  skill activation or model run; source reviewed 2026-11-16.
+
 - Clarify that the copyable SHA-pinned `v0.2.0` GitHub Action
   **does not include** later hard-link input guards in the standalone audit
   and Markdown/HTML scanners (#381–#382). Distinguish released-pin evidence
