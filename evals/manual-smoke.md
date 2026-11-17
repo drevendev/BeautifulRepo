@@ -1,6 +1,6 @@
 # Manual smoke matrix for BeautifulRepo Agent Skills
 
-**Prepared 2026-10-25; successor candidate source reviewed 2026-11-15; no model runs claimed.** This procedure is for a
+**Prepared 2026-10-25; current candidate source reviewed 2026-11-17; no model runs claimed.** This procedure is for a
 maintainer who has separately authorized model usage. It is not part of CI,
 does not install or invoke an agent automatically, and is not a security
 certification. The static [eval case definitions](README.md) are inputs, not
@@ -13,14 +13,16 @@ results. Never report PASS based on reading this page or on green unit tests.
    documents, private project history or your actual home directory. The
    agent's model provider may receive the inspected repository content.
 2. For the **four-skill development-candidate** matrix, use exactly
-   [commit `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`](https://github.com/drevendev/BeautifulRepo/tree/70b792b7f09d4bd03e36b6ca1cf6c869e5036872)
+   [commit `76c39ed5732304334358b9d4b214821d7030b39f`](https://github.com/drevendev/BeautifulRepo/tree/76c39ed5732304334358b9d4b214821d7030b39f)
    (`0.3.0-dev.0`). Record the full SHA, plugin source, agent name/version,
    model/provider, host OS, sandbox, permissions and target directory.
    Released `v0.2.0` contains only `audit-repo` and **cannot** satisfy this
    four-skill matrix. Do not substitute mutable `master` or a later commit.
-   **Revision boundary, reviewed 2026-11-15:** this successor commit includes
-   the hard-link input fixes from PRs #380–#383 and supersedes the older
-   `8947574…` **source pin**, but does **not** inherit any earlier
+   **Revision boundary, reviewed 2026-11-17:** this source includes
+   the hard-link input fixes from PRs #380–#383, the installed-cache hard-link
+   verifier from PR #387 and the README parent-path fix from PR #402.
+   The previous `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` candidate is historical and lacks #402;
+   the older `8947574…` candidate is historical too. Neither transfers any
    model-evaluation PASS. Test the candidate's actual installed assets and
    fixtures; neither successful CI nor a matching cache proves a host model
    invoked a skill. Prior candidate evidence remains historical.
@@ -29,13 +31,13 @@ results. Never report PASS based on reading this page or on green unit tests.
 
    ```sh
    git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
-   git -C BeautifulRepo-candidate checkout --detach 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
+   git -C BeautifulRepo-candidate checkout --detach 76c39ed5732304334358b9d4b214821d7030b39f
    git -C BeautifulRepo-candidate rev-parse HEAD
    git -C BeautifulRepo-candidate status --porcelain --untracked-files=all
    git -C BeautifulRepo-candidate clean -ndx
    ```
 
-   Stop unless `rev-parse HEAD` is exactly `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`
+   Stop unless `rev-parse HEAD` is exactly `76c39ed5732304334358b9d4b214821d7030b39f`
    **and both following commands are silent**. `status` catches tracked
    changes and ordinary untracked files; `git clean -ndx` is a **dry run**
    that also reports ignored/untracked files, without deleting anything.
@@ -66,7 +68,7 @@ results. Never report PASS based on reading this page or on green unit tests.
    **BeautifulRepo**, and start a new chat. In either host, restart as
    needed and compare the **installed/cached** four
    `skills/<name>/SKILL.md` files with the pinned source, not just the
-   GitHub checkout. Use the [separately pinned hard-link-aware offline
+   GitHub checkout. Use the [embedded hard-link-aware offline
    cache-check procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline)
    as extra byte-level evidence, not as proof of discovery or execution.
    For a **Codex local-marketplace** install, the
@@ -74,11 +76,13 @@ results. Never report PASS based on reading this page or on green unit tests.
    explains the typical `~/.codex/plugins/cache/beautifulrepo/beautifulrepo/local/`
    path. Confirm the **actual host installation** and use its physical path;
    that example path is not a PASS and `marketplace list` is not installation.
-   The verifier **embedded in the candidate source** predates PR #387 and
-   cannot reject hard-linked installed cache files; do not silently treat
-   its exit 0 as equivalent to the separate verifier's result.
+   The verifier embedded in this **current** source includes PR #387's
+   installed-cache hard-link guard. Execute it from the same pinned clean
+   source checkout as the [current procedure](../guides/agent-plugin.md#verify-cached-skill-definitions-against-the-pinned-commit-offline);
+   do not use the historical candidate's weaker embedded checker or a
+   manufactured installed cache.
    If a host fails to install, inspect its actual version and report
-   **FAIL/INCONCLUSIVE** with the error. **Issue handoff (checked 2026-11-16):**
+   **FAIL/INCONCLUSIVE** with the error. **Issue handoff (reviewed 2026-11-17):**
    [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
    now pins the same successor SHA and separates older trials from current
    acceptance. Follow its candidate-specific instructions, but do not treat

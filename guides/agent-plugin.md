@@ -82,29 +82,35 @@ checkout as evidence for a tested release candidate**.
 
 ## Try all four skills from a pinned development candidate
 
-### Successor source pin — 15 November 2026 (development, not released)
+### Current source pin — 17 November 2026 (development, not released)
 
-The newer four-skill candidate is the immutable [commit `70b792b`](https://github.com/drevendev/BeautifulRepo/tree/70b792b7f09d4bd03e36b6ca1cf6c869e5036872)
-(full SHA: `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`), manifest version `0.3.0-dev.0`.
-At that exact commit, GitHub source inspection confirmed all four
-`skills/<name>/SKILL.md` files, both plugin manifests and both marketplace
-manifests. This source includes the later hard-link input fixes in
-[#380](https://github.com/drevendev/BeautifulRepo/pull/380),
-[#381](https://github.com/drevendev/BeautifulRepo/pull/381),
-[#382](https://github.com/drevendev/BeautifulRepo/pull/382) and
-[#383](https://github.com/drevendev/BeautifulRepo/pull/383).
-The [exact-commit push CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43740775213)
-completed **six of six jobs successfully** on Linux and Windows. This is
-source and deterministic CI evidence only: **no current Claude Code or Codex
-host installation, skill discovery, actual model invocation or external
-acceptance is verified**. The released `v0.2.0` still contains only
-`audit-repo`.
+The current four-skill development candidate is immutable [commit `76c39ed`](https://github.com/drevendev/BeautifulRepo/tree/76c39ed5732304334358b9d4b214821d7030b39f)
+(full SHA: `76c39ed5732304334358b9d4b214821d7030b39f`), manifest version `0.3.0-dev.0`.
+Source inspection on **2026-11-17** confirmed all four
+`skills/<name>/SKILL.md` files, both plugin manifests, both marketplace
+manifests and Codex `requires_local_executor: true`. This source includes
+the hard-link input fixes from [#380–#383](https://github.com/drevendev/BeautifulRepo/pull/383),
+the hard-link-aware cache verifier from [#387](https://github.com/drevendev/BeautifulRepo/pull/387),
+and the README parent-directory path guard from [#402](https://github.com/drevendev/BeautifulRepo/pull/402).
+The prior pin `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` is **historical, not current release acceptance**:
+its bundled README helper lacks the #402 fix. Do not use that older source on
+sensitive checkouts.
+
+[Exact-commit check runs](https://github.com/drevendev/BeautifulRepo/commit/76c39ed5732304334358b9d4b214821d7030b39f/checks)
+reviewed on **2026-11-17** show **nine successful checks and one cancelled**
+(`Python 3.14 (Windows)`). [PR #402's Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44102915781)
+passed 6/6 on its **different PR head**; that pass is not transferred to this
+source commit. The cancelled check means an all-green exact-source suite is
+**not established**. This is a reproducible development source candidate,
+**not** a host-accepted release: no actual Claude Code or Codex installation,
+skill discovery or model invocation has been verified. Stable `v0.2.0`
+still contains only `audit-repo`.
 
 Use a clean disposable **parent** directory, Git and Python 3.11+:
 
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
-git -C BeautifulRepo-candidate checkout --detach 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
+git -C BeautifulRepo-candidate checkout --detach 76c39ed5732304334358b9d4b214821d7030b39f
 git -C BeautifulRepo-candidate rev-parse HEAD
 git -C BeautifulRepo-candidate status --porcelain --untracked-files=all
 git -C BeautifulRepo-candidate clean -ndx
@@ -163,52 +169,29 @@ list` as an install. If the host has no installed copy, report the observed
 failure or **INCONCLUSIVE**, not PASS. Matching bytes still cannot establish
 actual skill discovery, selection or model execution.
 
-**Verifier-version boundary (2026-11-16):** the candidate's embedded
-`scripts/plugin_install_verify.py` predates [PR #387](https://github.com/drevendev/BeautifulRepo/pull/387).
-It can report a byte match for an installed **hard-linked file** whose bytes
-also have an alias outside the selected cache. Do not call that embedded
-verifier's exit 0 a hard-link-safe cache inventory. Keep the **tested plugin
-source** at 70b792b7f09d4bd03e36b6ca1cf6c869e5036872, and use a **separately pinned verifier**
-at [`a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc`](https://github.com/drevendev/BeautifulRepo/tree/a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc)
-for the stronger installed-file check.
-
-In the same disposable parent directory, prepare the verifier's **own**
-clean checkout. This checkout is **not** installed as a plugin or used as
-a source of prompts, skills or test fixtures:
+**Verifier boundary (reviewed 2026-11-17):** unlike the historical
+`70b792b7f09d4bd03e36b6ca1cf6c869e5036872` pin, this candidate already includes the hard-link-aware
+`scripts/plugin_install_verify.py` from PR #387. Use that checker from
+the **same clean, pinned source checkout**; no third verifier checkout is
+required for this successor. Run it only against the actual physical installed
+host cache, never a copy or the source directory itself:
 
 ```sh
-git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-verifier
-git -C BeautifulRepo-verifier checkout --detach a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc
-git -C BeautifulRepo-verifier rev-parse HEAD
-git -C BeautifulRepo-verifier status --porcelain --untracked-files=all
-git -C BeautifulRepo-verifier clean -ndx
+python -I /absolute/path/to/BeautifulRepo-candidate/scripts/plugin_install_verify.py --source /absolute/path/to/BeautifulRepo-candidate --installed /absolute/path/to/actual-installed-plugin-cache --expected-commit 76c39ed5732304334358b9d4b214821d7030b39f
 ```
 
-Stop unless `rev-parse HEAD` prints **exactly** a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc
-and both subsequent commands are silent; the final command is a
-non-destructive dry run. Then use **physical absolute** source/cache paths:
-
-```sh
-python -I /absolute/path/to/BeautifulRepo-verifier/scripts/plugin_install_verify.py --source /absolute/path/to/BeautifulRepo-candidate --installed /absolute/path/to/actual-installed-plugin-cache --expected-commit 70b792b7f09d4bd03e36b6ca1cf6c869e5036872
-```
-
-A verifier with newer safety guards does not change, repair or replace the
-candidate under evaluation. If the separate verifier cannot be obtained,
-record the **cache-hard-link check as unverified** rather than claiming an
-equivalent result from the embedded older checker.
-
-Exit 0 with state `match` compares committed skill assets and known shared
-dependencies; check the JSON for missing optional manifests. Exit 1 means a
-mismatch and exit 2 means incomplete evidence. This comparison cannot prove
-host provenance, discovery, agent tool execution, absence of writes outside
-the inspected target or prompt-injection resistance.
+A byte match is a bounded file-inventory result, not host provenance,
+skill discovery, actual model execution or an out-of-workspace safety proof.
+If the cache is missing or the source is dirty, record INCONCLUSIVE rather
+than inventing PASS. Do not install, launch or bill models without
+separate operator/tester consent.
 
 For model tests, take the **prompts, synthetic resources and graders** from
-[`evals/` at this exact source SHA](https://github.com/drevendev/BeautifulRepo/tree/70b792b7f09d4bd03e36b6ca1cf6c869e5036872/evals),
+[`evals/` at this exact source SHA](https://github.com/drevendev/BeautifulRepo/tree/76c39ed5732304334358b9d4b214821d7030b39f/evals),
 not from moving `master`. The matrix *embedded at this source commit* still
 pins the **earlier** candidate and its installer. For successor tests use
 **this installation procedure** and the [maintained smoke scoring guide](../evals/manual-smoke.md),
-while pinning every tested fixture byte to `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`. Capture host version,
+while pinning every tested fixture byte to `76c39ed5732304334358b9d4b214821d7030b39f`. Capture host version,
 cache evidence, complete tool trace, actual fixture reads, before/after
 snapshots, positive and unrelated triggers and hostile-source outcomes.
 Record PASS, FAIL or INCONCLUSIVE against **this SHA** in
@@ -230,25 +213,23 @@ the successor pinned above. The older tree lacks the later hard-link fixes.
 
 ## Verify cached skill definitions against the pinned commit (offline)
 
-For the successor pin, run the **separate hard-link-aware verifier**
-[`scripts/plugin_install_verify.py`](https://github.com/drevendev/BeautifulRepo/blob/a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc/scripts/plugin_install_verify.py)
-at `a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc` as shown above, not the older verifier embedded in the candidate.
-It requires **two distinct physical roots** for the inputs: a clean Git source
-checkout with `HEAD == 70b792b7f09d4bd03e36b6ca1cf6c869e5036872` and the actual installed
-plugin cache reported by Claude Code or Codex. The executable verifier comes
-from the separately verified third checkout. Aliased/symlinked root paths,
-hard-linked installed files, missing required assets or unknown local files
-inside the skill directories return **INCOMPLETE (exit 2)**; altered tracked
-files return **MISMATCH (exit 1)**. A matching checked inventory is exit 0,
-but missing optional plugin manifests are still explicitly listed as unverified.
+For the current source pin, run the **embedded hard-link-aware verifier**
+[`scripts/plugin_install_verify.py`](https://github.com/drevendev/BeautifulRepo/blob/76c39ed5732304334358b9d4b214821d7030b39f/scripts/plugin_install_verify.py)
+from the same clean checkout as shown above. It requires two **different
+physical roots**: committed source at `HEAD == 76c39ed5732304334358b9d4b214821d7030b39f`, and the
+actually installed plugin cache in Claude Code or Codex. Symlinked/aliased
+roots, hard-linked installed files, missing required assets and unknown
+installed skill files return **INCOMPLETE (exit 2)**; altered tracked files
+return **MISMATCH (exit 1)**. A matching inventory returns exit 0 but
+optional manifests are reported separately.
 
-Only the committed Git source is treated as expected content; verify the
-Git remote and host cache provenance separately. A matching inventory does
-not establish that the client discovered or invoked a skill, nor does it
-measure model behavior, unauthorized external writes or live provider settings.
-For historical `8947574…` tests, retain that exact source SHA and
-use the [separate stricter verifier pinned at `56d1c02`](https://github.com/drevendev/BeautifulRepo/tree/56d1c0236000354647cd1ea1987354a3c0025e70),
-not the older checker embedded in the historical source.
+This does not prove installation provenance, host skill discovery, model
+invocation, correct agent behavior, absence of effects outside the chosen
+target or permissions. Do not substitute a copied fake cache for the real
+installed assets. Historical `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` tests require the
+[separate verifier pinned at `a9e0cd1`](https://github.com/drevendev/BeautifulRepo/tree/a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc);
+historical `8947574…` tests retain their
+[separate stricter verifier](https://github.com/drevendev/BeautifulRepo/tree/56d1c0236000354647cd1ea1987354a3c0025e70).
 
 ## Standalone skill-manager installations: separate from full plugins
 

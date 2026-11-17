@@ -101,15 +101,19 @@ no installable package.
 
 ## Current work: verify the four-skill candidate and demonstrate real use
 
-This section reflects issue/source inspection on **2026-11-15**. It is not
+This section reflects source inspection on **2026-11-17**. It is not
 a release date or evidence of passing model tests. Consult the linked GitHub
 issues for their live status.
 
 - **Four-skill plugin candidate** ([#257](https://github.com/drevendev/BeautifulRepo/issues/257)):
   the published `v0.2.0` plugin has **only** `audit-repo`. The [exact
   four-skill development candidate](guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate)
-  is pinned to `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` (`0.3.0-dev.0`), includes
-  the desktop-only local-executor declaration and hard-link fixes from #380–#383.
+  is pinned to `76c39ed5732304334358b9d4b214821d7030b39f` (`0.3.0-dev.0`), includes
+  the desktop-only local-executor declaration, hard-link fixes from #380–#383,
+  the verifier from #387 and the README path guard from #402. Earlier
+  `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` is historical, not current acceptance. The
+  [exact-source checks](https://github.com/drevendev/BeautifulRepo/commit/76c39ed5732304334358b9d4b214821d7030b39f/checks)
+  had one cancelled Windows job; full green CI on that SHA is unproven.
   Source/CI tests do not verify successful *fresh install*, skill discovery or model behavior
   in Claude Code and Codex. The [manual matrix](evals/manual-smoke.md),
   [fixture infrastructure](https://github.com/drevendev/BeautifulRepo/issues/74)

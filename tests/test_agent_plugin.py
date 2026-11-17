@@ -70,7 +70,7 @@ class PluginManifestTests(unittest.TestCase):
         )
         self.assertEqual(len(checkouts), 1, "need one active full-SHA checkout")
         candidate = checkouts[0]
-        self.assertEqual(candidate, "70b792b7f09d4bd03e36b6ca1cf6c869e5036872")
+        self.assertEqual(candidate, "76c39ed5732304334358b9d4b214821d7030b39f")
         self.assertIn("git -C BeautifulRepo-candidate rev-parse HEAD", guide)
         self.assertIn("claude plugin marketplace add ./BeautifulRepo-candidate", guide)
         self.assertIn("codex plugin marketplace add ./BeautifulRepo-candidate", guide)
@@ -131,38 +131,37 @@ class PluginManifestTests(unittest.TestCase):
         self.assertIn("earlier", guide)
         self.assertIn("embedded at this source commit", guide)
 
-    def test_cache_verifier_uses_separately_pinned_guard_and_preserves_older_procedure(self):
-        """The candidate stays immutable while the cache verifier fixes later hard-link guards."""
+    def test_current_candidate_bundles_cache_verifier_and_keeps_historical_pins(self):
+        """The current source includes the hard-link guard; old pins remain historical."""
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        candidate = "70b792b7f09d4bd03e36b6ca1cf6c869e5036872"
+        matrix = (ROOT / "evals/manual-smoke.md").read_text(encoding="utf-8")
+        candidate = "76c39ed5732304334358b9d4b214821d7030b39f"
+        historical = "70b792b7f09d4bd03e36b6ca1cf6c869e5036872"
         section = guide.split("## Verify cached skill definitions", 1)[1].split(
             "## Standalone skill-manager installations", 1
         )[0]
-        verifier = "a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc"
         self.assertIn(
+            "BeautifulRepo-candidate/scripts/plugin_install_verify.py", guide
+        )
+        self.assertNotIn(
             "BeautifulRepo-verifier/scripts/plugin_install_verify.py", guide
         )
-        self.assertIn(
-            f"git -C BeautifulRepo-verifier checkout --detach {verifier}", guide
-        )
-        self.assertIn("git -C BeautifulRepo-verifier status --porcelain --untracked-files=all", guide)
-        self.assertIn("git -C BeautifulRepo-verifier clean -ndx", guide)
-        self.assertIn("hard-linked installed files", section)
-        self.assertNotIn("third verifier checkout is not required", guide)
         self.assertIn(f"--expected-commit {candidate}", guide)
         self.assertIn("--source /absolute/path/to/BeautifulRepo-candidate", guide)
         self.assertIn("--installed /absolute/path/to/actual-installed-plugin-cache", guide)
-        self.assertIn("two distinct physical roots", section)
+        self.assertIn("hard-linked installed files", section)
+        self.assertIn("different\nphysical roots", section)
         self.assertIn(f"HEAD == {candidate}", section)
         self.assertIn("INCOMPLETE (exit 2)", section)
-        self.assertIn("MISMATCH", section)
+        self.assertIn("MISMATCH (exit 1)", section)
         self.assertIn("exit 0", section)
-        self.assertIn("missing optional", section)
+        self.assertIn("optional manifests", section)
+        self.assertIn(historical, section)
+        self.assertIn("a9e0cd185c4bad8c9a7bd3679d4cb00391e6a0dc", section)
         self.assertIn("56d1c0236000354647cd1ea1987354a3c0025e70", section)
         self.assertIn("8947574…", section)
-        self.assertIn("8947574399df2cc11e8ded41cecbef70be4808c6", guide)
-        self.assertIn("The verifier **embedded in the candidate source**", (ROOT / "evals/manual-smoke.md").read_text(encoding="utf-8"))
-        self.assertIn("host cache provenance separately", section)
+        self.assertIn("embedded in this **current** source", matrix)
+        self.assertIn("host skill discovery", section)
 
     def test_manifest_versions_are_valid(self):
         for path in (".claude-plugin/plugin.json", "plugin.json"):

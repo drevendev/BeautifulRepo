@@ -692,6 +692,15 @@ keep their original themed headings.
 
 ### Changed
 
+- Refresh the four-skill **development** test pin to immutable source
+  commit `76c39ed5732304334358b9d4b214821d7030b39f` after the merged README parent-path guard
+  (#402), and align the plugin install and manual smoke instructions.
+  The historical `70b792b7f09d4bd03e36b6ca1cf6c869e5036872` source remains non-acceptance evidence.
+  On the new exact commit, one Windows check was cancelled; no all-green
+  exact-source suite or live Claude Code/Codex skill invocation is claimed
+  (#257, #258). The current source already bundles the hard-link-aware
+  cache verifier, so no separate verifier checkout is required.
+
 - Document the official Codex local-marketplace installed-cache layout and
   show how to distinguish the **installed host copy** from the source checkout
   or merely registered marketplace during four-skill trials (#257). The
