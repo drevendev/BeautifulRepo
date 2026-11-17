@@ -18,6 +18,12 @@ one file) are inspected; Windows-style line endings must not hide an external
 Action from the manifest check. This is a bounded line-oriented check,
 not a complete YAML parser or a verification of remote action provenance.
 
+For GitHub.com, the [commit-bound same-repository action syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#example-using-an-action-in-the-same-repository-as-the-workflow-at-the-running-commit)
+(`uses: $/path/to/action`) is local, so no external SHA/manifest entry is required.
+Malformed self-references (empty, parent-directory segments or an `@ref`) fail.
+This syntax is **not available on GitHub Enterprise Server**. The pin
+checker does not verify that local action paths or container tags exist.
+
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
 repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 

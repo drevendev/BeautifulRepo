@@ -115,6 +115,19 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
             comment = (match.group(2) or "").strip()
             if ref.startswith("./") or ref.startswith("docker://"):
                 continue  # Local and container actions have no GitHub commit SHA.
+            if ref.startswith("$/"):
+                # GitHub.com supports commit-bound same-repository actions.
+                # They have no external ref to compare against the manifest;
+                # reject malformed forms instead of silently accepting @refs.
+                parts = ref[2:].split("/")
+                if ("@" in ref or "\\" in ref or any(
+                        part in {"", ".", ".."} for part in parts
+                ) or any(char.isspace() for char in ref)):
+                    errors.append(
+                        f"{path.relative_to(root)}:{line}: "
+                        f"invalid self-repository uses reference: {ref!r}"
+                    )
+                continue
             seen += 1
             pinned = ACTION_REFERENCE.fullmatch(ref)
             if not pinned:

@@ -891,6 +891,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Accept GitHub.com's commit-bound `uses: $/path/to/action` for local
+  same-repository Actions without requiring an external SHA/manifest entry.
+  Refuse empty, redirected or `@ref` self-references; test quoted and
+  ordinary uses. The `$/` form is not supported on GitHub Enterprise Server,
+  and this static scanner does not verify local action path existence.
+  Source: GitHub Actions workflow syntax (reviewed 2026-11-17).
+
 - Inspect CRLF-terminated `uses` steps in the offline reviewed-action pin
   checker, including unpinned or unreviewed Actions hidden among valid LF steps.
   Tests cover all-CRLF and mixed-newline workflows with quoted mapping keys.

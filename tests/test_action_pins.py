@@ -51,6 +51,26 @@ class ActionPinTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("2 reviewed external action references", result.stdout)
 
+    def test_same_repository_actions_are_commit_bound_and_exempt_from_external_pins(self):
+        source = (self.root / ".github/workflows/ci.yml").read_text()
+        self.write_workflow(source + (
+            "  - uses: $/.github/actions/project-audit\n"
+            '  - "uses": "$/tools/local-check"\n'
+        ))
+        result = self.run_tool()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("2 reviewed external action references", result.stdout)
+
+    def test_invalid_same_repository_references_fail_closed(self):
+        source = (self.root / ".github/workflows/ci.yml").read_text()
+        for reference in ("$/", "$/../escape", "$/tool//subdir",
+                          "$/tools/local@main", "$/tools\\local"):
+            with self.subTest(reference=reference):
+                self.write_workflow(source + f'  - uses: "{reference}"\n')
+                result = self.run_tool()
+                self.assertEqual(1, result.returncode, result.stderr)
+                self.assertIn("invalid self-repository uses reference", result.stderr)
+
     def test_single_and_double_quoted_uses_are_checked_normally(self):
         source = (self.root / ".github/workflows/ci.yml").read_text()
         source = source.replace(
