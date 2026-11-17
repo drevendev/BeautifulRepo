@@ -150,7 +150,7 @@ class PluginManifestTests(unittest.TestCase):
         self.assertIn("--source /absolute/path/to/BeautifulRepo-candidate", guide)
         self.assertIn("--installed /absolute/path/to/actual-installed-plugin-cache", guide)
         self.assertIn("hard-linked installed files", section)
-        self.assertIn("different\\nphysical roots", section)
+        self.assertIn("different\nphysical roots", section)
         self.assertIn(f"HEAD == {candidate}", section)
         self.assertIn("INCOMPLETE (exit 2)", section)
         self.assertIn("MISMATCH (exit 1)", section)
