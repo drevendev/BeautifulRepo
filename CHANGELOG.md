@@ -891,6 +891,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Inspect single- and double-quoted YAML `uses` mapping keys in the offline
+  reviewed GitHub Actions pin checker. Without this, valid quoted keys could
+  bypass SHA/manifest checks while other unquoted steps still passed. Add
+  positive and negative regressions for reviewed, unpinned and unreviewed
+  external actions. Source: GitHub Actions workflow YAML syntax (reviewed
+  2026-11-17). This remains a bounded line-oriented check, not a YAML parser.
+
 - Reject a symlinked `.github` parent before reading the reviewed-action
   manifest or workflow files. Checking only the final `workflows` directory
   could follow a redirected parent and inspect files outside the selected
