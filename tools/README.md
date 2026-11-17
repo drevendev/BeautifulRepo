@@ -33,10 +33,10 @@ source requirement](https://html.spec.whatwg.org/multipage/embedded-content.html
 but is a bounded static check, not playback or browser accessibility evidence.
 
 The entry-point audit's `link.vague_text` informational rule now also checks
-single-line full and collapsed Markdown reference links (such as
-`[here][guide]` or `[read more][]`) **only when the reference has a
-defined, nonempty one-line destination**. It ignores images, literal code and
-unknown labels. This is a bounded source heuristic, not a renderer, a check
+single-line full, collapsed and shortcut Markdown reference links (such as
+`[here][guide]`, `[read more][]` or `[here]`) **only when the reference has a
+defined, nonempty one-line destination**. It ignores reference definitions
+themselves, images, literal code and unknown labels. This is a bounded source heuristic, not a renderer, a check
 of shortcut references or a judgement of link purpose in its full context.
 No destination is echoed into the finding. See the
 [GitHub Flavored Markdown reference-link specification](https://github.github.com/gfm/#reference-link)
