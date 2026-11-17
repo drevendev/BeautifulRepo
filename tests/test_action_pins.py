@@ -63,6 +63,20 @@ class ActionPinTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("0 reviewed external action references", result.stdout)
 
+    def test_workspace_local_action_paths_reject_traversal_and_refs(self):
+        # Valid external pins must not mask malformed local uses paths.
+        source = (self.root / ".github/workflows/ci.yml").read_text()
+        for reference in (
+            "./../escape", "./checks/../escape", "./checks/./audit",
+            "./checks//audit", "./checks\\audit", "./checks/audit@main",
+            "./checks/ ", "./checks/",
+        ):
+            with self.subTest(reference=reference):
+                self.write_workflow(source + f'  - uses: "{reference}"\n')
+                result = self.run_tool()
+                self.assertEqual(1, result.returncode, result.stderr)
+                self.assertIn("invalid workspace-local uses reference", result.stderr)
+
     def test_local_only_workflows_still_reject_unused_manifest_entries(self):
         self.write_workflow("name: Local-only\nsteps:\n  - uses: $/.github/actions/check\n")
         result = self.run_tool()
