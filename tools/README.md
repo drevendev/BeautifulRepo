@@ -38,7 +38,9 @@ single-line full and collapsed Markdown reference links (such as
 defined, nonempty one-line destination**. It ignores images, literal code and
 unknown labels. This is a bounded source heuristic, not a renderer, a check
 of shortcut references or a judgement of link purpose in its full context.
-No destination is echoed into the finding.
+No destination is echoed into the finding. See the
+[GitHub Flavored Markdown reference-link specification](https://github.github.com/gfm/#reference-link)
+for cases this intentionally limited checker does not parse.
 
 ## All three checks in one local run
 
