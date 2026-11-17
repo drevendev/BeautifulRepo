@@ -247,7 +247,7 @@ class AuditTests(unittest.TestCase):
                    "# Example\n"
                    "[HERE]\n"
                    "<!-- [here] -->\n"
-                   "Use \`[here]\` as an example.\n"
+                   "Use `[here]` as an example.\n"
                    "~~~md\n[here]\n~~~\n"
                    "[here]: docs/setup.md\n")
         report = audit.audit_repository(self.root, source_spans=True)
