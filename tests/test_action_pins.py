@@ -68,6 +68,27 @@ class ActionPinTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("2 reviewed external action references", result.stdout)
 
+    def test_quoted_uses_mapping_keys_are_checked(self):
+        source = (self.root / ".github/workflows/ci.yml").read_text()
+        source = source.replace("- uses: actions/checkout@", '- "uses": actions/checkout@')
+        source = source.replace("- uses: actions/setup-python@", "- 'uses': actions/setup-python@")
+        self.write_workflow(source)
+        clean = self.run_tool()
+        self.assertEqual(0, clean.returncode, clean.stderr)
+        self.assertIn("2 reviewed external action references", clean.stdout)
+
+        self.write_workflow(source.replace(f"actions/checkout@{CHECKOUT}",
+                                           "actions/checkout@main"))
+        unpinned = self.run_tool()
+        self.assertEqual(1, unpinned.returncode)
+        self.assertIn("40-character commit SHA", unpinned.stderr)
+
+        self.write_workflow(source.replace(f"actions/setup-python@{PYTHON}",
+                                           f"unreviewed/action@{PYTHON}"))
+        unreviewed = self.run_tool()
+        self.assertEqual(1, unreviewed.returncode)
+        self.assertIn("no reviewed manifest entry", unreviewed.stderr)
+
     def test_quoted_unpinned_and_unreviewed_uses_still_fail(self):
         source = (self.root / ".github/workflows/ci.yml").read_text()
         self.write_workflow(source.replace(
