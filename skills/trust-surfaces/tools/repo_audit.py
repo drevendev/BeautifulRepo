@@ -38,6 +38,11 @@ VAGUE_REFERENCE_USE = re.compile(
 VAGUE_REFERENCE_DEFINITION = re.compile(
     r"^ {0,3}\[([^\[\]\r\n]{1,128})\]:[ \t]*\S"
 )
+# A defined [label] is a shortcut link. Exclude attached image syntax and
+# labels following another bracketed link part; definitions are filtered below.
+VAGUE_REFERENCE_SHORTCUT = re.compile(
+    r"(?<!!)(?<!\\)(?<!\])\[([^\[\]\r\n]{1,80})\](?![\[(])"
+)
 VAGUE_LINK_LABELS = frozenset({
     "here", "click here", "read more", "learn more", "more info", "this link",
 })
@@ -447,6 +452,23 @@ def _inspect_markdown(text: str, path: str, *,
                     "Review its rendered context; prefer link text naming the destination.",
                     location=location,
                 ))
+        definition = VAGUE_REFERENCE_DEFINITION.match(line)
+        for link in VAGUE_REFERENCE_SHORTCUT.finditer(line):
+            label = " ".join(link[1].split()).casefold().strip(" .,!?")
+            if (label not in VAGUE_LINK_LABELS
+                    or label not in reference_definitions
+                    or (definition and link.start() == definition.start(1) - 1)):
+                continue
+            location = (_source_span(
+                line_starts, line_starts[index] + link.start(),
+                line_starts[index] + link.end(),
+            ) if source_spans else None)
+            findings.append(finding(
+                "link.vague_text", "info", path, index + 1,
+                "Shortcut reference-style Markdown link uses a context-dependent label.",
+                "Review its rendered context; prefer link text naming the destination.",
+                location=location,
+            ))
         placeholder = re.search(r"\{\{[A-Z][A-Z0-9_]*\}\}|\b(?:TODO|TBD|FIXME)\b", line)
         if placeholder:
             location = (_source_span(

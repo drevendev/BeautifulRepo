@@ -14,10 +14,11 @@ keep their original themed headings.
 ### Added
 
 - Extend the offline entry-point audit's informational vague-link check to
-  defined single-line full/collapsed Markdown reference links. Synthetic tests
-  cover resolved and missing labels, image/escape exclusions, code and comments.
-  This is a bounded source heuristic, not a complete Markdown renderer or
-  an accessibility certification.
+  defined single-line full/collapsed/shortcut Markdown reference links. Synthetic
+  tests cover resolved and missing labels, no double-counting, definition lines,
+  image/escape exclusions, code, comments and exact source spans. This is a
+  bounded source heuristic, not a complete Markdown renderer or accessibility
+  certification.
 
 - Check local `video src/poster`, `audio src` and `track src` destinations
   in active Markdown HTML in addition to existing image and source checks.

@@ -222,6 +222,44 @@ class AuditTests(unittest.TestCase):
                    "![here][guide]\n")
         self.assertNotIn("link.vague_text", self.codes())
 
+    def test_vague_shortcut_reference_requires_definition_without_duplicates(self):
+        self.write("README.md",
+                   "# Example\n\n"
+                   "[Here]\n"
+                   "[READ   more]\n"
+                   "![here]\n"
+                   "\\[here]\n"
+                   "[here](details.md)\n"
+                   "[here][guide]\n"
+                   "[unknown]\n\n"
+                   "[here]: docs/private-route-token.md\n"
+                   "[read more]: docs/advanced.md\n"
+                   "[guide]: docs/setup.md\n")
+        matches = [item for item in self.report()["findings"]
+                   if item["rule_id"] == "link.vague_text"]
+        self.assertEqual([(item["line"], item["severity"]) for item in matches],
+                         [(3, "info"), (4, "info"), (7, "info"), (8, "info")])
+        self.assertNotIn("private-route-token", json.dumps(matches))
+        self.assertNotIn("docs/setup.md", json.dumps(matches))
+
+    def test_vague_shortcut_source_span_and_hidden_examples(self):
+        self.write("README.md",
+                   "# Example\n"
+                   "[HERE]\n"
+                   "<!-- [here] -->\n"
+                   "Use `[here]` as an example.\n"
+                   "~~~md\n[here]\n~~~\n"
+                   "[here]: docs/setup.md\n")
+        report = audit.audit_repository(self.root, source_spans=True)
+        matches = [item for item in report["findings"]
+                   if item["rule_id"] == "link.vague_text"]
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0]["line"], 2)
+        self.assertEqual(matches[0]["location"], {
+            "start": {"line": 2, "column": 1},
+            "end": {"line": 2, "column": 7},
+        })
+
     def test_vague_link_heuristic_ignores_images_code_comments_and_escapes(self):
         self.write("README.md",
                    "# Example\n"
