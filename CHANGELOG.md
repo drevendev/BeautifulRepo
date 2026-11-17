@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed maintainer-capacity recipe and reusable expectation card,
+  including an explicitly fictional two-hour monthly allocation, real support
+  routing and a no-promise triage decision. This does not create a response SLA,
+  appoint backup maintainers or change repository support settings.
+
 - Extend the offline entry-point audit's informational vague-link check to
   defined single-line full/collapsed/shortcut Markdown reference links. Synthetic
   tests cover resolved and missing labels, no double-counting, definition lines,

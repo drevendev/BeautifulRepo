@@ -55,6 +55,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 
 - [Small-project governance decisions](guides/governance-decisions.md): a
   copyable decision card and annotated real offline-tool choice, without invented roles.
+- [Capacity-based maintenance guide](guides/maintainer-capacity.md) with a
+  [copyable, explicitly non-binding capacity card](templates/MAINTAINER_CAPACITY.template.md),
+  a worked fictional monthly allocation and verified support-route boundaries.
 - [Evidence-led issue triage recipe](guides/issue-triage.md), with a copyable
   decision card, real issue examples and explicit not-run/permission boundaries.
 - [First-contribution route](guides/first-contribution.md) with a
