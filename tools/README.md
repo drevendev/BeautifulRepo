@@ -36,8 +36,9 @@ The entry-point audit's `link.vague_text` informational rule now also checks
 single-line full, collapsed and shortcut Markdown reference links (such as
 `[here][guide]`, `[read more][]` or `[here]`) **only when the reference has a
 defined, nonempty one-line destination**. It ignores reference definitions
-themselves, images, literal code and unknown labels. This is a bounded source heuristic, not a renderer, a check
-of shortcut references or a judgement of link purpose in its full context.
+themselves, images, literal code and unknown labels. This is a bounded source
+heuristic, not a renderer, an exhaustive parser of nested/multiline references
+or a judgment of link purpose in its full context.
 No destination is echoed into the finding. See the
 [GitHub Flavored Markdown reference-link specification](https://github.github.com/gfm/#reference-link)
 for cases this intentionally limited checker does not parse.
