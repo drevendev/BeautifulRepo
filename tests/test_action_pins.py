@@ -51,6 +51,43 @@ class ActionPinTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("2 reviewed external action references", result.stdout)
 
+    def test_local_only_workflows_do_not_require_a_pin_manifest(self):
+        (self.root / ".github/action-pins.json").unlink()
+        self.write_workflow(
+            "name: Local-only\nsteps:\n"
+            "  - uses: ./.github/actions/project-audit\n"
+            "  - uses: $/.github/actions/commit-bound\n"
+            "  - uses: docker://alpine:3.19\n"
+        )
+        result = self.run_tool()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("0 reviewed external action references", result.stdout)
+
+    def test_local_only_workflows_still_reject_unused_manifest_entries(self):
+        self.write_workflow("name: Local-only\nsteps:\n  - uses: $/.github/actions/check\n")
+        result = self.run_tool()
+        self.assertEqual(1, result.returncode, result.stderr)
+        self.assertIn("manifest entry is not used", result.stderr)
+        self.assertNotIn("no action references", result.stderr)
+
+    def test_missing_manifest_is_not_exempt_for_external_actions(self):
+        (self.root / ".github/action-pins.json").unlink()
+        result = self.run_tool()
+        self.assertEqual(2, result.returncode, result.stderr)
+        self.assertIn("external actions require .github/action-pins.json", result.stderr)
+
+    def test_empty_uses_and_invalid_self_ref_still_fail_without_manifest(self):
+        (self.root / ".github/action-pins.json").unlink()
+        self.write_workflow("name: No actions\njobs:\n  build:\n    runs-on: ubuntu-latest\n")
+        missing = self.run_tool()
+        self.assertEqual(1, missing.returncode, missing.stderr)
+        self.assertIn("no action references found", missing.stderr)
+
+        self.write_workflow("name: Invalid self-ref\nsteps:\n  - uses: $/../escape\n")
+        malformed = self.run_tool()
+        self.assertEqual(1, malformed.returncode, malformed.stderr)
+        self.assertIn("invalid self-repository uses reference", malformed.stderr)
+
     def test_same_repository_actions_are_commit_bound_and_exempt_from_external_pins(self):
         source = (self.root / ".github/workflows/ci.yml").read_text()
         self.write_workflow(source + (
