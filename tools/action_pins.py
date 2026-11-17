@@ -84,6 +84,16 @@ def load_manifest(path: Path) -> dict[str, dict[str, str]]:
     return data
 
 
+def invalid_local_action_path(ref: str, prefix: str, allow_root: bool = False) -> bool:
+    """Reject malformed local paths without reading or resolving action targets."""
+    tail = ref[len(prefix):]
+    if allow_root and not tail:
+        return False  # The workspace root can itself contain an action.yml.
+    return ("@" in tail or "\\" in tail or any(
+        part in {"", ".", ".."} for part in tail.split("/")
+    ) or any(char.isspace() for char in ref))
+
+
 def check_repo(root: Path) -> tuple[list[str], int, int]:
     root = root.resolve()
     github = root / ".github"
@@ -118,18 +128,22 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
             if len(ref) >= 2 and ref[0] in ("'", '"') and ref[-1] == ref[0]:
                 ref = ref[1:-1]
             comment = (match.group(2) or "").strip()
-            if ref.startswith("./") or ref.startswith("docker://"):
+            if ref.startswith("./"):
                 local_seen += 1
-                continue  # Local and container actions have no GitHub commit SHA.
+                if invalid_local_action_path(ref, "./", allow_root=True):
+                    errors.append(
+                        f"{path.relative_to(root)}:{line}: "
+                        f"invalid workspace-local uses reference: {ref!r}"
+                    )
+                continue
+            if ref.startswith("docker://"):
+                local_seen += 1
+                continue  # Container images have no GitHub action commit SHA.
             if ref.startswith("$/"):
                 local_seen += 1
-                # GitHub.com supports commit-bound same-repository actions.
-                # They have no external ref to compare against the manifest;
-                # reject malformed forms instead of silently accepting @refs.
-                parts = ref[2:].split("/")
-                if ("@" in ref or "\\" in ref or any(
-                        part in {"", ".", ".."} for part in parts
-                ) or any(char.isspace() for char in ref)):
+                # GitHub.com supports commit-bound same-repository actions;
+                # their path must not be redirected or include an @ref.
+                if invalid_local_action_path(ref, "$/"):
                     errors.append(
                         f"{path.relative_to(root)}:{line}: "
                         f"invalid self-repository uses reference: {ref!r}"

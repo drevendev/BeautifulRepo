@@ -900,6 +900,14 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject malformed workspace-local `uses: ./...` paths in the offline Actions
+  pin checker instead of exempting redirected `../`, repeated-slash,
+  backslash, whitespace and `@ref` forms as local. Preserve a bare `./`
+  for an action at the workspace root; tests cover malformed and ordinary
+  local inputs. This remains a bounded source scanner, not a workspace or
+  Docker-image provenance validator (GitHub Actions workflow syntax reviewed
+  2026-11-17).
+
 - Reject README preview/apply proposal files reached through symlinked or
   Windows-reparse-point parent directories, even when the final file is
   ordinary and the approval hashes match. Regression tests cover direct
