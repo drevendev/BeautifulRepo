@@ -192,6 +192,36 @@ class AuditTests(unittest.TestCase):
         self.assertEqual(audit.exit_status(report, "warning"), 0)
         self.assertEqual(audit.exit_status(report, "error"), 0)
 
+    def test_vague_reference_link_text_requires_real_definition(self):
+        self.write("README.md",
+                   "# Example\n\n"
+                   "[Here][guide]\n"
+                   "[READ more][]\n"
+                   "[click here][missing]\n"
+                   "![here][image]\n"
+                   "\\[here][guide]\n"
+                   "[Descriptive setup guide][guide]\n"
+                   "\n[guide]: docs/setup.md\n"
+                   "[read MORE]: docs/advanced.md\n"
+                   "[image]: diagram.svg\n")
+        matches = [item for item in self.report()["findings"]
+                   if item["rule_id"] == "link.vague_text"]
+        self.assertEqual([(item["line"], item["severity"]) for item in matches],
+                         [(3, "info"), (4, "info")])
+        self.assertNotIn("docs/advanced.md", json.dumps(matches))
+        self.assertNotIn("docs/setup.md", json.dumps(matches))
+
+    def test_vague_reference_link_text_ignores_literal_regions(self):
+        self.write("README.md",
+                   "# Example\n"
+                   "[guide]: docs/setup.md\n"
+                   "<!-- [here][guide] -->\n"
+                   "~~~md\n[here][guide]\n~~~\n"
+                   "[here][unknown]\n"
+                   "[Readable guide][guide]\n"
+                   "![here][guide]\n")
+        self.assertNotIn("link.vague_text", self.codes())
+
     def test_vague_link_heuristic_ignores_images_code_comments_and_escapes(self):
         self.write("README.md",
                    "# Example\n"
