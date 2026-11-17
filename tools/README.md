@@ -13,7 +13,9 @@ python -m unittest discover -s tests -v
 
 The reviewed Actions pin check accepts ordinary and single- or double-quoted
 `uses` mapping keys, as well as whole single- or double-quoted `uses:` YAML values. Quoting does not bypass SHA,
-manifest or annotation validation. This is a bounded line-oriented check,
+manifest or annotation validation. LF and CRLF workflow lines (even mixed in
+one file) are inspected; Windows-style line endings must not hide an external
+Action from the manifest check. This is a bounded line-oriented check,
 not a complete YAML parser or a verification of remote action provenance.
 
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
