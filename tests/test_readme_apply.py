@@ -205,7 +205,7 @@ class ReadmeApplyTests(unittest.TestCase):
     def test_symlinked_proposal_parent_rejects_approved_hashes(self):
         physical = self.tmp / "physical-proposals"
         physical.mkdir()
-        (physical / "external.md").write_bytes(b"# Synthetic\\nSYNTHETIC_PRIVATE_MARKER\\n")
+        (physical / "external.md").write_bytes(b"# Synthetic\nSYNTHETIC_PRIVATE_MARKER\n")
         alias = self.tmp / "proposals-alias"
         try:
             alias.symlink_to(physical, target_is_directory=True)
