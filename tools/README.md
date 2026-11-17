@@ -113,8 +113,11 @@ For a stale-content guard, repeat with `--expected-sha256` followed by the
 64-character SHA-256 printed for the original README in an earlier preview.
 The command fails with exit code 2 if that content has changed; it **does not**
 apply a patch, obtain consent or prevent later concurrent edits. No file is
-created or modified. The `--root` directory and **all its ancestor components** must be named
-through their physical paths, not symlinked or junction-based aliases.
+created or modified. The `--root` directory and **all lexical parents of both input files** must
+be reached through non-redirected paths, not symlinked or junction-based
+aliases. In particular, a proposal reached through a symlinked parent is
+refused even when the proposal file itself is regular; ordinary `..`
+components without redirection remain supported.
 Both inputs must be ordinary, non-symlinked UTF-8 files
 of at most 256 KiB; the tool rejects bare carriage returns, C0/C1
 terminal controls (except tab and ordinary newlines), Unicode bidirectional
