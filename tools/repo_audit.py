@@ -30,6 +30,14 @@ PROFILES = ("public", "internal", "private")
 VAGUE_INLINE_LINK = re.compile(
     r"(?<!!)(?<!\\)\[([^\[\]\r\n]{1,80})\]\([^\r\n)]{0,2048}\)"
 )
+# Bounded, single-line full and collapsed Markdown reference links. Require a
+# source definition before reporting: bracketed prose is not itself a link.
+VAGUE_REFERENCE_USE = re.compile(
+    r"(?<!!)(?<!\\)\[([^\[\]\r\n]{1,80})\]\[([^\[\]\r\n]{0,128})\]"
+)
+VAGUE_REFERENCE_DEFINITION = re.compile(
+    r"^ {0,3}\[([^\[\]\r\n]{1,128})\]:[ \t]*\S"
+)
 VAGUE_LINK_LABELS = frozenset({
     "here", "click here", "read more", "learn more", "more info", "this link",
 })
@@ -380,6 +388,11 @@ def _inspect_markdown(text: str, path: str, *,
     visible = visible_source(text)
     source_lines = _split_lines(visible)
     lines = [line.rstrip("\r\n") for line in source_lines]
+    reference_definitions = {
+        " ".join(match[1].split()).casefold()
+        for line in lines
+        if (match := VAGUE_REFERENCE_DEFINITION.match(line))
+    }
     line_starts = [0]
     if source_spans:
         for source_line in source_lines[:-1]:
@@ -417,6 +430,20 @@ def _inspect_markdown(text: str, path: str, *,
                 findings.append(finding(
                     "link.vague_text", "info", path, index + 1,
                     "Inline Markdown link uses a context-dependent label.",
+                    "Review its rendered context; prefer link text naming the destination.",
+                    location=location,
+                ))
+        for link in VAGUE_REFERENCE_USE.finditer(line):
+            label = " ".join(link[1].split()).casefold().strip(" .,!?")
+            reference = " ".join((link[2] or link[1]).split()).casefold()
+            if label in VAGUE_LINK_LABELS and reference in reference_definitions:
+                location = (_source_span(
+                    line_starts, line_starts[index] + link.start(),
+                    line_starts[index] + link.end(),
+                ) if source_spans else None)
+                findings.append(finding(
+                    "link.vague_text", "info", path, index + 1,
+                    "Reference-style Markdown link uses a context-dependent label.",
                     "Review its rendered context; prefer link text naming the destination.",
                     location=location,
                 ))
