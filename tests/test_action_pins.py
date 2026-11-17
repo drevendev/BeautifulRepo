@@ -89,6 +89,29 @@ class ActionPinTests(unittest.TestCase):
         self.assertEqual(1, unreviewed.returncode)
         self.assertIn("no reviewed manifest entry", unreviewed.stderr)
 
+    def test_windows_crlf_workflows_remain_visible_to_pin_checker(self):
+        # write_bytes preserves exact CRLF on Windows as well as POSIX.
+        path = self.root / ".github/workflows/ci.yml"
+        source = path.read_text(encoding="utf-8")
+        path.write_bytes(source.replace("\n", "\r\n").encode("utf-8"))
+        result = self.run_tool()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 reviewed external action references", result.stdout)
+
+    def test_mixed_lf_crlf_cannot_hide_unpinned_or_unreviewed_actions(self):
+        path = self.root / ".github/workflows/ci.yml"
+        source = path.read_text(encoding="utf-8")
+        for key, reference, expected in (
+            ("uses", "other/unsafe@v1", "40-character commit SHA"),
+            ('"uses"', "other/unsafe@v1", "40-character commit SHA"),
+            ("'uses'", f"other/unsafe@{CHECKOUT}", "no reviewed manifest entry"),
+        ):
+            with self.subTest(key=key, reference=reference):
+                path.write_bytes((source + f"  - {key}: {reference}\r\n").encode("utf-8"))
+                result = self.run_tool()
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn(expected, result.stderr)
+
     def test_quoted_unpinned_and_unreviewed_uses_still_fail(self):
         source = (self.root / ".github/workflows/ci.yml").read_text()
         self.write_workflow(source.replace(
