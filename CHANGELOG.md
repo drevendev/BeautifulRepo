@@ -891,6 +891,13 @@ keep their original themed headings.
 
 ### Fixed
 
+- Permit workflow sets using only local, commit-bound same-repository or
+  container `uses:` steps to pass the offline reviewed-Action pin check
+  without an external pin manifest. Existing manifests remain validated;
+  missing manifests still fail for external actions, and zero recognized
+  action references still fail. Add black-box regressions.
+
+
 - Accept GitHub.com's commit-bound `uses: $/path/to/action` for local
   same-repository Actions without requiring an external SHA/manifest entry.
   Refuse empty, redirected or `@ref` self-references; test quoted and

@@ -23,6 +23,11 @@ For GitHub.com, the [commit-bound same-repository action syntax](https://docs.gi
 Malformed self-references (empty, parent-directory segments or an `@ref`) fail.
 This syntax is **not available on GitHub Enterprise Server**. The pin
 checker does not verify that local action paths or container tags exist.
+Repositories using only recognized local/commit-bound/container `uses:` values
+can omit `.github/action-pins.json`; if a manifest exists, unused entries
+still fail. External `uses:` always require the reviewed manifest. A workflow
+with no recognized action references still fails; this is intentionally a
+bounded source check, not a YAML completeness guarantee.
 
 To run `repo_audit.py`, `docs_links.py` and `html_navigation.py` in another
 repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).

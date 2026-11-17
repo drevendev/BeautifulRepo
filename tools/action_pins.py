@@ -94,7 +94,11 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
     directory = github / "workflows"
     if not directory.is_dir() or directory.is_symlink():
         raise InputError(".github/workflows must be an ordinary directory")
-    pins = load_manifest(github / "action-pins.json")
+    manifest_path = github / "action-pins.json"
+    # Repositories with only local/container actions have no external pins.
+    # Existing manifests, including symlinks, must still be validated.
+    has_manifest = manifest_path.exists() or manifest_path.is_symlink()
+    pins = load_manifest(manifest_path) if has_manifest else {}
     paths = sorted(path for path in directory.iterdir()
                    if path.suffix.lower() in {".yml", ".yaml"})
     if not paths or len(paths) > MAX_WORKFLOWS:
@@ -102,6 +106,7 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
     errors = []
     used = set()
     seen = 0
+    local_seen = 0
     for path in paths:
         source = read_regular(path, MAX_FILE_BYTES)
         for match in USE_LINE.finditer(source):
@@ -114,8 +119,10 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
                 ref = ref[1:-1]
             comment = (match.group(2) or "").strip()
             if ref.startswith("./") or ref.startswith("docker://"):
+                local_seen += 1
                 continue  # Local and container actions have no GitHub commit SHA.
             if ref.startswith("$/"):
+                local_seen += 1
                 # GitHub.com supports commit-bound same-repository actions.
                 # They have no external ref to compare against the manifest;
                 # reject malformed forms instead of silently accepting @refs.
@@ -144,8 +151,10 @@ def check_repo(root: Path) -> tuple[list[str], int, int]:
             wanted = f"{item['version']} ref inspected {item['reviewed']}"
             if comment != wanted:
                 errors.append(f"{path.relative_to(root)}:{line}: {name} annotation must be '# {wanted}'")
-    if seen == 0:
-        errors.append("no external action references found")
+    if seen and not has_manifest:
+        raise InputError("external actions require .github/action-pins.json")
+    if seen == 0 and local_seen == 0:
+        errors.append("no action references found")
     for name in sorted(set(pins) - used):
         errors.append(f"manifest entry is not used by any workflow: {name}")
     return errors, seen, len(paths)
