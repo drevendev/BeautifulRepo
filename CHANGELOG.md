@@ -891,6 +891,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Inspect CRLF-terminated `uses` steps in the offline reviewed-action pin
+  checker, including unpinned or unreviewed Actions hidden among valid LF steps.
+  Tests cover all-CRLF and mixed-newline workflows with quoted mapping keys.
+  YAML 1.2.2 recognizes CRLF as a line break; the checker remains a bounded
+  source scanner rather than a complete YAML parser (reviewed 2026-11-17).
+
 - Inspect single- and double-quoted YAML `uses` mapping keys in the offline
   reviewed GitHub Actions pin checker. Without this, valid quoted keys could
   bypass SHA/manifest checks while other unquoted steps still passed. Add

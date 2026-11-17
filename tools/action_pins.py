@@ -20,7 +20,8 @@ MAX_WORKFLOWS = 100
 ACTION_NAME = r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+"
 ACTION_REFERENCE = re.compile(rf"({ACTION_NAME})@([0-9a-f]{{40}})\Z")
 # YAML permits quoted mapping keys. A quoted "uses" key must not bypass the SHA check.
-USE_LINE = re.compile(r'''^[ \t]*(?:-[ \t]+)?(?:uses|'uses'|"uses")[ \t]*:[ \t]*([^#\r\n]*?)[ \t]*(?:#[ \t]*(.*))?$''', re.M)
+# CRLF is a valid YAML line break; do not skip uses on Windows-style lines.
+USE_LINE = re.compile(r'''^[ \t]*(?:-[ \t]+)?(?:uses|'uses'|"uses")[ \t]*:[ \t]*([^#\r\n]*?)[ \t]*(?:#[ \t]*([^\r\n]*))?\r?$''', re.M)
 VERSION = re.compile(r"v[0-9]+(?:\.[0-9]+){1,2}(?:[-+][0-9A-Za-z.+-]+)?\Z")
 DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}\Z")
 
