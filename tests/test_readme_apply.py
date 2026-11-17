@@ -202,6 +202,27 @@ class ReadmeApplyTests(unittest.TestCase):
         self.assertEqual(proposal_before, self.proposal.read_bytes())
         self.assert_clean()
 
+    def test_symlinked_proposal_parent_rejects_approved_hashes(self):
+        physical = self.tmp / "physical-proposals"
+        physical.mkdir()
+        (physical / "external.md").write_bytes(b"# Synthetic\nSYNTHETIC_PRIVATE_MARKER\n")
+        alias = self.tmp / "proposals-alias"
+        try:
+            alias.symlink_to(physical, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        original = self.readme.read_bytes()
+        for proposal in (alias / "external.md", alias / ".." / "candidate.md"):
+            with self.subTest(proposal=str(proposal)):
+                self.proposal = proposal
+                result = self.approved()
+                self.assertEqual(2, result.returncode, result.stderr)
+                self.assertEqual("", result.stdout)
+                self.assertIn("proposal: symlinked or redirected parent directory", result.stderr)
+                self.assertNotIn("SYNTHETIC_PRIVATE_MARKER", result.stderr)
+                self.assertEqual(original, self.readme.read_bytes())
+                self.assert_clean()
+
     def test_invisible_proposal_characters_fail_before_replacement(self):
         original = self.readme.read_bytes()
         for ch in ("\u200b", "\u2060", "\ufeff"):

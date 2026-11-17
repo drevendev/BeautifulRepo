@@ -891,6 +891,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject README preview/apply proposal files reached through symlinked or
+  Windows-reparse-point parent directories, even when the final file is
+  ordinary and the approval hashes match. Regression tests cover direct
+  aliases and lexical `..` paths without exposing synthetic outside text.
+
 - Permit workflow sets using only local, commit-bound same-repository or
   container `uses:` steps to pass the offline reviewed-Action pin check
   without an external pin manifest. Existing manifests remain validated;

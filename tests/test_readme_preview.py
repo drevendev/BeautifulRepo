@@ -183,6 +183,35 @@ class ReadmePreviewTests(unittest.TestCase):
         self.assertEqual(before, self.readme.read_bytes())
         self.assertEqual(proposal_before, self.proposal.read_bytes())
 
+    def test_symlinked_proposal_parent_does_not_disclose_external_text(self):
+        physical = self.tmp / "physical-proposals"
+        physical.mkdir()
+        (physical / "external.md").write_text(
+            "# Synthetic\n\nSYNTHETIC_PRIVATE_MARKER\n", encoding="utf-8")
+        alias = self.tmp / "proposals-alias"
+        try:
+            alias.symlink_to(physical, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        old = self.readme.read_bytes()
+        for proposal in (alias / "external.md", alias / ".." / "candidate.md"):
+            with self.subTest(proposal=str(proposal)):
+                self.proposal = proposal
+                result = self.command()
+                self.assertEqual(2, result.returncode, result.stderr)
+                self.assertEqual("", result.stdout)
+                self.assertIn("proposal: symlinked or redirected parent directory", result.stderr)
+                self.assertNotIn("SYNTHETIC_PRIVATE_MARKER", result.stderr)
+                self.assertEqual(old, self.readme.read_bytes())
+
+    def test_plain_proposal_dotdot_without_redirect_is_accepted(self):
+        normal = self.tmp / "normal-proposals"
+        normal.mkdir()
+        self.proposal = normal / ".." / "candidate.md"
+        result = self.command()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Proposed unified diff", result.stdout)
+
     def test_missing_final_newline_and_line_endings_reported(self):
         self.readme.write_bytes(b"# X\r\nBefore")
         self.proposal.write_bytes(b"# X\nAfter\n")
