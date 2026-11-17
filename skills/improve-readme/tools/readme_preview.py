@@ -48,6 +48,11 @@ def _unsafe_display_character(ch: str) -> bool:
 
 def read_file(path: Path, label: str) -> tuple[bytes, str]:
     try:
+        # A regular file can be reached through a symlinked directory.
+        # Inspect lexical ancestors, including components before '..', before reading.
+        selected = path if path.is_absolute() else Path.cwd() / path
+        if any(_redirect(parent) for parent in selected.parents):
+            raise PreviewError(f"{label}: symlinked or redirected parent directory.")
         if _redirect(path):
             raise PreviewError(f"{label}: expected a regular, non-redirected UTF-8 file.")
         source_info = path.lstat()
