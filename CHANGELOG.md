@@ -697,6 +697,13 @@ keep their original themed headings.
 
 ### Changed
 
+- Re-pin all three public combined-audit first-run recipes (README,
+  combined-audit guide and working proof) from `28530c9` to reachable
+  immutable `master` commit `d0e746c`, whose six Quality CI jobs passed on
+  2026-11-18. This source includes later hard-link and redirected-path guards;
+  a cross-document regression now rejects inconsistent guide pins. Source CI
+  is not evidence of an independently observed fresh end-user installation.
+
 - Refresh the four-skill **development** test pin to immutable source
   commit `76c39ed5732304334358b9d4b214821d7030b39f` after the merged README parent-path guard
   (#402), and align the plugin install and manual smoke instructions.
