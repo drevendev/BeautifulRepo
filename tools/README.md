@@ -368,7 +368,12 @@ reviewed `.github/action-pins.json`. The manifest names each action, its full
 40-character lowercase commit SHA, upstream release label and actual manual
 inspection date. A Dependabot bump that only changes a SHA now fails until a
 maintainer verifies upstream and updates the manifest and workflow annotations.
-Local `./` and `docker://` actions are excluded. Duplicate manifest JSON keys,
+Local `./`, commit-bound `$/` and `docker://` actions do not require
+external SHA entries. The checker rejects `./` and `$/` references with
+parent/current-directory components, repeated separators, backslashes,
+whitespace or an `@ref` suffix; a bare `./` may point at an action in the
+workspace root. It does not verify local action existence, whether the
+workspace was checked out, or Docker image provenance. Duplicate manifest JSON keys,
 unpinned tags, missing annotations, unknown actions and unused manifest records
 fail closed. Files are bounded to 256 KiB (64 KiB manifest, 100 workflows);
 symlinked files are rejected. Exit 0 means locally consistent references;
