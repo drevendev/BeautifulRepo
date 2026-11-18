@@ -47,6 +47,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   tags, GitHub Releases and maintained changelogs without implying a release.
 - [Annotated pattern studies](case-studies/first-patterns.md) and a
   [curated source catalog](catalog/README.md).
+- [Idle Fantasy Shop game README source case](case-studies/idle-fantasy-shop.md):
+  a pinned, dated diagnosis of release-history overload and contradictory
+  current-version text with a proposed first-screen rewrite. No target PR,
+  hosted run or completed before/after result is claimed.
 - [Curated collection starter](guides/curated-collections.md), with
   [three annotated references](examples/curated-starter/README.md), deterministic
   Markdown/JSON output and explicit input boundaries.
