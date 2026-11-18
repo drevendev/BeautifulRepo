@@ -85,9 +85,11 @@ results. Never report PASS based on reading this page or on green unit tests.
    If a host fails to install, inspect its actual version and report
    **FAIL/INCONCLUSIVE** with the error. **Issue handoff (reviewed 2026-11-18):**
    [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
-   now pins the same successor SHA and separates older trials from current
-   acceptance. Follow its candidate-specific instructions, but do not treat
-   the issue or this matrix as evidence that a host installed or ran a skill. These
+   and [release gate #257](https://github.com/drevendev/BeautifulRepo/issues/257)
+   still name the earlier candidate. Until their native issue instructions are
+   reconciled, follow this guide's explicit full SHA for the newly proposed
+   development-source trial and do not combine test results across candidate
+   revisions. Neither issue nor this matrix proves a host installed or ran a skill. These
    commands are **untested setup instructions**, not an observed host PASS,
    GitHub-source marketplace acceptance or authorization to run a model.
 
