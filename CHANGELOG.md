@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-locked Idle Fantasy Shop game README case that separates the
+  public play entrance from operational release history, identifies conflicting
+  current-version statements and provides an explicitly untested first-screen
+  rewrite. No target repository change, fresh playtest or completed before/after
+  claim is made.
+
 - Add a practical pull-request review workflow and reusable evidence card,
   including an annotated real code-change example, material-versus-follow-up
   decisions and exact-head provider-gate checks. This does not create
