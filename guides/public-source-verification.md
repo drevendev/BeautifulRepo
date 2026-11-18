@@ -9,6 +9,29 @@ This is a read-only, manually evaluated preflight, **not** a guarantee that
 the source will remain available or that the application runs. No target
 code needs to be executed. Reviewed **2026-11-18**.
 
+## Optional offline permalink consistency check
+
+Before attempting anonymous HTTP verification, check that the source-only
+case uses one explicit 40-character revision consistently. From a BeautifulRepo
+checkout, this standard-library command reads the case Markdown only:
+
+```sh
+python -I tools/source_pins.py \
+  --case case-studies/hungrycrab-first-command.md \
+  --repository drevendev/HungryCrab \
+  --commit d20850c4e71382c796c4b4dac554137ebcb7e937
+```
+
+Exit **0** means matching GitHub tree/blob source links and at least one
+README blob permalink were found; **1** reports inconsistent/missing pins;
+**2** means the input could not be inspected or the arguments are invalid.
+This bounded source-text scanner ignores fenced code and unrelated GitHub
+repositories, but is not a complete Markdown renderer. It does **not**
+contact GitHub, confirm anonymous access, follow the links, compare actual
+file contents or verify the claims made by the case. A PASS here must be
+followed by the separate signed-out checks below; it is never a
+public-access or runtime PASS.
+
 ## A concrete example: HungryCrab
 
 The current [source-only case](../case-studies/hungrycrab-first-command.md)
