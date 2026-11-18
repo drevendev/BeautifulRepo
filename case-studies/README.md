@@ -9,6 +9,7 @@ procedure have not been executed; a source comparison alone is not a finished ca
 | --- | --- | --- |
 | [README before/after](readme-first-success-case.md) | BeautifulRepo | complete; written before this procedure, which it shaped |
 | [Offline first success](patchpitch.md) | PatchPitch | complete; change merged as PatchPitch#90 |
+| [First play below the release ledger](idle-fantasy-shop.md) | Idle Fantasy Shop | source-only diagnosis and proposed reader-first rewrite; no target PR or hosted test |
 | [Milestone-claim drift](trade_simulation.md) | trade_simulation | in progress; pinned clone audits and live 320 px light/dark observations, broader accessibility/deployment proof pending |
 | [First-run and reporting-route baseline](quillgrain.md) | Quillgrain + Quillgrain_Voice_Common | source-only baseline; no target PR or run evidence yet |
 | [First pattern studies](first-patterns.md) | Devostasis, Hungry Crab, Gum | source observations only, no changes made |
