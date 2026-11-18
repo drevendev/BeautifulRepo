@@ -11,12 +11,6 @@ keep their original themed headings.
 
 ## [Unreleased]
 
-### Fixed
-
-- Refuse redirected checkout paths in the offline release-history inventory before
-  Git reads commit subjects, including symlinked parents and Windows reparse
-  points. This is a path preflight, not an isolation sandbox or host-model test.
-
 ### Added
 
 - Add a practical pull-request review workflow and reusable evidence card,
@@ -927,6 +921,10 @@ keep their original themed headings.
   public guidance and issue history remain available.
 
 ### Fixed
+
+- Refuse redirected checkout paths in the offline release-history inventory before
+  Git reads commit subjects, including symlinked parents and Windows reparse
+  points. This is a path preflight, not an isolation sandbox or host-model test.
 
 - Reject malformed workspace-local `uses: ./...` paths in the offline Actions
   pin checker instead of exempting redirected `../`, repeated-slash,
