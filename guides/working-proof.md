@@ -29,12 +29,15 @@ clone BeautifulRepo **beside** it and run:
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 28530c997bf6e0df4406c271f77dd21482e40781
+git checkout --detach d0e746c04563beef0a854baa5974e5f409a3bd90
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
 The detached commit pins a reviewed **development checkout** containing the
 combined audit; it is not a new release or the older `v0.2.0` Action pin.
+Its [six Quality CI jobs](https://github.com/drevendev/BeautifulRepo/actions/runs/44190103994)
+passed on the exact SHA, including later hard-link and redirected-path source
+guards. No independent first-time installation or user experience is inferred.
 Cloning needs network access; the audit itself does not. To adopt a newer
 revision, review and intentionally change the pin rather than silently
 running whatever is on `master`.

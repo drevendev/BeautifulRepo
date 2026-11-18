@@ -162,10 +162,14 @@ class FirstVisitTests(unittest.TestCase):
         guide = (ROOT / "guides" / "combined-audit.md").read_text(encoding="utf-8")
         readme_pins = re.findall(pattern, readme, flags=re.MULTILINE)
         guide_pins = re.findall(pattern, guide, flags=re.MULTILINE)
+        proof = (ROOT / "guides" / "working-proof.md").read_text(encoding="utf-8")
+        proof_pins = re.findall(pattern, proof, flags=re.MULTILINE)
         self.assertEqual(1, len(readme_pins), "README needs one first-audit pin")
         self.assertEqual(2, len(guide_pins), "POSIX and PowerShell pins must agree")
+        self.assertEqual(1, len(proof_pins), "Working proof needs one first-audit pin")
         pin = readme_pins[0]
         self.assertEqual({pin}, set(guide_pins))
+        self.assertEqual([pin], proof_pins, "All public first-run guides must use the same pinned source")
         if not (ROOT / ".git").exists():
             self.skipTest("source archive has no local Git history")
 

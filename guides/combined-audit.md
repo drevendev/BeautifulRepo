@@ -18,7 +18,7 @@ beside it and check out a reviewed, immutable development snapshot:
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 28530c997bf6e0df4406c271f77dd21482e40781
+git checkout --detach d0e746c04563beef0a854baa5974e5f409a3bd90
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 python -I tools/audit_bundle.py ../your-repository --format json
 ```
@@ -43,7 +43,7 @@ Run the same **read-only**, dependency-free checker in PowerShell:
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw "Git clone failed" }
 Set-Location .\BeautifulRepo
-git checkout --detach 28530c997bf6e0df4406c271f77dd21482e40781
+git checkout --detach d0e746c04563beef0a854baa5974e5f409a3bd90
 if ($LASTEXITCODE -ne 0) { throw "Pinned checkout failed" }
 python --version
 if ($LASTEXITCODE -ne 0) { throw "Python not available" }
@@ -62,7 +62,10 @@ Python 3.11+ and ensure its command is on PATH; do not substitute a different
 unchecked interpreter or install packages into the target.
 
 The pinned checkout is a reviewed development snapshot, not a new stable
-release. This path is checked using a fresh **local** sibling Git clone of
+release. Its [six Quality CI checks](https://github.com/drevendev/BeautifulRepo/actions/runs/44190103994)
+completed successfully on the exact pinned source (2026-11-18). The pin
+includes subsequent hard-link and path-redirection protections absent from
+`28530c9`; this is source/checker evidence, not external-user installation. This path is checked using a fresh **local** sibling Git clone of
 the CI source revision on Windows; the remote pinned-revision checkout and
 actual first-time end-user PowerShell session have not been independently
 observed. The audit
