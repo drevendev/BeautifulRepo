@@ -17,7 +17,8 @@ procedure have not been executed; a source comparison alone is not a finished ca
 ## Source-only reviews: useful, but not a before/after
 
 A **source-only** study can help a reader when no upstream patch or actual
-first-run test exists. Use the [source-only case template](../templates/SOURCE_ONLY_CASE.template.md)
+first-run test exists. Use the [anonymous public-source verification recipe](../guides/public-source-verification.md)
+for a copyable no-credential preflight, then the [source-only case template](../templates/SOURCE_ONLY_CASE.template.md)
 to record an editorial proposal without claiming a completed intervention.
 The [HungryCrab study](hungrycrab-first-command.md) demonstrates this evidence class.
 

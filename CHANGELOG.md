@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Document a reproducible, credential-free public-source preflight using
+  GitHub's read-only contents endpoint, fixed commit paths, explicit failure
+  classification and dated evidence. The example commands are **not run**;
+  this is a public case-study recipe, not a source-access certification.
+
 - Add a reusable source-only case template and a public-evidence preflight,
   inspired by rejecting an inaccessible-source candidate. Anonymous access,
   pinned files, separately dated GitHub metadata, unrun commands and missing
