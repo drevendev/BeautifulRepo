@@ -922,6 +922,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Refuse redirected checkout paths in the offline release-history inventory before
+  Git reads commit subjects, including symlinked parents and Windows reparse
+  points. This is a path preflight, not an isolation sandbox or host-model test.
+
 - Reject malformed workspace-local `uses: ./...` paths in the offline Actions
   pin checker instead of exempting redirected `../`, repeated-slash,
   backslash, whitespace and `@ref` forms as local. Preserve a bare `./`
