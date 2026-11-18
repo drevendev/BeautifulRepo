@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a practical pull-request review workflow and reusable evidence card,
+  including an annotated real code-change example, material-versus-follow-up
+  decisions and exact-head provider-gate checks. This does not create
+  required approvals or claim security certification.
+
 - Add an evidence-led dependency-update review recipe and editable decision
   card, including an inspected BeautifulRepo Actions/Dependabot example,
   specific privilege/test checks and ACCEPT/DEFER/REJECT outcomes. Neither
