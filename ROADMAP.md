@@ -47,6 +47,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   tags, GitHub Releases and maintained changelogs without implying a release.
 - [Annotated pattern studies](case-studies/first-patterns.md) and a
   [curated source catalog](catalog/README.md).
+- [Public-evidence gate for source-only cases](case-studies/README.md#source-only-reviews-useful-but-not-a-beforeafter)
+  and [reusable source-only template](templates/SOURCE_ONLY_CASE.template.md),
+  distinguishing inspected source from unrun commands and upstream changes.
 - [Curated collection starter](guides/curated-collections.md), with
   [three annotated references](examples/curated-starter/README.md), deterministic
   Markdown/JSON output and explicit input boundaries.
