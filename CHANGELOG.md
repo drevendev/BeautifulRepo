@@ -946,6 +946,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reconcile the four-skill smoke matrix and ROADMAP with the updated #257/#258
+  instructions: immutable skill source and reviewed documentation have distinct
+  commits. Passing deterministic CI does not establish actual host acceptance.
+
 - Refuse redirected checkout paths in the offline release-history inventory before
   Git reads commit subjects, including symlinked parents and Windows reparse
   points. This is a path preflight, not an isolation sandbox or host-model test.
