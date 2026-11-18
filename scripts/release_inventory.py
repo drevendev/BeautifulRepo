@@ -6,12 +6,37 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 
 
 class InventoryError(ValueError):
     """The requested history cannot be inventoried reliably."""
+
+
+def ordinary_checkout_directory(path: Path) -> Path:
+    """Reject redirected lexical components before reading a selected checkout.
+
+    An alias to another local repository can silently expose that repository's
+    commit subjects. This point-in-time check is not a filesystem sandbox and
+    does not attest Git's own repository configuration.
+    """
+    selected = path if path.is_absolute() else Path.cwd() / path
+    for component in reversed((selected, *selected.parents)):
+        try:
+            info = component.lstat()
+        except OSError as exc:
+            raise InventoryError("checkout path cannot be inspected") from exc
+        if (stat.S_ISLNK(info.st_mode)
+                or bool(getattr(info, "st_reparse_tag", 0))
+                or bool(getattr(info, "st_file_attributes", 0)
+                        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+                or getattr(component, "is_junction", lambda: False)()):
+            raise InventoryError("checkout path contains a symlink or reparse point")
+        if not stat.S_ISDIR(info.st_mode):
+            raise InventoryError("checkout path must contain only directories")
+    return selected
 
 
 def git(target: Path, *args: str, allow_missing: bool = False) -> str | None:
@@ -40,10 +65,11 @@ def git(target: Path, *args: str, allow_missing: bool = False) -> str | None:
 def inventory(target: Path, base: str | None = None, limit: int = 200) -> dict:
     if limit < 1 or limit > 500:
         raise InventoryError("--limit must be between 1 and 500")
+    target = ordinary_checkout_directory(target)
     root = git(target, "rev-parse", "--show-toplevel")
     if not root:
         raise InventoryError("target must be inside a local Git checkout")
-    target = Path(root)
+    target = ordinary_checkout_directory(Path(root))
     # Git treats the boundary of a shallow clone as a root, which would
     # otherwise silently produce an incomplete (often empty) inventory.
     # Reject even explicit-base requests: this is a complete-history tool.
