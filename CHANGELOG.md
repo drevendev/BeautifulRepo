@@ -707,6 +707,15 @@ keep their original themed headings.
 
 ### Changed
 
+- Refresh the immutable four-skill development-test source to commit
+  `4d74e840792fe87c79e1202d982a95103d97ba73` after its
+  2026-11-18 exact-source Quality CI passed 6/6. Align the host smoke
+  protocol and cache-verification examples with the later checkout-path and
+  hard-link guards. Prior candidate traces remain historical; no real
+  Claude Code/Codex installation or invocation, four-skill release or
+  external acceptance is claimed. Related: #257, #258.
+
+
 - Re-pin all three public combined-audit first-run recipes (README,
   combined-audit guide and working proof) from `28530c9` to reachable
   immutable `master` commit `d0e746c`, whose six Quality CI jobs passed on
