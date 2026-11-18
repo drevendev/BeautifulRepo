@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -235,6 +236,40 @@ class ActionPinTests(unittest.TestCase):
                                   '"version": "v7.0.1", "version": "v7.1.0",')
         (self.root / ".github/action-pins.json").write_text(content)
         self.assertEqual(self.run_tool().returncode, 2)
+
+    def test_hard_linked_workflow_outside_checkout_is_rejected(self):
+        with tempfile.TemporaryDirectory() as outside_dir:
+            target = Path(outside_dir) / "external-workflow.yml"
+            workflow = self.root / ".github/workflows/ci.yml"
+            expected = workflow.read_bytes()
+            target.write_bytes(expected)
+            workflow.unlink()
+            try:
+                os.link(target, workflow)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"hard links unavailable: {exc}")
+            self.assertEqual(workflow.stat().st_nlink, 2)
+            result = self.run_tool()
+            self.assertEqual(2, result.returncode, result.stderr)
+            self.assertIn("single-linked ordinary file", result.stderr)
+            self.assertEqual(expected, target.read_bytes())
+
+    def test_hard_linked_pin_manifest_outside_checkout_is_rejected(self):
+        with tempfile.TemporaryDirectory() as outside_dir:
+            target = Path(outside_dir) / "external-pins.json"
+            manifest = self.root / ".github/action-pins.json"
+            expected = manifest.read_bytes()
+            target.write_bytes(expected)
+            manifest.unlink()
+            try:
+                os.link(target, manifest)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"hard links unavailable: {exc}")
+            self.assertEqual(manifest.stat().st_nlink, 2)
+            result = self.run_tool()
+            self.assertEqual(2, result.returncode, result.stderr)
+            self.assertIn("single-linked ordinary file", result.stderr)
+            self.assertEqual(expected, target.read_bytes())
 
     def test_manifest_symlink_fails_closed(self):
         original = self.root / ".github/action-pins.json"

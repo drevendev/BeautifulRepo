@@ -1380,6 +1380,11 @@ keep their original themed headings.
 
 ### Security
 
+- Reject hard-linked GitHub Actions workflow files and the reviewed pin manifest
+  in the offline Actions pin checker. Inspect the opened file descriptor as well
+  as the filename before parsing, with regressions for external aliases.
+  This assumes a stable checkout and does not claim race-free filesystem isolation.
+
 - Refuse hard-linked entry-point documents in the direct offline repository
   auditor, not only in the optional MCP preflight. A hard link can point to
   an external file while appearing regular; pre-open and descriptor checks
