@@ -4,7 +4,8 @@
 **Target changed:** NO. **First-run commands:** NOT RUN unless separately evidenced.
 
 Replace every placeholder before publishing. Use this only for source that an
-independent visitor can access. See the [case study procedure](../case-studies/README.md).
+independent visitor can access. Follow the [anonymous source-check recipe](../guides/public-source-verification.md)
+for reproducible read-only verification. See the [case study procedure](../case-studies/README.md).
 
 ## Public evidence preflight
 
