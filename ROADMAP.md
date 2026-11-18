@@ -58,6 +58,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Dependency-update review recipe](guides/dependency-review.md) and
   [editable decision card](templates/DEPENDENCY_REVIEW.template.md), grounded
   in source/privilege/test evidence without new security settings.
+- [Evidence-led pull request review](guides/pull-request-review.md) with a
+  [copyable review record](templates/PULL_REQUEST_REVIEW.template.md), an
+  annotated existing PR and explicit separation of actual GitHub gates from
+  reviewer judgement; no new review policy or repository settings.
 - [Capacity-based maintenance guide](guides/maintainer-capacity.md) with a
   [copyable, explicitly non-binding capacity card](templates/MAINTAINER_CAPACITY.template.md),
   a worked fictional monthly allocation and verified support-route boundaries.
