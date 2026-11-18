@@ -12,16 +12,16 @@ code needs to be executed. Reviewed **2026-11-18**.
 ## A concrete example: HungryCrab
 
 The current [source-only case](../case-studies/hungrycrab-first-command.md)
-uses public repository \`drevendev/HungryCrab\` and the immutable revision
-\`d20850c4e71382c796c4b4dac554137ebcb7e937\`.
+uses public repository `drevendev/HungryCrab` and the immutable revision
+`d20850c4e71382c796c4b4dac554137ebcb7e937`.
 
 In a session with **no GitHub authentication**, no GitHub-authorizing proxy
 and no credentials in curl configuration, run these read-only requests.
-The \`-q\` first option prevents curl from loading a per-user \`.curlrc\`.
-The commands deliberately do not set an Authorization header, use \`gh\`,
+The `-q` first option prevents curl from loading a per-user `.curlrc`.
+The commands deliberately do not set an Authorization header, use `gh`,
 run source code or store downloaded response bodies.
 
-\`\`\`sh
+```sh
 # Repository metadata: public anonymous access at the observation time.
 curl -q --fail --silent --show-error --location --max-redirs 3 \
   --proto '=https' --proto-redir '=https' --max-time 20 \
@@ -42,7 +42,7 @@ curl -q --fail --silent --show-error --location --max-redirs 3 \
   -H 'Accept: application/vnd.github+json' \
   -o /dev/null -w 'pyproject: HTTP %{http_code}; final: %{url_effective}\n' \
   'https://api.github.com/repos/drevendev/HungryCrab/contents/pyproject.toml?ref=d20850c4e71382c796c4b4dac554137ebcb7e937'
-\`\`\`
+```
 
 These are **example commands, not recorded execution results**. Substitute
 your own owner/repository, exact 40-character commit and source paths. Check
@@ -68,7 +68,7 @@ verify that your prose accurately describes the file.
   invocation. Label these **NOT RUN**, and do not claim an upstream patch
   when no upstream PR exists.
 
-**Privacy:** do not paste an access token, API key, cookie, \`gh auth\`
+**Privacy:** do not paste an access token, API key, cookie, `gh auth`
 output or private source into the case. Test from an actually separate
 signed-out environment; proxies, browser profiles, credential injectors and
 enterprise gateways can silently add access. If you cannot isolate
