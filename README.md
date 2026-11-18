@@ -180,7 +180,9 @@ not a second copy of the first-screen chooser.
   a [release-note template](templates/RELEASE_NOTES.template.md),
   [maintenance workflow](guides/maintenance-workflow.md),
   [evidence-led issue triage](guides/issue-triage.md),
-  [capacity-based maintainer expectations](guides/maintainer-capacity.md) and
+  [capacity-based maintainer expectations](guides/maintainer-capacity.md),
+  [dependency-update review](guides/dependency-review.md) and
+  [editable decision card](templates/DEPENDENCY_REVIEW.template.md),
   [reusable capacity card](templates/MAINTAINER_CAPACITY.template.md),
   [first-contribution route](guides/first-contribution.md) and
   [copyable starter issue](templates/GOOD_FIRST_ISSUE.template.md),

@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add an evidence-led dependency-update review recipe and editable decision
+  card, including an inspected BeautifulRepo Actions/Dependabot example,
+  specific privilege/test checks and ACCEPT/DEFER/REJECT outcomes. Neither
+  document enables automation or certifies supply-chain safety.
+
 - Add a source-backed maintainer-capacity recipe and reusable expectation card,
   including an explicitly fictional two-hour monthly allocation, real support
   routing and a no-promise triage decision. This does not create a response SLA,
