@@ -70,7 +70,7 @@ class PluginManifestTests(unittest.TestCase):
         )
         self.assertEqual(len(checkouts), 1, "need one active full-SHA checkout")
         candidate = checkouts[0]
-        self.assertEqual(candidate, "76c39ed5732304334358b9d4b214821d7030b39f")
+        self.assertEqual(candidate, "4d74e840792fe87c79e1202d982a95103d97ba73")
         self.assertIn("git -C BeautifulRepo-candidate rev-parse HEAD", guide)
         self.assertIn("claude plugin marketplace add ./BeautifulRepo-candidate", guide)
         self.assertIn("codex plugin marketplace add ./BeautifulRepo-candidate", guide)
@@ -135,7 +135,7 @@ class PluginManifestTests(unittest.TestCase):
         """The current source includes the hard-link guard; old pins remain historical."""
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
         matrix = (ROOT / "evals/manual-smoke.md").read_text(encoding="utf-8")
-        candidate = "76c39ed5732304334358b9d4b214821d7030b39f"
+        candidate = "4d74e840792fe87c79e1202d982a95103d97ba73"
         historical = "70b792b7f09d4bd03e36b6ca1cf6c869e5036872"
         section = guide.split("## Verify cached skill definitions", 1)[1].split(
             "## Standalone skill-manager installations", 1
