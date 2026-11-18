@@ -34,8 +34,10 @@ repository's CI, use the [GitHub Action](../guides/adopting-the-checks.md).
 
 The Markdown and HTML/fragment scanners refuse hard-linked Markdown source files
 and anchor targets rather than reading aliases to files outside the checkout.
-These read-only checks assume a stable checkout; they are not a sandbox against
-concurrent filesystem replacement.
+The reviewed Actions pin checker likewise rejects hard-linked workflow files and
+its pin manifest. It checks file identity again after opening each input and
+refuses symlink targets; this is a stable-checkout preflight, not a sandbox
+against concurrent filesystem replacement.
 
 The HTML navigation checker reports explicit empty or whitespace-only `src` and
 `srcset` attributes on active `img`, `source`, `video`, `audio` and `track`
