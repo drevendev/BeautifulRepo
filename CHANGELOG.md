@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add a reusable source-only case template and a public-evidence preflight,
+  inspired by rejecting an inaccessible-source candidate. Anonymous access,
+  pinned files, separately dated GitHub metadata, unrun commands and missing
+  target changes are now distinguished explicitly. A 404 remains inconclusive;
+  no other repository was modified.
+
 - Add an independently checkable, commit-pinned HungryCrab README first-command
   study with concrete annotated replacement copy and explicit source-only
   acceptance limits. No HungryCrab changes, host install or measured adoption.

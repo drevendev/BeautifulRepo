@@ -14,6 +14,34 @@ procedure have not been executed; a source comparison alone is not a finished ca
 | [HungryCrab first command](hungrycrab-first-command.md) | HungryCrab (public) | source-only; pinned evidence and proposed first-screen copy, no target change or runtime test |
 | [First pattern studies](first-patterns.md) | Devostasis, Hungry Crab, Gum | source observations only, no changes made |
 
+## Source-only reviews: useful, but not a before/after
+
+A **source-only** study can help a reader when no upstream patch or actual
+first-run test exists. Use the [source-only case template](../templates/SOURCE_ONLY_CASE.template.md)
+to record an editorial proposal without claiming a completed intervention.
+The [HungryCrab study](hungrycrab-first-command.md) demonstrates this evidence class.
+
+**Check public reproducibility first:** inspect the exact target commit and
+source-file permalinks without a privileged account, record the method and
+date, and confirm an independent visitor can see them. Being able to fetch
+a private repository with an authenticated connector does **not** make it a
+public case study. A 404 is *inconclusive* (private, deleted, incorrect path,
+permissions, rate limiting or transient errors). If public evidence cannot
+be confirmed, **defer** rather than publish privileged source details. A
+fictional example may be created independently, but must not leak private facts.
+
+Use full commit SHAs for inspected files; separately date visibility, releases,
+security settings and other metadata that Git does not freeze. Mark commands,
+rendering, target changes and external-host checks **NOT RUN / NONE** when absent.
+Even public, unlicensed source is not permission to reproduce its code or
+images; see [rights and quoting](#rights-and-quoting).
+
+This procedure is an editorial reproducibility gate, not a guarantee of
+usability or public availability forever. Reference: [GitHub's README
+guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes)
+and [Open Source Guides' starting-a-project checklist](https://opensource.guide/starting-a-project/),
+reviewed **2026-11-18**.
+
 ## The procedure
 
 A case changes the target through that repository's normal pull request. It never edits
