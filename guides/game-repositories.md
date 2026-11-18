@@ -80,6 +80,11 @@ certification without the corresponding process and results.
 
 Adapt the [game README template](../templates/GAME_README.template.md) and
 use the [first-success checklist](../checklists/first-success.md).
+A [revision-pinned Idle Fantasy Shop case](../case-studies/idle-fantasy-shop.md)
+shows a real source-only problem: an operational release log precedes the
+actual game description and play link, while two sections disagree about
+the current version. It includes a deliberately unverified first-screen
+rewrite, not a merged change or an observed playtest.
 The [application guide](application-repositories.md) has more detail on
 services and data handling; this guide focuses on games' mixed audience.
 
