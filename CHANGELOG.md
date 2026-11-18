@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add an independently checkable, commit-pinned HungryCrab README first-command
+  study with concrete annotated replacement copy and explicit source-only
+  acceptance limits. No HungryCrab changes, host install or measured adoption.
+
 - Add a practical pull-request review workflow and reusable evidence card,
   including an annotated real code-change example, material-versus-follow-up
   decisions and exact-head provider-gate checks. This does not create
