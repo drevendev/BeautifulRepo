@@ -50,7 +50,7 @@ This is **copy to verify**, not a patch applied to IdleShop. The facts come
 from the inspected source and store listing; the first-minute gameplay
 steps and responsive layout still need a real hosted check.
 
-```markdown
+~~~~markdown
 # Idle Fantasy Shop
 
 Run a small shop in Latchford. Gather and craft goods, stock your shelves,
@@ -76,7 +76,7 @@ npm run dev
 
 [Release history and qualification evidence](docs/release/README.md)
 [Development roadmap](docs/ROADMAP.md)
-```
+~~~~
 
 The commands and runtime requirements are copied from the pinned
 `package.json` and README; **they were not executed** for this case.
