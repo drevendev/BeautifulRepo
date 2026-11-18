@@ -143,6 +143,12 @@ issues for their live status.
   inside Claude Code/Codex. Use the pinned full-plugin candidate for its
   separate host-acceptance tests; do not advertise an agent-verified
   standalone installation yet.
+- **Public HungryCrab first-command case**
+  ([source-only review](case-studies/hungrycrab-first-command.md)):
+  a verified public README at a fixed upstream commit, with a specific
+  first-visit obstacle and copyable proposed improvement. It is **not** an
+  upstream PR, after-state or observed installation; the full procedure
+  remains open under #88.
 - **Real before/after cases**
   ([#88](https://github.com/drevendev/BeautifulRepo/issues/88)):
   the [repeatable procedure](case-studies/README.md) and

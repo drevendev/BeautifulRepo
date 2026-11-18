@@ -11,6 +11,7 @@ procedure have not been executed; a source comparison alone is not a finished ca
 | [Offline first success](patchpitch.md) | PatchPitch | complete; change merged as PatchPitch#90 |
 | [Milestone-claim drift](trade_simulation.md) | trade_simulation | in progress; pinned clone audits and live 320 px light/dark observations, broader accessibility/deployment proof pending |
 | [First-run and reporting-route baseline](quillgrain.md) | Quillgrain + Quillgrain_Voice_Common | source-only baseline; no target PR or run evidence yet |
+| [HungryCrab first command](hungrycrab-first-command.md) | HungryCrab (public) | source-only; pinned evidence and proposed first-screen copy, no target change or runtime test |
 | [First pattern studies](first-patterns.md) | Devostasis, Hungry Crab, Gum | source observations only, no changes made |
 
 ## The procedure
