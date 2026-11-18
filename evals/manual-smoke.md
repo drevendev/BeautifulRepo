@@ -92,9 +92,8 @@ results. Never report PASS based on reading this page or on green unit tests.
    graders and fixtures must still come from the **source** candidate, not the
    docs commit or mutable master. Do not combine test results across source
    candidates. Neither issue nor this matrix proves a host installed or ran a
-   skill. These commands are **untested setup instructions**, not an observed
-   host PASS,
-   GitHub-source marketplace acceptance or authorization to run a model.
+   skill. These commands are **untested setup instructions**, not an observed host PASS,
+   proof of GitHub-source marketplace acceptance, or authorization to run a model.
 
 4. For **negative-trigger** and read-only preview runs, allow file-reading and
    skill invocation only. Block editing, outbound browsing, remote services,
