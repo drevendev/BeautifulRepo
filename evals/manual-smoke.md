@@ -86,12 +86,14 @@ results. Never report PASS based on reading this page or on green unit tests.
    **FAIL/INCONCLUSIVE** with the error. **Issue handoff (reviewed 2026-11-18):**
    [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
    and [release gate #257](https://github.com/drevendev/BeautifulRepo/issues/257)
-   still name the earlier candidate. Until their native issue instructions are
-   reconciled, follow this guide's explicit full SHA for the newly proposed
-   development-source trial and do not combine test results across candidate
-   revisions. Neither issue nor this matrix proves a host installed or ran a skill. These
-   commands are **untested setup instructions**, not an observed host PASS,
-   GitHub-source marketplace acceptance or authorization to run a model.
+   now name source candidate `4d74e840792fe87c79e1202d982a95103d97ba73`
+   and link to the reviewed documentation commit
+   `775e1ba9de4b20fd9e6b60f4648d558f85944b63`. Source bytes, prompts,
+   graders and fixtures must still come from the **source** candidate, not the
+   docs commit or mutable master. Do not combine test results across source
+   candidates. Neither issue nor this matrix proves a host installed or ran a
+   skill. These commands are **untested setup instructions**, not an observed host PASS,
+   proof of GitHub-source marketplace acceptance, or authorization to run a model.
 
 4. For **negative-trigger** and read-only preview runs, allow file-reading and
    skill invocation only. Block editing, outbound browsing, remote services,

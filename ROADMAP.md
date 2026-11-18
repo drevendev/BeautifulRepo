@@ -134,8 +134,10 @@ issues for their live status.
   [fixtures](https://github.com/drevendev/BeautifulRepo/issues/74) and
   [tester request](https://github.com/drevendev/BeautifulRepo/issues/258)
   cover remaining positive, negative and hostile tests. Issues #257/#258
-  still reference an earlier pin: record the tested SHA explicitly and do
-  not combine evidence across candidates. No stable four-skill release or
+  now use source candidate `4d74e840792fe87c79e1202d982a95103d97ba73`
+  and reviewed setup documentation from `775e1ba9de4b20fd9e6b60f4648d558f85944b63`.
+  Pin their roles separately: instructions are not host evidence, and no test
+  results transfer across source candidates. No stable four-skill release or
   real host acceptance is claimed.
 - **Standalone skills CLI distribution** ([#333](https://github.com/drevendev/BeautifulRepo/issues/333)):
   the four skills now carry their individual required files in-source. The
