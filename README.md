@@ -31,7 +31,7 @@ Choose the result you need:
 
 - **Diagnose an existing repository:** run the [offline audit](guides/repository-audit.md) with the [repository checklist](checklists/repository.md) to get specific findings, not a beauty score.
 - **Start a new repository:** adapt the [README scaffold](templates/README.template.md) using the [first-success checklist](checklists/first-success.md) to provide a reproducible command and honest scope.
-- **Borrow a working example:** explore [five starter types](examples/README.md) for runnable source, tests and documented limitations.
+- **Borrow a working example:** explore [five working starter types plus a terminal game](examples/README.md) for runnable source, tests and documented limitations.
 
 ## Working proof
 
@@ -171,7 +171,8 @@ not a second copy of the first-screen chooser.
   [application guide](guides/application-repositories.md) and
   [example](examples/application-starter/README.md);
   [game README guide](guides/game-repositories.md) and
-  [editable template](templates/GAME_README.template.md) (no bundled game);
+  [editable template](templates/GAME_README.template.md) and a
+  [runnable terminal game example](examples/game-starter/README.md) (no hosted build);
   [research/data guide](guides/research-data-repositories.md) and
   [example](examples/research-data-starter/README.md);
   [curated-collection guide](guides/curated-collections.md) and
