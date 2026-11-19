@@ -95,6 +95,10 @@ def _bounded_source_tree(root: Path) -> bool:
                     # *every* regular hard link, independent of extension.
                     if stat.S_ISREG(info.st_mode) and info.st_nlink > 1:
                         return False
+                    # Entry-point checks can read LICENSE/README.rst too: a
+                    # non-Markdown FIFO or device must not reach a checker.
+                    if not (stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)):
+                        return False
                     is_markdown = entry.name.lower().endswith((".md", ".markdown"))
                     if stat.S_ISLNK(info.st_mode) and not is_markdown:
                         # An extensionless README/LICENSE or asset link may be
