@@ -40,10 +40,11 @@ fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
 like the link checkers. **At the immutable installation pin below**
-(`2724555bee2629397cb2b23449ba30eed8f718c1`), it refuses non-directory special files (FIFOs, sockets and devices)
-regardless of extension, out-of-checkout file symlinks (including `LICENSE`,
-`README.rst` and assets), and hard-linked regular files of any extension,
-directory symlinks and directory junctions encountered in the scanned tree
+(`2724555bee2629397cb2b23449ba30eed8f718c1`), it refuses
+non-directory special files (FIFOs, sockets and devices) regardless of
+extension, out-of-checkout file symlinks (including `LICENSE`, `README.rst`
+and assets), hard-linked regular files of any extension, directory symlinks
+and directory junctions encountered in the scanned tree
 (excluding ignored directories). The non-Markdown symlink check was merged
 in [PR #351](https://github.com/drevendev/BeautifulRepo/pull/351);
 ordinary in-root file aliases are accepted only when they resolve to regular,
@@ -106,8 +107,9 @@ extension-independent FIFO/socket/device refusal merged in
 On the **PR #425 head** `b50ef4e3f0aa1d14daa00467913589156282805e`,
 [Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44576851080)
 completed 6/6 and [MCP protocol CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44576851023)
-completed 2/2. Those are tests of the PR head, **not** a fresh CI execution of
-the squash-merge commit pinned below, a clean external installation, or model-host acceptance.
+completed 2/2. Those are tests of the PR head, **not** fresh CI on the
+squash-merge commit pinned below, a clean external installation, or model-host
+acceptance.
 On the PR #349 head, [Windows Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43167429218)
 executed the native junction tests successfully (not skipped); that is
 **PR-head CI evidence**, not a fresh test on this squash-merge SHA or an
@@ -337,8 +339,9 @@ python -I tools/audit_bundle.py /absolute/path/to/synthetic-fixture --format jso
 
 Source-level tests check path refusal (including non-Markdown special-file
 metadata on all platforms and native FIFO refusal on POSIX), fixed subprocess
-arguments, timeout behavior, incomplete evidence and one actual broken-link fixture. On Windows,
-the `test_real_windows_junction_ancestor_rejected_before_any_checker`
+arguments, timeout behavior, incomplete evidence and one actual broken-link
+fixture. On Windows, the
+`test_real_windows_junction_ancestor_rejected_before_any_checker`
 regression additionally attempts to create a **real directory junction** with
 [`mklink /J`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink)
 and checks that both a junction root and a nested root through it are refused
