@@ -27,54 +27,67 @@ MAX_CASE_BYTES = 256 * 1024
 BACKTICK_RUN_RE = re.compile(r"`+")
 
 
-def mask_inline_code(line: str) -> str:
-    """Mask paired one-line backtick spans without moving link source offsets."""
-    # Backslashes are literal inside code spans, including before a closer.
-    # Consider all runs as possible closing delimiters; reject escaped
-    # opening delimiters only when outside a code span.
+def mask_source_markup(line: str, in_comment: bool) -> tuple[str, bool]:
+    """Mask one-line inline code and HTML comments without changing offsets."""
     runs = list(BACKTICK_RUN_RE.finditer(line))
-
-    next_run_by_length: dict[int, int] = {}
-    next_partner: list[int | None] = [None] * len(runs)
+    next_by_length: dict[int, int] = {}
+    partners: list[int | None] = [None] * len(runs)
+    starts: dict[int, int] = {}
     for index in range(len(runs) - 1, -1, -1):
-        length = runs[index].end() - runs[index].start()
-        next_partner[index] = next_run_by_length.get(length)
-        next_run_by_length[length] = index
+        run = runs[index]
+        size = run.end() - run.start()
+        partners[index] = next_by_length.get(size)
+        next_by_length[size] = index
+        starts[run.start()] = index
 
-    parts = []
-    cursor = 0
+    masked = list(line)
     index = 0
-    while index < len(runs):
-        # Escape parity applies to an opener, never to a closer inside code.
-        left = runs[index].start() - 1
-        while left >= 0 and line[left] == "\\":
-            left -= 1
-        if (runs[index].start() - 1 - left) % 2:
-            index += 1
+    while index < len(line):
+        if in_comment:
+            close = line.find("-->", index)
+            end = len(line) if close < 0 else close + 3
+            masked[index:end] = " " * (end - index)
+            index = end
+            if close < 0:
+                break
+            in_comment = False
             continue
-        closing = next_partner[index]
-        if closing is None:
-            index += 1
+        if line.startswith("<!--", index):
+            masked[index:index + 4] = "    "
+            index += 4
+            in_comment = True
             continue
-        start, end = runs[index].start(), runs[closing].end()
-        parts.extend((line[cursor:start], " " * (end - start)))
-        cursor = end
-        index = closing + 1
-    parts.append(line[cursor:])
-    return "".join(parts)
+        run_index = starts.get(index)
+        if run_index is not None:
+            left = index - 1
+            while left >= 0 and line[left] == "\\":
+                left -= 1
+            escaped = (index - 1 - left) % 2 == 1
+            closing = partners[run_index]
+            if not escaped and closing is not None:
+                end = runs[closing].end()
+                masked[index:end] = " " * (end - index)
+                index = end
+                continue
+            index = runs[run_index].end()
+            continue
+        index += 1
+    return "".join(masked), in_comment
 
 
 def active_lines(document: str):
-    """Yield 1-based non-fenced source lines; not a full Markdown renderer."""
+    """Yield 1-based visible source lines; not a full Markdown renderer."""
     fence = None
+    in_comment = False
     for line_no, line in enumerate(document.splitlines(), 1):
-        start = FENCE_RE.match(line)
+        start = FENCE_RE.match(line) if not in_comment else None
         if fence is None:
             if start is not None:
                 run = start.group("run")
                 fence = (run[0], len(run))
                 continue
-            yield line_no, mask_inline_code(line)
+            visible, in_comment = mask_source_markup(line, in_comment)
+            yield line_no, visible
         else:
             char, count = fence
             stripped = line.lstrip(" ")
