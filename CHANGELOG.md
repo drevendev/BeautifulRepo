@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add an offline WCAG 2.2 sRGB text-contrast calculator with AA/AAA
+  thresholds, machine-readable JSON, unrounded comparisons and thirteen
+  numerical/CLI regression tests. It checks declared opaque color pairs, not
+  browser-rendered colors or full accessibility conformance.
+
 - Add Lantern Row, a runnable offline five-lamp terminal game with a
   deterministic first-win transcript, explicit failure/quit boundaries and
   ten Python regressions. Its README demonstrates source-only first play,
