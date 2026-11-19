@@ -58,6 +58,37 @@ No destination is echoed into the finding. See the
 [GitHub Flavored Markdown reference-link specification](https://github.github.com/gfm/#reference-link)
 for cases this intentionally limited checker does not parse.
 
+## Check a declared text-color pair offline
+
+[WCAG 2.2, SC 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)
+defines a **4.5:1** minimum for ordinary text at level AA and **3:1** for
+qualifying large text. Level AAA uses **7:1** and **4.5:1**, respectively.
+Review date: **2026-11-19**. The small original
+[color-pair calculator](color_contrast.py) uses the W3C sRGB relative-luminance
+formula and deliberately **does not round before threshold comparison**:
+
+```sh
+python -I tools/color_contrast.py '#000000' '#ffffff'
+# Contrast 21.0000:1; WCAG 2.2 AA normal text (minimum 4.5:1): PASS
+
+python -I tools/color_contrast.py '#777777' '#ffffff' --format json
+# Exit 1; ratio approximately 4.478 (below the unrounded 4.5 threshold).
+```
+
+Specify `--text large` only when the rendered text **actually qualifies**,
+and `--level AAA` to evaluate the stricter level. Exit **0** = selected
+numeric threshold met, **1** = contrast below it, **2** = invalid input.
+Only opaque six-digit sRGB `#RRGGBB` foreground/background pairs are supported;
+short hex, alpha, named colors, images, gradients, CSS variables and color
+compositing are intentionally out of scope. JSON mode records the raw ratio.
+
+A numeric PASS is **not WCAG conformance**: the tool cannot identify the
+rendered colors, size/weight, antialiasing, interaction states, theme switching,
+text over images, adjacent component colors, or the exceptions in SC 1.4.3.
+Inspect the actual page at relevant widths and light/dark themes, then
+perform manual accessibility checks. See
+[visual README guidance](../guides/readme-visuals.md#accessibility-is-part-of-the-visual-design).
+
 ## Verify the revision pins in a source-only case
 
 [`source_pins.py`](source_pins.py) checks that a Markdown source-only case
