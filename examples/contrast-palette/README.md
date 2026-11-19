@@ -26,8 +26,9 @@ The process exits **0** only if each before-pair fails and each after-pair
 passes its selected AA/AAA text threshold, using the **unrounded** ratios.
 Malformed fixture data (including duplicate JSON object members), invalid hex
 colors, an accidental regression in a corrected pair, or a before-pair that no
-longer fails yields exit **2** with an error. The sample is deliberately locked to its four checked-in rows, so
-it is an example rather than a general-purpose palette linter.
+longer fails yields exit **2** with an error. The sample is deliberately
+locked to its four checked-in rows, so it is an example rather than a
+general-purpose palette linter.
 
 **How to adapt:** identify the *actual rendered* foreground and opaque background
 of each normal/large text style in **both** themes; choose an accessible
