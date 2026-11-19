@@ -423,6 +423,53 @@ class CheckerWrapperTests(unittest.TestCase):
                     self.assertEqual(original.stat().st_nlink, 1)
                     self.assertTrue(adapter._bounded_source_tree(self.root))
 
+    def test_non_markdown_special_file_metadata_refused_for_all_tools(self):
+        """Even LICENSE without a Markdown suffix must not be a named pipe."""
+        source = self.root / "LICENSE"
+        source.write_text("Synthetic fixture", encoding="utf-8")
+        original_lstat = adapter.os.lstat
+
+        def fake_special(candidate):
+            info = original_lstat(candidate)
+            if Path(candidate) == source:
+                return types.SimpleNamespace(
+                    st_mode=0o010000,  # stat.S_IFIFO, including on Windows.
+                    st_nlink=1, st_size=0, st_reparse_tag=0,
+                )
+            return info
+
+        with mock.patch.object(adapter.os, "lstat", side_effect=fake_special):
+            with mock.patch.object(adapter, "_bounded_run") as run:
+                for tool_name in adapter.CHECKS:
+                    with self.subTest(tool=tool_name):
+                        report = adapter.run_check(self.root, tool_name)
+                        self.assertEqual(report["state"], "incomplete")
+                        self.assertEqual(report["exit_code"], 2)
+                run.assert_not_called()
+        self.assertTrue(adapter._bounded_source_tree(self.root))
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "named pipes unavailable")
+    def test_native_non_markdown_fifo_refused_before_every_checker(self):
+        """Linux/POSIX regression: never open a blocking LICENSE or asset FIFO."""
+        for name in ("LICENSE", "README.rst", "assets/logo.svg"):
+            with self.subTest(name=name):
+                source = self.root / name
+                source.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    os.mkfifo(source)
+                except (OSError, NotImplementedError):
+                    self.skipTest("FIFO creation unavailable on this filesystem")
+                try:
+                    with mock.patch.object(adapter, "_bounded_run") as run:
+                        for tool_name in adapter.CHECKS:
+                            report = adapter.run_check(self.root, tool_name)
+                            self.assertEqual(report["state"], "incomplete")
+                            self.assertEqual(report["exit_code"], 2)
+                        run.assert_not_called()
+                finally:
+                    source.unlink()
+        self.assertTrue(adapter._bounded_source_tree(self.root))
+
     def test_ordinary_nested_markdown_passes_preflight(self):
         (self.root / "nested").mkdir()
         (self.root / "nested" / "guide.md").write_text("# Guide\n", encoding="utf-8")
