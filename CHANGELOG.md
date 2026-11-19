@@ -967,6 +967,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Verify Lantern Row's documented first-win and invalid-input transcript blocks
+  against actual decoded subprocess output and exit status in tests. Previously
+  the test asserted a separate hard-coded transcript, allowing README drift.
+  Markdown shell commands are compared to fixed allowlisted strings, not executed.
+
+
 - Exclude HTML-commented source links, including multiline comments, from the
   offline source-pin checker. A commented-out README is no longer proof of a
   published source, and links after the comment close remain visible. This

@@ -16,7 +16,7 @@ From the **BeautifulRepo repository root**:
 python -I examples/game-starter/lantern_row.py --demo
 ~~~
 
-Expected stdout (also asserted byte-for-byte by the test suite):
+Expected stdout (the tests compare this fenced block with the program's decoded output):
 
 ~~~text
 Lantern Row | deterministic offline transcript

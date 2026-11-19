@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -86,6 +87,36 @@ class GameStarterTests(unittest.TestCase):
         eof = self.invoke(stdin="")
         self.assertEqual(0, eof.returncode)
         self.assertIn("Quit after 0 moves", eof.stdout)
+
+    @staticmethod
+    def readme_fence(section: str, language: str) -> str:
+        """Read one documented code block; reject missing or ambiguous evidence."""
+        text = (ROOT / "examples/game-starter/README.md").read_text(encoding="utf-8")
+        heading = f"## {section}\n"
+        if text.count(heading) != 1:
+            raise AssertionError(f"expected one README section: {section}")
+        body = text.split(heading, 1)[1].split("\n## ", 1)[0]
+        blocks = re.findall(rf"(?ms)^~~~{re.escape(language)}\n(.*?)^~~~ *$", body)
+        if len(blocks) != 1:
+            raise AssertionError(f"expected one {language} block in {section}")
+        return blocks[0]
+
+    def test_readme_demo_transcript_matches_live_program(self):
+        section = "First success: see a reproducible win"
+        # Never execute arbitrary commands extracted from the README.
+        self.assertEqual(self.readme_fence(section, "sh").strip(),
+                         "python -I examples/game-starter/lantern_row.py --demo")
+        run = self.invoke("--demo")
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertEqual(self.readme_fence(section, "text"), run.stdout)
+
+    def test_readme_invalid_input_transcript_matches_live_program(self):
+        section = "Show a failure, not just a happy screenshot"
+        self.assertEqual(self.readme_fence(section, "sh").strip(),
+                         "python -I examples/game-starter/lantern_row.py --moves 9")
+        run = self.invoke("--moves", "9")
+        self.assertEqual(run.returncode, 2)
+        self.assertEqual(self.readme_fence(section, "text"), run.stderr)
 
     def test_game_is_offline_and_has_no_storage_or_external_imports(self):
         source = GAME.read_text(encoding="utf-8")
