@@ -19,7 +19,6 @@ keep their original themed headings.
   honest distribution and asset-rights claims; no browser or store build
   is shipped.
 
-
 - Add a no-network source-only case permalink consistency checker and
   black-box regressions for moving SHA links, unrelated hosts, fenced examples
   and linked input files. This catches source-pin drift, not public access,
