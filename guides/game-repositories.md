@@ -51,6 +51,23 @@ itch.io upload and a playable build. These are distinct artifacts and
 events. Say which build the current screenshot and changelog describe;
 do not silently reuse old captures as new-version gameplay.
 
+## Keep first-play transcripts in sync
+
+If a game README includes a copyable terminal transcript, **test the Markdown
+block against actual process output**. Testing an identical string copied
+into a test does not catch a stale README. For [Lantern Row](../tests/test_game_starter.py),
+the tests extract the documented success and invalid-input fenced blocks,
+assert the commands are fixed reviewed invocations, then compare decoded
+stdout and stderr text with `python -I` subprocess output and exit codes.
+The test harness normalizes platform line endings; it does not make raw
+terminal-byte or rendering claims. Never execute arbitrary shell commands
+extracted from untrusted documentation.
+
+This verifies **documented text for the source-only Python example**, not
+a store build, a visual screenshot, platform compatibility or a real player's
+experience. If actual output changes, update the documentation intentionally
+alongside the code and let CI expose drift.
+
 ## Screenshots, motion and store presentation
 
 Use a real gameplay still before any large animation. Include descriptive

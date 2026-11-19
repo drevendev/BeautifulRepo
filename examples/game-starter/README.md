@@ -16,7 +16,7 @@ From the **BeautifulRepo repository root**:
 python -I examples/game-starter/lantern_row.py --demo
 ~~~
 
-Expected stdout (also asserted byte-for-byte by the test suite):
+Expected stdout (the tests compare this fenced block with the program's decoded output):
 
 ~~~text
 Lantern Row | deterministic offline transcript
@@ -64,6 +64,8 @@ That invalid input exits **2** without starting or partially replaying a
 game. A valid but unsuccessful sequence (such as --moves 2) exits **1**
 and reports no win. q or end-of-input in interactive mode exits **0** as a
 voluntary exit, not as a win.
+
+## Test the game source
 
 Run its independent Python regressions from the repository root:
 
