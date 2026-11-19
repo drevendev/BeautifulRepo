@@ -44,7 +44,8 @@ def play_moves(moves: tuple[int, ...]) -> tuple[list[str], bool]:
         if all(state):
             lines.append(f"WIN in {turn} moves")
             return lines, True
-    lines.append(f"No win after {len(moves)} moves")
+    count = len(moves)
+    lines.append(f"No win after {count} {'move' if count == 1 else 'moves'}")
     return lines, False
 
 
