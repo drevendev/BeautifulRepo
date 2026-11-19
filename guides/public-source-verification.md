@@ -26,8 +26,8 @@ Exit **0** means matching GitHub tree/blob source links and at least one
 README blob permalink were found; **1** reports inconsistent/missing pins;
 **2** means the input could not be inspected or the arguments are invalid.
 This bounded source-text scanner ignores fenced code, paired single-line
-inline-code spans and unrelated GitHub repositories. Unclosed or multiline
-inline-code spans are not fully parsed; it is not a complete Markdown renderer. It does **not**
+inline-code spans, single-line/multiline HTML comments and unrelated GitHub
+repositories. Unclosed or multiline inline-code spans are not fully parsed; it is not a complete Markdown renderer. It does **not**
 contact GitHub, confirm anonymous access, follow the links, compare actual
 file contents or verify the claims made by the case. A PASS here must be
 followed by the separate signed-out checks below; it is never a

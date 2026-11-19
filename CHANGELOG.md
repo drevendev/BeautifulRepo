@@ -951,6 +951,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Exclude HTML-commented source links, including multiline comments, from the
+  offline source-pin checker. A commented-out README is no longer proof of a
+  published source, and links after the comment close remain visible. This
+  is a bounded Markdown scan, not anonymous-access verification.
+
 - Ignore paired single-line inline-code spans when checking pinned GitHub source
   links in a source-only case. Literal examples no longer count as pinned README
   evidence or trigger false moving-revision errors; escaped and unclosed runs

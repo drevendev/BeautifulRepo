@@ -101,6 +101,52 @@ class SourcePinTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("2 source permalinks", result.stdout)
 
+
+    def test_html_comments_do_not_prove_pinned_links(self):
+        result = check(f"<!-- [tree]({TREE}) [README]({README}) -->\n")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("no pinned tree/blob links", result.stderr)
+        self.assertIn("no source README.md", result.stderr)
+
+    def test_multiline_html_comment_does_not_fail_visible_valid_pins(self):
+        result = check(
+            f"[tree]({TREE})\n"
+            f"<!--\n[bad](https://github.com/{SOURCE}/blob/main/README.md)\n"
+            f"[ignored]({README})\n--> [README]({README})\n"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 source permalinks", result.stdout)
+
+    def test_html_comment_marker_inside_code_does_not_hide_bad_link(self):
+        result = check(
+            f"[tree]({TREE}) [README]({README})\n"
+            f"`<!--` [bad](https://github.com/{SOURCE}/blob/main/README.md)\n"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
+    def test_comment_backtick_does_not_hide_link_after_closer(self):
+        result = check(
+            f"[tree]({TREE}) [README]({README})\n"
+            f"<!-- ` --> [bad](https://github.com/{SOURCE}/blob/main/README.md) `\n"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
+    def test_comment_fence_like_line_does_not_hide_visible_link(self):
+        result = check(
+            f"[tree]({TREE}) [README]({README})\n"
+            "<!--\n```\n-->\n"
+            f"[bad](https://github.com/{SOURCE}/blob/main/README.md)\n"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
+    def test_unclosed_html_comment_hides_remaining_links(self):
+        result = check(f"<!--\n[tree]({TREE})\n[README]({README})\n")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("no pinned tree/blob links", result.stderr)
+
     def test_escaped_or_unclosed_backticks_do_not_hide_real_links(self):
         for prefix in (r"\`", "`"):
             with self.subTest(prefix=prefix):
