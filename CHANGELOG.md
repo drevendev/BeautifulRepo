@@ -743,6 +743,11 @@ keep their original themed headings.
 
 ### Changed
 
+- Refresh the experimental MCP host-trial guide's immutable checkout pin to
+  `2724555bee2629397cb2b23449ba30eed8f718c1` for extension-independent
+  special-file refusal. Align POSIX and Windows setup commands and distinguish
+  source/PR-head CI from unverified Claude Code/Codex host installation (#255).
+
 - Refresh the immutable four-skill development-test source to commit
   `4d74e840792fe87c79e1202d982a95103d97ba73` after its
   2026-11-18 exact-source Quality CI passed 6/6. Align the host smoke
