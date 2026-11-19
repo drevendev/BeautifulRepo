@@ -40,9 +40,9 @@ fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
 like the link checkers. **At the immutable installation pin below**
-(`2724555bee2629397cb2b23449ba30eed8f718c1`), it refuses FIFO paths, sockets and devices regardless of filename extension (including
-`LICENSE`, `README.rst` and assets), as well as out-of-checkout file symlinks (including `LICENSE`,
-`README.rst` and assets), hard-linked regular files of any extension,
+(`2724555bee2629397cb2b23449ba30eed8f718c1`), it refuses non-directory special files (FIFOs, sockets and devices)
+regardless of extension, out-of-checkout file symlinks (including `LICENSE`,
+`README.rst` and assets), and hard-linked regular files of any extension,
 directory symlinks and directory junctions encountered in the scanned tree
 (excluding ignored directories). The non-Markdown symlink check was merged
 in [PR #351](https://github.com/drevendev/BeautifulRepo/pull/351);
