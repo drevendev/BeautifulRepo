@@ -29,13 +29,10 @@ BACKTICK_RUN_RE = re.compile(r"`+")
 
 def mask_inline_code(line: str) -> str:
     """Mask paired one-line backtick spans without moving link source offsets."""
-    runs = []
-    for match in BACKTICK_RUN_RE.finditer(line):
-        left = match.start() - 1
-        while left >= 0 and line[left] == "\\":
-            left -= 1
-        if (match.start() - 1 - left) % 2 == 0:
-            runs.append(match)
+    # Backslashes are literal inside code spans, including before a closer.
+    # Consider all runs as possible closing delimiters; reject escaped
+    # opening delimiters only when outside a code span.
+    runs = list(BACKTICK_RUN_RE.finditer(line))
 
     next_run_by_length: dict[int, int] = {}
     next_partner: list[int | None] = [None] * len(runs)
@@ -48,6 +45,13 @@ def mask_inline_code(line: str) -> str:
     cursor = 0
     index = 0
     while index < len(runs):
+        # Escape parity applies to an opener, never to a closer inside code.
+        left = runs[index].start() - 1
+        while left >= 0 and line[left] == "\\":
+            left -= 1
+        if (runs[index].start() - 1 - left) % 2:
+            index += 1
+            continue
         closing = next_partner[index]
         if closing is None:
             index += 1
