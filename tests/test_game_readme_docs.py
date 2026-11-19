@@ -10,7 +10,7 @@ class GameReadmeDocsTests(unittest.TestCase):
         text = (ROOT / "guides/game-repositories.md").read_text(encoding="utf-8")
         for expected in ("Reviewed **2026-11-14**", "two audiences",
                          "not automatically open source", "first-success checklist",
-                         "not a bundled or tested game",
+                         "tested **source-only terminal",
                          "https://itch.io/docs/creators/getting-started",
                          "https://itch.io/docs/creators/widget"):
             with self.subTest(expected=expected):
@@ -27,13 +27,16 @@ class GameReadmeDocsTests(unittest.TestCase):
         self.assertIn("not evidence that the hosted/downloadable game works", text)
         self.assertIn("not** automatically license", text)
 
-    def test_public_navigation_is_explicit_about_no_game_bundle(self):
+    def test_public_navigation_distinguishes_game_source_and_hosted_build(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         index = (ROOT / "templates/README.md").read_text(encoding="utf-8")
         roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
         self.assertIn("(guides/game-repositories.md)", readme)
         self.assertIn("(templates/GAME_README.template.md)", readme)
-        self.assertIn("no bundled game", readme)
+        self.assertIn("(examples/game-starter/README.md)", readme)
+        self.assertIn("no hosted build", readme)
+        self.assertIn("(examples/game-starter/README.md)", roadmap)
+        self.assertIn("not a hosted or published game", roadmap)
         self.assertIn("(GAME_README.template.md)", index)
         self.assertIn("(guides/game-repositories.md)", roadmap)
 

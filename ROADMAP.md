@@ -36,9 +36,12 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Application repository starter](guides/application-repositories.md), with the
   [read-only Pocket Board demo](examples/application-starter/README.md), local HTTP
   integration tests and honest development-server boundaries.
-- [Game repository README guidance](guides/game-repositories.md) and
-  [editable game README template](templates/GAME_README.template.md), separating
-  playability from source builds and code rights from game assets; no game bundled.
+- [Game repository README guidance](guides/game-repositories.md),
+  [editable game README template](templates/GAME_README.template.md), and
+  [runnable Lantern Row terminal example](examples/game-starter/README.md)
+  with a deterministic win, failure/quit routes and standard-library tests.
+  This is source-only, not a hosted or published game; code and asset rights
+  remain separate.
 - [Research/data repository starter](guides/research-data-repositories.md), including
   a [synthetic CSV analysis](examples/research-data-starter/README.md), fixture integrity
   checks and a [README template](templates/RESEARCH_DATA_README.template.md).

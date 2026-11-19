@@ -5,6 +5,12 @@ try it; a contributor wants reproducible source and clear rights to reuse it.
 A Git repository is not evidence that a hosted game launches, and a store page
 is not proof that the linked source can rebuild its binary.
 
+A small, directly runnable contrast is the [Lantern Row terminal game](../examples/game-starter/README.md):
+it has a first-win transcript, a negative input path, deterministic Python tests
+and explicit no-hosted-build boundaries. It is **not** a browser game, a
+released executable or evidence of an itch.io upload. For games with actual
+published builds, verify those independently.
+
 ## Show a player one verified minute
 
 Put these answers near the top, before build-tool detail:
@@ -96,5 +102,6 @@ Reviewed **2026-11-14**:
 - [itch.io — Embeddable widget](https://itch.io/docs/creators/widget)
   — embedding on external sites.
 
-This guide is **documentation guidance**, not a bundled or tested game,
-license opinion, accessibility certification or real-player evaluation.
+The accompanying Lantern Row example is a tested **source-only terminal
+puzzle**, not a hosted game, released download, license opinion, accessibility
+certification or real-player evaluation.

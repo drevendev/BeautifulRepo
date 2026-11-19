@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Add Lantern Row, a runnable offline five-lamp terminal game with a
+  deterministic first-win transcript, explicit failure/quit boundaries and
+  ten Python regressions. Its README demonstrates source-only first play,
+  honest distribution and asset-rights claims; no browser or store build
+  is shipped.
+
 - Add a no-network source-only case permalink consistency checker and
   black-box regressions for moving SHA links, unrelated hosts, fenced examples
   and linked input files. This catches source-pin drift, not public access,

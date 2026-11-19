@@ -37,6 +37,15 @@ recommendations with use cases, limitations and dated checks. The
 [collection template](../templates/CURATED_README.template.md) makes selection and
 retirement criteria visible; stale metadata is not a broken-link verdict.
 
+## A player can try a source-only game
+
+[Lantern Row](game-starter/README.md) is a five-lamp terminal puzzle with a
+replayable win, negative input route and offline Python tests. Its README
+distinguishes runnable source from a hosted play URL, packaged binary, game
+assets and real-player/accessibility evidence. Use the
+[game repository guide](../guides/game-repositories.md) to adapt the pattern
+for an actual released build.
+
 ## An internal reader can get started safely
 
 The [fictional Sample Queue README](internal-repository/README.md) demonstrates
