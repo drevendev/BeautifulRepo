@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a no-network source-only case permalink consistency checker and
+  black-box regressions for moving SHA links, unrelated hosts, fenced examples
+  and linked input files. This catches source-pin drift, not public access,
+  actual source contents or runtime behavior.
+
 - Document a reproducible, credential-free public-source preflight using
   GitHub's read-only contents endpoint, fixed commit paths, explicit failure
   classification and dated evidence. The example commands are **not run**;

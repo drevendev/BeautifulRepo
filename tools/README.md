@@ -58,6 +58,28 @@ No destination is echoed into the finding. See the
 [GitHub Flavored Markdown reference-link specification](https://github.github.com/gfm/#reference-link)
 for cases this intentionally limited checker does not parse.
 
+## Verify the revision pins in a source-only case
+
+[`source_pins.py`](source_pins.py) checks that a Markdown source-only case
+consistently links to its declared GitHub repository at one immutable,
+40-character commit. It requires a pinned README blob link, checks other
+tree/blob source links for moving branches or different revisions, ignores
+fenced examples and unrelated repositories, and runs with no network access.
+
+```sh
+python -I tools/source_pins.py \
+  --case case-studies/hungrycrab-first-command.md \
+  --repository drevendev/HungryCrab \
+  --commit d20850c4e71382c796c4b4dac554137ebcb7e937
+```
+
+Exit **0** means consistency only, **1** means a source-link problem and
+**2** means invalid or unreadable input. This bounded scanner does not
+parse all Markdown forms, check a license, verify actual content, prove the
+repository is public or execute a tool from the target. Follow the
+[separate anonymous verification guide](../guides/public-source-verification.md)
+before treating any case study as publicly reproducible.
+
 ## All three checks in one local run
 
 Run the [combined offline audit](../guides/combined-audit.md) to invoke the
