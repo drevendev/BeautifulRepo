@@ -102,7 +102,7 @@ class SourcePinTests(unittest.TestCase):
         self.assertIn("2 source permalinks", result.stdout)
 
     def test_escaped_or_unclosed_backticks_do_not_hide_real_links(self):
-        for prefix in (r"\\`", "`"):
+        for prefix in (r"\`", "`"):
             with self.subTest(prefix=prefix):
                 result = check(f"{prefix}[tree]({TREE}) [README]({README})")
                 self.assertEqual(result.returncode, 0, result.stderr)
