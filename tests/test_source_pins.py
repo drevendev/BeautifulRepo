@@ -107,6 +107,30 @@ class SourcePinTests(unittest.TestCase):
                 result = check(f"{prefix}[tree]({TREE}) [README]({README})")
                 self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_backslash_prefixed_closer_exposes_active_moving_link(self):
+        result = check(
+            f"[tree]({TREE})\n[README]({README})\n"
+            rf"`literal \` [bad](https://github.com/{SOURCE}/blob/main/README.md) `"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
+    def test_backslash_prefixed_closer_masks_literal_moving_link(self):
+        result = check(
+            f"[tree]({TREE})\n[README]({README})\n"
+            rf"`[literal](https://github.com/{SOURCE}/blob/main/README.md) \`"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 source permalinks", result.stdout)
+
+    def test_escaped_opener_outside_span_does_not_hide_moving_link(self):
+        result = check(
+            f"[tree]({TREE})\n[README]({README})\n"
+            rf"\`[bad](https://github.com/{SOURCE}/blob/main/README.md)`"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
     def test_source_link_outside_inline_code_still_fails_on_wrong_revision(self):
         result = check(
             f"`[ignored]({README})`\n"
