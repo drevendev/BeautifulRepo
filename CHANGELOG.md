@@ -743,6 +743,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Clarify how to invoke a virtualenv-installed CLI entry point without relying
+  on an unstated PATH/activation step, with a pinned Quillgrain source-only
+  example. This is not a fresh-clone or agent-host acceptance test.
+
 - Refresh the experimental MCP host-trial guide's immutable checkout pin to
   `2724555bee2629397cb2b23449ba30eed8f718c1` for extension-independent
   special-file refusal. Align POSIX and Windows setup commands and distinguish
