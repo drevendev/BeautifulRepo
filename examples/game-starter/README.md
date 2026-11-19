@@ -65,6 +65,8 @@ game. A valid but unsuccessful sequence (such as --moves 2) exits **1**
 and reports no win. q or end-of-input in interactive mode exits **0** as a
 voluntary exit, not as a win.
 
+## Test the game source
+
 Run its independent Python regressions from the repository root:
 
 ~~~sh
