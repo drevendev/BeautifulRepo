@@ -1,6 +1,6 @@
 # Experimental local MCP adapter (not a released integration)
 
-**Development candidate, reviewed 2026-11-12 (UTC).** This optional adapter exposes
+**Development candidate, source-reviewed 2026-11-19 (UTC).** This optional adapter exposes
 BeautifulRepo's *existing* offline checkers as three read-only tools over MCP
 stdio. No successful Claude Code, Codex, or external-user installation is
 claimed. The normal CLI and GitHub Action do **not** require MCP.
@@ -40,8 +40,8 @@ fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
 like the link checkers. **At the immutable installation pin below**
-(`7b9c3391f426c76cbf0a75a1470ff06eb7e6db18`), it refuses Markdown-named devices,
-out-of-checkout file symlinks regardless of extension (including `LICENSE`,
+(`2724555bee2629397cb2b23449ba30eed8f718c1`), it refuses FIFO paths, sockets and devices regardless of filename extension (including
+`LICENSE`, `README.rst` and assets), as well as out-of-checkout file symlinks (including `LICENSE`,
 `README.rst` and assets), hard-linked regular files of any extension,
 directory symlinks and directory junctions encountered in the scanned tree
 (excluding ignored directories). The non-Markdown symlink check was merged
@@ -90,7 +90,7 @@ do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
 
-This **source-checked procedure, refreshed 2026-11-12 (UTC), has not passed a fresh
+This **source-checked procedure, refreshed 2026-11-19 (UTC), has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
 following full commit is a `master` snapshot containing both official-SDK
 protocol smoke lifecycles, per-checker isolation, bounded child output,
@@ -100,7 +100,14 @@ root ([PR #347](https://github.com/drevendev/BeautifulRepo/pull/347)) and
 rejection of a junction encountered *inside* the allowed checkout
 ([PR #349](https://github.com/drevendev/BeautifulRepo/pull/349)).
 It also includes the extension-independent file-symlink preflight merged
-in [PR #351](https://github.com/drevendev/BeautifulRepo/pull/351).
+in [PR #351](https://github.com/drevendev/BeautifulRepo/pull/351), and the
+extension-independent FIFO/socket/device refusal merged in
+[PR #425](https://github.com/drevendev/BeautifulRepo/pull/425).
+On the **PR #425 head** `b50ef4e3f0aa1d14daa00467913589156282805e`,
+[Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44576851080)
+completed 6/6 and [MCP protocol CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44576851023)
+completed 2/2. Those are tests of the PR head, **not** a fresh CI execution of
+the squash-merge commit pinned below, a clean external installation, or model-host acceptance.
 On the PR #349 head, [Windows Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/43167429218)
 executed the native junction tests successfully (not skipped); that is
 **PR-head CI evidence**, not a fresh test on this squash-merge SHA or an
@@ -111,7 +118,7 @@ replacement remain untested. The older `ed1e70c` trial predates the internal-jun
 checkout should be reused when testing the current documented boundary.
 This commit is **not a released MCP version**:
 
-[BeautifulRepo `7b9c3391f426c76cbf0a75a1470ff06eb7e6db18`](https://github.com/drevendev/BeautifulRepo/commit/7b9c3391f426c76cbf0a75a1470ff06eb7e6db18).
+[BeautifulRepo `2724555bee2629397cb2b23449ba30eed8f718c1`](https://github.com/drevendev/BeautifulRepo/commit/2724555bee2629397cb2b23449ba30eed8f718c1).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -119,8 +126,8 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 7b9c3391f426c76cbf0a75a1470ff06eb7e6db18
-test "$(git rev-parse HEAD)" = "7b9c3391f426c76cbf0a75a1470ff06eb7e6db18" || exit 1
+git checkout --detach 2724555bee2629397cb2b23449ba30eed8f718c1
+test "$(git rev-parse HEAD)" = "2724555bee2629397cb2b23449ba30eed8f718c1" || exit 1
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
 ../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
@@ -155,7 +162,7 @@ checked explicitly rather than assuming `$ErrorActionPreference` catches
 external program exit codes:
 
 ```powershell
-$pin = '7b9c3391f426c76cbf0a75a1470ff06eb7e6db18'
+$pin = '2724555bee2629397cb2b23449ba30eed8f718c1'
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
 Set-Location BeautifulRepo
@@ -328,8 +335,9 @@ python -m unittest discover -s tests -v
 python -I tools/audit_bundle.py /absolute/path/to/synthetic-fixture --format json
 ```
 
-Source-level tests check path refusal, fixed subprocess arguments, timeout
-behavior, incomplete evidence and one actual broken-link fixture. On Windows,
+Source-level tests check path refusal (including non-Markdown special-file
+metadata on all platforms and native FIFO refusal on POSIX), fixed subprocess
+arguments, timeout behavior, incomplete evidence and one actual broken-link fixture. On Windows,
 the `test_real_windows_junction_ancestor_rejected_before_any_checker`
 regression additionally attempts to create a **real directory junction** with
 [`mklink /J`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink)
