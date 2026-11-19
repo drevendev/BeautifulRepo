@@ -61,9 +61,20 @@ def evaluate(rows: object, *, calculator=None) -> list[str]:
     return results
 
 
+def reject_duplicate_members(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject ambiguous object keys even in nested palette fixture rows."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON member: {key!r}")
+        result[key] = value
+    return result
+
+
 def main() -> int:
     try:
-        rows = json.loads(PAIRS.read_text(encoding="utf-8"))
+        rows = json.loads(PAIRS.read_text(encoding="utf-8"),
+                          object_pairs_hook=reject_duplicate_members)
         results = evaluate(rows)
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as error:
         print(f"ERROR: palette example cannot be verified: {error}", file=sys.stderr)
