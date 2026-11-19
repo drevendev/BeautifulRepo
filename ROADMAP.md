@@ -20,6 +20,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   before/after README, announcement and changelog copy examples.
 - [Offline catalog validation](tools/README.md) and repository-owned Markdown
   destination checks, both exercised by CI.
+- [Offline WCAG 2.2 text-color pair check](tools/README.md#check-a-declared-text-color-pair-offline)
+  with numerical and CLI regressions; browser-rendered color and complete
+  accessibility conformance remain separate manual checks.
 - [Offline repository entry-point audit](guides/repository-audit.md), with bounded
   read-only checks, actionable findings and a
   [tested before/after walkthrough](examples/repository-audit/README.md).

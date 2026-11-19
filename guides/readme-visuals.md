@@ -66,6 +66,15 @@ For README visuals:
 An automated source check can catch missing assets and markup regressions. It cannot certify
 contrast, screen-reader behavior or whether a screenshot is genuinely understandable.
 
+For a **known opaque text/background pair**, the offline
+[`color_contrast.py` calculator](../tools/README.md#check-a-declared-text-color-pair-offline)
+reproduces the WCAG 2.2 relative-luminance calculation and reports the AA/AAA
+threshold result without rounding before classification. It can catch a
+mistaken palette choice early, but **does not read screenshots or computed
+browser styles**. Verify the actual rendered pair, theme, text size, focus
+states and exceptions separately. For example, `#777777` on white yields
+about **4.478:1** and fails the unrounded **4.5:1** AA normal-text threshold.
+
 The offline `python tools/html_navigation.py` check also flags **raw HTML
 `<img>` elements missing an `alt` attribute** in active Markdown content.
 Use meaningful text for informative images; `alt=""` is correct when an
