@@ -152,7 +152,7 @@ has a more precise source-level onboarding gap than the general
 PowerShell/POSIX split above. Its very first agent setup block says
 `qg skill install --agent codex` or `--agent claude`; the later source
 installation creates `.venv` and invokes
-`.\\.venv\\Scripts\\qg.exe` on PowerShell, or `.venv/bin/qg` on POSIX,
+`.\.venv\Scripts\qg.exe` on PowerShell, or `.venv/bin/qg` on POSIX,
 with **no environment activation step**. A shell that has not added the new
 environment's scripts directory to `PATH` cannot rely on bare `qg` finding
 that newly installed entry point. A separately installed `qg` could hide
@@ -166,7 +166,7 @@ entry-point path after installation (proposed, **not executed**):
 ```
 
 ```powershell
-.\\.venv\\Scripts\\qg.exe skill install --agent claude --project PATH_TO_WRITING_PROJECT
+.\.venv\Scripts\qg.exe skill install --agent claude --project PATH_TO_WRITING_PROJECT
 ```
 
 Alternatively, document activation first and then consistently use bare
