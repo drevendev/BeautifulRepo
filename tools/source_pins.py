@@ -24,6 +24,42 @@ FENCE_RE = re.compile(r"^ {0,3}(?P<run>\x60{3,}|~{3,})")
 MAX_CASE_BYTES = 256 * 1024
 
 
+BACKTICK_RUN_RE = re.compile(r"`+")
+
+
+def mask_inline_code(line: str) -> str:
+    """Mask paired one-line backtick spans without moving link source offsets."""
+    runs = []
+    for match in BACKTICK_RUN_RE.finditer(line):
+        left = match.start() - 1
+        while left >= 0 and line[left] == "\\":
+            left -= 1
+        if (match.start() - 1 - left) % 2 == 0:
+            runs.append(match)
+
+    next_run_by_length: dict[int, int] = {}
+    next_partner: list[int | None] = [None] * len(runs)
+    for index in range(len(runs) - 1, -1, -1):
+        length = runs[index].end() - runs[index].start()
+        next_partner[index] = next_run_by_length.get(length)
+        next_run_by_length[length] = index
+
+    parts = []
+    cursor = 0
+    index = 0
+    while index < len(runs):
+        closing = next_partner[index]
+        if closing is None:
+            index += 1
+            continue
+        start, end = runs[index].start(), runs[closing].end()
+        parts.extend((line[cursor:start], " " * (end - start)))
+        cursor = end
+        index = closing + 1
+    parts.append(line[cursor:])
+    return "".join(parts)
+
+
 def active_lines(document: str):
     """Yield 1-based non-fenced source lines; not a full Markdown renderer."""
     fence = None
@@ -34,7 +70,7 @@ def active_lines(document: str):
                 run = start.group("run")
                 fence = (run[0], len(run))
                 continue
-            yield line_no, line
+            yield line_no, mask_inline_code(line)
         else:
             char, count = fence
             stripped = line.lstrip(" ")
