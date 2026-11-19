@@ -78,6 +78,67 @@ class SourcePinTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("1 source permalinks", result.stdout)
 
+    def test_inline_code_links_do_not_count_as_source_evidence(self):
+        result = check(f"`[tree]({TREE}) [README]({README})`")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("no pinned tree/blob links", result.stderr)
+        self.assertIn("no source README.md", result.stderr)
+
+    def test_moving_revision_in_inline_code_does_not_fail_real_links(self):
+        result = check(
+            f"[tree]({TREE})\n[README]({README})\n"
+            f"Example: `https://github.com/{SOURCE}/blob/master/README.md`\n"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 source permalinks", result.stdout)
+
+    def test_multi_backtick_span_with_inner_tick_is_ignored(self):
+        result = check(
+            f"[tree]({TREE}) [README]({README})\n"
+            f"``[bad](https://github.com/{SOURCE}/blob/main/README.md) "
+            f"` literal``\n"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 source permalinks", result.stdout)
+
+    def test_escaped_or_unclosed_backticks_do_not_hide_real_links(self):
+        for prefix in (r"\`", "`"):
+            with self.subTest(prefix=prefix):
+                result = check(f"{prefix}[tree]({TREE}) [README]({README})")
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_backslash_prefixed_closer_exposes_active_moving_link(self):
+        result = check(
+            f"[tree]({TREE})\n[README]({README})\n"
+            rf"`literal \` [bad](https://github.com/{SOURCE}/blob/main/README.md) `"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
+    def test_backslash_prefixed_closer_masks_literal_moving_link(self):
+        result = check(
+            f"[tree]({TREE})\n[README]({README})\n"
+            rf"`[literal](https://github.com/{SOURCE}/blob/main/README.md) \`"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 source permalinks", result.stdout)
+
+    def test_escaped_opener_outside_span_does_not_hide_moving_link(self):
+        result = check(
+            f"[tree]({TREE})\n[README]({README})\n"
+            rf"\`[bad](https://github.com/{SOURCE}/blob/main/README.md)`"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
+    def test_source_link_outside_inline_code_still_fails_on_wrong_revision(self):
+        result = check(
+            f"`[ignored]({README})`\n"
+            f"[README](https://github.com/{SOURCE}/blob/main/README.md)\n"
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different or moving revision", result.stderr)
+
     def test_missing_readme_is_error(self):
         result = check(f"[tree]({TREE})\n")
         self.assertEqual(result.returncode, 1)
