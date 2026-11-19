@@ -1,0 +1,6 @@
+[
+  {"name": "Light help text", "theme": "light", "text": "normal", "level": "AA", "background": "#ffffff", "before": "#777777", "after": "#595959"},
+  {"name": "Dark help text", "theme": "dark", "text": "normal", "level": "AA", "background": "#202020", "before": "#777777", "after": "#bbbbbb"},
+  {"name": "Light large heading", "theme": "light", "text": "large", "level": "AA", "background": "#ffffff", "before": "#a0a0a0", "after": "#888888"},
+  {"name": "Dark high-contrast text", "theme": "dark", "text": "normal", "level": "AAA", "background": "#1a1a1a", "before": "#999999", "after": "#dddddd"}
+]

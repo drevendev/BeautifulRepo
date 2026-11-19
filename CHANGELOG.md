@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a runnable light/dark text-palette before/after example with four
+  checked-in failing-to-passing WCAG pairs and seven regression tests. This
+  checks declared opaque colors, not rendered UI or accessibility conformance.
+
+
 - Add an offline WCAG 2.2 sRGB text-contrast calculator with AA/AAA
   thresholds, machine-readable JSON, unrounded comparisons and thirteen
   numerical/CLI regression tests. It checks declared opaque color pairs, not

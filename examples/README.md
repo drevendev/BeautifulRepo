@@ -54,6 +54,13 @@ real internal service. Its bundled verifier has a repeatable offline result.
 Adapt the [internal README template](../templates/INTERNAL_README.template.md)
 only after checking the actual organization's policies and contact routes.
 
+## Check a light/dark palette with evidence
+
+The [contrast before/after example](contrast-palette/README.md) checks four
+synthetic color pairs against WCAG 2.2 text thresholds with the real offline
+calculator. Its runnable report and regressions show where a palette change
+improves a **declared numerical pair**, not whether a rendered page is accessible.
+
 ## Improve an existing first impression
 
 The [offline audit walkthrough](repository-audit/README.md) fixes specific README
