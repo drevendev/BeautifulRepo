@@ -64,7 +64,9 @@ for cases this intentionally limited checker does not parse.
 consistently links to its declared GitHub repository at one immutable,
 40-character commit. It requires a pinned README blob link, checks other
 tree/blob source links for moving branches or different revisions, ignores
-fenced examples and unrelated repositories, and runs with no network access.
+fenced examples, paired single-line backtick spans and unrelated repositories,
+and runs with no network access. Unclosed or multiline inline-code spans
+are not fully parsed.
 
 ```sh
 python -I tools/source_pins.py \
