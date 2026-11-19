@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -55,6 +56,44 @@ class ContrastPaletteExampleTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.demo.evaluate(self.rows)
 
+    def test_ambiguous_duplicate_members_fail_closed(self):
+        from contextlib import redirect_stderr
+        from io import StringIO
+        from unittest import mock
+
+        original = PAIRS.read_text(encoding="utf-8")
+        ambiguous = original.replace(
+            '"name": "Light help text",',
+            '"name": "Light help text", "name": "Conflicting name",', 1)
+        self.assertNotEqual(original, ambiguous)
+        with tempfile.TemporaryDirectory() as outside:
+            fixture = Path(outside) / "pairs.json"
+            fixture.write_text(ambiguous, encoding="utf-8")
+            stderr = StringIO()
+            with mock.patch.object(self.demo, "PAIRS", fixture), redirect_stderr(stderr):
+                status = self.demo.main()
+        self.assertEqual(2, status)
+        self.assertIn("duplicate JSON member", stderr.getvalue())
+        self.assertNotIn("Traceback", stderr.getvalue())
+
+    def test_readme_transcript_is_the_live_program_output(self):
+        readme = DEMO.with_name("README.md").read_text(encoding="utf-8")
+        command = "```sh\npython -I examples/contrast-palette/demo.py\n```"
+        self.assertEqual(1, readme.count(command))
+        marker = "Expected output (verified with"
+        self.assertEqual(1, readme.count(marker))
+        section = readme.split(marker, 1)[1].split("\nThe process exits", 1)[0]
+        blocks = re.findall(r"(?ms)^```text\n(.*?)^```[ \t]*$", section)
+        self.assertEqual(1, len(blocks), "expected exactly one published transcript")
+        # Do not execute shell commands extracted from untrusted Markdown.
+        with tempfile.TemporaryDirectory() as outside:
+            run = subprocess.run(
+                [sys.executable, "-I", str(DEMO)], cwd=outside,
+                capture_output=True, text=True, encoding="utf-8",
+                check=False, timeout=15)
+        self.assertEqual(0, run.returncode, run.stderr)
+        self.assertEqual("", run.stderr)
+        self.assertEqual(blocks[0], run.stdout)
     def test_script_works_in_isolated_mode_outside_checkout(self):
         with tempfile.TemporaryDirectory() as outside:
             proc = subprocess.run([sys.executable, "-I", str(DEMO)], cwd=outside,
