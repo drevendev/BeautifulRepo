@@ -94,6 +94,7 @@ class ContrastPaletteExampleTests(unittest.TestCase):
         self.assertEqual(0, run.returncode, run.stderr)
         self.assertEqual("", run.stderr)
         self.assertEqual(blocks[0], run.stdout)
+
     def test_script_works_in_isolated_mode_outside_checkout(self):
         with tempfile.TemporaryDirectory() as outside:
             proc = subprocess.run([sys.executable, "-I", str(DEMO)], cwd=outside,
