@@ -1,5 +1,6 @@
 """Black-box checks for the documented, dependency-free CLI example."""
 
+import re
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "examples" / "cli-starter" / "rowcount.py"
 SAMPLE = ROOT / "examples" / "cli-starter" / "sample.csv"
+README = ROOT / "examples" / "cli-starter" / "README.md"
 
 
 class CLIStarterTests(unittest.TestCase):
@@ -26,6 +28,27 @@ class CLIStarterTests(unittest.TestCase):
         result = self.run_cli(str(SAMPLE))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "Data rows: 3\n")
+        self.assertEqual(result.stderr, "")
+
+    def test_readme_quickstart_matches_actual_cli_output(self):
+        """Verify the actual README fence, not a duplicate expected-output constant."""
+        readme = README.read_text(encoding="utf-8")
+        heading = "## Try it in a checkout\n"
+        self.assertEqual(readme.count(heading), 1)
+        section = readme.split(heading, 1)[1].split("\n## ", 1)[0]
+        commands = re.findall(r"(?ms)^```bash\n(.*?)\n```$", section)
+        outputs = re.findall(r"(?ms)^```text\n(.*?)\n```$", section)
+
+        # Never execute arbitrary Markdown shell snippets. Pin the reviewed argv.
+        self.assertEqual(
+            commands,
+            ["python examples/cli-starter/rowcount.py examples/cli-starter/sample.csv"],
+        )
+        self.assertEqual(len(outputs), 1)
+        self.assertTrue(outputs[0])
+        result = self.run_cli(str(SAMPLE))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, outputs[0] + "\n")
         self.assertEqual(result.stderr, "")
 
     def test_help_exit_code(self):

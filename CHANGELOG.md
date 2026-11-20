@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Bind the working Rowcount README's first-run command and expected stdout to a
+  black-box regression that reads the actual Markdown fences, executes only the
+  reviewed fixed argv and rejects documentation drift. This does not execute
+  arbitrary README snippets or certify installers or other platforms.
+
 - Add an offline itch.io HTML5 ZIP preflight with text/JSON output and
   regression coverage for root entry-point case, count/path/size limits,
   duplicate and unsafe ZIP members, encrypted/special entries and invalid
