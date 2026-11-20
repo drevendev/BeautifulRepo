@@ -76,8 +76,12 @@ The checker never extracts files, invokes game code or uses a network.
 
 Rules cover a root-level `index.html` with exact case, published itch.io
 file-count/path-length/uncompressed-size limits, and conservative duplicate,
-unsafe-path, special-file and encryption preflights. It counts bytes from
-ZIP metadata, **not** verified decompressed content; it does not verify
+unsafe-path, special-file, encryption and non-UTF-8-marked name preflights.
+Non-ASCII names without the ZIP UTF-8 flag are reported as potentially
+non-portable; malformed UTF-8 filenames return **incomplete** rather than
+crashing. These are conservative metadata checks, not an asset URL or
+browser compatibility test. It counts bytes from ZIP metadata, **not**
+verified decompressed content; it does not verify
 CRC, HTML/JS asset references, player controls, saves, platform behavior
 or uploaded iframe execution. A single self-contained HTML upload is
 outside its ZIP-only scope. For a verified first-play route, see the

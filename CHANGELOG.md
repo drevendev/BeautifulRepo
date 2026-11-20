@@ -983,6 +983,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Report non-ASCII ZIP member names lacking the UTF-8 flag in the offline
+  itch.io HTML5 preflight, and return a structured incomplete result for
+  malformed UTF-8 member headers instead of a Python traceback. Three
+  regressions cover flagged UTF-8, legacy CP437 and invalid UTF-8 names;
+  no archive data is extracted or executed.
+
 - Verify Lantern Row's documented first-win and invalid-input transcript blocks
   against actual decoded subprocess output and exit status in tests. Previously
   the test asserted a separate hard-coded transcript, allowing README drift.
