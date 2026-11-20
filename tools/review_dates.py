@@ -38,51 +38,82 @@ BACKTICK_RUN = re.compile(r"`+")
 
 
 def mask_inline_inert(text: str) -> str:
-    """Ignore same-line code spans and HTML comments; keep prose and line numbers.
+    """Ignore code spans and HTML comments while retaining source line numbers.
 
-    Markdown backtick runs close only at an equal-width run. Track comments
-    across lines without interpreting backticks inside comments as code.
-    This is a bounded source-date filter, not a complete GFM parser.
+    GFM backtick spans may cross lines inside one prose block, but not
+    blank paragraphs or obvious new block starts (headings, lists, quotes,
+    thematic breaks). Unmatched delimiters remain prose. This is a bounded
+    source-date filter, not a full Markdown parser.
     """
-    in_comment = False
-    result: list[str] = []
-    for line in text.splitlines(keepends=True):
-        runs = list(BACKTICK_RUN.finditer(line))
-        run_at = {match.start(): i for i, match in enumerate(runs)}
-        following: dict[int, int] = {}
-        next_by_width: dict[int, int] = {}
-        for i in range(len(runs) - 1, -1, -1):
-            width = len(runs[i].group())
-            if width in next_by_width:
-                following[i] = next_by_width[width]
-            next_by_width[width] = i
+    runs = list(BACKTICK_RUN.finditer(text))
+    run_at: dict[int, int] = {}
+    following: dict[int, int] = {}
+    next_by_width: dict[int, int] = {}
+    # GFM block structure takes precedence over inline spans. Without this
+    # boundary, an unclosed backtick could mask a real source-review date in
+    # a following heading, list item, quote or thematic break.
+    # In GFM, only an ordered list starting with 1 may interrupt a paragraph;
+    # 2. and 3) remain prose and may continue a multiline code span.
+    # A line-starting HTML comment also interrupts a paragraph under GFM;
+    # its backticks cannot close a code span opened before that block.
+    block_break = re.compile(
+        r"\n(?:[ \t]*\n| {0,3}(?:"
+        r"#{1,6}(?:[ \t]|$)|"
+        r">|"
+        r"<!--|"
+        r"[-+*][ \t]+|"
+        r"1[.)][ \t]+|"
+        r"(?:[-_*][ \t]*){3,}(?:\n|$)"
+        r"))",
+        re.MULTILINE,
+    )
+    for i in range(len(runs) - 1, -1, -1):
+        run = runs[i]
+        # Backslash escapes apply to openers in prose. An odd preceding
+        # backslash count escapes only the first backtick of a run; any
+        # remaining backticks can still start a shorter code span.
+        before = run.start() - 1
+        while before >= 0 and text[before] == "\\":
+            before -= 1
+        escaped_first = (run.start() - before - 1) % 2
+        opener_at = run.start() + escaped_first
+        opener_width = run.end() - opener_at
+        successor = next_by_width.get(opener_width) if opener_width else None
+        if (successor is not None
+                and not block_break.search(text, run.end(), runs[successor].start())):
+            following[i] = successor
+        if opener_width:
+            run_at[opener_at] = i
+        # A run preceded by a backslash may still CLOSE an already active
+        # code span: backslash escapes are not processed within code spans.
+        next_by_width[len(run.group())] = i
 
-        chars = list(line)
-        offset = 0
-        while offset < len(line):
-            if in_comment:
-                close = line.find("-->", offset)
-                end = len(line) if close == -1 else close + 3
+    chars = list(text)
+    in_comment = False
+    offset = 0
+    while offset < len(text):
+        if in_comment:
+            close = text.find("-->", offset)
+            end = len(text) if close == -1 else close + 3
+            chars[offset:end] = ["\n" if c == "\n" else " " for c in chars[offset:end]]
+            offset = end
+            in_comment = close == -1
+            continue
+        if text.startswith("<!--", offset):
+            in_comment = True
+            continue
+        run_id = run_at.get(offset)
+        if run_id is not None:
+            closing_id = following.get(run_id)
+            if closing_id is not None:
+                end = runs[closing_id].end()
                 chars[offset:end] = ["\n" if c == "\n" else " " for c in chars[offset:end]]
                 offset = end
-                in_comment = close == -1
-                continue
-            if line.startswith("<!--", offset):
-                in_comment = True
-                continue
-            run_id = run_at.get(offset)
-            if run_id is not None:
-                closing_id = following.get(run_id)
-                if closing_id is not None:
-                    end = runs[closing_id].end()
-                    chars[offset:end] = ["\n" if c == "\n" else " " for c in chars[offset:end]]
-                    offset = end
-                else:
-                    offset = runs[run_id].end()
-                continue
-            offset += 1
-        result.append("".join(chars))
-    return "".join(result)
+            else:
+                offset = runs[run_id].end()
+            continue
+        offset += 1
+    return "".join(chars)
 
 
 def mask_fenced_blocks(text: str) -> str:

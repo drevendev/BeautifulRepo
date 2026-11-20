@@ -988,6 +988,16 @@ keep their original themed headings.
 
 ### Fixed
 
+- Stop the source review-date checker from treating dates inside multiline
+  GFM backtick code spans as real review evidence. A bounded parser now masks
+  spans across adjacent prose lines, preserves source line numbers and
+  leaves unmatched delimiters or interrupting Markdown blocks, including
+  HTML comment starts, visible.
+  Ordered markers other than 1 may continue a paragraph, so code spans can
+  cross `2. ` and `3) ` lines. Regressions cover false overdue warnings,
+  ordered-marker continuations and blank-paragraph boundaries; this remains
+  source inspection, not a full Markdown rendering test.
+
 - Reject HTML5 ZIP file/directory path collisions, including a file
   shadowing an asset's implicit parent directory. Three black-box cases
   cover both collision shapes and ordinary directory entries. The checker

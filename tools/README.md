@@ -478,10 +478,15 @@ that any workflow ran. Manual source review remains mandatory.
 
 ## Guide review dates
 
-The scanner ignores date-like text inside ordinary inline code and Markdown
-fenced-code examples, including valid longer closing fences and blocks
-left unclosed through the end of the document. This follows the bounded
-[GitHub Flavored Markdown fence rules](https://github.github.com/gfm/#fenced-code-blocks)
+The scanner ignores date-like text inside single-line and multiline backtick
+code spans within a paragraph, HTML comments and Markdown fenced examples,
+including longer closing fences and unclosed blocks. Unmatched inline backticks
+remain prose; blank paragraphs and interrupting Markdown blocks (headings,
+quotes, bullets, ordered lists starting at 1, thematic breaks and line-starting
+HTML comments) bound inline matching. Lines such as `2. ` and `3) ` can continue a prose paragraph. This follows bounded
+[GitHub Flavored Markdown code-span rules](https://github.github.com/gfm/#code-spans)
+(reviewed 2026-11-20) and
+[fence rules](https://github.github.com/gfm/#fenced-code-blocks)
 (reviewed 2026-10-27); it is not a complete Markdown renderer.
 
 `review_dates.py` finds the dates on which someone re-read a guide's sources, such as

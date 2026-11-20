@@ -63,6 +63,112 @@ class ReviewDateTests(unittest.TestCase):
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
         self.assertEqual([(7, "2026-10-20")], found)
 
+    def test_multiline_backtick_spans_are_not_source_reviews(self):
+        # GFM inline code can contain a line ending. Dates inside that code
+        # must not trigger false overdue warnings in the scheduled check.
+        root = self.repo({"guides/a.md": (
+            "Write ``a long literal sample\n"
+            "Reviewed 1999-01-01\n"
+            "ends with ` inside`` for readers.\n"
+            "Also `another literal sample\n"
+            "Checked: 1999-01-02` shown.\n"
+            "Reviewed 2026-10-27.\n"
+        )})
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(6, "2026-10-27")], found)
+        out = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("1 review date(s), 0 due", out.stdout)
+
+    def test_escaped_backtick_does_not_hide_review_across_lines(self):
+        # GFM backslash escapes apply outside code spans. One or three
+        # preceding slashes escape the backtick, so the later date is prose.
+        for slash_count in (1, 3):
+            with self.subTest(backslashes=slash_count):
+                root = self.repo({"guides/a.md": (
+                    "Show " + ("\\" * slash_count) + "` as literal punctuation.\n"
+                    "Reviewed 2026-10-27 ` suffix.\n"
+                )})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(2, "2026-10-27")], found)
+                out = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, out.returncode, out.stdout + out.stderr)
+                self.assertIn("1 review date(s), 0 due", out.stdout)
+
+    def test_even_backslashes_leave_real_multiline_code_span(self):
+        for slash_count in (0, 2):
+            with self.subTest(backslashes=slash_count):
+                root = self.repo({"guides/a.md": (
+                    "Example " + ("\\" * slash_count) + "`literal starts\n"
+                    "Reviewed 1999-01-01` and stops.\n"
+                    "Reviewed 2026-10-27.\n"
+                )})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(3, "2026-10-27")], found)
+
+    def test_escaped_run_prefix_and_code_span_closer(self):
+        cases = (
+            # The escaped first backtick leaves a one-backtick opener.
+            "Example \\``literal\nReviewed 1999-01-01` ends.\n"
+            "Reviewed 2026-10-27.\n",
+            # Within code spans, a backslash does not escape the closing run.
+            "Example `literal \\` ends; Reviewed 2026-10-27.\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                root = self.repo({"guides/a.md": source})
+                found = [raw for _, _, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual(["2026-10-27"], found)
+
+    def test_inline_backticks_do_not_cross_blank_paragraphs(self):
+        root = self.repo({"guides/a.md": (
+            "Unmatched ` opening\n\n"
+            "Reviewed 2026-10-26 ` still prose.\n"
+        )})
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(3, "2026-10-26")], found)
+
+    def test_noninitial_numbered_markers_continue_multiline_code_spans(self):
+        # GFM cannot interrupt an existing paragraph with 0., 2., or 3);
+        # these lines remain part of a multiline inline-code span.
+        for marker in ("0.", "2.", "3)"):
+            with self.subTest(marker=marker):
+                root = self.repo({"guides/a.md": (
+                    "This is `a multiline literal\n"
+                    f"{marker} Reviewed 1999-01-01\n"
+                    "finishing here` in prose.\n"
+                    "Reviewed 2026-10-27.\n"
+                )})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(4, "2026-10-27")], found)
+                out = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, out.returncode, out.stdout + out.stderr)
+
+    def test_inline_spans_stop_at_markdown_block_starts(self):
+        # GFM parses blocks before inline code; an unclosed backtick in prose
+        # cannot consume a source review in a new heading/list/quote block.
+        cases = {
+            "heading": ("Unmatched ` opener\n# Reviewed 2026-10-20 ` suffix\n", 2),
+            "bullet": ("Unmatched ` opener\n- Reviewed 2026-10-20 ` suffix\n", 2),
+            "numbered": ("Unmatched ` opener\n1. Reviewed 2026-10-20 ` suffix\n", 2),
+            "numbered-paren": ("Unmatched ` opener\n1) Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote": ("Unmatched ` opener\n> Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote-unspaced": ("Unmatched ` opener\n>Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote-unspaced-indented": (
+                "Unmatched ` opener\n  >Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote-nested": ("Unmatched ` opener\n>>Reviewed 2026-10-20 ` suffix\n", 2),
+            "thematic": ("Unmatched ` opener\n---\nReviewed 2026-10-20 ` suffix\n", 3),
+            "fence": ("Unmatched ` opener\n~~~text\nChecked: 1999-01-01\n~~~\n"
+                      "Reviewed 2026-10-20 ` suffix\n", 5),
+        }
+        for name, (source, line) in cases.items():
+            with self.subTest(block=name):
+                root = self.repo({"guides/a.md": source})
+                found = [(num, raw) for _, num, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(line, "2026-10-20")], found)
+                result = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
     def test_gfm_fences_with_longer_closers_and_unclosed_blocks(self):
         source = "\n".join((
             "```text",
@@ -89,6 +195,38 @@ class ReviewDateTests(unittest.TestCase):
         self.assertEqual(["2026-10-22"],
                          [raw for _, _, _, raw in review_dates.find_review_dates(unfinished)])
 
+    def test_html_comment_blocks_interrupt_multiline_code_pairing(self):
+        # A GFM HTML comment at the beginning of a line interrupts prose,
+        # even without a blank line. A backtick inside that comment cannot
+        # close an unmatched prose opener and conceal a real review date.
+        cases = {
+            "line-start": (
+                "Unmatched ` opener in prose.\n"
+                "Reviewed 2026-10-20.\n"
+                "<!-- discarded ` Reviewed 1999-01-01 -->\n"
+            ),
+            "indented": (
+                "Unmatched ` opener in prose.\n"
+                "Reviewed 2026-10-20.\n"
+                "   <!-- discarded ` example -->\n"
+            ),
+            "multiline": (
+                "Unmatched ` opener in prose.\n"
+                "Reviewed 2026-10-20.\n"
+                "<!-- comment begins\n"
+                "discarded ` example\n"
+                "-->\n"
+            ),
+        }
+        for name, source in cases.items():
+            with self.subTest(comment=name):
+                root = self.repo({"guides/a.md": source})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(2, "2026-10-20")], found)
+                result = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertIn("1 review date(s), 0 due", result.stdout)
+
     def test_html_comments_do_not_count_as_source_reviews(self):
         source = ("<!-- Reviewed 1999-01-01 --> Reviewed 2026-10-27\n"
                   "<!--\n"
@@ -104,11 +242,11 @@ class ReviewDateTests(unittest.TestCase):
                           (5, "2026-10-25"), (6, "2026-10-24")], found)
 
     def test_unmatched_backtick_width_does_not_hide_real_review_date(self):
-        source = ("` Reviewed 2026-10-21 ``\n"
+        source = ("` Reviewed 2026-10-21 ``\n\n"
                   "`` Reviewed 1999-01-01 ` still code `` Reviewed 2026-10-20\n")
         root = self.repo({"guides/a.md": source})
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
-        self.assertEqual([(1, "2026-10-21"), (2, "2026-10-20")], found)
+        self.assertEqual([(1, "2026-10-21"), (3, "2026-10-20")], found)
 
     def test_linked_source_file_is_rejected_before_reading_target(self):
         with tempfile.TemporaryDirectory() as foreign:
