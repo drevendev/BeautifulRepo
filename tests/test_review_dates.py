@@ -88,6 +88,26 @@ class ReviewDateTests(unittest.TestCase):
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
         self.assertEqual([(3, "2026-10-26")], found)
 
+    def test_inline_spans_stop_at_markdown_block_starts(self):
+        # GFM parses blocks before inline code; an unclosed backtick in prose
+        # cannot consume a source review in a new heading/list/quote block.
+        cases = {
+            "heading": ("Unmatched ` opener\n# Reviewed 2026-10-20 ` suffix\n", 2),
+            "bullet": ("Unmatched ` opener\n- Reviewed 2026-10-20 ` suffix\n", 2),
+            "numbered": ("Unmatched ` opener\n1. Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote": ("Unmatched ` opener\n> Reviewed 2026-10-20 ` suffix\n", 2),
+            "thematic": ("Unmatched ` opener\n---\nReviewed 2026-10-20 ` suffix\n", 3),
+            "fence": ("Unmatched ` opener\n~~~text\nChecked: 1999-01-01\n~~~\n"
+                      "Reviewed 2026-10-20 ` suffix\n", 5),
+        }
+        for name, (source, line) in cases.items():
+            with self.subTest(block=name):
+                root = self.repo({"guides/a.md": source})
+                found = [(num, raw) for _, num, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(line, "2026-10-20")], found)
+                result = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
     def test_gfm_fences_with_longer_closers_and_unclosed_blocks(self):
         source = "\n".join((
             "```text",
