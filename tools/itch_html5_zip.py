@@ -35,7 +35,16 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         # zipfile normalizes backslashes on Windows; inspect the original spelling.
         raw_name = item.orig_filename
         canonical_name = name.replace("\\", "/")
-        if not item.is_dir():
+        mode = item.external_attr >> 16
+        unix_type = stat.S_IFMT(mode) if item.create_system == 3 else 0
+        # ZipInfo.is_dir() checks only the trailing slash, not Unix mode bits.
+        # A directory masquerading as "index.html" is not a usable entry point.
+        name_is_dir = item.is_dir()
+        unix_is_dir = unix_type == stat.S_IFDIR
+        if unix_type in (stat.S_IFDIR, stat.S_IFREG) and name_is_dir != unix_is_dir:
+            report("entry_type_mismatch", raw_name,
+                   "Unix file type disagrees with directory path spelling")
+        if not (name_is_dir or unix_is_dir):
             files += 1
             total += item.file_size
             if raw_name == "index.html":
@@ -54,8 +63,7 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             report("path_length", name, f"path exceeds {MAX_PATH_CHARS} characters")
         if not item.is_dir() and item.file_size > MAX_FILE_BYTES:
             report("file_size", name, f"uncompressed file exceeds {MAX_FILE_BYTES} bytes")
-        mode = item.external_attr >> 16
-        if item.create_system == 3 and stat.S_IFMT(mode) not in (0, stat.S_IFREG, stat.S_IFDIR):
+        if item.create_system == 3 and unix_type not in (0, stat.S_IFREG, stat.S_IFDIR):
             report("special_entry", name, "symbolic links and special files are not accepted by this preflight")
         if item.flag_bits & 1:
             report("encrypted_entry", name, "encrypted ZIP members cannot be checked as ordinary game assets")
