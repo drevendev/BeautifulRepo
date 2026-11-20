@@ -80,6 +80,46 @@ class ReviewDateTests(unittest.TestCase):
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
         self.assertIn("1 review date(s), 0 due", out.stdout)
 
+    def test_escaped_backtick_does_not_hide_review_across_lines(self):
+        # GFM backslash escapes apply outside code spans. One or three
+        # preceding slashes escape the backtick, so the later date is prose.
+        for slash_count in (1, 3):
+            with self.subTest(backslashes=slash_count):
+                root = self.repo({"guides/a.md": (
+                    "Show " + ("\\" * slash_count) + "` as literal punctuation.\\n"
+                    "Reviewed 2026-10-27 ` suffix.\\n"
+                )})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(2, "2026-10-27")], found)
+                out = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, out.returncode, out.stdout + out.stderr)
+                self.assertIn("1 review date(s), 0 due", out.stdout)
+
+    def test_even_backslashes_leave_real_multiline_code_span(self):
+        for slash_count in (0, 2):
+            with self.subTest(backslashes=slash_count):
+                root = self.repo({"guides/a.md": (
+                    "Example " + ("\\" * slash_count) + "`literal starts\\n"
+                    "Reviewed 1999-01-01` and stops.\\n"
+                    "Reviewed 2026-10-27.\\n"
+                )})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(3, "2026-10-27")], found)
+
+    def test_escaped_run_prefix_and_code_span_closer(self):
+        cases = (
+            # The escaped first backtick leaves a one-backtick opener.
+            "Example \\``literal\\nReviewed 1999-01-01` ends.\\n"
+            "Reviewed 2026-10-27.\\n",
+            # Within code spans, a backslash does not escape the closing run.
+            "Example `literal \\` ends; Reviewed 2026-10-27.\\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                root = self.repo({"guides/a.md": source})
+                found = [raw for _, _, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual(["2026-10-27"], found)
+
     def test_inline_backticks_do_not_cross_blank_paragraphs(self):
         root = self.repo({"guides/a.md": (
             "Unmatched ` opening\n\n"
