@@ -15,7 +15,7 @@ Prerequisite: **Python 3.11+**. From the BeautifulRepo repository root:
 python examples/cli-starter/rowcount.py examples/cli-starter/sample.csv
 ```
 
-Expected stdout (tested, no color or network required):
+Expected stdout (compared with real CLI output by the README-fence regression; no color or network required):
 
 ```text
 Data rows: 3
@@ -44,8 +44,11 @@ telemetry, credentials or environment configuration are needed.
 python -m unittest discover -s tests -p 'test_cli_starter.py' -v
 ```
 
-The tests exercise the advertised sample, help, usage errors and common malformed inputs.
-They do not prove portability across every Python version, shell, CSV dialect or platform.
+The tests extract this README's first-run command and expected stdout, insist on
+a fixed reviewed invocation, and compare the text with actual CLI stdout and exit status.
+They also exercise help, usage errors and common malformed inputs. The harness
+does not execute arbitrary README commands and does not prove portability across
+every Python version, shell, CSV dialect or platform.
 
 ## Adapt for a real CLI project
 
