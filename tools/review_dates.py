@@ -57,7 +57,7 @@ def mask_inline_inert(text: str) -> str:
     block_break = re.compile(
         r"\n(?:[ \t]*\n| {0,3}(?:"
         r"#{1,6}(?:[ \t]|$)|"
-        r">(?:[ \t]|$)|"
+        r">|"
         r"[-+*][ \t]+|"
         r"1[.)][ \t]+|"
         r"(?:[-_*][ \t]*){3,}(?:\n|$)"
