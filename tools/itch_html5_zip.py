@@ -32,18 +32,21 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
 
     for item in entries:
         name = item.filename
+        # zipfile normalizes backslashes on Windows; inspect the original spelling.
+        raw_name = item.orig_filename
+        canonical_name = name.replace("\\", "/")
         if not item.is_dir():
             files += 1
             total += item.file_size
-            if name == "index.html":
+            if raw_name == "index.html":
                 has_index = True
-        if name in seen:
-            report("duplicate_path", name, "multiple ZIP members have this exact path")
-        seen.add(name)
-        if not name or name.startswith("/") or "\\" in name or ":" in name.split("/", 1)[0] or any(
-            part in ("", ".", "..") for part in name.rstrip("/").split("/")
+        if canonical_name in seen:
+            report("duplicate_path", raw_name, "multiple ZIP members share this path or normalized alias")
+        seen.add(canonical_name)
+        if not raw_name or raw_name.startswith("/") or "\\" in raw_name or ":" in raw_name.split("/", 1)[0] or any(
+            part in ("", ".", "..") for part in raw_name.rstrip("/").split("/")
         ):
-            report("unsafe_path", name, "member path is not a safe relative POSIX path")
+            report("unsafe_path", raw_name, "member path is not a safe relative POSIX path")
         if len(name) > MAX_PATH_CHARS:
             report("path_length", name, f"path exceeds {MAX_PATH_CHARS} characters")
         if not item.is_dir() and item.file_size > MAX_FILE_BYTES:
