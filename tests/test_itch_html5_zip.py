@@ -33,6 +33,14 @@ class ItchHTML5ZipTests(unittest.TestCase):
                 for name, contents in files:
                     out.writestr(name, contents)
 
+
+    def patch_raw_member_name(self, old: bytes, new: bytes) -> None:
+        """Rewrite both ZIP headers, bypassing Windows ZipInfo path normalization."""
+        self.assertEqual(len(old), len(new))
+        data = self.archive.read_bytes()
+        self.assertEqual(data.count(old), 2, "member path must occur in local and central headers")
+        self.archive.write_bytes(data.replace(old, new))
+
     def rules(self) -> set[str]:
         return {item["rule"] for item in checker.inspect(self.archive)["findings"]}
 
@@ -65,10 +73,28 @@ class ItchHTML5ZipTests(unittest.TestCase):
 
     def test_unsafe_names_rejected_without_extracting(self):
         self.build([("index.html", "okay"), ("../secret", "a"),
-                    ("/absolute/file", "x"), ("js\\backslash.js", "x"),
+                    ("/absolute/file", "x"), ("js/backslash.js", "x"),
                     ("./dot.txt", "x"), ("C:/drive.txt", "x")])
+        self.patch_raw_member_name(b"js/backslash.js", b"js\\backslash.js")
         self.assertEqual(len([x for x in checker.inspect(self.archive)["findings"]
                               if x["rule"] == "unsafe_path"]), 5)
+
+
+    def test_raw_backslash_member_is_reported_by_cli_on_all_platforms(self):
+        self.build([("index.html", "ok"), ("js/game.js", "ok")])
+        self.patch_raw_member_name(b"js/game.js", b"js\\game.js")
+        with zipfile.ZipFile(self.archive) as archive:
+            self.assertEqual(archive.infolist()[1].orig_filename, "js\\game.js")
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        findings = json.loads(run.stdout)["findings"]
+        self.assertIn("unsafe_path", {item["rule"] for item in findings})
+
+    def test_raw_backslash_alias_collides_with_forward_slash_path(self):
+        self.build([("index.html", "ok"), ("js/game.js", "a"), ("js/gane.js", "b")])
+        self.patch_raw_member_name(b"js/gane.js", b"js\\game.js")
+        self.assertIn("duplicate_path", self.rules())
+        self.assertEqual(self.run_cli().returncode, 1)
 
     def test_long_member_path(self):
         self.build([("index.html", "okay"), ("folder/" + "a" * 235, "x")])
