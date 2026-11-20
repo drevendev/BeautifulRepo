@@ -113,6 +113,10 @@ class ReviewDateTests(unittest.TestCase):
             "numbered": ("Unmatched ` opener\n1. Reviewed 2026-10-20 ` suffix\n", 2),
             "numbered-paren": ("Unmatched ` opener\n1) Reviewed 2026-10-20 ` suffix\n", 2),
             "blockquote": ("Unmatched ` opener\n> Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote-unspaced": ("Unmatched ` opener\n>Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote-unspaced-indented": (
+                "Unmatched ` opener\n  >Reviewed 2026-10-20 ` suffix\n", 2),
+            "blockquote-nested": ("Unmatched ` opener\n>>Reviewed 2026-10-20 ` suffix\n", 2),
             "thematic": ("Unmatched ` opener\n---\nReviewed 2026-10-20 ` suffix\n", 3),
             "fence": ("Unmatched ` opener\n~~~text\nChecked: 1999-01-01\n~~~\n"
                       "Reviewed 2026-10-20 ` suffix\n", 5),
