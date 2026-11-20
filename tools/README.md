@@ -58,6 +58,33 @@ No destination is echoed into the finding. See the
 [GitHub Flavored Markdown reference-link specification](https://github.github.com/gfm/#reference-link)
 for cases this intentionally limited checker does not parse.
 
+## Preflight a browser-game ZIP for itch.io
+
+The dependency-free [`itch_html5_zip.py`](itch_html5_zip.py) checks an
+exported **multi-file** HTML5 game ZIP's central-directory metadata before
+a possible itch.io upload:
+
+```sh
+python -I tools/itch_html5_zip.py dist/game.zip
+python -I tools/itch_html5_zip.py dist/game.zip --format json
+```
+
+Exit **0** means no reported metadata findings, **1** means an upload-shape
+finding, **2** means an unreadable, invalid or unsupported archive. JSON
+includes `status`, `files`, `uncompressed_bytes` and sorted `findings`.
+The checker never extracts files, invokes game code or uses a network.
+
+Rules cover a root-level `index.html` with exact case, published itch.io
+file-count/path-length/uncompressed-size limits, and conservative duplicate,
+unsafe-path, special-file and encryption preflights. It counts bytes from
+ZIP metadata, **not** verified decompressed content; it does not verify
+CRC, HTML/JS asset references, player controls, saves, platform behavior
+or uploaded iframe execution. A single self-contained HTML upload is
+outside its ZIP-only scope. For a verified first-play route, see the
+[game repository guide](../guides/game-repositories.md#preflight-an-itchio-html5-zip-without-uploading-it)
+and [itch.io's upload documentation](https://itch.io/docs/creators/html5)
+(reviewed **2026-11-20**).
+
 ## Check a declared text-color pair offline
 
 [WCAG 2.2, SC 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)

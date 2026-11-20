@@ -39,6 +39,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Application repository starter](guides/application-repositories.md), with the
   [read-only Pocket Board demo](examples/application-starter/README.md), local HTTP
   integration tests and honest development-server boundaries.
+- [Offline itch.io HTML5 ZIP preflight](tools/README.md#preflight-a-browser-game-zip-for-itchio),
+  with metadata-only upload-shape checks and synthetic Python regressions;
+  this does not prove iframe play or asset loading.
 - [Game repository README guidance](guides/game-repositories.md),
   [editable game README template](templates/GAME_README.template.md), and
   [runnable Lantern Row terminal example](examples/game-starter/README.md)
