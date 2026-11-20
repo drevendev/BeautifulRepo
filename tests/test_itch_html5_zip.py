@@ -80,6 +80,39 @@ class ItchHTML5ZipTests(unittest.TestCase):
                               if x["rule"] == "unsafe_path"]), 5)
 
 
+    def test_utf8_member_name_is_accepted_when_flagged(self):
+        self.build([("index.html", "ok"), ("café.png", "asset")])
+        self.assertNotIn("legacy_name_encoding", self.rules())
+        self.assertEqual(self.run_cli().returncode, 0)
+
+    def test_cp437_non_ascii_member_name_is_reported(self):
+        self.build([("index.html", "ok"), ("cafe.png", "asset")])
+        self.patch_raw_member_name(b"cafe.png", b"caf\x82.png")
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        report = json.loads(run.stdout)
+        self.assertIn({"rule": "legacy_name_encoding", "path": "café.png",
+                       "detail": "non-ASCII ZIP member name lacks the UTF-8 flag; re-export with UTF-8 names"},
+                      report["findings"])
+
+    def test_invalid_utf8_member_is_incomplete_not_traceback(self):
+        self.build([("index.html", "ok"), ("cafe.png", "asset")])
+        self.patch_raw_member_name(b"cafe.png", b"caf\x82.png")
+        data = bytearray(self.archive.read_bytes())
+        # The last member is the one with the corrupted name. Flag both headers.
+        for signature, flag_offset in ((b"PK\x03\x04", 6), (b"PK\x01\x02", 8)):
+            pos = data.rfind(signature)
+            self.assertGreaterEqual(pos, 0)
+            flags = int.from_bytes(data[pos + flag_offset:pos + flag_offset + 2], "little")
+            data[pos + flag_offset:pos + flag_offset + 2] = (flags | 0x800).to_bytes(2, "little")
+        self.archive.write_bytes(data)
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 2, run.stderr)
+        self.assertEqual(run.stderr, "")
+        result = json.loads(run.stdout)
+        self.assertEqual(result["status"], "incomplete")
+        self.assertIn("UnicodeDecodeError", result["error"])
+
     def test_raw_backslash_member_is_reported_by_cli_on_all_platforms(self):
         self.build([("index.html", "ok"), ("js/game.js", "ok")])
         self.patch_raw_member_name(b"js/game.js", b"js\\game.js")
