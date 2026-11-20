@@ -63,6 +63,31 @@ class ReviewDateTests(unittest.TestCase):
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
         self.assertEqual([(7, "2026-10-20")], found)
 
+    def test_multiline_backtick_spans_are_not_source_reviews(self):
+        # GFM inline code can contain a line ending. Dates inside that code
+        # must not trigger false overdue warnings in the scheduled check.
+        root = self.repo({"guides/a.md": (
+            "Write ``a long literal sample\n"
+            "Reviewed 1999-01-01\n"
+            "ends with ` inside`` for readers.\n"
+            "Also `another literal sample\n"
+            "Checked: 1999-01-02` shown.\n"
+            "Reviewed 2026-10-27.\n"
+        )})
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(6, "2026-10-27")], found)
+        out = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("1 review date(s), 0 due", out.stdout)
+
+    def test_inline_backticks_do_not_cross_blank_paragraphs(self):
+        root = self.repo({"guides/a.md": (
+            "Unmatched ` opening\n\n"
+            "Reviewed 2026-10-26 ` still prose.\n"
+        )})
+        found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+        self.assertEqual([(3, "2026-10-26")], found)
+
     def test_gfm_fences_with_longer_closers_and_unclosed_blocks(self):
         source = "\n".join((
             "```text",
@@ -104,11 +129,11 @@ class ReviewDateTests(unittest.TestCase):
                           (5, "2026-10-25"), (6, "2026-10-24")], found)
 
     def test_unmatched_backtick_width_does_not_hide_real_review_date(self):
-        source = ("` Reviewed 2026-10-21 ``\n"
+        source = ("` Reviewed 2026-10-21 ``\n\n"
                   "`` Reviewed 1999-01-01 ` still code `` Reviewed 2026-10-20\n")
         root = self.repo({"guides/a.md": source})
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
-        self.assertEqual([(1, "2026-10-21"), (2, "2026-10-20")], found)
+        self.assertEqual([(1, "2026-10-21"), (3, "2026-10-20")], found)
 
     def test_linked_source_file_is_rejected_before_reading_target(self):
         with tempfile.TemporaryDirectory() as foreign:
