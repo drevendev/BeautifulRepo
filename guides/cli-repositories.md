@@ -28,7 +28,8 @@ repository. The script is a **documentation demo**, not a separately distributed
 The [CLI regression](../tests/test_cli_starter.py) also reads the **actual first-run
 command and expected-output fences** from that README. It permits only the reviewed
 fixed command, then compares live stdout and exit status with the documented text;
-editing just the prose or just the executable will fail the contract. Do not
+changing the fenced command or output-changing behavior without matching evidence
+will fail the contract. Do not
 blindly execute README shell snippets in CI: parsing and running arbitrary
 contributor-supplied commands would cross a different trust boundary. This
 fixed-argv check cannot verify packaging, arbitrary command examples, or OS coverage.
