@@ -195,6 +195,38 @@ class ReviewDateTests(unittest.TestCase):
         self.assertEqual(["2026-10-22"],
                          [raw for _, _, _, raw in review_dates.find_review_dates(unfinished)])
 
+    def test_html_comment_blocks_interrupt_multiline_code_pairing(self):
+        # A GFM HTML comment at the beginning of a line interrupts prose,
+        # even without a blank line. A backtick inside that comment cannot
+        # close an unmatched prose opener and conceal a real review date.
+        cases = {
+            "line-start": (
+                "Unmatched ` opener in prose.\\n"
+                "Reviewed 2026-10-20.\\n"
+                "<!-- discarded ` Reviewed 1999-01-01 -->\\n",
+            ),
+            "indented": (
+                "Unmatched ` opener in prose.\\n"
+                "Reviewed 2026-10-20.\\n"
+                "   <!-- discarded ` example -->\\n",
+            ),
+            "multiline": (
+                "Unmatched ` opener in prose.\\n"
+                "Reviewed 2026-10-20.\\n"
+                "<!-- comment begins\\n"
+                "discarded ` example\\n"
+                "-->\\n",
+            ),
+        }
+        for name, source in cases.items():
+            with self.subTest(comment=name):
+                root = self.repo({"guides/a.md": source})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(2, "2026-10-20")], found)
+                result = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertIn("1 review date(s), 0 due", result.stdout)
+
     def test_html_comments_do_not_count_as_source_reviews(self):
         source = ("<!-- Reviewed 1999-01-01 --> Reviewed 2026-10-27\n"
                   "<!--\n"

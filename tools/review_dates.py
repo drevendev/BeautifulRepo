@@ -54,10 +54,13 @@ def mask_inline_inert(text: str) -> str:
     # a following heading, list item, quote or thematic break.
     # In GFM, only an ordered list starting with 1 may interrupt a paragraph;
     # 2. and 3) remain prose and may continue a multiline code span.
+    # A line-starting HTML comment also interrupts a paragraph under GFM;
+    # its backticks cannot close a code span opened before that block.
     block_break = re.compile(
         r"\n(?:[ \t]*\n| {0,3}(?:"
         r"#{1,6}(?:[ \t]|$)|"
         r">|"
+        r"<!--|"
         r"[-+*][ \t]+|"
         r"1[.)][ \t]+|"
         r"(?:[-_*][ \t]*){3,}(?:\n|$)"
