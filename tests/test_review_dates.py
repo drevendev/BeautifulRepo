@@ -201,21 +201,21 @@ class ReviewDateTests(unittest.TestCase):
         # close an unmatched prose opener and conceal a real review date.
         cases = {
             "line-start": (
-                "Unmatched ` opener in prose.\\n"
-                "Reviewed 2026-10-20.\\n"
-                "<!-- discarded ` Reviewed 1999-01-01 -->\\n",
+                "Unmatched ` opener in prose.\n"
+                "Reviewed 2026-10-20.\n"
+                "<!-- discarded ` Reviewed 1999-01-01 -->\n",
             ),
             "indented": (
-                "Unmatched ` opener in prose.\\n"
-                "Reviewed 2026-10-20.\\n"
-                "   <!-- discarded ` example -->\\n",
+                "Unmatched ` opener in prose.\n"
+                "Reviewed 2026-10-20.\n"
+                "   <!-- discarded ` example -->\n",
             ),
             "multiline": (
-                "Unmatched ` opener in prose.\\n"
-                "Reviewed 2026-10-20.\\n"
-                "<!-- comment begins\\n"
-                "discarded ` example\\n"
-                "-->\\n",
+                "Unmatched ` opener in prose.\n"
+                "Reviewed 2026-10-20.\n"
+                "<!-- comment begins\n"
+                "discarded ` example\n"
+                "-->\n",
             ),
         }
         for name, source in cases.items():
