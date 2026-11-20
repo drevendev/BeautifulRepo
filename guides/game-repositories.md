@@ -68,6 +68,41 @@ a store build, a visual screenshot, platform compatibility or a real player's
 experience. If actual output changes, update the documentation intentionally
 alongside the code and let CI expose drift.
 
+## Preflight an itch.io HTML5 ZIP without uploading it
+
+The [official itch.io HTML5 upload guide](https://itch.io/docs/creators/html5)
+(reviewed **2026-11-20**) requires a multi-file browser game to be supplied as
+a ZIP with **`index.html` at the archive root**, with filenames treated as
+case-sensitive. itch.io documents limits of **1,000 files**, **240 characters
+per member path**, **500 MB total extracted content** and **200 MB per extracted
+file**. A self-contained single HTML file may instead be uploaded directly;
+this ZIP checker intentionally does not cover that route.
+
+From a BeautifulRepo checkout, inspect the *actual exported ZIP* before
+uploading it:
+
+```sh
+python -I tools/itch_html5_zip.py path/to/game.zip
+python -I tools/itch_html5_zip.py path/to/game.zip --format json
+```
+
+The [offline preflight](../tools/README.md#preflight-a-browser-game-zip-for-itchio)
+reports a missing or mis-cased root entry point, member count/length/size
+limits, duplicate paths and conservative unsafe-path/special-file findings.
+Exit **0** means these ZIP *metadata* checks passed, **1** reports findings,
+and **2** means the input could not be inspected. It does **not** unpack
+assets, follow links, parse HTML/JS/CSS, verify ZIP member checksums, upload
+anything or test the game. Its sizes use decimal MB for a conservative
+interpretation of itch.io's published thresholds.
+
+Then separately test the uploaded **iframe build** in the actual itch.io
+preview. The provider warns that leading `/` asset URLs escape the game's
+hosted subdirectory, path case mismatches may work locally but fail on its
+case-sensitive server, and external assets need HTTPS. Record the launch
+result and console/network failures. Test resizing/fullscreen and save
+behavior with the real build; mark **Mobile Friendly** only when tested on
+mobile. A green archive preflight is not a working-browser certification.
+
 ## Screenshots, motion and store presentation
 
 Use a real gameplay still before any large animation. Include descriptive
