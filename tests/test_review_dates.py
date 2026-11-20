@@ -86,8 +86,8 @@ class ReviewDateTests(unittest.TestCase):
         for slash_count in (1, 3):
             with self.subTest(backslashes=slash_count):
                 root = self.repo({"guides/a.md": (
-                    "Show " + ("\\" * slash_count) + "` as literal punctuation.\\n"
-                    "Reviewed 2026-10-27 ` suffix.\\n"
+                    "Show " + ("\\" * slash_count) + "` as literal punctuation.\n"
+                    "Reviewed 2026-10-27 ` suffix.\n"
                 )})
                 found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
                 self.assertEqual([(2, "2026-10-27")], found)
@@ -99,9 +99,9 @@ class ReviewDateTests(unittest.TestCase):
         for slash_count in (0, 2):
             with self.subTest(backslashes=slash_count):
                 root = self.repo({"guides/a.md": (
-                    "Example " + ("\\" * slash_count) + "`literal starts\\n"
-                    "Reviewed 1999-01-01` and stops.\\n"
-                    "Reviewed 2026-10-27.\\n"
+                    "Example " + ("\\" * slash_count) + "`literal starts\n"
+                    "Reviewed 1999-01-01` and stops.\n"
+                    "Reviewed 2026-10-27.\n"
                 )})
                 found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
                 self.assertEqual([(3, "2026-10-27")], found)
@@ -109,10 +109,10 @@ class ReviewDateTests(unittest.TestCase):
     def test_escaped_run_prefix_and_code_span_closer(self):
         cases = (
             # The escaped first backtick leaves a one-backtick opener.
-            "Example \\``literal\\nReviewed 1999-01-01` ends.\\n"
-            "Reviewed 2026-10-27.\\n",
+            "Example \\``literal\nReviewed 1999-01-01` ends.\n"
+            "Reviewed 2026-10-27.\n",
             # Within code spans, a backslash does not escape the closing run.
-            "Example `literal \\` ends; Reviewed 2026-10-27.\\n",
+            "Example `literal \\` ends; Reviewed 2026-10-27.\n",
         )
         for source in cases:
             with self.subTest(source=source):
