@@ -47,6 +47,9 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             part in ("", ".", "..") for part in raw_name.rstrip("/").split("/")
         ):
             report("unsafe_path", raw_name, "member path is not a safe relative POSIX path")
+        if any(ord(char) > 127 for char in raw_name) and not (item.flag_bits & 0x800):
+            report("legacy_name_encoding", raw_name,
+                   "non-ASCII ZIP member name lacks the UTF-8 flag; re-export with UTF-8 names")
         if len(name) > MAX_PATH_CHARS:
             report("path_length", name, f"path exceeds {MAX_PATH_CHARS} characters")
         if not item.is_dir() and item.file_size > MAX_FILE_BYTES:
@@ -76,7 +79,7 @@ def inspect(path: Path) -> dict[str, object]:
             raise ValueError("archive must be an existing regular file, not a symlink")
         with zipfile.ZipFile(path, "r") as archive:
             files, total, findings = check_entries(archive.infolist())
-    except (OSError, ValueError, zipfile.BadZipFile, zipfile.LargeZipFile) as exc:
+    except (OSError, ValueError, UnicodeError, zipfile.BadZipFile, zipfile.LargeZipFile) as exc:
         report["error"] = f"cannot inspect ZIP central directory: {type(exc).__name__}"
         return report
     report.update(status="findings" if findings else "ok", files=files,
