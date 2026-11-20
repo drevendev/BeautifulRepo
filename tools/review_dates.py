@@ -40,20 +40,33 @@ BACKTICK_RUN = re.compile(r"`+")
 def mask_inline_inert(text: str) -> str:
     """Ignore code spans and HTML comments while retaining source line numbers.
 
-    GFM backtick spans may cross line endings, but not a blank paragraph
-    boundary. An unmatched delimiter remains prose. This is a bounded
+    GFM backtick spans may cross lines inside one prose block, but not
+    blank paragraphs or obvious new block starts (headings, lists, quotes,
+    thematic breaks). Unmatched delimiters remain prose. This is a bounded
     source-date filter, not a full Markdown parser.
     """
     runs = list(BACKTICK_RUN.finditer(text))
     run_at = {match.start(): i for i, match in enumerate(runs)}
     following: dict[int, int] = {}
     next_by_width: dict[int, int] = {}
-    paragraph_break = re.compile(r"\n[ \t]*\n")
+    # GFM block structure takes precedence over inline spans. Without this
+    # boundary, an unclosed backtick could mask a real source-review date in
+    # a following heading, list item, quote or thematic break.
+    block_break = re.compile(
+        r"\n(?:[ \t]*\n| {0,3}(?:"
+        r"#{1,6}(?:[ \t]|$)|"
+        r">(?:[ \t]|$)|"
+        r"[-+*][ \t]+|"
+        r"[0-9]{1,9}[.)][ \t]+|"
+        r"(?:[-_*][ \t]*){3,}(?:\n|$)"
+        r"))",
+        re.MULTILINE,
+    )
     for i in range(len(runs) - 1, -1, -1):
         width = len(runs[i].group())
         successor = next_by_width.get(width)
         if (successor is not None
-                and not paragraph_break.search(text, runs[i].end(), runs[successor].start())):
+                and not block_break.search(text, runs[i].end(), runs[successor].start())):
             following[i] = successor
         next_by_width[width] = i
 
