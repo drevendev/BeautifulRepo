@@ -87,7 +87,7 @@ python -I tools/itch_html5_zip.py path/to/game.zip --format json
 ```
 
 The [offline preflight](../tools/README.md#preflight-a-browser-game-zip-for-itchio)
-reports a missing or mis-cased root entry point, member count/length/size
+reports a missing, zero-byte or mis-cased root entry point, member count/length/size
 limits, duplicate paths, file/directory collisions and conservative
 unsafe-path/special-file findings.
 It also rejects a root `index.html` declared as a Unix directory despite
