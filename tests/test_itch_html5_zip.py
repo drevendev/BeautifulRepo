@@ -101,6 +101,34 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.build([("index.html", "a"), ("index.html", "b")])
         self.assertIn("duplicate_path", self.rules())
 
+    def test_file_blocks_implicit_parent_directory(self):
+        self.build([("index.html", "ok"), ("assets", "file"),
+                    ("assets/game.js", "console.log(1)")])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        findings = json.loads(run.stdout)["findings"]
+        self.assertIn("assets/game.js",
+                      {f["path"] for f in findings if f["rule"] == "path_type_conflict"})
+
+    def test_explicit_directory_conflicts_with_file_at_same_path(self):
+        self.build([("index.html", "ok"), ("assets/", ""), ("assets", "file")])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertIn({"rule": "path_type_conflict", "path": "assets",
+                       "detail": "ZIP contains both a file and a directory at this path"},
+                      json.loads(run.stdout)["findings"])
+
+    def test_valid_implicit_and_explicit_directory_paths(self):
+        for explicit in (False, True):
+            with self.subTest(explicit=explicit):
+                files = [("index.html", "ok"), ("assets/game.js", "ok")]
+                if explicit:
+                    files.insert(1, ("assets/", ""))
+                self.build(files)
+                run = self.run_cli("--format", "json")
+                self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+                self.assertEqual(json.loads(run.stdout)["findings"], [])
+
     def test_unsafe_names_rejected_without_extracting(self):
         self.build([("index.html", "okay"), ("../secret", "a"),
                     ("/absolute/file", "x"), ("js/backslash.js", "x"),

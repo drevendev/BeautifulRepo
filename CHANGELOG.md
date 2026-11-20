@@ -11,6 +11,14 @@ keep their original themed headings.
 
 ## [Unreleased]
 
+### Fixed
+
+- Reject HTML5 ZIP file/directory path collisions, including a file
+  shadowing an asset's implicit parent directory. Three black-box cases
+  cover both collision shapes and ordinary directory entries. The checker
+  remains metadata-only and does not extract or run game files.
+
+
 ### Added
 
 - Add an offline itch.io HTML5 ZIP preflight with text/JSON output and
