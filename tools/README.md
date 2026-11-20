@@ -74,9 +74,12 @@ finding, **2** means an unreadable, invalid or unsupported archive. JSON
 includes `status`, `files`, `uncompressed_bytes` and sorted `findings`.
 The checker never extracts files, invokes game code or uses a network.
 
-Rules cover a root-level `index.html` with exact case, published itch.io
-file-count/path-length/uncompressed-size limits, and conservative duplicate,
-unsafe-path, special-file, encryption and non-UTF-8-marked name preflights.
+Rules cover a root-level `index.html` **file** with exact case, published
+itch.io file-count/path-length/uncompressed-size limits, and conservative
+duplicate, unsafe-path, special-file, encryption and non-UTF-8-marked name
+preflights. Unix ZIP entries with conflicting filename/directory type metadata
+are reported: a directory named `index.html` without a trailing slash is
+**not** accepted as the game's entry point.
 Non-ASCII names without the ZIP UTF-8 flag are reported as potentially
 non-portable; malformed UTF-8 filenames return **incomplete** rather than
 crashing. These are conservative metadata checks, not an asset URL or
