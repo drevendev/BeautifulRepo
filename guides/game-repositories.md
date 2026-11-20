@@ -89,6 +89,9 @@ python -I tools/itch_html5_zip.py path/to/game.zip --format json
 The [offline preflight](../tools/README.md#preflight-a-browser-game-zip-for-itchio)
 reports a missing or mis-cased root entry point, member count/length/size
 limits, duplicate paths and conservative unsafe-path/special-file findings.
+It also rejects a root `index.html` declared as a Unix directory despite
+lacking a trailing slash, and reports conflicting file/directory metadata
+instead of mistaking that entry for a working page.
 It also reports legacy non-ASCII member names without the ZIP UTF-8 flag,
 which can behave differently across ZIP readers; a malformed UTF-8 member
 makes inspection **incomplete**. Re-export with UTF-8 filenames rather
