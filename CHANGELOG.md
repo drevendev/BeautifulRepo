@@ -988,6 +988,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Report a zero-byte root `index.html` in the offline itch.io HTML5 ZIP
+  preflight instead of accepting a demonstrably empty entry document. A
+  black-box test verifies the JSON finding, exit code and unchanged ZIP.
+  This uses central-directory metadata only, not HTML validity, asset
+  loading or browser execution.
+
 - Stop the source review-date checker from treating dates inside multiline
   GFM backtick code spans as real review evidence. A bounded parser now masks
   spans across adjacent prose lines, preserves source line numbers and
