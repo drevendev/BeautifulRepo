@@ -46,7 +46,7 @@ def mask_inline_inert(text: str) -> str:
     source-date filter, not a full Markdown parser.
     """
     runs = list(BACKTICK_RUN.finditer(text))
-    run_at = {match.start(): i for i, match in enumerate(runs)}
+    run_at: dict[int, int] = {}
     following: dict[int, int] = {}
     next_by_width: dict[int, int] = {}
     # GFM block structure takes precedence over inline spans. Without this
@@ -65,12 +65,25 @@ def mask_inline_inert(text: str) -> str:
         re.MULTILINE,
     )
     for i in range(len(runs) - 1, -1, -1):
-        width = len(runs[i].group())
-        successor = next_by_width.get(width)
+        run = runs[i]
+        # Backslash escapes apply to openers in prose. An odd preceding
+        # backslash count escapes only the first backtick of a run; any
+        # remaining backticks can still start a shorter code span.
+        before = run.start() - 1
+        while before >= 0 and text[before] == "\\":
+            before -= 1
+        escaped_first = (run.start() - before - 1) % 2
+        opener_at = run.start() + escaped_first
+        opener_width = run.end() - opener_at
+        successor = next_by_width.get(opener_width) if opener_width else None
         if (successor is not None
-                and not block_break.search(text, runs[i].end(), runs[successor].start())):
+                and not block_break.search(text, run.end(), runs[successor].start())):
             following[i] = successor
-        next_by_width[width] = i
+        if opener_width:
+            run_at[opener_at] = i
+        # A run preceded by a backslash may still CLOSE an already active
+        # code span: backslash escapes are not processed within code spans.
+        next_by_width[len(run.group())] = i
 
     chars = list(text)
     in_comment = False
