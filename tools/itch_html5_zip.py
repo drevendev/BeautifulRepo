@@ -94,7 +94,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     result = inspect(args.archive)
     if args.format == "json":
-        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+        # Keep JSON ASCII-only so legacy ZIP paths survive narrow Windows consoles.
+        print(json.dumps(result, ensure_ascii=True, sort_keys=True))
     else:
         print(f"HTML5 ZIP preflight: {result['status'].upper()} ({result['files']} files; "
               f"{result['uncompressed_bytes']} bytes unpacked, by ZIP metadata)")
