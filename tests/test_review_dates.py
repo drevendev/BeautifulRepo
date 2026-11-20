@@ -88,6 +88,22 @@ class ReviewDateTests(unittest.TestCase):
         found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
         self.assertEqual([(3, "2026-10-26")], found)
 
+    def test_noninitial_numbered_markers_continue_multiline_code_spans(self):
+        # GFM cannot interrupt an existing paragraph with 0., 2., or 3);
+        # these lines remain part of a multiline inline-code span.
+        for marker in ("0.", "2.", "3)"):
+            with self.subTest(marker=marker):
+                root = self.repo({"guides/a.md": (
+                    "This is `a multiline literal\n"
+                    f"{marker} Reviewed 1999-01-01\n"
+                    "finishing here` in prose.\n"
+                    "Reviewed 2026-10-27.\n"
+                )})
+                found = [(line, raw) for _, line, _, raw in review_dates.find_review_dates(root)]
+                self.assertEqual([(4, "2026-10-27")], found)
+                out = self.run_tool(root, "--today", "2026-10-28", "--fail-on-warning")
+                self.assertEqual(0, out.returncode, out.stdout + out.stderr)
+
     def test_inline_spans_stop_at_markdown_block_starts(self):
         # GFM parses blocks before inline code; an unclosed backtick in prose
         # cannot consume a source review in a new heading/list/quote block.
@@ -95,6 +111,7 @@ class ReviewDateTests(unittest.TestCase):
             "heading": ("Unmatched ` opener\n# Reviewed 2026-10-20 ` suffix\n", 2),
             "bullet": ("Unmatched ` opener\n- Reviewed 2026-10-20 ` suffix\n", 2),
             "numbered": ("Unmatched ` opener\n1. Reviewed 2026-10-20 ` suffix\n", 2),
+            "numbered-paren": ("Unmatched ` opener\n1) Reviewed 2026-10-20 ` suffix\n", 2),
             "blockquote": ("Unmatched ` opener\n> Reviewed 2026-10-20 ` suffix\n", 2),
             "thematic": ("Unmatched ` opener\n---\nReviewed 2026-10-20 ` suffix\n", 3),
             "fence": ("Unmatched ` opener\n~~~text\nChecked: 1999-01-01\n~~~\n"
