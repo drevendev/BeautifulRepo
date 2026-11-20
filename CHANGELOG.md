@@ -13,6 +13,13 @@ keep their original themed headings.
 
 ### Added
 
+- Add an offline itch.io HTML5 ZIP preflight with text/JSON output and
+  regression coverage for root entry-point case, count/path/size limits,
+  duplicate and unsafe ZIP members, encrypted/special entries and invalid
+  archives. It reads central-directory metadata only; real browser play,
+  asset loading, upload and CRC integrity remain unverified. Expand the
+  game README guide with a dated provider-backed browser-upload checklist.
+
 - Add a runnable light/dark text-palette before/after example with four
   checked-in failing-to-passing WCAG pairs and seven regression tests. This
   checks declared opaque colors, not rendered UI or accessibility conformance.
