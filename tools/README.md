@@ -481,7 +481,8 @@ that any workflow ran. Manual source review remains mandatory.
 The scanner ignores date-like text inside single-line and multiline backtick
 code spans within a paragraph, HTML comments and Markdown fenced examples,
 including longer closing fences and unclosed blocks. Unmatched inline backticks
-remain prose; blank paragraphs bound inline matching. This follows bounded
+remain prose; blank paragraphs and common Markdown block starts (headings,
+lists, quotes and thematic breaks) bound inline matching. This follows bounded
 [GitHub Flavored Markdown code-span rules](https://github.github.com/gfm/#code-spans)
 (reviewed 2026-11-20) and
 [fence rules](https://github.github.com/gfm/#fenced-code-blocks)
