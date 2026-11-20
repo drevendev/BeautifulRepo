@@ -59,6 +59,23 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.assertEqual(result["files"], 2)
         self.assertEqual(result["findings"], [])
 
+    def test_zero_byte_root_index_is_a_finding_without_reading_assets(self):
+        self.build([("index.html", ""), ("assets/game.js", "console.log(1)")])
+        original = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        report = json.loads(run.stdout)
+        self.assertEqual(report["status"], "findings")
+        self.assertEqual(report["files"], 2)
+        self.assertEqual(report["uncompressed_bytes"], len("console.log(1)"))
+        self.assertEqual(report["findings"], [{
+            "rule": "empty_entrypoint",
+            "path": "index.html",
+            "detail": "root index.html has zero bytes; it cannot serve as a game entry document",
+        }])
+        self.assertEqual(self.archive.read_bytes(), original)
+
     def test_nested_index_is_not_root_entry(self):
         self.build([("dist/index.html", "okay")])
         self.assertIn("missing_entrypoint", self.rules())
