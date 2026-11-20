@@ -99,7 +99,7 @@ class ItchHTML5ZipTests(unittest.TestCase):
 
     def test_legacy_member_json_survives_ascii_only_console(self):
         self.build([("index.html", "ok"), ("cafe.png", "asset")])
-        self.patch_raw_member_name(b"cafe.png", b"caf\\x82.png")
+        self.patch_raw_member_name(b"cafe.png", b"caf\x82.png")
         # A Windows terminal or redirected stream may not support Unicode.
         run = self.run_cli("--format", "json",
                            env={**os.environ, "PYTHONIOENCODING": "ascii"})
