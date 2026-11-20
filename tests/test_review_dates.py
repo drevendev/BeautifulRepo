@@ -203,19 +203,19 @@ class ReviewDateTests(unittest.TestCase):
             "line-start": (
                 "Unmatched ` opener in prose.\n"
                 "Reviewed 2026-10-20.\n"
-                "<!-- discarded ` Reviewed 1999-01-01 -->\n",
+                "<!-- discarded ` Reviewed 1999-01-01 -->\n"
             ),
             "indented": (
                 "Unmatched ` opener in prose.\n"
                 "Reviewed 2026-10-20.\n"
-                "   <!-- discarded ` example -->\n",
+                "   <!-- discarded ` example -->\n"
             ),
             "multiline": (
                 "Unmatched ` opener in prose.\n"
                 "Reviewed 2026-10-20.\n"
                 "<!-- comment begins\n"
                 "discarded ` example\n"
-                "-->\n",
+                "-->\n"
             ),
         }
         for name, source in cases.items():
