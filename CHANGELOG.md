@@ -983,6 +983,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject ZIP archives whose supposed root `index.html` is actually marked as
+  a Unix directory, even without a trailing slash. Detect contradictory
+  directory/file metadata and cover both forms with synthetic CLI regressions;
+  checks remain metadata-only, not browser launch verification.
+
 - Report non-ASCII ZIP member names lacking the UTF-8 flag in the offline
   itch.io HTML5 preflight, and return a structured incomplete result for
   malformed UTF-8 member headers instead of a Python traceback. Three
