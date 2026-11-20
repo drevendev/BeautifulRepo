@@ -68,6 +68,35 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.build([("Index.html", "okay")])
         self.assertIn("missing_entrypoint", self.rules())
 
+    def test_unix_directory_named_index_is_not_a_valid_entrypoint(self):
+        # Python's ZipInfo.is_dir() checks only a trailing slash.
+        index = zipfile.ZipInfo("index.html")
+        index.create_system = 3
+        index.external_attr = (stat.S_IFDIR | 0o755) << 16
+        with zipfile.ZipFile(self.archive, "w") as out:
+            out.writestr(index, b"")
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        result = json.loads(run.stdout)
+        self.assertEqual(result["status"], "findings")
+        self.assertEqual(result["files"], 0)
+        self.assertEqual({"entry_type_mismatch", "missing_entrypoint"},
+                         {item["rule"] for item in result["findings"]})
+
+    def test_unix_regular_file_named_as_directory_is_reported(self):
+        directory_name = zipfile.ZipInfo("assets/")
+        directory_name.create_system = 3
+        directory_name.external_attr = (stat.S_IFREG | 0o644) << 16
+        with zipfile.ZipFile(self.archive, "w") as out:
+            out.writestr("index.html", "ok")
+            out.writestr(directory_name, b"")
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        result = json.loads(run.stdout)
+        self.assertEqual(result["files"], 1)
+        self.assertIn("entry_type_mismatch",
+                      {item["rule"] for item in result["findings"]})
+
     def test_duplicates_are_not_mistaken_for_single_asset(self):
         self.build([("index.html", "a"), ("index.html", "b")])
         self.assertIn("duplicate_path", self.rules())
