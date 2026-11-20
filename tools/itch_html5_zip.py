@@ -23,6 +23,8 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
     """Inspect central-directory metadata; never read or unpack member data."""
     findings: list[dict[str, str]] = []
     seen: set[str] = set()
+    file_paths: set[str] = set()
+    directory_paths: set[str] = set()
     files = 0
     total = 0
     has_index = False
@@ -52,6 +54,10 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         if canonical_name in seen:
             report("duplicate_path", raw_name, "multiple ZIP members share this path or normalized alias")
         seen.add(canonical_name)
+        # ZIP can contain incompatible file/directory paths; extracted filesystems cannot.
+        key = canonical_name.rstrip("/")
+        if key:
+            (directory_paths if (name_is_dir or unix_is_dir) else file_paths).add(key)
         if not raw_name or raw_name.startswith("/") or "\\" in raw_name or ":" in raw_name.split("/", 1)[0] or any(
             part in ("", ".", "..") for part in raw_name.rstrip("/").split("/")
         ):
@@ -67,6 +73,20 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             report("special_entry", name, "symbolic links and special files are not accepted by this preflight")
         if item.flag_bits & 1:
             report("encrypted_entry", name, "encrypted ZIP members cannot be checked as ordinary game assets")
+
+    # An explicit directory cannot also be a file; a nested member cannot
+    # use a file as its implicit parent directory. Explicit directory records
+    # are optional in ZIPs, so their absence is not a finding.
+    for path in sorted(file_paths & directory_paths):
+        report("path_type_conflict", path, "ZIP contains both a file and a directory at this path")
+    for path in sorted(file_paths | directory_paths):
+        pieces = path.split("/")
+        for depth in range(1, len(pieces)):
+            parent = "/".join(pieces[:depth])
+            if parent in file_paths:
+                report("path_type_conflict", path,
+                       f"member needs a directory at '{parent}', but ZIP contains a file there")
+                break
 
     if not has_index:
         report("missing_entrypoint", "index.html", "ZIP needs an index.html file at archive root (exact case)")

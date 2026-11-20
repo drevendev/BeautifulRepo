@@ -983,6 +983,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject HTML5 ZIP file/directory path collisions, including a file
+  shadowing an asset's implicit parent directory. Three black-box cases
+  cover both collision shapes and ordinary directory entries. The checker
+  remains metadata-only and does not extract or run game files.
+
 - Reject ZIP archives whose supposed root `index.html` is actually marked as
   a Unix directory, even without a trailing slash. Detect contradictory
   directory/file metadata and cover both forms with synthetic CLI regressions;
