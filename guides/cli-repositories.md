@@ -51,6 +51,25 @@ command name. If this is a source-only project, say so openly and provide the di
 checkout invocation. For platform-specific instructions, indicate which commands were
 actually exercised.
 
+## Make the installed entry point reachable
+
+A source install inside a Python virtual environment puts its console scripts
+under `.venv/bin/` (POSIX) or `.venv\Scripts\` (Windows). Creating and
+installing into that environment does **not** automatically add the directory to
+the reader's shell `PATH`. Either invoke the installed script by its full
+relative path or document explicit activation before introducing a bare command
+name. Keep that decision consistent for the first command *and* later subcommands.
+A different globally installed tool with the same name can otherwise conceal an
+unreproducible first run.
+
+The [Quillgrain source-only case](../case-studies/quillgrain.md) shows this
+specific documentation gap at a pinned revision: its first `qg skill install`
+example uses bare `qg`, while the later virtualenv install path uses
+platform-qualified executables without an activation step. This is a source
+finding, **not** an observed failed installation. See
+[Python's virtual-environment documentation](https://docs.python.org/3/library/venv.html#how-venvs-work)
+(reviewed 2026-11-19 UTC) for activation and direct script execution.
+
 ## CLI documentation quality review
 
 - [ ] The opening sentence describes a concrete result and intended reader.

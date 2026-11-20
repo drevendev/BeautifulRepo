@@ -144,3 +144,42 @@ claim, a Codex check reported by the pack, or an ordinary schema test cannot
 stand in for those host observations. Both tracks still require permission to
 change the target repos and an actual target-side PR before this becomes a
 completed before/after case.
+
+## 2026-11-20: entry point availability in the first-minute path
+
+The engine's [immutable 0.1.0rc5 README](https://github.com/drevendev/Quillgrain/blob/6b022c2e51c688ee3639628551aa5a2d80e5568a/README.md)
+has a more precise source-level onboarding gap than the general
+PowerShell/POSIX split above. Its very first agent setup block says
+`qg skill install --agent codex` or `--agent claude`; the later source
+installation creates `.venv` and invokes
+`.\.venv\Scripts\qg.exe` on PowerShell, or `.venv/bin/qg` on POSIX,
+with **no environment activation step**. A shell that has not added the new
+environment's scripts directory to `PATH` cannot rely on bare `qg` finding
+that newly installed entry point. A separately installed `qg` could hide
+the mismatch rather than prove the new checkout works.
+
+The minimal target-side documentation fix is to show a consistent direct
+entry-point path after installation (proposed, **not executed**):
+
+```sh
+.venv/bin/qg skill install --agent codex --project PATH_TO_WRITING_PROJECT
+```
+
+```powershell
+.\.venv\Scripts\qg.exe skill install --agent claude --project PATH_TO_WRITING_PROJECT
+```
+
+Alternatively, document activation first and then consistently use bare
+`qg`. The paths above are platform examples, **not** evidence that either
+host discovered or ran the skill. In a separately authorized, disposable
+fresh clone, test both the direct CLI first success and the skill installation
+route, recording the exact interpreter/entry-point paths, exit codes and
+observed output. Verify actual host discovery/invocation separately. Do
+not write the target repository or claim a runtime failure from this
+source-only comparison.
+
+This finding is backed by the pinned README and
+[Python's venv behavior](https://docs.python.org/3/library/venv.html#how-venvs-work),
+reviewed 2026-11-20. The same immutable engine and Common revisions from
+2026-11-16 remain the inspected sources; no new target changes, releases,
+fresh-clone runs or provider-setting checks are claimed.
