@@ -78,8 +78,14 @@ Rules cover a root-level, **nonempty** `index.html` **file** with exact case, pu
 itch.io file-count/path-length/uncompressed-size limits, and conservative
 duplicate, file/directory path conflict, unsafe-path (including C0/C1 control
 characters in member names), special-file, encryption and non-UTF-8-marked name
-preflights. Unix ZIP entries with conflicting filename/directory type metadata
-are reported: a directory named `index.html` without a trailing slash is
+preflights. It also reports Windows-nonportable member names (reserved
+devices such as `NUL.txt` and `COM¹.json`, prohibited punctuation or trailing
+dots/spaces) and case-distinct members that collide on common case-insensitive
+filesystems. These are optional conservative portability policies based on
+[Microsoft's filename rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file),
+**not** additional itch.io ZIP-upload requirements. Unix ZIP entries with
+conflicting filename/directory type metadata are reported: a directory named
+`index.html` without a trailing slash is
 **not** accepted as the game's entry point.
 Non-ASCII names without the ZIP UTF-8 flag are reported as potentially
 non-portable; malformed UTF-8 filenames return **incomplete** rather than

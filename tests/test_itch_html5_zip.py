@@ -173,6 +173,70 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.assertEqual(len(unsafe), len(names))
         self.assertEqual(before, self.archive.read_bytes())
 
+    def test_windows_reserved_names_and_trailing_components_are_reported(self):
+        bad = ("NUL.txt", "assets/con.JSON", "audio/Lpt1.wav",
+               "data/COM¹.json", "icons/end.", "assets/trail /view.png")
+        self.build([("index.html", "ok")] + [(name, "asset") for name in bad])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        report = json.loads(run.stdout)
+        self.assertEqual({f["path"] for f in report["findings"]
+                          if f["rule"] == "windows_path"}, set(bad))
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_windows_punctuation_inside_nested_components_is_reported(self):
+        bad = ("assets/question?.png", "images/<splash>/a.png",
+               "assets/foo:bar.txt", "assets/tag*star.png")
+        self.build([("index.html", "ok")] + [(name, "asset") for name in bad])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual({f["path"] for f in json.loads(run.stdout)["findings"]
+                          if f["rule"] == "windows_path"}, set(bad))
+
+    def test_case_distinct_members_are_reported_without_double_counting_duplicates(self):
+        self.build([("index.html", "ok"), ("assets/logo.png", "x"),
+                    ("Assets/LOGO.PNG", "y"), ("Assets/LOGO.PNG", "z"),
+                    ("repeat.txt", "x"), ("repeat.txt", "y")])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        findings = json.loads(run.stdout)["findings"]
+        self.assertEqual([f["path"] for f in findings
+                          if f["rule"] == "windows_case_collision"], ["Assets/LOGO.PNG"])
+        self.assertIn("duplicate_path", {f["rule"] for f in findings})
+
+    def test_directory_marker_and_case_distinct_file_collide_on_windows(self):
+        self.build([("index.html", "ok"), ("assets/", ""), ("ASSETS", "file")])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        findings = json.loads(run.stdout)["findings"]
+        self.assertIn("ASSETS", {f["path"] for f in findings
+                                 if f["rule"] == "windows_case_collision"})
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_case_distinct_file_blocks_implicit_nested_directory(self):
+        self.build([("index.html", "ok"), ("assets", "file"),
+                    ("ASSETS/logo.png", "asset")])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        findings = json.loads(run.stdout)["findings"]
+        self.assertIn("ASSETS/logo.png", {f["path"] for f in findings
+                                          if f["rule"] == "windows_case_collision"})
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_windows_portable_names_are_not_flagged(self):
+        self.build([("index.html", "ok"), ("assets/compass.png", "x"),
+                    ("assets/com10.txt", "x"), ("assets/lpt0.txt", "x"),
+                    ("assets/.hidden", "x"), ("assets/nulled.txt", "x")])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+        self.assertEqual(json.loads(run.stdout)["findings"], [])
+
     def test_utf8_member_name_is_accepted_when_flagged(self):
         self.build([("index.html", "ok"), ("café.png", "asset")])
         self.assertNotIn("legacy_name_encoding", self.rules())
