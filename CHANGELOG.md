@@ -771,6 +771,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Separate reproduction steps or accessibility barriers from expected/actual
+  behavior in the GitHub problem issue form, with optional environment details,
+  explicit untested evidence and a private-report warning. Add a practical
+  issue-triage example and source-contract regressions; no issue was submitted
+  and live GitHub form rendering remains unverified.
+
 - Clarify how to invoke a virtualenv-installed CLI entry point without relying
   on an unstated PATH/activation step, with a pinned Quillgrain source-only
   example. This is not a fresh-clone or agent-host acceptance test.
