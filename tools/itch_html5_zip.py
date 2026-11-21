@@ -71,13 +71,14 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
                 if item.file_size == 0:
                     report("empty_entrypoint", raw_name,
                            "root index.html has zero bytes; it cannot serve as a game entry document")
-        if canonical_name in seen:
+        already_seen = canonical_name in seen
+        if already_seen:
             report("duplicate_path", raw_name, "multiple ZIP members share this path or normalized alias")
         seen.add(canonical_name)
         # Case-distinct ZIP members can overwrite each other in a Windows extraction.
         folded = canonical_name.casefold()
         prior = seen_casefold.get(folded)
-        if prior is not None and prior != canonical_name:
+        if prior is not None and prior != canonical_name and not already_seen:
             report("windows_case_collision", raw_name,
                    "case-distinct members may collide on case-insensitive filesystems")
         seen_casefold.setdefault(folded, canonical_name)
