@@ -93,7 +93,12 @@ unsafe-path/special-file findings. A directory marker may end with one `/`;
 repeated trailing separators such as `assets//` are a local unsafe-path finding,
 not a new itch.io rule. It also rejects control characters in
 member paths (a local portability policy, not a separate itch.io limit).
-The same conservative portability check reports Windows-reserved names
+The same conservative portability check warns when ZIP members use
+compression methods other than Store or Deflate (including BZIP2, LZMA,
+Zstandard and unrecognized methods). Python's
+[ZIP documentation](https://docs.python.org/3/library/zipfile.html) notes
+cross-tool compatibility limits; this is a local check, not an itch.io rule.
+It also reports Windows-reserved names
 (`NUL.txt`, `COM¹.json`), invalid filename punctuation, trailing dots/spaces
 and case-only path collisions that may overwrite assets on case-insensitive
 filesystems. See [Microsoft's file naming rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file)

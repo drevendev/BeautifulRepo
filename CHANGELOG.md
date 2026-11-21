@@ -999,6 +999,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Warn when HTML5 ZIP members use compression methods beyond portable Store
+  or Deflate (including BZIP2, LZMA, Zstandard and unknown methods). Add
+  real ZIP/CLI regressions for supported, known nonportable and unknown
+  methods, without unpacking assets. This is a BeautifulRepo portability
+  check, not an official itch.io upload restriction.
+
 - Flag repeated trailing `/` separators on HTML5 ZIP directory members
   (for example `assets//`) as an `unsafe_path` instead of normalizing away
   the empty path segment. A synthetic archive/CLI regression checks JSON,

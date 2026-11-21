@@ -117,6 +117,12 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             report("file_size", name, f"uncompressed file exceeds {MAX_FILE_BYTES} bytes")
         if item.create_system == 3 and unix_type not in (0, stat.S_IFREG, stat.S_IFDIR):
             report("special_entry", name, "symbolic links and special files are not accepted by this preflight")
+        # ZIP metadata may parse successfully even when a consumer cannot
+        # decompress an asset. Store and Deflate are the portable baseline;
+        # other methods are not universally supported. This is not an itch.io rule.
+        if item.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+            report("compression_method", raw_name,
+                   f"ZIP compression method {item.compress_type} is not portable; use Store or Deflate")
         if item.flag_bits & 1:
             report("encrypted_entry", name, "encrypted ZIP members cannot be checked as ordinary game assets")
 
