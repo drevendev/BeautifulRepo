@@ -209,21 +209,41 @@ def _mask_code_spans(source: str) -> str:
     return "".join(chars)
 
 
+def _fence_content(line: str) -> tuple[str, int]:
+    """Peel blockquote markers for fence detection without shifting source offsets.
+
+    A bounded source heuristic, not a complete CommonMark container parser.
+    """
+    depth = 0
+    while match := re.match(r"^ {0,3}>[ \t]?", line):
+        line = line[match.end():]
+        depth += 1
+    return line, depth
+
+
 def visible_source(text: str, *, mask_inline: bool = True) -> str:
     """Mask common fenced code/comments, preserving source line numbers.
 
     This intentionally implements a bounded Markdown subset, not a renderer.
     """
     lines = []
-    active: tuple[str, int] | None = None
+    active: tuple[str, int, int] | None = None
     in_comment = False
     for line in _split_lines(text):
         if active is not None:
-            match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line.rstrip("\r\n"))
-            if match and match[1][0] == active[0] and len(match[1]) >= active[1] and not match[2].strip():
+            content, quote_depth = _fence_content(line)
+            if active[2] and quote_depth < active[2]:
+                # The containing blockquote ended; do not hide outside prose.
                 active = None
-            lines.append(_masked(line))
-            continue
+            else:
+                match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", content.rstrip("\r\n"))
+                if (match and quote_depth == active[2]
+                        and match[1][0] == active[0]
+                        and len(match[1]) >= active[1]
+                        and not match[2].strip()):
+                    active = None
+                lines.append(_masked(line))
+                continue
         # Inline examples of comment delimiters must not open real comments.
         outside_code = _mask_code_spans(line)
         cursor = 0
@@ -246,9 +266,10 @@ def visible_source(text: str, *, mask_inline: bool = True) -> str:
                 cursor = opening
                 in_comment = True
         visible_line = "".join(pieces)
-        match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", visible_line.rstrip("\r\n"))
+        content, quote_depth = _fence_content(visible_line)
+        match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", content.rstrip("\r\n"))
         if match and not (match[1][0] == "`" and "`" in match[2]):
-            active = (match[1][0], len(match[1]))
+            active = (match[1][0], len(match[1]), quote_depth)
             lines.append(_masked(visible_line))
         else:
             lines.append(visible_line)

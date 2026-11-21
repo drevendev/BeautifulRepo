@@ -58,6 +58,14 @@ No destination is echoed into the finding. See the
 [GitHub Flavored Markdown reference-link specification](https://github.github.com/gfm/#reference-link)
 for cases this intentionally limited checker does not parse.
 
+The entry-point audit also masks fenced code blocks inside ordinary Markdown
+blockquotes, so example commands and placeholders do not become prose findings.
+An unfinished quoted fence stops masking when its containing quote ends.
+This intentionally covers a bounded Markdown subset; nested list-container
+parsing and rendered accessibility still require a human review. See the
+[GitHub Flavored Markdown container rules](https://github.github.com/gfm/#container-blocks)
+(reviewed 2026-11-21).
+
 ## Preflight a browser-game ZIP for itch.io
 
 The dependency-free [`itch_html5_zip.py`](itch_html5_zip.py) checks an
