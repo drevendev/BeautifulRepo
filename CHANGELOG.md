@@ -999,6 +999,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Ignore placeholder tokens, vague links and remote-image examples inside
+  fenced Markdown code contained in blockquotes during the offline entry-point
+  audit. Stop masking when a quoted fence's container ends; cover ordinary,
+  nested and interrupted quotes with regressions. This is a bounded source
+  heuristic, not a complete Markdown renderer.
+
 - Reject ZIP member names containing C0/C1 control characters in the
   offline HTML5 preflight, rather than silently accepting names that make
   asset paths and diagnostic logs ambiguous. Synthetic JSON/exit-code
