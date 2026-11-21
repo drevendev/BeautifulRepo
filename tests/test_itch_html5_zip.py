@@ -155,6 +155,24 @@ class ItchHTML5ZipTests(unittest.TestCase):
                               if x["rule"] == "unsafe_path"]), 5)
 
 
+    def test_control_character_members_are_rejected_without_extraction(self):
+        names = ("assets/line\nfeed.js", "assets/tab\tname.png",
+                 "assets/del\x7f.css", "assets/c1\x85.dat")
+        # These ZIP member names are legal to encode but unsafe to use as
+        # portable asset paths or as unescaped terminal diagnostics.
+        self.build([("index.html", "ok")] + [(name, "asset") for name in names])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        result = json.loads(run.stdout)
+        self.assertEqual(result["status"], "findings")
+        self.assertEqual(result["files"], len(names) + 1)
+        unsafe = [item for item in result["findings"] if item["rule"] == "unsafe_path"]
+        self.assertEqual({item["path"] for item in unsafe}, set(names))
+        self.assertEqual(len(unsafe), len(names))
+        self.assertEqual(before, self.archive.read_bytes())
+
     def test_utf8_member_name_is_accepted_when_flagged(self):
         self.build([("index.html", "ok"), ("café.png", "asset")])
         self.assertNotIn("legacy_name_encoding", self.rules())

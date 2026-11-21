@@ -76,8 +76,8 @@ The checker never extracts files, invokes game code or uses a network.
 
 Rules cover a root-level, **nonempty** `index.html` **file** with exact case, published
 itch.io file-count/path-length/uncompressed-size limits, and conservative
-duplicate, file/directory path conflict, unsafe-path, special-file,
-encryption and non-UTF-8-marked name
+duplicate, file/directory path conflict, unsafe-path (including C0/C1 control
+characters in member names), special-file, encryption and non-UTF-8-marked name
 preflights. Unix ZIP entries with conflicting filename/directory type metadata
 are reported: a directory named `index.html` without a trailing slash is
 **not** accepted as the game's entry point.

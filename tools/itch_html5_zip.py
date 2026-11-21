@@ -61,8 +61,16 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         key = canonical_name.rstrip("/")
         if key:
             (directory_paths if (name_is_dir or unix_is_dir) else file_paths).add(key)
-        if not raw_name or raw_name.startswith("/") or "\\" in raw_name or ":" in raw_name.split("/", 1)[0] or any(
-            part in ("", ".", "..") for part in raw_name.rstrip("/").split("/")
+        # Control characters can be present in ZIP names but make extracted
+        # paths and diagnostic logs ambiguous. This is a conservative
+        # portability preflight, not a published itch.io-specific limit.
+        if (
+            not raw_name
+            or raw_name.startswith("/")
+            or "\\" in raw_name
+            or ":" in raw_name.split("/", 1)[0]
+            or any(part in ("", ".", "..") for part in raw_name.rstrip("/").split("/"))
+            or any(ord(char) < 0x20 or 0x7f <= ord(char) <= 0x9f for char in raw_name)
         ):
             report("unsafe_path", raw_name, "member path is not a safe relative POSIX path")
         if any(ord(char) > 127 for char in raw_name) and not (item.flag_bits & 0x800):
