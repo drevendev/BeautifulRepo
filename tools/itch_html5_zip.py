@@ -18,11 +18,28 @@ MAX_PATH_CHARS = 240
 MAX_TOTAL_BYTES = 500_000_000
 MAX_FILE_BYTES = 200_000_000
 
+# Local Windows extraction portability rules, NOT itch.io upload requirements.
+# https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+WINDOWS_RESERVED = {"CON", "PRN", "AUX", "NUL"} | {
+    f"{prefix}{digit}" for prefix in ("COM", "LPT") for digit in "123456789¹²³"
+}
+WINDOWS_INVALID = '<>:"|?*'
+
+
+def nonportable_windows_component(component: str) -> bool:
+    """Reject names Windows shell/tools cannot reliably create or preserve."""
+    return bool(component) and (
+        component.endswith((" ", "."))
+        or any(char in WINDOWS_INVALID for char in component)
+        or component.split(".", 1)[0].rstrip(" ").upper() in WINDOWS_RESERVED
+    )
+
 
 def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[str, str]]]:
     """Inspect central-directory metadata; never read or unpack member data."""
     findings: list[dict[str, str]] = []
     seen: set[str] = set()
+    seen_casefold: dict[str, str] = {}
     file_paths: set[str] = set()
     directory_paths: set[str] = set()
     files = 0
@@ -57,6 +74,13 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         if canonical_name in seen:
             report("duplicate_path", raw_name, "multiple ZIP members share this path or normalized alias")
         seen.add(canonical_name)
+        # Case-distinct ZIP members can overwrite each other in a Windows extraction.
+        folded = canonical_name.casefold()
+        prior = seen_casefold.get(folded)
+        if prior is not None and prior != canonical_name:
+            report("windows_case_collision", raw_name,
+                   "case-distinct members may collide on case-insensitive filesystems")
+        seen_casefold.setdefault(folded, canonical_name)
         # ZIP can contain incompatible file/directory paths; extracted filesystems cannot.
         key = canonical_name.rstrip("/")
         if key:
@@ -73,6 +97,10 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             or any(ord(char) < 0x20 or 0x7f <= ord(char) <= 0x9f for char in raw_name)
         ):
             report("unsafe_path", raw_name, "member path is not a safe relative POSIX path")
+        if any(nonportable_windows_component(part)
+               for part in raw_name.rstrip("/").split("/")):
+            report("windows_path", raw_name,
+                   "member name uses Windows-reserved characters, device names or trailing dot/space")
         if any(ord(char) > 127 for char in raw_name) and not (item.flag_bits & 0x800):
             report("legacy_name_encoding", raw_name,
                    "non-ASCII ZIP member name lacks the UTF-8 flag; re-export with UTF-8 names")
