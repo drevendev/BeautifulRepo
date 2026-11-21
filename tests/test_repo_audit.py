@@ -158,6 +158,40 @@ class AuditTests(unittest.TestCase):
         self.write("README.md", "# Example\n\n```md\n### TODO\n<img src='x'>\n```\n~~~text\n{{NAME}}\n~~~\n`TODO` and ``{{NAME}} ` text`` are examples.\n")
         self.assertEqual(self.report()["findings"], [])
 
+    def test_blockquote_fenced_examples_do_not_trigger_prose_rules(self):
+        self.write("README.md",
+                   "# Example\n\n"
+                   "> ```md\n"
+                   "> TODO\n"
+                   "> [click here](guide.md)\n"
+                   "> <img src='https://raw.githubusercontent.com/org/repo/main/x.png'>\n"
+                   "> ```\n\n"
+                   "TBD\n")
+        self.assertEqual(
+            [(f["rule_id"], f["line"]) for f in self.report()["findings"]],
+            [("readme.placeholder", 9)],
+        )
+
+    def test_nested_quote_fence_does_not_hide_actual_quoted_prose(self):
+        self.write("README.md",
+                   "# Example\n\n"
+                   "> > ~~~md\n"
+                   "> > TODO\n"
+                   "> > [read more](help.md)\n"
+                   "> > ~~~\n"
+                   "> [click here](help.md)\n")
+        self.assertEqual(
+            [(f["rule_id"], f["line"]) for f in self.report()["findings"]],
+            [("link.vague_text", 7)],
+        )
+
+    def test_unclosed_quote_fence_stops_at_container_boundary(self):
+        self.write("README.md", "# Example\n\n> ```md\n> TODO\nOutside: TBD\n")
+        self.assertEqual(
+            [(f["rule_id"], f["line"]) for f in self.report()["findings"]],
+            [("readme.placeholder", 5)],
+        )
+
     def test_long_fence_needs_matching_length(self):
         self.write("README.md", "# Example\n````md\n```\nTODO\n````\n\nTBD\n")
         items = [f for f in self.report()["findings"] if f["rule_id"] == "readme.placeholder"]
