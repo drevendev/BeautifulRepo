@@ -16,10 +16,21 @@ body:
     validations:
       required: true
   - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce or barrier to reproduction
+      description: List the steps, command or URL used. For an accessibility barrier that is hard to reproduce, describe what you tried and mark untested steps NOT RUN. Never post secrets or private logs.
+      placeholder: |
+        1. At revision or version ...
+        2. Open the page or run the command ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
     id: behavior
     attributes:
       label: Expected and actual result
-      description: Explain the obstacle and steps to reproduce. Do not post secrets, security-vulnerability details, exploit steps, or personal data in this public issue.
+      description: Explain what should happen and what actually happened. Include sanitized output and an exit code if observed, not guessed. Keep security details out of public issues.
     validations:
       required: true
   - type: textarea
