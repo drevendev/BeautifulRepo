@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed CODEOWNERS adaptation guide and inert template for
+  reviewer permissions, last-match ownership, branch-specific routing,
+  provider-native syntax errors and optional review enforcement. No active
+  CODEOWNERS or repository-protection setting is changed.
+
 - Extend the offline itch.io ZIP preflight with **local Windows extraction
   portability** findings for reserved device basenames, invalid punctuation,
   trailing dots/spaces and case-only member collisions. Cover positive and
