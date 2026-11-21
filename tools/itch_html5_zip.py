@@ -95,6 +95,9 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         if (
             not raw_name
             or raw_name.startswith("/")
+            # Exactly one final slash denotes a directory. Repeated slashes
+            # hide an empty segment after rstrip("/") below.
+            or raw_name.endswith("//")
             or "\\" in raw_name
             or ":" in raw_name.split("/", 1)[0]
             or any(part in ("", ".", "..") for part in raw_name.rstrip("/").split("/"))

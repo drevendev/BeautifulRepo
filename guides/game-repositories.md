@@ -89,7 +89,9 @@ python -I tools/itch_html5_zip.py path/to/game.zip --format json
 The [offline preflight](../tools/README.md#preflight-a-browser-game-zip-for-itchio)
 reports a missing, zero-byte or mis-cased root entry point, member count/length/size
 limits, duplicate paths, file/directory collisions and conservative
-unsafe-path/special-file findings. It also rejects control characters in
+unsafe-path/special-file findings. A directory marker may end with one `/`;
+repeated trailing separators such as `assets//` are a local unsafe-path finding,
+not a new itch.io rule. It also rejects control characters in
 member paths (a local portability policy, not a separate itch.io limit).
 The same conservative portability check reports Windows-reserved names
 (`NUL.txt`, `COM¹.json`), invalid filename punctuation, trailing dots/spaces

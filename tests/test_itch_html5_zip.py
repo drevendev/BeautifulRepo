@@ -155,6 +155,23 @@ class ItchHTML5ZipTests(unittest.TestCase):
                               if x["rule"] == "unsafe_path"]), 5)
 
 
+    def test_repeated_directory_terminators_are_unsafe_not_silently_normalized(self):
+        # ZipInfo.is_dir accepts any trailing slash, including repeated ones.
+        # A single final slash is a valid directory marker; a second is empty.
+        self.build([("index.html", "ok"), ("assets/", ""),
+                    ("scripts//", ""), ("images///", ""),
+                    ("assets/game.js", "ok")])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        report = json.loads(run.stdout)
+        self.assertEqual(report["status"], "findings")
+        self.assertEqual({f["path"] for f in report["findings"]
+                          if f["rule"] == "unsafe_path"},
+                         {"scripts//", "images///"})
+        self.assertEqual(before, self.archive.read_bytes())
+
     def test_control_character_members_are_rejected_without_extraction(self):
         names = ("assets/line\nfeed.js", "assets/tab\tname.png",
                  "assets/del\x7f.css", "assets/c1\x85.dat")

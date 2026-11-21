@@ -86,7 +86,9 @@ Rules cover a root-level, **nonempty** `index.html` **file** with exact case, pu
 itch.io file-count/path-length/uncompressed-size limits, and conservative
 duplicate, file/directory path conflict, unsafe-path (including C0/C1 control
 characters in member names), special-file, encryption and non-UTF-8-marked name
-preflights. It also reports Windows-nonportable member names (reserved
+preflights. Directory entries may end with one `/`; repeated trailing `//`
+separators are reported as unsafe rather than silently normalized.
+It also reports Windows-nonportable member names (reserved
 devices such as `NUL.txt` and `COM¹.json`, prohibited punctuation or trailing
 dots/spaces) and case-distinct members that collide on common case-insensitive
 filesystems. These are optional conservative portability policies based on

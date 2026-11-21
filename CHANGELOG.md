@@ -999,6 +999,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Flag repeated trailing `/` separators on HTML5 ZIP directory members
+  (for example `assets//`) as an `unsafe_path` instead of normalizing away
+  the empty path segment. A synthetic archive/CLI regression checks JSON,
+  the exit code, a valid single-slash directory and unchanged ZIP bytes.
+  This is a conservative local portability check, not an itch.io upload rule.
+
 - Ignore placeholder tokens, vague links and remote-image examples inside
   fenced Markdown code contained in blockquotes during the offline entry-point
   audit. Stop masking when a quoted fence's container ends; cover ordinary,
