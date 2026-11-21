@@ -13,6 +13,12 @@ keep their original themed headings.
 
 ### Added
 
+- Extend the offline itch.io ZIP preflight with **local Windows extraction
+  portability** findings for reserved device basenames, invalid punctuation,
+  trailing dots/spaces and case-only member collisions. Cover positive and
+  negative synthetic ZIPs without extracting assets. This is based on
+  Microsoft's filename rules, not on new itch.io upload limits.
+
 - Add an evidence-led GitHub Actions failure-triage guide and copyable
   attempt-specific diagnostic record, with real six-job Windows matrix evidence
   from PR #429 and clear repair, retry and incomplete outcomes. No workflow
