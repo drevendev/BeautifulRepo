@@ -91,6 +91,13 @@ reports a missing, zero-byte or mis-cased root entry point, member count/length/
 limits, duplicate paths, file/directory collisions and conservative
 unsafe-path/special-file findings. It also rejects control characters in
 member paths (a local portability policy, not a separate itch.io limit).
+The same conservative portability check reports Windows-reserved names
+(`NUL.txt`, `COM¹.json`), invalid filename punctuation, trailing dots/spaces
+and case-only path collisions that may overwrite assets on case-insensitive
+filesystems. See [Microsoft's file naming rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file)
+(reviewed **2026-11-21**). These **are not additional itch.io limits**:
+a game may run on itch.io yet be awkward or impossible to unpack or edit
+on a typical Windows checkout.
 It also rejects a root `index.html` declared as a Unix directory despite
 lacking a trailing slash, and reports conflicting file/directory metadata
 instead of mistaking that entry for a working page.
