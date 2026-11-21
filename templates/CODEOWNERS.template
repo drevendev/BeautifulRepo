@@ -1,0 +1,17 @@
+# CODEOWNERS TEMPLATE — NOT ACTIVE IN BEAUTIFULREPO.
+# Adapt this file and copy to .github/CODEOWNERS in YOUR repository.
+# Replace every @YOUR-* value with a VERIFIED user or visible organization
+# team having repository write access and agreement to review the paths.
+# Last matching pattern wins; owners do not accumulate across lines.
+# For two eligible owners on one pattern, put both on that SAME line.
+# GitHub's CODEOWNERS patterns are case-sensitive and not full gitignore.
+*                   @YOUR-REPO-OWNER
+/docs/              @YOUR-DOCS-OWNER
+/tools/             @YOUR-TOOLS-OWNER
+/tests/             @YOUR-TOOLS-OWNER
+/.github/CODEOWNERS @YOUR-REPO-OWNER
+#
+# Check provider syntax errors AND observed requests on a later non-draft PR.
+# Review requests use the base branch's file; no approval is required
+# unless repository protection/rulesets separately enforce it.
+# Adaptation recipe: guides/codeowners.md in the BeautifulRepo source.

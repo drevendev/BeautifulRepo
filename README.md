@@ -186,7 +186,8 @@ not a second copy of the first-screen chooser.
   [capacity-based maintainer expectations](guides/maintainer-capacity.md),
   [dependency-update review](guides/dependency-review.md) and
   [editable decision card](templates/DEPENDENCY_REVIEW.template.md),
-  [evidence-led PR review](guides/pull-request-review.md) and
+  [evidence-led PR review](guides/pull-request-review.md),
+  [CODEOWNERS review routing](guides/codeowners.md) and
   [copyable review record](templates/PULL_REQUEST_REVIEW.template.md),
   [reusable capacity card](templates/MAINTAINER_CAPACITY.template.md),
   [first-contribution route](guides/first-contribution.md) and
