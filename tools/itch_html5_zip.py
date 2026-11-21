@@ -51,6 +51,9 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             total += item.file_size
             if raw_name == "index.html":
                 has_index = True
+                if item.file_size == 0:
+                    report("empty_entrypoint", raw_name,
+                           "root index.html has zero bytes; it cannot serve as a game entry document")
         if canonical_name in seen:
             report("duplicate_path", raw_name, "multiple ZIP members share this path or normalized alias")
         seen.add(canonical_name)

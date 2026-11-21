@@ -74,7 +74,7 @@ finding, **2** means an unreadable, invalid or unsupported archive. JSON
 includes `status`, `files`, `uncompressed_bytes` and sorted `findings`.
 The checker never extracts files, invokes game code or uses a network.
 
-Rules cover a root-level `index.html` **file** with exact case, published
+Rules cover a root-level, **nonempty** `index.html` **file** with exact case, published
 itch.io file-count/path-length/uncompressed-size limits, and conservative
 duplicate, file/directory path conflict, unsafe-path, special-file,
 encryption and non-UTF-8-marked name
