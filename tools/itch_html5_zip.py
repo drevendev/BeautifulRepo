@@ -76,12 +76,15 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             report("duplicate_path", raw_name, "multiple ZIP members share this path or normalized alias")
         seen.add(canonical_name)
         # Case-distinct ZIP members can overwrite each other in a Windows extraction.
-        folded = canonical_name.casefold()
+        # Strip the directory marker so "assets/" and the file "ASSETS"
+        # refer to the same Windows path when comparing case-insensitively.
+        folded_key = canonical_name.rstrip("/")
+        folded = folded_key.casefold()
         prior = seen_casefold.get(folded)
-        if prior is not None and prior != canonical_name and not already_seen:
+        if prior is not None and prior != folded_key and not already_seen:
             report("windows_case_collision", raw_name,
                    "case-distinct members may collide on case-insensitive filesystems")
-        seen_casefold.setdefault(folded, canonical_name)
+        seen_casefold.setdefault(folded, folded_key)
         # ZIP can contain incompatible file/directory paths; extracted filesystems cannot.
         key = canonical_name.rstrip("/")
         if key:
@@ -119,6 +122,7 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
     # are optional in ZIPs, so their absence is not a finding.
     for path in sorted(file_paths & directory_paths):
         report("path_type_conflict", path, "ZIP contains both a file and a directory at this path")
+    folded_file_paths = {path.casefold() for path in file_paths}
     for path in sorted(file_paths | directory_paths):
         pieces = path.split("/")
         for depth in range(1, len(pieces)):
@@ -126,6 +130,10 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             if parent in file_paths:
                 report("path_type_conflict", path,
                        f"member needs a directory at '{parent}', but ZIP contains a file there")
+                break
+            if parent.casefold() in folded_file_paths:
+                report("windows_case_collision", path,
+                       f"member needs a directory at '{parent}', but a case-distinct file blocks it")
                 break
 
     if not has_index:
