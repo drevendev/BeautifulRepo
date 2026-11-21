@@ -206,6 +206,29 @@ class ItchHTML5ZipTests(unittest.TestCase):
                           if f["rule"] == "windows_case_collision"], ["Assets/LOGO.PNG"])
         self.assertIn("duplicate_path", {f["rule"] for f in findings})
 
+    def test_directory_marker_and_case_distinct_file_collide_on_windows(self):
+        self.build([("index.html", "ok"), ("assets/", ""), ("ASSETS", "file")])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        findings = json.loads(run.stdout)["findings"]
+        self.assertIn("ASSETS", {f["path"] for f in findings
+                                 if f["rule"] == "windows_case_collision"})
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_case_distinct_file_blocks_implicit_nested_directory(self):
+        self.build([("index.html", "ok"), ("assets", "file"),
+                    ("ASSETS/logo.png", "asset")])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        findings = json.loads(run.stdout)["findings"]
+        self.assertIn("ASSETS/logo.png", {f["path"] for f in findings
+                                          if f["rule"] == "windows_case_collision"})
+        self.assertEqual(before, self.archive.read_bytes())
+
     def test_windows_portable_names_are_not_flagged(self):
         self.build([("index.html", "ok"), ("assets/compass.png", "x"),
                     ("assets/com10.txt", "x"), ("assets/lpt0.txt", "x"),
