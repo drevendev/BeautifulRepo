@@ -33,6 +33,39 @@ or exploit details in a public comment. See the
 [community safety guide](community-safety.md) and this repository's
 [security policy](../SECURITY.md).
 
+## Give bug reporters a reproducible starting point
+
+The [public problem form](../.github/ISSUE_TEMPLATE/problem.yml) now separates
+**location**, **steps or an accessibility barrier**, **expected versus actual
+result**, and optional **environment**. This keeps an observable failure from
+getting buried in a general description. A required text field is a prompt
+for evidence, **not** a claim that a reporter has a complete reproduction:
+`NOT RUN` and an explicit barrier are useful answers.
+
+For example, an **illustrative, unreported** broken documentation link can
+be described without exposing a repository or personal logs:
+
+- Location: `README.md` at `<verified-commit>`, line 12.
+- Steps: open the documented Install link from a fresh checkout;
+  note the browser/platform tested.
+- Expected: the install guide opens. Actual: the link resolves to a missing
+  file. Provide the sanitized destination and observed error, if available.
+- Not run: other platforms or browsers. No invented universal failure.
+
+For a CLI bug, substitute an exact reviewed command, working directory,
+input fixture, version and observed exit code/output. Never ask a reporter
+to execute unknown scripts or expose private repository details merely to
+complete a form. An accessibility barrier may be reported without a video,
+assistive-technology version, or a confidently reproducible sequence.
+See the [first-contribution route](first-contribution.md) for a bounded
+broken-link repair, and [SECURITY.md](../SECURITY.md) for private reports.
+
+GitHub [issue-form syntax](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms)
+and [form validation guidance](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/common-validation-errors-when-creating-issue-forms)
+were reviewed on **2026-11-21**. The repository's source-level regression
+checks field structure and privacy wording, but only GitHub can confirm
+the actual issue-chooser rendering; no submission was made.
+
 ## Make the disposition specific
 
 | Situation | Reader-facing response | What not to claim |
