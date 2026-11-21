@@ -197,8 +197,8 @@ class ItchHTML5ZipTests(unittest.TestCase):
 
     def test_case_distinct_members_are_reported_without_double_counting_duplicates(self):
         self.build([("index.html", "ok"), ("assets/logo.png", "x"),
-                    ("Assets/LOGO.PNG", "y"), ("repeat.txt", "x"),
-                    ("repeat.txt", "y")])
+                    ("Assets/LOGO.PNG", "y"), ("Assets/LOGO.PNG", "z"),
+                    ("repeat.txt", "x"), ("repeat.txt", "y")])
         run = self.run_cli("--format", "json")
         self.assertEqual(run.returncode, 1, run.stderr)
         findings = json.loads(run.stdout)["findings"]
