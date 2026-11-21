@@ -65,6 +65,11 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Working-example index](examples/README.md), [first-success checklist](checklists/first-success.md),
   [maintenance workflow](guides/maintenance-workflow.md) and application/collection README templates.
 
+- [GitHub Actions failure triage](guides/ci-failure-triage.md), with a
+  [copyable evidence record](templates/CI_FAILURE_RECORD.template.md), an
+  observed Windows matrix-failure/repair example and a safe retry-versus-fix
+  decision. This is manual diagnosis, not a new workflow gate.
+
 - [Small-project governance decisions](guides/governance-decisions.md): a
   copyable decision card and annotated real offline-tool choice, without invented roles.
 - [Dependency-update review recipe](guides/dependency-review.md) and
