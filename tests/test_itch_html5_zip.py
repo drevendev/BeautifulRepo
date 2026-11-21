@@ -343,6 +343,58 @@ class ItchHTML5ZipTests(unittest.TestCase):
         _, _, findings = checker.check_entries([index, link])
         self.assertIn("special_entry", {item["rule"] for item in findings})
 
+    def test_store_and_deflate_members_are_accepted(self):
+        with zipfile.ZipFile(self.archive, "w") as out:
+            out.writestr("index.html", "ok", compress_type=zipfile.ZIP_STORED)
+            out.writestr("assets/game.js", "ok", compress_type=zipfile.ZIP_DEFLATED)
+        self.assertEqual(self.run_cli("--format", "json").returncode, 0)
+        self.assertNotIn("compression_method", self.rules())
+
+    def test_bzip2_and_lzma_members_are_nonportable_metadata_findings(self):
+        with zipfile.ZipFile(self.archive, "w") as out:
+            out.writestr("index.html", "ok")
+            out.writestr("assets/bzip2.dat", "asset", compress_type=zipfile.ZIP_BZIP2)
+            out.writestr("assets/lzma.dat", "asset", compress_type=zipfile.ZIP_LZMA)
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        findings = json.loads(run.stdout)["findings"]
+        self.assertEqual({f["path"] for f in findings if f["rule"] == "compression_method"},
+                         {"assets/bzip2.dat", "assets/lzma.dat"})
+        self.assertEqual(self.archive.read_bytes(), before)
+
+    def test_unknown_compression_method_is_not_a_false_ok(self):
+        self.build([("index.html", "ok"), ("assets/game.js", "asset")])
+        # ZIP compression method: local header +8, central header +10.
+        # Patch the last entry's two headers; do not unpack any asset.
+        data = bytearray(self.archive.read_bytes())
+        for signature, method_offset in ((b"PK\x03\x04", 8),
+                                         (b"PK\x01\x02", 10)):
+            positions = []
+            start = 0
+            while True:
+                pos = data.find(signature, start)
+                if pos < 0:
+                    break
+                positions.append(pos)
+                start = pos + 4
+            self.assertEqual(len(positions), 2)
+            pos = positions[-1]
+            data[pos + method_offset:pos + method_offset + 2] = (99).to_bytes(2, "little")
+        self.archive.write_bytes(data)
+        before = self.archive.read_bytes()
+        with zipfile.ZipFile(self.archive) as source:
+            self.assertEqual(source.infolist()[-1].compress_type, 99)
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        report = json.loads(run.stdout)
+        self.assertEqual(report["status"], "findings")
+        self.assertEqual({f["path"] for f in report["findings"]
+                          if f["rule"] == "compression_method"}, {"assets/game.js"})
+        self.assertEqual(self.archive.read_bytes(), before)
+
     def test_encrypted_flag_reported(self):
         index = zipfile.ZipInfo("index.html")
         index.flag_bits = 1

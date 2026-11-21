@@ -99,7 +99,11 @@ conflicting filename/directory type metadata are reported: a directory named
 **not** accepted as the game's entry point.
 Non-ASCII names without the ZIP UTF-8 flag are reported as potentially
 non-portable; malformed UTF-8 filenames return **incomplete** rather than
-crashing. These are conservative metadata checks, not an asset URL or
+crashing. Store and Deflate ZIP member compression are accepted; BZIP2,
+LZMA, Zstandard and unknown compression methods produce a `compression_method`
+finding, because not every ZIP extractor supports them. This is a local
+portability rule, **not** an itch.io requirement; see the
+[Python ZIP compatibility note](https://docs.python.org/3/library/zipfile.html). These are conservative metadata checks, not an asset URL or
 browser compatibility test. It counts bytes from ZIP metadata, **not**
 verified decompressed content; it does not verify
 CRC, HTML/JS asset references, player controls, saves, platform behavior
