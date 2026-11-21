@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed contribution-rights intake recipe and review card,
+  including a fictional copied-asset decision and DCO/CLA distinctions.
+  Existing MIT license and contributor requirements remain unchanged.
+
 - Add a source-backed CODEOWNERS adaptation guide and inert template for
   reviewer permissions, last-match ownership, branch-specific routing,
   provider-native syntax errors and optional review enforcement. No active

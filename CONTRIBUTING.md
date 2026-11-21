@@ -66,6 +66,10 @@ starting something large.
 Edit `catalog/resources.json`, not its generated README. Each resource needs a primary
 source, a specific benefit, a local application, a limitation, a real review date and
 honest coverage. “Popular” and “awesome” are not sufficient reasons to list something.
+For incoming code, screenshots or copied materials with unclear origin,
+use the [contribution-rights guide](guides/contribution-rights.md) and
+[review card](templates/CONTRIBUTION_RIGHTS.template.md) before asserting
+redistribution rights. No CLA or DCO requirement is introduced.
 Separate reading documentation from running a tool. Link to copyrighted material rather
 than copying it; check permissions and preserve required attribution before any reuse.
 
