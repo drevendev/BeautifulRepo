@@ -993,6 +993,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject ZIP member names containing C0/C1 control characters in the
+  offline HTML5 preflight, rather than silently accepting names that make
+  asset paths and diagnostic logs ambiguous. Synthetic JSON/exit-code
+  regressions cover newline, tab, DEL and C1 cases without extracting files;
+  this is a conservative local policy, not a new itch.io requirement.
+
 - Report a zero-byte root `index.html` in the offline itch.io HTML5 ZIP
   preflight instead of accepting a demonstrably empty entry document. A
   black-box test verifies the JSON finding, exit code and unchanged ZIP.

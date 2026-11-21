@@ -89,7 +89,8 @@ python -I tools/itch_html5_zip.py path/to/game.zip --format json
 The [offline preflight](../tools/README.md#preflight-a-browser-game-zip-for-itchio)
 reports a missing, zero-byte or mis-cased root entry point, member count/length/size
 limits, duplicate paths, file/directory collisions and conservative
-unsafe-path/special-file findings.
+unsafe-path/special-file findings. It also rejects control characters in
+member paths (a local portability policy, not a separate itch.io limit).
 It also rejects a root `index.html` declared as a Unix directory despite
 lacking a trailing slash, and reports conflicting file/directory metadata
 instead of mistaking that entry for a working page.
