@@ -75,6 +75,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Dependency-update review recipe](guides/dependency-review.md) and
   [editable decision card](templates/DEPENDENCY_REVIEW.template.md), grounded
   in source/privilege/test evidence without new security settings.
+- [Contribution-rights intake](guides/contribution-rights.md) with an
+  [editable review card](templates/CONTRIBUTION_RIGHTS.template.md),
+  fictional unclear-origin example and DCO/CLA boundaries; no rights policy changes.
 - [Evidence-led pull request review](guides/pull-request-review.md) with a
   [copyable review record](templates/PULL_REQUEST_REVIEW.template.md), an
   annotated existing PR and explicit separation of actual GitHub gates from
