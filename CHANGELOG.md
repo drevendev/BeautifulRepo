@@ -1014,6 +1014,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Flag Unicode bidirectional formatting controls in HTML5 ZIP member names as
+  unsafe paths, while retaining normal Arabic/Hebrew filenames. Add real ZIP/CLI
+  regressions without extracting files; this is local review portability, not
+  an itch.io upload rule or a general Unicode spoofing detector.
+
 - Warn when HTML5 ZIP members use compression methods beyond portable Store
   or Deflate (including BZIP2, LZMA, Zstandard and unknown methods). Add
   real ZIP/CLI regressions for supported, known nonportable and unknown
