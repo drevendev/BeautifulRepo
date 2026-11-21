@@ -180,6 +180,8 @@ not a second copy of the first-screen chooser.
 - **Maintain evidence and trust:** [release notes](guides/release-notes.md) with
   a [release-note template](templates/RELEASE_NOTES.template.md),
   [maintenance workflow](guides/maintenance-workflow.md),
+  [CI failure triage](guides/ci-failure-triage.md) and
+  [copyable CI failure record](templates/CI_FAILURE_RECORD.template.md),
   [evidence-led issue triage](guides/issue-triage.md),
   [capacity-based maintainer expectations](guides/maintainer-capacity.md),
   [dependency-update review](guides/dependency-review.md) and

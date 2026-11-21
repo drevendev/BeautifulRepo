@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add an evidence-led GitHub Actions failure-triage guide and copyable
+  attempt-specific diagnostic record, with real six-job Windows matrix evidence
+  from PR #429 and clear repair, retry and incomplete outcomes. No workflow
+  permissions, required checks or retry automation changed.
+
 - Bind the working Rowcount README's first-run command and expected stdout to a
   black-box regression that reads the actual Markdown fences, executes only the
   reviewed fixed argv and rejects documentation drift. This does not execute
