@@ -190,6 +190,31 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.assertEqual(len(unsafe), len(names))
         self.assertEqual(before, self.archive.read_bytes())
 
+    def test_bidi_format_controls_are_reported_without_extraction(self):
+        # Unicode bidi formatting may visually reorder the archive member name.
+        # They are not C0/C1 controls and were previously accepted as safe.
+        bad = ("assets/icon\u202e.gnp", "assets/\u2066game.js\u2069",
+               "assets/\u200elogo.png", "assets/\u061cnotice.txt")
+        self.build([("index.html", "ok")] + [(name, "asset") for name in bad])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        report = json.loads(run.stdout)
+        self.assertEqual(report["status"], "findings")
+        self.assertEqual({f["path"] for f in report["findings"]
+                          if f["rule"] == "unsafe_path"}, set(bad))
+        self.assertIn("\\u202e", run.stdout)
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_ordinary_rtl_filenames_remain_valid(self):
+        # Arabic and Hebrew letters are not Unicode Bidi_Control formatting.
+        self.build([("index.html", "ok"), ("assets/\u0645\u0631\u062d\u0628\u0627.png", "asset"),
+                    ("assets/\u05e9\u05dc\u05d5\u05dd.txt", "asset")])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+        self.assertEqual(json.loads(run.stdout)["findings"], [])
+
     def test_windows_reserved_names_and_trailing_components_are_reported(self):
         bad = ("NUL.txt", "assets/con.JSON", "audio/Lpt1.wav",
                "data/COM¹.json", "icons/end.", "assets/trail /view.png")
