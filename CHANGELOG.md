@@ -11,14 +11,6 @@ keep their original themed headings.
 
 ## [Unreleased]
 
-### Changed
-
-- Separate reproduction steps or accessibility barriers from expected/actual
-  behavior in the GitHub problem issue form, with optional environment details,
-  explicit untested evidence and a private-report warning. Add a practical
-  issue-triage example and source-contract regressions; no issue was submitted
-  and live GitHub form rendering remains unverified.
-
 ### Added
 
 - Add a source-backed CODEOWNERS adaptation guide and inert template for
@@ -778,6 +770,12 @@ keep their original themed headings.
   for ideas only, and the known tool caveats (#80).
 
 ### Changed
+
+- Separate reproduction steps or accessibility barriers from expected/actual
+  behavior in the GitHub problem issue form, with optional environment details,
+  explicit untested evidence and a private-report warning. Add a practical
+  issue-triage example and source-contract regressions; no issue was submitted
+  and live GitHub form rendering remains unverified.
 
 - Clarify how to invoke a virtualenv-installed CLI entry point without relying
   on an unstated PATH/activation step, with a pinned Quillgrain source-only
