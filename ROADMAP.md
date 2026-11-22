@@ -86,6 +86,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   [copyable review record](templates/PULL_REQUEST_REVIEW.template.md), an
   annotated existing PR and explicit separation of actual GitHub gates from
   reviewer judgement; no new review policy or repository settings.
+- [Agent-assisted contribution review](guides/agent-contribution-review.md)
+  with a [copyable evidence packet](templates/AGENT_CONTRIBUTION_REVIEW.template.md),
+  a real cross-platform repair example, concrete authorizations, negative-case
+  evidence and clear not-run boundaries; no new merge gate or model certification.
 - [Capacity-based maintenance guide](guides/maintainer-capacity.md) with a
   [copyable, explicitly non-binding capacity card](templates/MAINTAINER_CAPACITY.template.md),
   a worked fictional monthly allocation and verified support-route boundaries.
