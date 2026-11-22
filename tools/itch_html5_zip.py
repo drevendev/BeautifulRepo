@@ -34,6 +34,12 @@ BIDI_CONTROL_POINTS = frozenset({
 })
 
 
+def canonical_caseless_path(path: str) -> str:
+    """Unicode canonical caseless key (not exact filesystem behavior)."""
+    decomposed = unicodedata.normalize("NFD", path)
+    return unicodedata.normalize("NFD", decomposed.casefold())
+
+
 def nonportable_windows_component(component: str) -> bool:
     """Reject names Windows shell/tools cannot reliably create or preserve."""
     return bool(component) and (
@@ -49,6 +55,7 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
     seen: set[str] = set()
     seen_casefold: dict[str, str] = {}
     seen_normalized: dict[str, str] = {}
+    seen_caseless: dict[str, str] = {}
     file_paths: set[str] = set()
     directory_paths: set[str] = set()
     files = 0
@@ -107,6 +114,16 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
                 report("unicode_normalization_collision", raw_name,
                        "canonically equivalent Unicode member paths may collide on extraction")
             seen_normalized.setdefault(nfc_key, key)
+            # Neither casefold alone nor NFC alone finds mixed-case/NFD
+            # aliases (e.g. 'CafÉ' versus 'cafe' + combining acute).
+            caseless_key = canonical_caseless_path(key)
+            prior_caseless = seen_caseless.get(caseless_key)
+            if (prior_caseless is not None and prior_caseless != key
+                    and prior_caseless.casefold() != key.casefold()
+                    and unicodedata.normalize("NFC", prior_caseless) != nfc_key):
+                report("unicode_casefold_collision", raw_name,
+                       "case and Unicode canonical normalization together may alias this member")
+            seen_caseless.setdefault(caseless_key, key)
         # Control characters can be present in ZIP names but make extracted
         # paths and diagnostic logs ambiguous. This is a conservative
         # portability preflight, not a published itch.io-specific limit.
@@ -157,6 +174,9 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
     normalized_file_paths = {
         unicodedata.normalize("NFC", path): path for path in sorted(file_paths)
     }
+    caseless_file_paths = {
+        canonical_caseless_path(path): path for path in sorted(file_paths)
+    }
     for path in sorted(file_paths | directory_paths):
         pieces = path.split("/")
         for depth in range(1, len(pieces)):
@@ -174,6 +194,12 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
                 report("unicode_normalization_collision", path,
                        f"member needs a directory at '{parent}', but "
                        f"canonically equivalent file '{prior_file}' blocks it")
+                break
+            prior_file = caseless_file_paths.get(canonical_caseless_path(parent))
+            if prior_file is not None and prior_file != parent:
+                report("unicode_casefold_collision", path,
+                       f"member needs a directory at '{parent}', but "
+                       f"case-and-normalization equivalent file '{prior_file}' blocks it")
                 break
 
     if not has_index:
