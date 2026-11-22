@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add an agent-assisted contribution review recipe and copyable evidence packet
+  for authorized scope, exact-head changes, positive/negative tests, host/provider
+  uncertainty and material findings. Uses a real cross-platform repair PR;
+  introduces no approval gate, agent certification or repository setting change.
+
 - Add a dependency-free, metadata-only image-weight inventory with configurable
   project budgets, deterministic text/JSON reports, and twelve synthetic tests.
   It scans local image files, not README load behavior or accessibility.
