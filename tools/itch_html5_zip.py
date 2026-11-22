@@ -10,6 +10,7 @@ import argparse
 import json
 import stat
 import sys
+import unicodedata
 import zipfile
 from pathlib import Path
 
@@ -47,6 +48,7 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
     findings: list[dict[str, str]] = []
     seen: set[str] = set()
     seen_casefold: dict[str, str] = {}
+    seen_normalized: dict[str, str] = {}
     file_paths: set[str] = set()
     directory_paths: set[str] = set()
     files = 0
@@ -96,6 +98,15 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         key = canonical_name.rstrip("/")
         if key:
             (directory_paths if (name_is_dir or unix_is_dir) else file_paths).add(key)
+            # Canonically equivalent names can alias on filesystems that
+            # compare Unicode-normalized names, including macOS APFS.
+            # A lone decomposed Unicode filename is still acceptable.
+            nfc_key = unicodedata.normalize("NFC", key)
+            previous = seen_normalized.get(nfc_key)
+            if previous is not None and previous != key:
+                report("unicode_normalization_collision", raw_name,
+                       "canonically equivalent Unicode member paths may collide on extraction")
+            seen_normalized.setdefault(nfc_key, key)
         # Control characters can be present in ZIP names but make extracted
         # paths and diagnostic logs ambiguous. This is a conservative
         # portability preflight, not a published itch.io-specific limit.
@@ -143,6 +154,9 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
     for path in sorted(file_paths & directory_paths):
         report("path_type_conflict", path, "ZIP contains both a file and a directory at this path")
     folded_file_paths = {path.casefold() for path in file_paths}
+    normalized_file_paths = {
+        unicodedata.normalize("NFC", path): path for path in sorted(file_paths)
+    }
     for path in sorted(file_paths | directory_paths):
         pieces = path.split("/")
         for depth in range(1, len(pieces)):
@@ -154,6 +168,12 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             if parent.casefold() in folded_file_paths:
                 report("windows_case_collision", path,
                        f"member needs a directory at '{parent}', but a case-distinct file blocks it")
+                break
+            prior_file = normalized_file_paths.get(unicodedata.normalize("NFC", parent))
+            if prior_file is not None and prior_file != parent:
+                report("unicode_normalization_collision", path,
+                       f"member needs a directory at '{parent}', but "
+                       f"canonically equivalent file '{prior_file}' blocks it")
                 break
 
     if not has_index:

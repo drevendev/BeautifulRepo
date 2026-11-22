@@ -96,9 +96,14 @@ upload requirement or a claim that all Unicode filename tricks are detected.
 It also reports Windows-nonportable member names (reserved
 devices such as `NUL.txt` and `COM¹.json`, prohibited punctuation or trailing
 dots/spaces) and case-distinct members that collide on common case-insensitive
-filesystems. These are optional conservative portability policies based on
-[Microsoft's filename rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file),
-**not** additional itch.io ZIP-upload requirements. Unix ZIP entries with
+filesystems. It also flags Unicode canonically equivalent member paths, such
+as the NFC and NFD spellings of `café.png`, which may collide on
+normalization-insensitive filesystems. A lone decomposed name is accepted.
+This is a conservative NFC-equivalence heuristic, **not** exact filesystem
+emulation; see [Apple's APFS filename guidance](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/FAQ/FAQ.html)
+(reviewed **2026-11-22** UTC). The Windows rules are based on
+[Microsoft's filename rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file).
+None are additional itch.io ZIP-upload requirements. Unix ZIP entries with
 conflicting filename/directory type metadata are reported: a directory named
 `index.html` without a trailing slash is
 **not** accepted as the game's entry point.

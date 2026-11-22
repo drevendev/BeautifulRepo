@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Flag canonically equivalent Unicode ZIP member paths that can alias on
+  normalization-insensitive extraction filesystems, including a file blocking
+  a differently encoded nested directory. Preserve lone decomposed names.
+  This is portable-archive guidance, not a new itch.io upload requirement.
+
 - Add a source-backed contribution-rights intake recipe and review card,
   including a fictional copied-asset decision and DCO/CLA distinctions.
   Existing MIT license and contributor requirements remain unchanged.
