@@ -31,8 +31,11 @@ the tool uses an uncached `os.stat(..., follow_symlinks=False)` instead. See the
 inventory **incomplete** (exit 2) and is excluded from totals; this is
 conservative, even when all the links happen to be inside the checkout.
 Non-image hard links are outside this inventory's scope. The tool skips
-.git, node_modules and common local virtual environments; other
-nested folders count. The largest five images are listed so a maintainer can
+.git, node_modules and common local virtual environments **by entry name,
+before checking redirects**: a symlinked or dangling `node_modules` or `.venv`
+does not make the report incomplete, because that tree is excluded entirely.
+A symlink outside those excluded names still produces incomplete evidence.
+Other nested folders count. The largest five images are listed so a maintainer can
 choose what to investigate first. The default advisory budgets (1 MiB per
 file, 8 MiB total) are **our example values**, not GitHub requirements,
 image-accessibility standards or measured page-load thresholds.
