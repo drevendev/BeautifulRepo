@@ -22,7 +22,13 @@ python -I tools/media_budget.py --root ../my-repo --max-file-kib 512 --max-total
 The original, dependency-free inventory uses file metadata only. It looks for
 .png, .jpg, .jpeg, .gif, .webp, .svg, .avif and .apng, without
 opening or decoding images, following directory/symbolic-link redirects
-or calling the network. It also refuses image files with multiple hard links
+or calling the network. The selected root **and every lexical parent** must
+be ordinary directories: a path such as `/tmp/link-to-elsewhere/repo` is
+refused even if its final `repo` directory is not itself a symlink. On
+Windows, redirected/junction-backed parents are also refused. Use the
+physical checkout path rather than an alias. This is a startup preflight,
+not a sandbox against concurrent filesystem changes.
+It also refuses image files with multiple hard links
 (`st_nlink != 1`, including an unavailable count): an alias could point
 outside the selected checkout and metadata cannot establish where every link
 lives. On Windows, `os.DirEntry.stat()` does not supply a meaningful link count;
