@@ -12,6 +12,8 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   hypothetical include/defer/replace decisions and a real existing notice example.
 - [Demo media recipe](guides/demo-media.md), with a [copyable evidence record](templates/DEMO_MEDIA.template.md)
   and the checked-in synthetic Pocket Trails example; no independently verified GitHub playback claim.
+- [Advisory offline image-weight inventory](guides/media-budget.md) with configurable
+  local file-size budgets, deterministic JSON, and synthetic regressions (not browser load evidence).
 - [Visual README patterns](guides/readme-visuals.md), including a before/after example
   with theme-aware assets, text equivalents and a
   [project-specific design brief](examples/readme-visuals/DESIGN_INTENT.md).
