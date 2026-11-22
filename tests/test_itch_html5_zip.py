@@ -249,6 +249,41 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         self.assertEqual(json.loads(run.stdout)["findings"], [])
 
+    def test_combined_unicode_case_and_normalization_alias_members(self):
+        upper_composed = "assets/Caf\u00c9.png"
+        lower_decomposed = "assets/cafe\u0301.png"
+        self.build([("index.html", "ok"), (upper_composed, "a"),
+                    (lower_decomposed, "b")])
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        findings = json.loads(run.stdout)["findings"]
+        self.assertEqual(
+            [f["path"] for f in findings if f["rule"] == "unicode_casefold_collision"],
+            [lower_decomposed])
+        self.assertFalse({"windows_case_collision", "unicode_normalization_collision"}
+                         & {f["rule"] for f in findings})
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_combined_unicode_case_and_normalization_file_blocks_directory(self):
+        upper_composed = "Assets/Caf\u00c9"
+        nested = "assets/cafe\u0301/game.js"
+        self.build([("index.html", "ok"), (upper_composed, "file"), (nested, "asset")])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        collisions = [f for f in json.loads(run.stdout)["findings"]
+                      if f["rule"] == "unicode_casefold_collision"]
+        self.assertEqual([f["path"] for f in collisions], [nested])
+        self.assertIn(upper_composed, collisions[0]["detail"])
+
+    def test_combined_unicode_case_and_normalization_distinct_names_are_valid(self):
+        self.build([("index.html", "ok"), ("assets/Caf\u00c9.png", "a"),
+                    ("assets/cafe\u0301.txt", "b")])
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+        self.assertEqual(json.loads(run.stdout)["findings"], [])
+
     def test_windows_reserved_names_and_trailing_components_are_reported(self):
         bad = ("NUL.txt", "assets/con.JSON", "audio/Lpt1.wav",
                "data/COM¹.json", "icons/end.", "assets/trail /view.png")
