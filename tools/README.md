@@ -18,9 +18,9 @@ Before opening a PR, run the nine Python steps of the Quality CI matrix job
 in their actual workflow order:
 
 ```sh
-python -I tools/verify_checkout.py
-python -I tools/verify_checkout.py --list         # list without running
-python -I tools/verify_checkout.py --keep-going   # collect all failures
+python -I scripts/verify_checkout.py
+python -I scripts/verify_checkout.py --list         # list without running
+python -I scripts/verify_checkout.py --keep-going   # collect all failures
 ```
 
 The first command stops at the first failing step; `--keep-going` finishes
