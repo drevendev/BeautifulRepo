@@ -115,7 +115,22 @@ or the separate [Rowcount starter](examples/cli-starter/README.md).
 
 BeautifulRepo includes small offline checks instead of relying on “looks good to me.”
 
-From a checkout with **Python 3.11+**:
+From a BeautifulRepo checkout with **Python 3.11+**, run all nine Python
+steps of the Quality workflow's matrix job with one command:
+
+```bash
+python -I scripts/verify_checkout.py
+```
+
+The runner checks **this BeautifulRepo checkout**, not another repository you
+may be auditing. Use `--list` to see the fixed commands without running them,
+or `--keep-going` to collect independent failures rather than stopping at
+the first one. Exit **0** means every step passed; **1** means at least one
+failed. It does not reproduce the separate GitHub Action self-tests, Ruff lint,
+or a Linux/Windows matrix run. Only the current provider checks establish
+those results.
+
+For a targeted repair, run the relevant checks individually:
 
 ```bash
 python tools/catalog.py
@@ -125,9 +140,9 @@ python -m unittest discover -s tests -v
 python tools/repo_audit.py .
 ```
 
-Each command exits with status 0 when the check passes. The tools print a line
-starting with `OK:` (the audit prints a summary with `0 error(s)`), and the unit
-tests end with `OK`. A failure prints `ERROR:` or a test name with the file to fix.
+Individual checks exit with status 0 when they pass. The tools print `OK:`
+(the audit reports `0 error(s)`), and unit tests end with `OK`. A failure
+identifies an error or failing test to investigate.
 
 The same checks run in GitHub Actions. They validate structured catalog metadata, generated catalog drift, repository-owned relative Markdown destinations, and structural regressions in the examples and public repository surfaces.
 
