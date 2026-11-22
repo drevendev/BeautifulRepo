@@ -88,6 +88,22 @@ python -m unittest discover -s tests -v
 python tools/repo_audit.py .
 ```
 
+For a general change, run the **Python portion of Quality CI** in this
+checkout with one command (no extra packages):
+
+```bash
+python -I tools/verify_checkout.py
+```
+
+It runs all nine Python steps of the Quality workflow's cross-platform matrix
+job, in workflow order, using the interpreter you invoked. It stops at the
+first failure; add `--keep-going` to finish independent checks or `--list`
+to inspect the commands without executing them. The runner always operates on
+**this BeautifulRepo checkout**, not a foreign repository. It does not
+reproduce the separate GitHub Action self-test jobs, the optional Ruff lint
+job, the Linux/Windows matrix, repository protection or external-host tests.
+Only the current linked GitHub checks establish the provider result.
+
 The first command explicitly regenerates `catalog/README.md`; the others are the five
 checks CI runs. `repo_audit.py` audits BeautifulRepo's own README, licence and
 contribution entry points.
