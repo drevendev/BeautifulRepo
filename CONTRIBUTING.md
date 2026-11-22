@@ -92,7 +92,7 @@ For a general change, run the **Python portion of Quality CI** in this
 checkout with one command (no extra packages):
 
 ```bash
-python -I tools/verify_checkout.py
+python -I scripts/verify_checkout.py
 ```
 
 It runs all nine Python steps of the Quality workflow's cross-platform matrix
