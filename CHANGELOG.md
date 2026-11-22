@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a checkout-bound, dependency-free local Quality CI command runner with
+  nine fixed Python steps, fail-fast/keep-going/list modes, six focused tests
+  and an exact workflow-inventory drift check. This is not a substitute for
+  GitHub's cross-platform matrix, Action self-tests or lint job.
+
 - Add an agent-assisted contribution review recipe and copyable evidence packet
   for authorized scope, exact-head changes, positive/negative tests, host/provider
   uncertainty and material findings. Uses a real cross-platform repair PR;

@@ -12,6 +12,33 @@ python -I tools/action_pins.py --root .    # check reviewed GitHub Actions SHA a
 python -m unittest discover -s tests -v
 ```
 
+## Verify this BeautifulRepo checkout in one command
+
+Before opening a PR, run the nine Python steps of the Quality CI matrix job
+in their actual workflow order:
+
+```sh
+python -I scripts/verify_checkout.py
+python -I scripts/verify_checkout.py --list         # list without running
+python -I scripts/verify_checkout.py --keep-going   # collect all failures
+```
+
+The first command stops at the first failing step; `--keep-going` finishes
+independent checks and returns failure if **any** step failed. It runs the
+current Python interpreter and uses the root of the BeautifulRepo checkout
+containing this script, even when invoked from another working directory.
+The runner uses a fixed argument list (no shell, dynamic commands, or target
+repository execution), reads the existing source, and does not install packages
+or intentionally write outside the project. Some underlying tests or demos may
+create temporary files or generated output inside their normal test boundaries.
+
+This is **not** GitHub CI equivalence: a local run does not exercise the
+cross-platform matrix, Action self-test jobs, separate Ruff lint job or
+provider protection, and it is not an audit tool for untrusted repositories.
+The tests explicitly compare its command inventory against
+`.github/workflows/quality.yml` to expose future workflow drift. Use the live
+GitHub checks for merge decisions.
+
 The reviewed Actions pin check accepts ordinary and single- or double-quoted
 `uses` mapping keys, as well as whole single- or double-quoted `uses:` YAML values. Quoting does not bypass SHA,
 manifest or annotation validation. LF and CRLF workflow lines (even mixed in
