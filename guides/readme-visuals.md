@@ -4,6 +4,10 @@ A visual README should reduce the time between landing on a repository and under
 its result. Decoration is optional; comprehension is not. Start with a useful sentence,
 then let one visual prove or clarify something the prose cannot show as quickly.
 
+For recorded demos, use the [source-backed media recipe](demo-media.md) to keep
+stills, complete text alternatives, captions, playback evidence and permissions
+distinct rather than assuming an embedded player is accessible.
+
 ## The first screen
 
 Use the opening area for four jobs, in roughly this order:
