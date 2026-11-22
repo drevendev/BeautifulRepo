@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed README demo media recipe, reusable evidence template and
+  tests for the existing synthetic Pocket Trails media paths. The guide
+  distinguishes poster, text alternative, visual description, captions, privacy
+  and actual playback; no current GitHub rendering or AT pass is claimed.
+
 - Flag canonically equivalent Unicode ZIP member paths that can alias on
   normalization-insensitive extraction filesystems, including a file blocking
   a differently encoded nested directory. Preserve lone decomposed names.

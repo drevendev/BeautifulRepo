@@ -10,6 +10,8 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Third-party asset provenance](guides/third-party-assets.md) with a
   [reusable rights-evidence record](templates/ASSET_PROVENANCE.template.md),
   hypothetical include/defer/replace decisions and a real existing notice example.
+- [Demo media recipe](guides/demo-media.md), with a [copyable evidence record](templates/DEMO_MEDIA.template.md)
+  and the checked-in synthetic Pocket Trails example; no independently verified GitHub playback claim.
 - [Visual README patterns](guides/readme-visuals.md), including a before/after example
   with theme-aware assets, text equivalents and a
   [project-specific design brief](examples/readme-visuals/DESIGN_INTENT.md).
