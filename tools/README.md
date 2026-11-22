@@ -99,8 +99,14 @@ dots/spaces) and case-distinct members that collide on common case-insensitive
 filesystems. It also flags Unicode canonically equivalent member paths, such
 as the NFC and NFD spellings of `café.png`, which may collide on
 normalization-insensitive filesystems. A lone decomposed name is accepted.
-This is a conservative NFC-equivalence heuristic, **not** exact filesystem
-emulation; see [Apple's APFS filename guidance](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/FAQ/FAQ.html)
+The checker also flags aliases that appear **only when Unicode canonical
+normalization and case folding are combined**, such as `CafÉ.png` and
+`café.png`; it detects file-versus-parent-directory blockers too.
+It uses Unicode canonical caseless matching (NFD/casefold/NFD), not
+compatibility normalization (NFKC), and does not reject distinct names by
+default. This is conservative portability guidance, **not** exact filesystem
+emulation or a new itch.io rule; see [Unicode canonical caseless matching](https://www.unicode.org/versions/Unicode18.0.0/core-spec/chapter-3/)
+and [Apple's APFS filename guidance](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/FAQ/FAQ.html)
 (reviewed **2026-11-22** UTC). The Windows rules are based on
 [Microsoft's filename rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file).
 None are additional itch.io ZIP-upload requirements. Unix ZIP entries with
