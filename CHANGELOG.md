@@ -1019,6 +1019,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Detect mixed-case plus canonically equivalent Unicode ZIP member names and
+  file-to-directory prefix conflicts missed by separate casefold and NFC checks.
+  Keep distinct assets valid; metadata only, no extraction or itch.io rule change.
+
 - Flag Unicode bidirectional formatting controls in HTML5 ZIP member names as
   unsafe paths, while retaining normal Arabic/Hebrew filenames. Add real ZIP/CLI
   regressions without extracting files; this is local review portability, not
