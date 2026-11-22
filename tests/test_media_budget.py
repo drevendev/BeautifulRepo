@@ -67,6 +67,33 @@ class MediaBudgetTests(unittest.TestCase):
         self.assertEqual(result["files"], 1)
         self.assertEqual(result["status"], "ok")
 
+
+    def test_ignored_dependency_directory_redirect_does_not_fail_inventory(self):
+        self.put("assets/kept.png", 20)
+        with tempfile.TemporaryDirectory() as elsewhere:
+            outside = Path(elsewhere)
+            (outside / "external.png").write_bytes(b"x" * 4096)
+            for name in ("node_modules", ".venv"):
+                try:
+                    (self.root / name).symlink_to(outside, target_is_directory=True)
+                except (OSError, NotImplementedError):
+                    self.skipTest("directory symlinks unavailable")
+            result = inspect(self.root, 64, 64)
+            self.assertEqual(result["status"], "ok")
+            self.assertEqual(result["files"], 1)
+            self.assertEqual(result["total_bytes"], 20)
+            self.assertEqual(result["errors"], [])
+
+    def test_ignored_broken_directory_redirect_does_not_fail_inventory(self):
+        try:
+            (self.root / "node_modules").symlink_to(
+                self.root / "missing-target", target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("directory symlinks unavailable")
+        result = inspect(self.root, 64, 64)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["files"], 0)
+
     def test_symlinks_are_incomplete_and_not_followed(self):
         self.put("a.png", 100)
         try:
