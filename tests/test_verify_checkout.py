@@ -10,7 +10,7 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("verify_checkout", ROOT / "tools" / "verify_checkout.py")
+SPEC = importlib.util.spec_from_file_location("verify_checkout", ROOT / "scripts" / "verify_checkout.py")
 verify_checkout = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(verify_checkout)
 
