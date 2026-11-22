@@ -19,7 +19,7 @@ python tools/repo_audit.py .
 
 CI runs these alongside additional local checks. To run all nine Python steps
 of the Quality workflow's matrix job in order, use
-`python -I tools/verify_checkout.py`; this does **not** replace GitHub's
+`python -I scripts/verify_checkout.py`; this does **not** replace GitHub's
 cross-platform matrix, Action self-test jobs or separate lint job. Edit
 `catalog/resources.json`, never `catalog/README.md`, and regenerate the view
 with `python tools/catalog.py --write`.
