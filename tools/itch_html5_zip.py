@@ -221,7 +221,8 @@ def inspect(path: Path) -> dict[str, object]:
             raise ValueError("archive must be an existing regular file, not a symlink")
         with zipfile.ZipFile(path, "r") as archive:
             files, total, findings = check_entries(archive.infolist())
-    except (OSError, ValueError, UnicodeError, zipfile.BadZipFile, zipfile.LargeZipFile) as exc:
+    except (OSError, ValueError, UnicodeError, NotImplementedError,
+            zipfile.BadZipFile, zipfile.LargeZipFile) as exc:
         report["error"] = f"cannot inspect ZIP central directory: {type(exc).__name__}"
         return report
     report.update(status="findings" if findings else "ok", files=files,
