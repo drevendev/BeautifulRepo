@@ -217,8 +217,8 @@ class ItchHTML5ZipTests(unittest.TestCase):
 
     def test_canonically_equivalent_unicode_members_collide(self):
         # Distinct NFC/NFD ZIP paths may alias when extracted on macOS.
-        composed = "assets/caf\\u00e9.png"
-        decomposed = "assets/cafe\\u0301.png"
+        composed = "assets/caf\u00e9.png"
+        decomposed = "assets/cafe\u0301.png"
         self.build([("index.html", "ok"), (composed, "one"), (decomposed, "two")])
         before = self.archive.read_bytes()
         run = self.run_cli("--format", "json")
@@ -232,8 +232,8 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.assertEqual(before, self.archive.read_bytes())
 
     def test_canonically_equivalent_file_blocks_nested_directory(self):
-        composed = "assets/caf\\u00e9"
-        child = "assets/cafe\\u0301/game.js"
+        composed = "assets/caf\u00e9"
+        child = "assets/cafe\u0301/game.js"
         self.build([("index.html", "ok"), (composed, "file"), (child, "asset")])
         run = self.run_cli("--format", "json")
         self.assertEqual(run.returncode, 1, run.stderr)
@@ -243,8 +243,8 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.assertIn(composed, collisions[0]["detail"])
 
     def test_decomposed_unicode_name_without_alias_remains_valid(self):
-        self.build([("index.html", "ok"), ("assets/cafe\\u0301.png", "asset"),
-                    ("assets/caf\\u00e9.txt", "asset")])
+        self.build([("index.html", "ok"), ("assets/cafe\u0301.png", "asset"),
+                    ("assets/caf\u00e9.txt", "asset")])
         run = self.run_cli("--format", "json")
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         self.assertEqual(json.loads(run.stdout)["findings"], [])
