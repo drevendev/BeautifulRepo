@@ -16,6 +16,14 @@ SPEC.loader.exec_module(verify_checkout)
 
 
 class VerifyCheckoutTests(unittest.TestCase):
+    def test_readme_exposes_one_command_and_its_limitations(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("python -I scripts/verify_checkout.py", readme)
+        self.assertIn("`--list`", readme)
+        self.assertIn("`--keep-going`", readme)
+        self.assertIn("this BeautifulRepo checkout", readme)
+        self.assertIn("GitHub Action self-tests", readme)
+
     def test_inventory_matches_python_steps_in_quality_catalog_job(self):
         workflow = (ROOT / ".github" / "workflows" / "quality.yml").read_text(encoding="utf-8")
         catalog = workflow.split("\n  catalog:\n", 1)[1].split("\n  lint:\n", 1)[0]
