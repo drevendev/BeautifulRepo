@@ -91,6 +91,11 @@ def inspect(root: Path, max_file_bytes: int, max_total_bytes: int) -> dict[str, 
                     stack.append((Path(entry.path), depth + 1))
             elif Path(entry.name).suffix.lower() in IMAGE_EXTENSIONS:
                 if stat.S_ISREG(mode):
+                    # A hard link can alias a file outside the selected checkout.
+                    # Metadata alone cannot establish that all links are local.
+                    if info.st_nlink > 1:
+                        errors.append(f"Skipped hard-linked media entry: {relative}")
+                        continue
                     sizes.append((relative, info.st_size))
                     if info.st_size > max_file_bytes:
                         findings.append({"rule": "file_budget", "path": relative, "bytes": info.st_size})
