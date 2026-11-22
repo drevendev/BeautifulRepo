@@ -146,12 +146,12 @@ non-portable; malformed UTF-8 filenames return **incomplete** rather than
 crashing. Store and Deflate ZIP member compression are accepted; BZIP2,
 LZMA, Zstandard and unknown compression methods produce a `compression_method`
 finding, because not every ZIP extractor supports them. This is a local
-portability rule, **not** an itch.io requirement; see the
-[Python ZIP compatibility note](https://docs.python.org/3/library/zipfile.html). If a member requires a ZIP extractor version unsupported by the local
-Python `zipfile` reader, the preflight returns **incomplete** (exit 2),
-not a traceback or a false success; it does not try to extract the payload.
-This is distinct from a recognized but nonportable compression method,
-which produces a finding (exit 1). See the
+portability rule, **not** an itch.io requirement. If a member requires
+an extractor version unsupported by the local Python `zipfile` reader, the
+preflight returns **incomplete** (exit 2), not a traceback or a false
+success; it does not try to extract the payload. This is distinct from a
+recognized but nonportable compression method, which produces a finding
+(exit 1). See the
 [Python ZIP compatibility notes](https://docs.python.org/3/library/zipfile.html).
 These are conservative metadata checks, not an asset URL or
 browser compatibility test. It counts bytes from ZIP metadata, **not**
