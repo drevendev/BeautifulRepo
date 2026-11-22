@@ -115,6 +115,48 @@ class MediaBudgetTests(unittest.TestCase):
         data = json.loads(self.check().stdout)
         self.assertEqual(data["largest"][0]["path"], "écran.png")
 
+    def test_hardlinked_external_image_is_incomplete_and_not_counted(self):
+        with tempfile.TemporaryDirectory() as elsewhere:
+            source = Path(elsewhere) / "external.png"
+            source.write_bytes(b"x" * 2048)
+            try:
+                (self.root / "poster.png").hardlink_to(source)
+            except (OSError, NotImplementedError):
+                self.skipTest("hard links unavailable")
+            run = self.check()
+            self.assertEqual(run.returncode, 2, run.stderr)
+            data = json.loads(run.stdout)
+            self.assertEqual(data["status"], "incomplete")
+            self.assertEqual(data["files"], 0)
+            self.assertEqual(data["total_bytes"], 0)
+            self.assertTrue(any("Skipped hard-linked media entry: poster.png" in
+                                error for error in data["errors"]))
+            self.assertEqual(source.read_bytes(), b"x" * 2048)
+
+    def test_hardlinked_image_inside_root_is_also_incomplete(self):
+        self.put("original.png", 32)
+        try:
+            (self.root / "alias.png").hardlink_to(self.root / "original.png")
+        except (OSError, NotImplementedError):
+            self.skipTest("hard links unavailable")
+        data = inspect(self.root, 1024, 1024)
+        self.assertEqual(data["status"], "incomplete")
+        self.assertEqual(data["files"], 0)
+        self.assertEqual(len([error for error in data["errors"]
+                              if "hard-linked media entry" in error]), 2)
+
+    def test_hardlinked_non_image_does_not_block_media_inventory(self):
+        with tempfile.TemporaryDirectory() as elsewhere:
+            source = Path(elsewhere) / "outside.txt"
+            source.write_text("not a media asset", encoding="utf-8")
+            try:
+                (self.root / "readme.txt").hardlink_to(source)
+            except (OSError, NotImplementedError):
+                self.skipTest("hard links unavailable")
+            data = inspect(self.root, 1024, 1024)
+            self.assertEqual(data["status"], "ok")
+            self.assertEqual(data["files"], 0)
+
     def test_root_symlink_is_not_followed(self):
         try:
             alias = self.root / "alias"
