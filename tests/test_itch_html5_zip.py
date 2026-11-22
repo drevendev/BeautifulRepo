@@ -489,6 +489,28 @@ class ItchHTML5ZipTests(unittest.TestCase):
                           if f["rule"] == "compression_method"}, {"assets/game.js"})
         self.assertEqual(self.archive.read_bytes(), before)
 
+    def test_unsupported_extract_version_is_incomplete_without_traceback(self):
+        self.build([("index.html", "ok"), ("assets/game.js", "asset")])
+        # Both ZIP headers carry a two-byte minimum extractor version.
+        # An unsupported version makes ZipFile raise NotImplementedError
+        # while parsing the central directory, before member inspection.
+        data = bytearray(self.archive.read_bytes())
+        for signature, version_offset in ((b"PK\\x03\\x04", 4),
+                                          (b"PK\\x01\\x02", 6)):
+            pos = data.find(signature)
+            self.assertGreaterEqual(pos, 0)
+            data[pos + version_offset:pos + version_offset + 2] = (99).to_bytes(2, "little")
+        self.archive.write_bytes(data)
+        before = self.archive.read_bytes()
+
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 2, run.stderr)
+        self.assertEqual(run.stderr, "")
+        result = json.loads(run.stdout)
+        self.assertEqual(result["status"], "incomplete")
+        self.assertIn("NotImplementedError", result["error"])
+        self.assertEqual(before, self.archive.read_bytes())
+
     def test_encrypted_flag_reported(self):
         index = zipfile.ZipInfo("index.html")
         index.flag_bits = 1
