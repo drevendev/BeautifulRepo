@@ -495,8 +495,8 @@ class ItchHTML5ZipTests(unittest.TestCase):
         # An unsupported version makes ZipFile raise NotImplementedError
         # while parsing the central directory, before member inspection.
         data = bytearray(self.archive.read_bytes())
-        for signature, version_offset in ((b"PK\\x03\\x04", 4),
-                                          (b"PK\\x01\\x02", 6)):
+        for signature, version_offset in ((b"PK\x03\x04", 4),
+                                          (b"PK\x01\x02", 6)):
             pos = data.find(signature)
             self.assertGreaterEqual(pos, 0)
             data[pos + version_offset:pos + version_offset + 2] = (99).to_bytes(2, "little")
