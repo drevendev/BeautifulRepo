@@ -1033,6 +1033,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Refuse media-budget scans whose selected repository root has a symlinked
+  or junction-backed lexical parent. A final ordinary directory behind a
+  redirected parent previously escaped the root-redirect preflight; a new
+  offline regression checks incomplete evidence without reading outside media.
+
 - Skip explicitly excluded dependency/virtual-environment trees before inspecting
   redirect metadata in the offline media-size inventory. A symlinked or dangling
   `node_modules`/`.venv` must not turn an otherwise complete scan into a false

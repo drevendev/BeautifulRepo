@@ -45,11 +45,16 @@ def inspect(root: Path, max_file_bytes: int, max_total_bytes: int) -> dict[str, 
     findings: list[dict[str, object]] = []
     sizes: list[tuple[str, int]] = []
     try:
-        root_info = root.lstat()
-        if not stat.S_ISDIR(root_info.st_mode) or root.is_symlink():
-            raise OSError("root must be an ordinary directory, not a redirect")
+        # lstat(root) alone misses a redirect in an ancestor, for example
+        # /tmp/alias/repository where alias is a symlink to an outside tree.
+        # Check every lexical ancestor without resolving away that evidence.
+        absolute_root = root.absolute()
+        for component in (absolute_root, *absolute_root.parents):
+            info = os.stat(component, follow_symlinks=False)
+            if not stat.S_ISDIR(info.st_mode) or getattr(info, "st_reparse_tag", 0):
+                raise OSError("root path includes a redirect or non-directory")
     except OSError:
-        report["errors"] = ["Cannot inspect root as an ordinary directory"]
+        report["errors"] = ["Cannot inspect root without directory redirects"]
         return report
 
     stack: list[tuple[Path, int]] = [(root, 0)]
