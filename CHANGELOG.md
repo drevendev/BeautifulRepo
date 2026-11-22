@@ -1033,6 +1033,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Skip explicitly excluded dependency/virtual-environment trees before inspecting
+  redirect metadata in the offline media-size inventory. A symlinked or dangling
+  `node_modules`/`.venv` must not turn an otherwise complete scan into a false
+  `incomplete`; unexcluded redirects remain rejected and regression-tested.
+
 - Reject hard-linked image entries in the offline media-size inventory rather
   than counting a potentially outside-checkout alias as repository-owned.
   Report incomplete evidence, preserve the original bytes, and cover external

@@ -74,6 +74,10 @@ def inspect(root: Path, max_file_bytes: int, max_total_bytes: int) -> dict[str, 
         for entry in entries:
             entries_seen += 1
             relative = entry.path[len(os.fspath(root).rstrip(os.sep)) + 1:].replace(os.sep, "/")
+            # Excluded trees are outside this inventory even when a path is
+            # a symlink/junction. Do not inspect or follow their metadata.
+            if entry.name in IGNORED_DIRECTORIES:
+                continue
             try:
                 # DirEntry.stat() reports st_nlink=0 on Windows, even for hard links.
                 # An uncached path stat supplies link counts and avoids false PASS.
@@ -85,8 +89,6 @@ def inspect(root: Path, max_file_bytes: int, max_total_bytes: int) -> dict[str, 
             if stat.S_ISLNK(mode) or getattr(info, "st_reparse_tag", 0) == 0xA0000003:
                 errors.append(f"Skipped redirect: {relative}")
             elif stat.S_ISDIR(mode):
-                if entry.name in IGNORED_DIRECTORIES:
-                    continue
                 if depth >= MAX_DEPTH:
                     errors.append(f"Scan exceeds {MAX_DEPTH} directory levels: {relative}")
                 else:
