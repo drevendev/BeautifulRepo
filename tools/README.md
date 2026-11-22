@@ -6,6 +6,7 @@
 python tools/catalog.py                 # validate and check the generated view
 python tools/catalog.py --write         # explicitly regenerate catalog/README.md
 python tools/docs_links.py               # check repository-owned Markdown destinations
+python -I tools/media_budget.py --root .   # advisory local image size inventory
 python tools/html_navigation.py          # verify local HTML/media and Markdown section anchors
 python -I tools/action_pins.py --root .    # check reviewed GitHub Actions SHA annotations
 python -m unittest discover -s tests -v
@@ -708,3 +709,23 @@ Read the [complete contract and limitations](../guides/repository-audit.md) and 
 source inspection is not a complete GitHub community-profile check, license classifier,
 screen-reader audit or beauty score. Its tests join the existing default unittest suite;
 no new required repository-protection rule is introduced.
+
+
+## Inventory repository image weight before publishing
+
+Run the [offline media inventory](media_budget.py) on an ordinary checkout:
+
+```sh
+python -I tools/media_budget.py --root . --max-file-kib 1024 --max-total-kib 8192
+python -I tools/media_budget.py --root ../another-repo --format json
+```
+
+It scans nested regular PNG/JPEG/GIF/WebP/SVG/AVIF/APNG files by file size,
+without decoding images, executing repository code or accessing the network.
+Dependency folders are excluded; redirects and inventory limits produce
+INCOMPLETE instead of a false PASS. Exit 0 = within chosen budgets;
+1 = over budget; 2 = incomplete or invalid arguments. The 1 MiB per-file
+and 8 MiB total defaults are configurable examples, **not** GitHub upload
+limits or a substitute for checking the rendered README. The total counts
+unreferenced assets and theme variants too. For a practical keep/re-export
+decision, see [image weight and evidence](../guides/media-budget.md).

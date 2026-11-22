@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a dependency-free, metadata-only image-weight inventory with configurable
+  project budgets, deterministic text/JSON reports, and twelve synthetic tests.
+  It scans local image files, not README load behavior or accessibility.
+
 - Add a source-backed README demo media recipe, reusable evidence template and
   tests for the existing synthetic Pocket Trails media paths. The guide
   distinguishes poster, text alternative, visual description, captions, privacy
