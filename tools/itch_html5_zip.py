@@ -24,6 +24,13 @@ WINDOWS_RESERVED = {"CON", "PRN", "AUX", "NUL"} | {
     f"{prefix}{digit}" for prefix in ("COM", "LPT") for digit in "123456789¹²³"
 }
 WINDOWS_INVALID = '<>:"|?*'
+# Unicode UAX #9 Bidi_Control property (12 invisible formatting characters).
+# https://www.unicode.org/reports/tr9/ — reviewed 2026-11-22.
+# Do not reject ordinary Arabic/Hebrew script letters or RTL filenames.
+BIDI_CONTROL_POINTS = frozenset({
+    0x061C, 0x200E, 0x200F, 0x202A, 0x202B, 0x202C,
+    0x202D, 0x202E, 0x2066, 0x2067, 0x2068, 0x2069,
+})
 
 
 def nonportable_windows_component(component: str) -> bool:
@@ -101,7 +108,11 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
             or "\\" in raw_name
             or ":" in raw_name.split("/", 1)[0]
             or any(part in ("", ".", "..") for part in raw_name.rstrip("/").split("/"))
-            or any(ord(char) < 0x20 or 0x7f <= ord(char) <= 0x9f for char in raw_name)
+            or any(
+                ord(char) < 0x20 or 0x7f <= ord(char) <= 0x9f
+                or ord(char) in BIDI_CONTROL_POINTS
+                for char in raw_name
+            )
         ):
             report("unsafe_path", raw_name, "member path is not a safe relative POSIX path")
         if any(nonportable_windows_component(part)

@@ -85,9 +85,14 @@ The checker never extracts files, invokes game code or uses a network.
 Rules cover a root-level, **nonempty** `index.html` **file** with exact case, published
 itch.io file-count/path-length/uncompressed-size limits, and conservative
 duplicate, file/directory path conflict, unsafe-path (including C0/C1 control
-characters in member names), special-file, encryption and non-UTF-8-marked name
-preflights. Directory entries may end with one `/`; repeated trailing `//`
+characters and Unicode bidirectional formatting controls in member names),
+special-file, encryption and non-UTF-8-marked name preflights. Directory entries may end with one `/`; repeated trailing `//`
 separators are reported as unsafe rather than silently normalized.
+The Unicode guard covers the twelve invisible Bidi_Control characters defined by
+[Unicode UAX #9](https://www.unicode.org/reports/tr9/) (reviewed **2026-11-21** UTC):
+they may reorder a displayed member name. Ordinary Arabic/Hebrew filenames
+remain allowed. This is a conservative archive review rule, **not** an itch.io
+upload requirement or a claim that all Unicode filename tricks are detected.
 It also reports Windows-nonportable member names (reserved
 devices such as `NUL.txt` and `COM¹.json`, prohibited punctuation or trailing
 dots/spaces) and case-distinct members that collide on common case-insensitive
