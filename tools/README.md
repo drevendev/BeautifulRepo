@@ -89,7 +89,7 @@ characters and Unicode bidirectional formatting controls in member names),
 special-file, encryption and non-UTF-8-marked name preflights. Directory entries may end with one `/`; repeated trailing `//`
 separators are reported as unsafe rather than silently normalized.
 The Unicode guard covers the twelve invisible Bidi_Control characters defined by
-[Unicode UAX #9](https://www.unicode.org/reports/tr9/) (reviewed **2026-11-22**):
+[Unicode UAX #9](https://www.unicode.org/reports/tr9/) (reviewed **2026-11-21** UTC):
 they may reorder a displayed member name. Ordinary Arabic/Hebrew filenames
 remain allowed. This is a conservative archive review rule, **not** an itch.io
 upload requirement or a claim that all Unicode filename tricks are detected.
