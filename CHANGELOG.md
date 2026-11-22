@@ -1038,6 +1038,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Return structured `incomplete` evidence (exit 2) for HTML5 ZIPs whose
+  minimum extractor version is unsupported by Python's ZIP parser, rather
+  than a traceback. A synthetic header regression checks JSON, stderr and
+  archive immutability; no extraction or browser result is implied.
+
 - Refuse media-budget scans whose selected repository root has a symlinked
   or junction-backed lexical parent. A final ordinary directory behind a
   redirected parent previously escaped the root-redirect preflight; a new
