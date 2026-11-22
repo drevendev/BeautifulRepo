@@ -184,6 +184,30 @@ class MediaBudgetTests(unittest.TestCase):
             self.assertEqual(data["status"], "ok")
             self.assertEqual(data["files"], 0)
 
+    def test_symlink_in_root_parent_is_incomplete_without_external_inventory(self):
+        with tempfile.TemporaryDirectory() as elsewhere:
+            external = Path(elsewhere) / "repo"
+            external.mkdir()
+            (external / "outside.png").write_bytes(b"x" * 4096)
+            alias = self.root / "redirected_parent"
+            try:
+                alias.symlink_to(Path(elsewhere), target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("directory symlinks unavailable")
+            indirect_root = alias / "repo"
+            self.assertFalse(indirect_root.is_symlink())
+            data = inspect(indirect_root, 1024, 1024)
+            self.assertEqual(data["status"], "incomplete")
+            self.assertEqual(data["files"], 0)
+            self.assertEqual(data["total_bytes"], 0)
+            run = subprocess.run(
+                [sys.executable, "-I", str(ROOT / "tools/media_budget.py"),
+                 "--root", str(indirect_root), "--format", "json"],
+                capture_output=True, text=True, check=False)
+            self.assertEqual(run.returncode, 2, run.stderr)
+            self.assertEqual(json.loads(run.stdout)["files"], 0)
+            self.assertEqual((external / "outside.png").read_bytes(), b"x" * 4096)
+
     def test_root_symlink_is_not_followed(self):
         try:
             alias = self.root / "alias"
