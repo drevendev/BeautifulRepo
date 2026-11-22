@@ -18,6 +18,10 @@ For your first contribution, use the [short contributor route](guides/first-cont
 with its deliberately fictional, fully scoped issue example. Maintainers can
 adapt the [good-first-issue template](templates/GOOD_FIRST_ISSUE.template.md)
 without pretending that a labelled issue, reviewer or completion date exists.
+For agent-assisted changes, use the [bounded review recipe](guides/agent-contribution-review.md)
+and [copyable evidence packet](templates/AGENT_CONTRIBUTION_REVIEW.template.md)
+to distinguish authorized edits, observed tests and provider checks from claims
+that were never verified; this adds no new approval requirement.
 
 **Testing is also a contribution.** [Help wanted: independent Agent Skills trials
 (#258)](https://github.com/drevendev/BeautifulRepo/issues/258) invites one
