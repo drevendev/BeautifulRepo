@@ -21,8 +21,17 @@ python -I tools/media_budget.py --root ../my-repo --max-file-kib 512 --max-total
 
 The original, dependency-free inventory uses file metadata only. It looks for
 .png, .jpg, .jpeg, .gif, .webp, .svg, .avif and .apng, without
-opening or decoding images, following redirects or calling the network. It
-skips .git, node_modules and common local virtual environments; other
+opening or decoding images, following directory/symbolic-link redirects
+or calling the network. It also refuses image files with multiple hard links
+(`st_nlink != 1`, including an unavailable count): an alias could point
+outside the selected checkout and metadata cannot establish where every link
+lives. On Windows, `os.DirEntry.stat()` does not supply a meaningful link count;
+the tool uses an uncached `os.stat(..., follow_symlinks=False)` instead. See the
+[Python `os.scandir` documentation](https://docs.python.org/3/library/os.html#os.DirEntry.stat). Such a file makes the
+inventory **incomplete** (exit 2) and is excluded from totals; this is
+conservative, even when all the links happen to be inside the checkout.
+Non-image hard links are outside this inventory's scope. The tool skips
+.git, node_modules and common local virtual environments; other
 nested folders count. The largest five images are listed so a maintainer can
 choose what to investigate first. The default advisory budgets (1 MiB per
 file, 8 MiB total) are **our example values**, not GitHub requirements,

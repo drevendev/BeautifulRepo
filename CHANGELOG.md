@@ -1028,6 +1028,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject hard-linked image entries in the offline media-size inventory rather
+  than counting a potentially outside-checkout alias as repository-owned.
+  Report incomplete evidence, preserve the original bytes, and cover external
+  and internal hard links with regressions.
+
 - Detect mixed-case plus canonically equivalent Unicode ZIP member names and
   file-to-directory prefix conflicts missed by separate casefold and NFC checks.
   Keep distinct assets valid; metadata only, no extraction or itch.io rule change.

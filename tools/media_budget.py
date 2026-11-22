@@ -75,7 +75,9 @@ def inspect(root: Path, max_file_bytes: int, max_total_bytes: int) -> dict[str, 
             entries_seen += 1
             relative = entry.path[len(os.fspath(root).rstrip(os.sep)) + 1:].replace(os.sep, "/")
             try:
-                info = entry.stat(follow_symlinks=False)
+                # DirEntry.stat() reports st_nlink=0 on Windows, even for hard links.
+                # An uncached path stat supplies link counts and avoids false PASS.
+                info = os.stat(entry.path, follow_symlinks=False)
             except OSError:
                 errors.append(f"Cannot inspect entry: {relative}")
                 continue
@@ -91,6 +93,11 @@ def inspect(root: Path, max_file_bytes: int, max_total_bytes: int) -> dict[str, 
                     stack.append((Path(entry.path), depth + 1))
             elif Path(entry.name).suffix.lower() in IMAGE_EXTENSIONS:
                 if stat.S_ISREG(mode):
+                    # A hard link can alias a file outside the selected checkout.
+                    # Metadata alone cannot establish that all links are local.
+                    if info.st_nlink != 1:
+                        errors.append(f"Skipped hard-linked media entry: {relative}")
+                        continue
                     sizes.append((relative, info.st_size))
                     if info.st_size > max_file_bytes:
                         findings.append({"rule": "file_budget", "path": relative, "bytes": info.st_size})
