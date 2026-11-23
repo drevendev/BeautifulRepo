@@ -150,6 +150,19 @@ class RepoReferencesTests(unittest.TestCase):
         self.assertEqual(report["status"], "incomplete")
         self.assertTrue(any("directory entries" in error for error in report["errors"]))
 
+    def test_match_limit_stops_before_scanning_later_files(self):
+        for index in range(5):
+            self.put(f"{index:02}.md", b"org/repo")
+        with patch.object(repo_references, "MAX_MATCHES", 2):
+            report = inspect(self.root, "org/repo")
+        self.assertEqual(report["status"], "incomplete")
+        self.assertEqual(report["files_scanned"], 2)
+        self.assertEqual(report["findings"], [
+            {"path": "00.md", "line": 1, "column": 1},
+            {"path": "01.md", "line": 1, "column": 1},
+        ])
+        self.assertTrue(any("match limit" in error for error in report["errors"]))
+
     def test_match_limit_never_reports_complete(self):
         self.put("README.md", b"org/repo " * 2000)
         result = inspect(self.root, "org/repo")
