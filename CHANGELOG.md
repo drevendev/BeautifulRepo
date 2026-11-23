@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Replace the incomplete template listing with a task-first chooser covering all
+  shipped scaffolds and tested for unique coverage. Correct the stale game-example
+  claim and distinguish inert owner/security templates from active policies.
+
 - Add task-first documentation navigation guidance and an editable docs-index
   scaffold, with an annotated fictional before/after route, review record and
   clear limits on what offline link checks can prove. No independent newcomer
