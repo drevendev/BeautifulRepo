@@ -305,6 +305,7 @@ class CheckerWrapperTests(unittest.TestCase):
                 result = adapter.run_check(self.root, "check_documentation_links")
         self.assertEqual(result["state"], "incomplete")
         self.assertEqual(result["exit_code"], 2)
+        self.assertEqual(result["reason"], "a Markdown source exceeded the per-file byte limit")
         run.assert_not_called()
 
     def test_too_many_sources_fails_before_checker_launch(self):
@@ -314,7 +315,27 @@ class CheckerWrapperTests(unittest.TestCase):
             with mock.patch.object(adapter, "_bounded_run") as run:
                 result = adapter.run_check(self.root, "check_html_navigation")
         self.assertEqual(result["state"], "incomplete")
+        self.assertEqual(result["reason"], "repository exceeded the Markdown source count limit")
         run.assert_not_called()
+
+    def test_distinct_aggregate_entry_and_deadline_reasons(self):
+        (self.root / "one.md").write_text("1234", encoding="utf-8")
+        (self.root / "two.md").write_text("5678", encoding="utf-8")
+        cases = (
+            ("MAX_TOTAL_MARKDOWN_BYTES", 7, "repository exceeded the total Markdown byte limit"),
+            ("MAX_WALK_ENTRIES", 1, "repository metadata preflight exceeded its entry limit"),
+            ("MAX_PREFLIGHT_SECONDS", -1, "repository metadata preflight exceeded its time limit"),
+        )
+        for setting, limit, expected in cases:
+            with self.subTest(setting=setting):
+                with mock.patch.object(adapter, setting, limit):
+                    with mock.patch.object(adapter, "_bounded_run") as run:
+                        result = adapter.run_check(self.root, "audit_repository")
+                        run.assert_not_called()
+                self.assertEqual(result["state"], "incomplete")
+                self.assertEqual(result["exit_code"], 2)
+                self.assertEqual(result["reason"], expected)
+                self.assertNotIn("evidence", result)
 
     def test_outside_markdown_symlink_fails_before_checker_launch(self):
         with tempfile.TemporaryDirectory() as outside:
@@ -361,7 +382,7 @@ class CheckerWrapperTests(unittest.TestCase):
             alias.symlink_to(original)
         except (OSError, NotImplementedError):
             self.skipTest("file symlinks unavailable")
-        self.assertTrue(adapter._bounded_source_tree(self.root))
+        self.assertIsNone(adapter._source_tree_problem(self.root))
 
     def test_non_markdown_directory_symlink_is_refused(self):
         ordinary = self.root / "docs"
@@ -388,7 +409,7 @@ class CheckerWrapperTests(unittest.TestCase):
             except OSError:
                 self.skipTest("hard links unavailable on this filesystem")
             self.assertGreater(linked.stat().st_nlink, 1)
-            self.assertFalse(adapter._bounded_source_tree(self.root))
+            self.assertIsNotNone(adapter._source_tree_problem(self.root))
             with mock.patch.object(adapter, "_bounded_run") as run:
                 for tool_name in adapter.CHECKS:
                     with self.subTest(tool=tool_name):
@@ -399,7 +420,7 @@ class CheckerWrapperTests(unittest.TestCase):
             # Releasing the outside alias makes the same ordinary file safe.
             original.unlink()
             self.assertEqual(linked.stat().st_nlink, 1)
-            self.assertTrue(adapter._bounded_source_tree(self.root))
+            self.assertIsNone(adapter._source_tree_problem(self.root))
 
     def test_non_markdown_hardlinked_entrypoints_are_refused(self):
         with tempfile.TemporaryDirectory() as outside:
@@ -421,7 +442,7 @@ class CheckerWrapperTests(unittest.TestCase):
                         run.assert_not_called()
                     linked.unlink()
                     self.assertEqual(original.stat().st_nlink, 1)
-                    self.assertTrue(adapter._bounded_source_tree(self.root))
+                    self.assertIsNone(adapter._source_tree_problem(self.root))
 
     def test_non_markdown_special_file_metadata_refused_for_all_tools(self):
         """Even LICENSE without a Markdown suffix must not be a named pipe."""
@@ -446,7 +467,7 @@ class CheckerWrapperTests(unittest.TestCase):
                         self.assertEqual(report["state"], "incomplete")
                         self.assertEqual(report["exit_code"], 2)
                 run.assert_not_called()
-        self.assertTrue(adapter._bounded_source_tree(self.root))
+        self.assertIsNone(adapter._source_tree_problem(self.root))
 
     @unittest.skipUnless(hasattr(os, "mkfifo"), "named pipes unavailable")
     def test_native_non_markdown_fifo_refused_before_every_checker(self):
@@ -468,12 +489,12 @@ class CheckerWrapperTests(unittest.TestCase):
                         run.assert_not_called()
                 finally:
                     source.unlink()
-        self.assertTrue(adapter._bounded_source_tree(self.root))
+        self.assertIsNone(adapter._source_tree_problem(self.root))
 
     def test_ordinary_nested_markdown_passes_preflight(self):
         (self.root / "nested").mkdir()
         (self.root / "nested" / "guide.md").write_text("# Guide\n", encoding="utf-8")
-        self.assertTrue(adapter._bounded_source_tree(self.root))
+        self.assertIsNone(adapter._source_tree_problem(self.root))
 
     def test_unknown_windows_reparse_sources_fail_closed(self):
         for kind in ("directory", "ordinary-file"):
