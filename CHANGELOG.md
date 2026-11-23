@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Include Go module/workspace metadata and `.go` source imports in the
+  bounded repository-rename reference inventory. Tests cover detected module
+  paths, excluded checksum records and undecodable modules.
+
 - Add a source-backed, read-only GitHub Pages publication verification recipe
   and editable evidence record to distinguish green CI, actual deployment and
   served-page first success. No Pages configuration or live-site result is claimed.
