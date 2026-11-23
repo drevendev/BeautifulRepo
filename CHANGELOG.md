@@ -829,6 +829,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Distinguish the five metadata/Markdown preflight budget failures in the
+  experimental MCP adapter with fixed, path-free reasons; keep generic unsafe
+  source refusals and the same fail-closed limits.
+
 - Surface the existing nine-step local Quality check runner in the root README,
   with list/keep-going options, checkout-scope limitations and a navigation
   regression; provider CI and platform-specific checks remain separate.
