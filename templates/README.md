@@ -8,7 +8,7 @@ sections whose claims you can verify.
 ## Help someone use the project
 
 - **General repository:** [general repository template](README.template.md) — promise, first result, proof and next steps.
-- **Private/internal project:** [private/internal project template](INTERNAL_README.template.md) — access, data handling, ownership and support without presuming an open-source licence.
+- **Private/internal project:** [private/internal project template](INTERNAL_README.template.md) — access, data handling, ownership and support without presuming an open-source licence. See the [filled fictional example](../examples/internal-repository/README.md) and [private-repository adaptation guide](../guides/adopting-the-checks.md#private-and-enterprise-repositories).
 - **Reusable library:** [reusable library template](LIBRARY_README.template.md) — tested installation, import and API.
 - **Application or service:** [application or service template](APPLICATION_README.template.md) — a visible first run and data boundaries.
 - **Game:** [game template](GAME_README.template.md) — play and build routes with separate asset rights; see the [runnable terminal example](../examples/game-starter/README.md).
@@ -18,7 +18,7 @@ sections whose claims you can verify.
 
 ## Explain the presentation and permissions
 
-- **Visual direction:** [visual direction template](DESIGN_INTENT.template.md) — audience, evidence and alternatives.
+- **Visual direction:** [visual direction template](DESIGN_INTENT.template.md) — audience, evidence and alternatives. See the [filled Rowcount case](../examples/readme-visuals/rowcount/DESIGN_INTENT.md).
 - **Demo media:** [demo media template](DEMO_MEDIA.template.md) — poster, captions, text alternatives and untested playback.
 - **Third-party assets:** [third-party assets template](ASSET_PROVENANCE.template.md) — author, licence, permitted use and rights evidence.
 
@@ -37,7 +37,7 @@ sections whose claims you can verify.
 - **First contribution:** [first contribution template](GOOD_FIRST_ISSUE.template.md) — reproducible problem and achievable acceptance.
 - **Contribution rights:** [contribution rights template](CONTRIBUTION_RIGHTS.template.md) — licence checks and copied-material provenance.
 - **Maintainer capacity:** [maintainer capacity template](MAINTAINER_CAPACITY.template.md) — non-binding availability and handoff.
-- **Mentoring proposal:** [mentoring proposal template](GSOC_PROJECT_IDEA.template.md) — deliverable, real mentor capacity and current organizer rules; not an application.
+- **Mentoring proposal:** [mentoring proposal template](GSOC_PROJECT_IDEA.template.md) — deliverable, real mentor capacity and current organizer rules; not an application. See the [dated programs guide](../guides/programs.md) and recheck organizer rules before publishing an ideas page.
 - **File owners:** [file owners template](CODEOWNERS.template) — verified GitHub users and permissions; copying it does not enable required review.
 - **Security policy:** [security policy template](SECURITY.template.md) — publish only after confirming an actual confidential reporting route.
 - **Public-source case:** [public-source case template](SOURCE_ONLY_CASE.template.md) — pinned observations and an editorial proposal, not a completed upstream change.
