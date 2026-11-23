@@ -799,6 +799,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Surface the existing nine-step local Quality check runner in the root README,
+  with list/keep-going options, checkout-scope limitations and a navigation
+  regression; provider CI and platform-specific checks remain separate.
+
 - Separate reproduction steps or accessibility barriers from expected/actual
   behavior in the GitHub problem issue form, with optional environment details,
   explicit untested evidence and a private-report warning. Add a practical
