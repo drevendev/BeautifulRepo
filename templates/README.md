@@ -1,39 +1,56 @@
-# Repository templates
+# Choose a repository template by task
 
-Pick a scaffold for the audience that will actually read the repository.
-Some templates describe a README; others document a release, security policy
-or contributor project idea. Every template is an **editable starting point**,
-not a completed project or verification of its placeholder claims.
+Start with the **reader's next action**, not a file name. These are editable
+drafts, **not evidence** that your project has working setup, active maintainers,
+security reporting, redistribution rights or a published release. Keep only
+sections whose claims you can verify.
 
-- [General repository README](README.template.md) — public-facing first result.
-- [Design-intent brief](DESIGN_INTENT.template.md) — audience, fixed evidence, two
-  honest first-screen alternatives and explicit manual review limits; see the
-  [filled Rowcount case](../examples/readme-visuals/rowcount/DESIGN_INTENT.md).
-- [Internal/private repository README](INTERNAL_README.template.md) —
-  verified ownership and support, access, private setup, data classification,
-  runbooks and approved usage terms **without presuming an open-source license**.
-- [Library README](LIBRARY_README.template.md) — actual installation and API.
-- [Application README](APPLICATION_README.template.md) — visible journey and data boundaries.
-- [Game README](GAME_README.template.md) — observed play route, source build and separately licensed assets; no example game bundled.
-- [Research/data README](RESEARCH_DATA_README.template.md) — provenance and reproduction.
-- [Curated references README](CURATED_README.template.md) — selection and retirement criteria.
-- [Release notes](RELEASE_NOTES.template.md) — accurately scoped changes.
-- [Repository move verification](REPOSITORY_MOVE.template.md) — date and test
-  rename/transfer outcomes; see the [guide](../guides/repository-relocation.md).
-- [Security policy](SECURITY.template.md) — publish only after a real private reporting route exists.
-- [CODEOWNERS example](CODEOWNERS.template) — adapt verified owner access and
-  [test reviewer routing](../guides/codeowners.md); this is not an active review rule.
+## Help someone use the project
 
-## Contributor project ideas
+- **General repository:** [general repository template](README.template.md) — promise, first result, proof and next steps.
+- **Private/internal project:** [private/internal project template](INTERNAL_README.template.md) — access, data handling, ownership and support without presuming an open-source licence.
+- **Reusable library:** [reusable library template](LIBRARY_README.template.md) — tested installation, import and API.
+- **Application or service:** [application or service template](APPLICATION_README.template.md) — a visible first run and data boundaries.
+- **Game:** [game template](GAME_README.template.md) — play and build routes with separate asset rights; see the [runnable terminal example](../examples/game-starter/README.md).
+- **Research or dataset:** [research or dataset template](RESEARCH_DATA_README.template.md) — source provenance and reproduction.
+- **Curated references:** [curated references template](CURATED_README.template.md) — selection rules and stale-entry retirement.
+- **Multi-page documentation:** [multi-page documentation template](DOCS_INDEX.template.md) — task-first first-run, how-to, reference and help routes; see the [navigation guide](../guides/documentation-navigation.md).
 
-- [GSoC project-idea card](GSOC_PROJECT_IDEA.template.md) — a draft with an
-  observable deliverable, actual mentor capacity, prerequisites and an explicit
-  AI-tool policy. It does **not** enroll this repository, promise mentoring or
-  verify future-year eligibility.
+## Explain the presentation and permissions
 
-See the [dated programs guide](../guides/programs.md) and recheck the organizer's
-current rules before publishing an ideas page or making participation claims.
+- **Visual direction:** [visual direction template](DESIGN_INTENT.template.md) — audience, evidence and alternatives.
+- **Demo media:** [demo media template](DEMO_MEDIA.template.md) — poster, captions, text alternatives and untested playback.
+- **Third-party assets:** [third-party assets template](ASSET_PROVENANCE.template.md) — author, licence, permitted use and rights evidence.
 
-See the [filled fictional internal example](../examples/internal-repository/README.md)
-and the [private-repository adoption guide](../guides/adopting-the-checks.md#private-and-enterprise-repositories).
-Before adapting any scaffold, use the [first-success checklist](../checklists/first-success.md).
+## Make maintenance decisions traceable
+
+- **Release notes:** [release notes template](RELEASE_NOTES.template.md) — verified changes; a draft is not a published GitHub Release.
+- **Rename or transfer:** [rename or transfer template](REPOSITORY_MOVE.template.md) — redirects, Actions, packages and first-run verification.
+- **Pause or retire:** [pause or retire template](REPOSITORY_STATUS_NOTICE.template.md) — maintenance expectations without an invented response SLA.
+- **CI investigation:** [ci investigation template](CI_FAILURE_RECORD.template.md) — observed job, attempted repair and retry decision.
+- **Dependency update:** [dependency update template](DEPENDENCY_REVIEW.template.md) — privilege, compatibility, tests and accept/defer/reject.
+- **Pull request review:** [pull request review template](PULL_REQUEST_REVIEW.template.md) — exact changes and findings, distinct from real GitHub merge gates.
+- **Agent-assisted changes:** [agent-assisted changes template](AGENT_CONTRIBUTION_REVIEW.template.md) — authorised scope, tool actions and untested behavior.
+
+## Invite contributions responsibly
+
+- **First contribution:** [first contribution template](GOOD_FIRST_ISSUE.template.md) — reproducible problem and achievable acceptance.
+- **Contribution rights:** [contribution rights template](CONTRIBUTION_RIGHTS.template.md) — licence checks and copied-material provenance.
+- **Maintainer capacity:** [maintainer capacity template](MAINTAINER_CAPACITY.template.md) — non-binding availability and handoff.
+- **Mentoring proposal:** [mentoring proposal template](GSOC_PROJECT_IDEA.template.md) — deliverable, real mentor capacity and current organizer rules; not an application.
+- **File owners:** [file owners template](CODEOWNERS.template) — verified GitHub users and permissions; copying it does not enable required review.
+- **Security policy:** [security policy template](SECURITY.template.md) — publish only after confirming an actual confidential reporting route.
+- **Public-source case:** [public-source case template](SOURCE_ONLY_CASE.template.md) — pinned observations and an editorial proposal, not a completed upstream change.
+
+## Adapt, then verify
+
+1. Choose **one primary template** for the current task. Do not copy everything.
+2. Replace placeholders and delete unsupported claims. Check commands, outputs,
+   licence obligations, help routes, responsible owners and asset permissions.
+3. Check relative links from the destination directory and rerun first-run
+   commands in a clean checkout. Record what was **not tested**.
+4. Inspect rendered task navigation and accessibility. A passing link check
+   cannot prove a reader will find or understand a page.
+
+For runnable starting points, see the [working examples](../examples/README.md).
+For review criteria, use the [first-success checklist](../checklists/first-success.md).
