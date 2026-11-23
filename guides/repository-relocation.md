@@ -81,6 +81,13 @@ integrations, redirection behavior and actual workflow success are **not
 verified**. Preserve these as UNKNOWN until separately checked. Review
 filenames before sharing output from a private checkout.
 
+The preflight checks the opened file's type, link count and identity against
+its no-follow metadata before reading bytes; a changed file produces
+**incomplete**, not a false clean scan. This is a best-effort local inventory,
+**not** an atomic filesystem snapshot or protection against every concurrent
+ancestor-directory replacement or in-place edit. Do not scan a maliciously
+mutable tree as if it were a sandbox.
+
 ## Verify after the authorized move
 
 Capture dated evidence for **each** applicable surface:
