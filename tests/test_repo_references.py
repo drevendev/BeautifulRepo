@@ -61,6 +61,34 @@ class RepoReferencesTests(unittest.TestCase):
         self.assertEqual(report["status"], "ok")
         self.assertEqual(report["files_scanned"], 1)
 
+    def test_go_module_paths_and_imports_are_included(self):
+        # Go module declarations and imports can retain the old repository.
+        self.put("go.mod", b"module github.com/orchard-labs/maple-lint\n")
+        self.put(
+            "cmd/main.go",
+            b'package main\nimport "github.com/orchard-labs/maple-lint/pkg"\n',
+        )
+        self.put(
+            "go.work",
+            b"go 1.23\nreplace github.com/orchard-labs/maple-lint => ./local\n",
+        )
+        # Generated checksum records stay outside the selected source formats.
+        self.put("go.sum", b"github.com/orchard-labs/maple-lint v1.0.0 fake\n")
+        report = inspect(self.root, "orchard-labs/maple-lint")
+        self.assertEqual(report["status"], "findings")
+        self.assertEqual(report["files_scanned"], 3)
+        self.assertEqual(
+            {item["path"] for item in report["findings"]},
+            {"cmd/main.go", "go.mod", "go.work"},
+        )
+        self.assertEqual(len(report["findings"]), 3)
+
+    def test_unreadable_go_module_is_not_a_clean_scan(self):
+        self.put("go.mod", b"module \xff\n")
+        report = inspect(self.root, "orchard-labs/maple-lint")
+        self.assertEqual(report["status"], "incomplete")
+        self.assertEqual(report["files_scanned"], 0)
+
     def test_malformed_utf8_makes_scan_incomplete(self):
         self.put("docs/legacy.md", b"\xff")
         report = inspect(self.root, "orchard-labs/maple-lint")
