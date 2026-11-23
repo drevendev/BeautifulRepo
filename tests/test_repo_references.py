@@ -7,10 +7,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+import repo_references  # noqa: E402
 from repo_references import inspect  # noqa: E402
 
 
@@ -115,6 +117,38 @@ class RepoReferencesTests(unittest.TestCase):
                                       "--old", input_value], capture_output=True, text=True, check=False)
                 self.assertEqual(run.returncode, 2)
                 self.assertNotIn("Traceback", run.stderr)
+
+    def test_directory_entry_limit_is_bounded_during_enumeration(self):
+        for index in range(7):
+            self.put(f"{index:02}.md", b"org/repo")
+
+        real_scandir = repo_references.os.scandir
+        entries_yielded = 0
+
+        class CountingScan:
+            def __init__(self, directory):
+                self.iterator = real_scandir(directory)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                self.iterator.close()
+
+            def __iter__(self):
+                nonlocal entries_yielded
+                for entry in self.iterator:
+                    entries_yielded += 1
+                    if entries_yielded > 4:
+                        raise AssertionError("enumerated beyond budget + overflow sentinel")
+                    yield entry
+
+        with patch.object(repo_references, "MAX_ENTRIES", 3), \
+                patch.object(repo_references.os, "scandir", CountingScan):
+            report = inspect(self.root, "org/repo")
+        self.assertEqual(entries_yielded, 4)
+        self.assertEqual(report["status"], "incomplete")
+        self.assertTrue(any("directory entries" in error for error in report["errors"]))
 
     def test_match_limit_never_reports_complete(self):
         self.put("README.md", b"org/repo " * 2000)
