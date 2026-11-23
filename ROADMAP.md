@@ -7,6 +7,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 
 - Reader-first [README](README.md), [repository checklist](checklists/repository.md),
   [README guide](guides/readme.md) and [README scaffold](templates/README.template.md).
+- [Task-first documentation navigation](guides/documentation-navigation.md) with a
+  [copyable documentation index](templates/DOCS_INDEX.template.md), a fictional
+  before/after reader route and a manual navigation review record.
+  This is editorial guidance, not a user-test or automatic discoverability pass.
 - [Third-party asset provenance](guides/third-party-assets.md) with a
   [reusable rights-evidence record](templates/ASSET_PROVENANCE.template.md),
   hypothetical include/defer/replace decisions and a real existing notice example.

@@ -180,7 +180,9 @@ not a second copy of the first-screen chooser.
   [demo media evidence and alternatives](guides/demo-media.md),
   [editorial evidence kit](guides/editorial-evidence.md),
   [AI-written README evidence review](guides/ai-readme-review.md),
-  [repository discoverability](guides/discoverability.md).
+  [repository discoverability](guides/discoverability.md),
+  [documentation navigation by reader task](guides/documentation-navigation.md)
+  with an [editable index](templates/DOCS_INDEX.template.md).
 - **Adapt an actual starter:** [CLI guide](guides/cli-repositories.md) and
   [example](examples/cli-starter/README.md);
   [library guide](guides/library-repositories.md) and
