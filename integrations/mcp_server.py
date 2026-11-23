@@ -54,8 +54,8 @@ def _unsupported_reparse(info: os.stat_result) -> bool:
     )
 
 
-def _bounded_source_tree(root: Path) -> bool:
-    """Fail closed on oversized, aliased or special Markdown source files.
+def _source_tree_problem(root: Path) -> str | None:
+    """Return a fixed, path-free reason for refusing the source tree, or None.
 
     Metadata preflight for a stable, trusted checkout; not a sandbox against
     concurrent filesystem changes. Never read target file contents here.
@@ -67,26 +67,26 @@ def _bounded_source_tree(root: Path) -> bool:
     try:
         while pending:
             if time.monotonic() > deadline:
-                return False
+                return "repository metadata preflight exceeded its time limit"
             with os.scandir(pending.pop()) as entries:
                 for entry in entries:
                     if time.monotonic() > deadline:
-                        return False
+                        return "repository metadata preflight exceeded its time limit"
                     # Match the offline link checkers' unscanned dependency trees.
                     if entry.name in (".git", "node_modules"):
                         continue
                     visited += 1
                     if visited > MAX_WALK_ENTRIES:
-                        return False
+                        return "repository metadata preflight exceeded its entry limit"
                     # os.lstat consistently exposes Windows junction tags;
                     # DirEntry.stat can omit reparse metadata on some versions.
                     info = os.lstat(entry.path)
                     # A junction redirects its subtree and must never reach
                     # a checker, even when lstat reports a directory mode.
                     if getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG:
-                        return False
+                        return "repository document sources exceeded safe scan limits or could not be inspected"
                     if not stat.S_ISLNK(info.st_mode) and _unsupported_reparse(info):
-                        return False
+                        return "repository document sources exceeded safe scan limits or could not be inspected"
                     if stat.S_ISDIR(info.st_mode):
                         pending.append(Path(entry.path))
                         continue
@@ -94,11 +94,11 @@ def _bounded_source_tree(root: Path) -> bool:
                     # can also be read by audit_repository. Fail closed for
                     # *every* regular hard link, independent of extension.
                     if stat.S_ISREG(info.st_mode) and info.st_nlink > 1:
-                        return False
+                        return "repository document sources exceeded safe scan limits or could not be inspected"
                     # Entry-point checks can read LICENSE/README.rst too: a
                     # non-Markdown FIFO or device must not reach a checker.
                     if not (stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)):
-                        return False
+                        return "repository document sources exceeded safe scan limits or could not be inspected"
                     is_markdown = entry.name.lower().endswith((".md", ".markdown"))
                     if stat.S_ISLNK(info.st_mode) and not is_markdown:
                         # An extensionless README/LICENSE or asset link may be
@@ -106,12 +106,12 @@ def _bounded_source_tree(root: Path) -> bool:
                         # source. Do not silently skip a redirect outside root.
                         target = Path(entry.path).resolve(strict=True)
                         if not target.is_relative_to(root) or not target.is_file():
-                            return False
+                            return "repository document sources exceeded safe scan limits or could not be inspected"
                         target_info = os.lstat(target)
                         if (not stat.S_ISREG(target_info.st_mode)
                                 or target_info.st_nlink > 1
                                 or _unsupported_reparse(target_info)):
-                            return False
+                            return "repository document sources exceeded safe scan limits or could not be inspected"
                     if not is_markdown:
                         continue
                     if stat.S_ISREG(info.st_mode):
@@ -119,24 +119,26 @@ def _bounded_source_tree(root: Path) -> bool:
                     elif stat.S_ISLNK(info.st_mode):
                         target = Path(entry.path).resolve(strict=True)
                         if not target.is_relative_to(root) or not target.is_file():
-                            return False
+                            return "repository document sources exceeded safe scan limits or could not be inspected"
                         target_info = target.stat()
                         if (not stat.S_ISREG(target_info.st_mode)
                                 or target_info.st_nlink > 1):
-                            return False
+                            return "repository document sources exceeded safe scan limits or could not be inspected"
                         size = target_info.st_size
                     else:
                         # Never hand a Markdown-named FIFO/device to read_text().
-                        return False
+                        return "repository document sources exceeded safe scan limits or could not be inspected"
                     markdown_files += 1
                     total_bytes += size
-                    if (markdown_files > MAX_MARKDOWN_SOURCES
-                            or size > MAX_SOURCE_BYTES
-                            or total_bytes > MAX_TOTAL_MARKDOWN_BYTES):
-                        return False
+                    if markdown_files > MAX_MARKDOWN_SOURCES:
+                        return "repository exceeded the Markdown source count limit"
+                    if size > MAX_SOURCE_BYTES:
+                        return "a Markdown source exceeded the per-file byte limit"
+                    if total_bytes > MAX_TOTAL_MARKDOWN_BYTES:
+                        return "repository exceeded the total Markdown byte limit"
     except (OSError, ValueError, RuntimeError):
-        return False
-    return True
+        return "repository document sources exceeded safe scan limits or could not be inspected"
+    return None
 
 
 def allowed_root(value: str) -> Path:
@@ -246,8 +248,9 @@ def run_check(root: Path, tool_name: str) -> dict[str, Any]:
         return incomplete(check, "configured repository root is no longer safe or available")
     # The entry-point audit reads Markdown too: it needs the same preflight as
     # both link checkers so a hard-linked README cannot evade scope checks.
-    if not _bounded_source_tree(fixed_root):
-        return incomplete(check, "repository document sources exceeded safe scan limits or could not be inspected")
+    problem = _source_tree_problem(fixed_root)
+    if problem is not None:
+        return incomplete(check, problem)
     if not BUNDLE.is_file():
         return incomplete(check, "checked-in bundle is unavailable")
     # Invoke only the requested checker: unrelated noisy/failed checks must not
