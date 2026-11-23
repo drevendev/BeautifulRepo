@@ -58,7 +58,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - [Repository rename/transfer verification](guides/repository-relocation.md) and
   [move record](templates/REPOSITORY_MOVE.template.md), distinguishing GitHub
   redirects from Action, Pages, package and clean-clone outcomes; no actual
-  repository rename, transfer or settings change.
+  repository rename, transfer or settings change. A [read-only reference
+  inventory](tools/README.md#inventory-old-repository-references-before-a-move)
+  provides bounded local text hits, not third-party consumer evidence.
 - [Release-note writing guide](guides/release-notes.md) and
   [editable draft template](templates/RELEASE_NOTES.template.md), distinguishing
   tags, GitHub Releases and maintained changelogs without implying a release.

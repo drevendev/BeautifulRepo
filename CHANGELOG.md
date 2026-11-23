@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a read-only, Git-free local repository-reference preflight with
+  deterministic text/JSON path and position reports, explicit incomplete
+  results, and synthetic regressions. It cannot verify redirected links,
+  third-party consumers or completed migrations.
+
 - Add a source-backed repository rename/transfer verification recipe and
   editable move record, covering redirects, downstream Actions, Pages,
   packages and first success. No repository settings or ownership changes.
