@@ -127,6 +127,9 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - Maintenance automation: scheduled pin and review-date checks, a
   [release draft workflow](guides/maintenance-workflow.md), a hash-pinned linter in
   CI, [AGENTS.md](AGENTS.md) and [decision records](docs/decisions/README.md).
+- [Local verification entrance case](case-studies/checkout-verification.md),
+  documenting a source-backed, tested CI-inventory correction and its first-user
+  evidence limits (not a measured usability study).
 - A [real README before/after case](case-studies/readme-first-success-case.md) for
   BeautifulRepo itself, including a clean-clone run and GitHub-rendered reflow
   observations at three emulated widths. Contrast was recorded only in light

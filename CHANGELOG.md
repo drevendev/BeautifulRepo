@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Document the real five-command-to-nine-step verification change in a
+  revision-pinned case: repaired first CI failure, source/CI evidence and
+  explicit limits on clean-clone and newcomer-use claims.
+
 - Add a checkout-bound, dependency-free local Quality CI command runner with
   nine fixed Python steps, fail-fast/keep-going/list modes, six focused tests
   and an exact workflow-inventory drift check. This is not a substitute for
