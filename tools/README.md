@@ -762,3 +762,35 @@ and 8 MiB total defaults are configurable examples, **not** GitHub upload
 limits or a substitute for checking the rendered README. The total counts
 unreferenced assets and theme variants too. For a practical keep/re-export
 decision, see [image weight and evidence](../guides/media-budget.md).
+
+## Inventory old repository references before a move
+
+The dependency-free [`repo_references.py`](repo_references.py) tool searches
+selected local source/documentation text files for occurrences of an old
+`OWNER/REPO` pair. It is useful *before* a GitHub rename/transfer, alongside
+the [verification guide](../guides/repository-relocation.md).
+
+```sh
+python -I tools/repo_references.py --root ../target-checkout --old orchard-labs/maple-lint
+python -I tools/repo_references.py --root ../target-checkout --old orchard-labs/maple-lint --format json
+```
+
+Both commands are **read-only** and require only Python 3.11+. The fictional
+pair illustrates an exact case-insensitive substring search: hits in longer
+names or example documentation are candidates for **manual review**, not
+automatically broken references. The output records path/line/column, not
+the source line, to avoid echoing adjacent secrets. Private filenames may
+still be sensitive; do not publish unchecked reports.
+
+**Exit status:** 0 = no matches in scanned text; 1 = references found;
+2 = incomplete or invalid input. The inventory covers common Markdown,
+plain text, YAML, JSON, TOML, HTML, shell/PowerShell and Python suffixes,
+plus Makefile, Dockerfile and .gitmodules. It excludes dependency/build
+folders and does **not** inspect binary formats, remote consumers or
+redirect behavior. Paths with redirects/hard links, undecodable/oversized
+eligible files, and scan ceilings produce incomplete results rather than
+a misleading clean result. Bounds: 10,000 directory entries, 32 directory
+levels, 1 MiB per text file, 24 MiB selected text and 2,000 matches.
+This is a stable-checkout source inventory, not a sandbox against concurrent
+filesystem changes or an exhaustive migration verifier. Run the separate
+post-move checks in the guide before claiming continuity.
