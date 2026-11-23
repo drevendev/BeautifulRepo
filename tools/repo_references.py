@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from itertools import islice
 import os
 from pathlib import Path
 import re
@@ -63,13 +64,16 @@ def inspect(root: Path, old: str) -> dict[str, object]:
         directory, depth = stack.pop()
         try:
             with os.scandir(directory) as scan:
-                entries = sorted(scan, key=lambda entry: entry.name)
+                # Consume at most the remaining budget and one overflow sentinel.
+                remaining = MAX_ENTRIES - entries_seen
+                batch = list(islice(scan, remaining + 1))
         except OSError:
             errors.append(f"Cannot inspect directory: {directory.relative_to(absolute).as_posix() or '.'}")
             continue
-        if entries_seen + len(entries) > MAX_ENTRIES:
+        if len(batch) > remaining:
             errors.append(f"Scan exceeds {MAX_ENTRIES} directory entries")
             break
+        entries = sorted(batch, key=lambda entry: entry.name)
         entries_seen += len(entries)
         for entry in entries:
             if entry.name in IGNORED_DIRECTORIES:
