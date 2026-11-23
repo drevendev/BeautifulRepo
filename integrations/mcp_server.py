@@ -39,6 +39,9 @@ MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_MARKDOWN_BYTES = 32 * 1024 * 1024
 MAX_WALK_ENTRIES = 50000
 MAX_PREFLIGHT_SECONDS = 5
+PREFLIGHT_REFUSAL = (
+    "repository document sources exceeded safe scan limits or could not be inspected"
+)
 
 
 def _unsupported_reparse(info: os.stat_result) -> bool:
@@ -84,9 +87,9 @@ def _source_tree_problem(root: Path) -> str | None:
                     # A junction redirects its subtree and must never reach
                     # a checker, even when lstat reports a directory mode.
                     if getattr(info, "st_reparse_tag", 0) == JUNCTION_TAG:
-                        return "repository document sources exceeded safe scan limits or could not be inspected"
+                        return PREFLIGHT_REFUSAL
                     if not stat.S_ISLNK(info.st_mode) and _unsupported_reparse(info):
-                        return "repository document sources exceeded safe scan limits or could not be inspected"
+                        return PREFLIGHT_REFUSAL
                     if stat.S_ISDIR(info.st_mode):
                         pending.append(Path(entry.path))
                         continue
@@ -94,11 +97,11 @@ def _source_tree_problem(root: Path) -> str | None:
                     # can also be read by audit_repository. Fail closed for
                     # *every* regular hard link, independent of extension.
                     if stat.S_ISREG(info.st_mode) and info.st_nlink > 1:
-                        return "repository document sources exceeded safe scan limits or could not be inspected"
+                        return PREFLIGHT_REFUSAL
                     # Entry-point checks can read LICENSE/README.rst too: a
                     # non-Markdown FIFO or device must not reach a checker.
                     if not (stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)):
-                        return "repository document sources exceeded safe scan limits or could not be inspected"
+                        return PREFLIGHT_REFUSAL
                     is_markdown = entry.name.lower().endswith((".md", ".markdown"))
                     if stat.S_ISLNK(info.st_mode) and not is_markdown:
                         # An extensionless README/LICENSE or asset link may be
@@ -106,12 +109,12 @@ def _source_tree_problem(root: Path) -> str | None:
                         # source. Do not silently skip a redirect outside root.
                         target = Path(entry.path).resolve(strict=True)
                         if not target.is_relative_to(root) or not target.is_file():
-                            return "repository document sources exceeded safe scan limits or could not be inspected"
+                            return PREFLIGHT_REFUSAL
                         target_info = os.lstat(target)
                         if (not stat.S_ISREG(target_info.st_mode)
                                 or target_info.st_nlink > 1
                                 or _unsupported_reparse(target_info)):
-                            return "repository document sources exceeded safe scan limits or could not be inspected"
+                            return PREFLIGHT_REFUSAL
                     if not is_markdown:
                         continue
                     if stat.S_ISREG(info.st_mode):
@@ -119,15 +122,15 @@ def _source_tree_problem(root: Path) -> str | None:
                     elif stat.S_ISLNK(info.st_mode):
                         target = Path(entry.path).resolve(strict=True)
                         if not target.is_relative_to(root) or not target.is_file():
-                            return "repository document sources exceeded safe scan limits or could not be inspected"
+                            return PREFLIGHT_REFUSAL
                         target_info = target.stat()
                         if (not stat.S_ISREG(target_info.st_mode)
                                 or target_info.st_nlink > 1):
-                            return "repository document sources exceeded safe scan limits or could not be inspected"
+                            return PREFLIGHT_REFUSAL
                         size = target_info.st_size
                     else:
                         # Never hand a Markdown-named FIFO/device to read_text().
-                        return "repository document sources exceeded safe scan limits or could not be inspected"
+                        return PREFLIGHT_REFUSAL
                     markdown_files += 1
                     total_bytes += size
                     if markdown_files > MAX_MARKDOWN_SOURCES:
@@ -137,7 +140,7 @@ def _source_tree_problem(root: Path) -> str | None:
                     if total_bytes > MAX_TOTAL_MARKDOWN_BYTES:
                         return "repository exceeded the total Markdown byte limit"
     except (OSError, ValueError, RuntimeError):
-        return "repository document sources exceeded safe scan limits or could not be inspected"
+        return PREFLIGHT_REFUSAL
     return None
 
 
