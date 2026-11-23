@@ -1055,6 +1055,12 @@ keep their original themed headings.
 
 ### Fixed
 
+- Refuse repository-reference scans when a checked file is swapped for a
+  different inode, redirected symlink, non-regular or hard-linked entry before
+  opening. Compare file metadata and bounded read size before counting matches;
+  add controlled file-swap regressions. This mitigates simple open races, not
+  all concurrent filesystem mutations or outside consumer discovery.
+
 - Enforce the 2,000-occurrence ceiling in the repository-reference preflight
   across multiple files, not only within one file. Stop reading further files
   once the limit is reached and report incomplete coverage; add a multi-file
