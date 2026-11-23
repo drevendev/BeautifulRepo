@@ -27,6 +27,7 @@ sections whose claims you can verify.
 - **Release notes:** [release notes template](RELEASE_NOTES.template.md) — verified changes; a draft is not a published GitHub Release.
 - **Rename or transfer:** [rename or transfer template](REPOSITORY_MOVE.template.md) — redirects, Actions, packages and first-run verification.
 - **Pause or retire:** [pause or retire template](REPOSITORY_STATUS_NOTICE.template.md) — maintenance expectations without an invented response SLA.
+- **Pages publication:** [Pages deployment record](PAGES_DEPLOYMENT_RECORD.template.md) — separate source, build, deployment and served reader routes; see the [verification guide](../guides/pages-deployment-evidence.md).
 - **CI investigation:** [ci investigation template](CI_FAILURE_RECORD.template.md) — observed job, attempted repair and retry decision.
 - **Dependency update:** [dependency update template](DEPENDENCY_REVIEW.template.md) — privilege, compatibility, tests and accept/defer/reject.
 - **Pull request review:** [pull request review template](PULL_REQUEST_REVIEW.template.md) — exact changes and findings, distinct from real GitHub merge gates.

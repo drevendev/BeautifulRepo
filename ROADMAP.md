@@ -8,6 +8,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
 - Reader-first [README](README.md), [repository checklist](checklists/repository.md),
   [README guide](guides/readme.md) and [README scaffold](templates/README.template.md).
 - [Task-first template chooser](templates/README.md) covering every shipped scaffold by reader task, with a completeness regression.
+- [GitHub Pages publication verification](guides/pages-deployment-evidence.md)
+  with an [editable deployment evidence record](templates/PAGES_DEPLOYMENT_RECORD.template.md),
+  separating build, deploy status and observed reader experience without
+  changing hosting settings or claiming a real site was inspected.
 - [Task-first documentation navigation](guides/documentation-navigation.md) with a
   [copyable documentation index](templates/DOCS_INDEX.template.md), a fictional
   before/after reader route and a manual navigation review record.
