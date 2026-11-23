@@ -32,6 +32,32 @@ def _source_file(path: Path) -> bool:
     return path.suffix.lower() in TEXT_SUFFIXES or path.name in {"Dockerfile", "Makefile", ".gitmodules"}
 
 
+def _read_checked(path: str, expected: os.stat_result) -> bytes:
+    """Reject a swapped or redirected file before reading any source bytes.
+
+    This protects the open boundary, not every possible concurrent directory
+    replacement or in-place edit. It is not a filesystem sandbox.
+    """
+    flags = (os.O_RDONLY | getattr(os, "O_BINARY", 0)
+             | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0))
+    fd = os.open(path, flags)
+    with os.fdopen(fd, "rb") as handle:
+        opened = os.fstat(handle.fileno())
+        if (not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1
+                or getattr(opened, "st_reparse_tag", 0)
+                or (opened.st_dev, opened.st_ino) != (expected.st_dev, expected.st_ino)):
+            raise OSError("file identity or type changed before read")
+        if opened.st_size != expected.st_size or opened.st_size > MAX_FILE_BYTES:
+            raise ValueError("file size changed before read")
+        data = handle.read(MAX_FILE_BYTES + 1)
+        after = os.fstat(handle.fileno())
+        if (len(data) != opened.st_size
+                or (after.st_size, after.st_mtime_ns)
+                != (opened.st_size, opened.st_mtime_ns)):
+            raise ValueError("file changed during read")
+    return data
+
+
 def inspect(root: Path, old: str) -> dict[str, object]:
     """Find case-insensitive literal occurrences in bounded local text files.
 
@@ -100,11 +126,8 @@ def inspect(root: Path, old: str) -> dict[str, object]:
                     continue
                 bytes_seen += info.st_size
                 try:
-                    # Racy files and malformed content must not produce false completeness.
-                    with open(entry.path, "rb") as handle:
-                        data = handle.read(MAX_FILE_BYTES + 1)
-                    if len(data) > MAX_FILE_BYTES:
-                        raise ValueError("file grew beyond limit")
+                    # Verify the opened file still matches the no-follow metadata.
+                    data = _read_checked(entry.path, info)
                     content = data.decode("utf-8-sig")
                 except (OSError, UnicodeError, ValueError):
                     errors.append(f"Cannot decode bounded text file: {relative}")
