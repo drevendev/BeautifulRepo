@@ -18,6 +18,8 @@ not a completed project or verification of its placeholder claims.
 - [Research/data README](RESEARCH_DATA_README.template.md) — provenance and reproduction.
 - [Curated references README](CURATED_README.template.md) — selection and retirement criteria.
 - [Release notes](RELEASE_NOTES.template.md) — accurately scoped changes.
+- [Repository move verification](REPOSITORY_MOVE.template.md) — date and test
+  rename/transfer outcomes; see the [guide](../guides/repository-relocation.md).
 - [Security policy](SECURITY.template.md) — publish only after a real private reporting route exists.
 - [CODEOWNERS example](CODEOWNERS.template) — adapt verified owner access and
   [test reviewer routing](../guides/codeowners.md); this is not an active review rule.

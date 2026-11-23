@@ -262,6 +262,9 @@ Public documentation is maintained in English.
 
 For a practical continuity example, see the [maintainer handoff recipe](guides/maintainer-handoff.md):
 it separates public onboarding from permissions, releases, and private reporting.
+For an authorized rename or transfer, use the [repository relocation recipe](guides/repository-relocation.md)
+and [move verification record](templates/REPOSITORY_MOVE.template.md) to distinguish
+GitHub redirects from working Actions, Pages and first-run commands.
 When maintenance really ends, the [pause/archive recipe](guides/repository-retirement.md)
 and [status notice template](templates/REPOSITORY_STATUS_NOTICE.template.md)
 show how to leave honest last-known instructions before GitHub becomes read-only.
