@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add task-first documentation navigation guidance and an editable docs-index
+  scaffold, with an annotated fictional before/after route, review record and
+  clear limits on what offline link checks can prove. No independent newcomer
+  or live-host testing is claimed.
+
 - Add a read-only, Git-free local repository-reference preflight with
   deterministic text/JSON path and position reports, explicit incomplete
   results, and synthetic regressions. It cannot verify redirected links,
