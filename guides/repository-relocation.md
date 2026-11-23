@@ -81,6 +81,14 @@ integrations, redirection behavior and actual workflow success are **not
 verified**. Preserve these as UNKNOWN until separately checked. Review
 filenames before sharing output from a private checkout.
 
+For Go projects, inspect `go.mod`, `go.work` and `.go` references
+in the inventory, not just the README: a `module` declaration can define
+the import-path prefix used by other projects. The tool reports literal
+matches, **not** whether a Go module rename is compatible or whether remote
+importers were updated. Go's [module reference](https://go.dev/ref/mod)
+was reviewed on **2026-11-23**. Check generated `go.sum` and other excluded
+files separately when relevant.
+
 The preflight checks the opened file's type, link count and identity against
 its no-follow metadata before reading bytes; a changed file produces
 **incomplete**, not a false clean scan. This is a best-effort local inventory,
