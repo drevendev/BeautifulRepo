@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed repository rename/transfer verification recipe and
+  editable move record, covering redirects, downstream Actions, Pages,
+  packages and first success. No repository settings or ownership changes.
+
 - Document the real five-command-to-nine-step verification change in a
   revision-pinned case: repaired first CI failure, source/CI evidence and
   explicit limits on clean-clone and newcomer-use claims.
