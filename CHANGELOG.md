@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed, read-only GitHub Pages publication verification recipe
+  and editable evidence record to distinguish green CI, actual deployment and
+  served-page first success. No Pages configuration or live-site result is claimed.
+
 - Replace the incomplete template listing with a task-first chooser covering all
   shipped scaffolds and tested for unique coverage. Correct the stale game-example
   claim and distinguish inert owner/security templates from active policies.
