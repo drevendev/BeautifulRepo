@@ -62,6 +62,25 @@ only means no matching literal in those tracked paths. It does not inspect
 third-party repositories, hidden configuration, generated output or remote
 users. Do not publish secret-bearing search results.
 
+For an optional **Git-free, read-only** inventory with deterministic JSON output,
+use the [repository reference preflight](../tools/README.md#inventory-old-repository-references-before-a-move):
+
+```sh
+python -I tools/repo_references.py --root . --old orchard-labs/maple-lint --format json
+```
+
+Run it from a BeautifulRepo checkout and set `--root` to the separate
+repository you are reviewing. The example pair is fictional. It searches
+selected local UTF-8 text files, case-insensitively, for the *literal*
+`OWNER/REPO` substring; its line/column hits need human review, including
+false matches inside longer names. It never runs the target's code or
+shows surrounding source text. Exit **0** means no hits in the **scanned
+subset**, **1** means hits, and **2** means incomplete evidence or invalid
+input. Excluded folders, binary files, third-party consumers, remote
+integrations, redirection behavior and actual workflow success are **not
+verified**. Preserve these as UNKNOWN until separately checked. Review
+filenames before sharing output from a private checkout.
+
 ## Verify after the authorized move
 
 Capture dated evidence for **each** applicable surface:
