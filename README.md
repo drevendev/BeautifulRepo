@@ -199,7 +199,9 @@ not a second copy of the first-screen chooser.
 - **Maintain evidence and trust:** [release notes](guides/release-notes.md) with
   a [release-note template](templates/RELEASE_NOTES.template.md),
   [maintenance workflow](guides/maintenance-workflow.md),
-  [CI failure triage](guides/ci-failure-triage.md) and
+  [CI failure triage](guides/ci-failure-triage.md),
+  [GitHub Pages publication evidence](guides/pages-deployment-evidence.md) with a
+  [copyable deployment record](templates/PAGES_DEPLOYMENT_RECORD.template.md), and
   [copyable CI failure record](templates/CI_FAILURE_RECORD.template.md),
   [evidence-led issue triage](guides/issue-triage.md),
   [capacity-based maintainer expectations](guides/maintainer-capacity.md),
