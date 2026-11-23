@@ -52,7 +52,13 @@ ordinary in-root file aliases are accepted only when they resolve to regular,
 single-linked files. This metadata preflight is not an anti-race sandbox.
 
 Copy fixtures rather than using hard links. A limit or unreadable source
-returns **incomplete evidence** (exit 2), not a clean audit. This is
+returns **incomplete evidence** (exit 2), not a clean audit. On the development
+branch, the preflight distinguishes deadline, directory-entry count,
+Markdown source count, per-file bytes and total Markdown bytes with fixed,
+path-free reasons. Unsupported or unreadable sources retain the generic
+refusal. These reasons help select a smaller trusted checkout without
+disclosing target names; they do not relax the limits or change the
+immutable host-trial pin below. This is
 **not** a stable filesystem snapshot, concurrent-write protection or a
 general limit on non-Markdown contents; the standalone CLI has its own
 coverage boundaries.
