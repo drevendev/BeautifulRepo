@@ -93,7 +93,7 @@ That sequence is the core BeautifulRepo test. Decoration is optional; a clear pa
 
 - **📋 Checklists** — prioritize clarity, onboarding, trust, accessibility and maintenance.
 - **🧱 Patterns** — source-backed examples of what strong repositories do and why it works.
-- **🧰 Templates** — reusable README, application, collection, research and security-policy scaffolds with explicit placeholders.
+- **🧰 Templates** — a [task-first chooser](templates/README.md) for README, documentation, maintenance and contributor scaffolds.
 - **🔎 Tools** — small dependency-free checks that keep repository documentation honest.
 - **🖼️ Visual guidance** — theme-aware media, useful alt text and evidence-first screenshots.
 - **🧭 Community guidance** — contribution and reporting surfaces that do not invent unsupported promises.
