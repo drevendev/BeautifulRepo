@@ -18,6 +18,7 @@ import stat
 TEXT_SUFFIXES = frozenset({
     ".md", ".markdown", ".rst", ".txt", ".yml", ".yaml", ".toml",
     ".json", ".ini", ".cfg", ".html", ".sh", ".ps1", ".py",
+    ".go", ".mod", ".work",
 })
 IGNORED_DIRECTORIES = frozenset({".git", ".venv", "venv", "node_modules", "__pycache__", "dist", "build"})
 MAX_ENTRIES = 10_000
