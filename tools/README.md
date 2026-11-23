@@ -784,10 +784,12 @@ still be sensitive; do not publish unchecked reports.
 
 **Exit status:** 0 = no matches in scanned text; 1 = references found;
 2 = incomplete or invalid input. The inventory covers common Markdown,
-plain text, YAML, JSON, TOML, HTML, shell/PowerShell and Python suffixes,
-plus Makefile, Dockerfile and .gitmodules. It excludes dependency/build
-folders and does **not** inspect binary formats, remote consumers or
-redirect behavior. Paths with redirects/hard links, undecodable/oversized
+plain text, YAML, JSON, TOML, HTML, shell/PowerShell, Python and Go
+(`.go`, `.mod`, `.work`) suffixes, plus Makefile, Dockerfile and
+.gitmodules. This includes Go module and workspace paths and Go source
+imports, but excludes `go.sum` checksum data, dependency/build folders and
+other unsupported files. It does **not** inspect binary formats, remote
+consumers or redirect behavior. Paths with redirects/hard links, undecodable/oversized
 eligible files, and scan ceilings produce incomplete results rather than
 a misleading clean result. Bounds: 10,000 directory entries, 32 directory
 levels, 1 MiB per text file, 24 MiB selected text and 2,000 matches.
