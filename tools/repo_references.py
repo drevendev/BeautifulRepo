@@ -119,6 +119,10 @@ def inspect(root: Path, old: str) -> dict[str, object]:
                             break
                     if len(findings) >= MAX_MATCHES:
                         break
+            # Stop the enclosing directory loop too: another file must not
+            # push a previously reached match budget past MAX_MATCHES.
+            if len(findings) >= MAX_MATCHES:
+                break
             # Non-text and non-regular non-source files do not belong to this inventory.
         if len(findings) >= MAX_MATCHES:
             break

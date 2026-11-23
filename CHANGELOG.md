@@ -1055,6 +1055,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Enforce the 2,000-occurrence ceiling in the repository-reference preflight
+  across multiple files, not only within one file. Stop reading further files
+  once the limit is reached and report incomplete coverage; add a multi-file
+  boundary regression.
+
 - Return structured `incomplete` evidence (exit 2) for HTML5 ZIPs whose
   minimum extractor version is unsupported by Python's ZIP parser, rather
   than a traceback. A synthetic header regression checks JSON, stderr and
