@@ -66,7 +66,7 @@ For an optional **Git-free, read-only** inventory with deterministic JSON output
 use the [repository reference preflight](../tools/README.md#inventory-old-repository-references-before-a-move):
 
 ```sh
-python -I tools/repo_references.py --root . --old orchard-labs/maple-lint --format json
+python -I tools/repo_references.py --root ../target-checkout --old orchard-labs/maple-lint --format json
 ```
 
 Run it from a BeautifulRepo checkout and set `--root` to the separate
