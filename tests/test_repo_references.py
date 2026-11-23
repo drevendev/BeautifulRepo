@@ -110,6 +110,50 @@ class RepoReferencesTests(unittest.TestCase):
             self.assertEqual(report["status"], "incomplete")
             self.assertEqual(report["findings"], [])
 
+    def test_replaced_file_between_metadata_and_open_is_incomplete(self):
+        victim = self.put("README.md", b"safe\n")
+        replacement = self.put("replacement.bin", b"org/repo\n")
+        real_open = repo_references.os.open
+
+        def swap_on_open(path, flags):
+            if Path(path) == victim:
+                replacement.replace(victim)
+            return real_open(path, flags)
+
+        with patch.object(repo_references.os, "open", side_effect=swap_on_open):
+            report = inspect(self.root, "org/repo")
+        self.assertEqual(report["status"], "incomplete")
+        self.assertEqual(report["findings"], [])
+        self.assertEqual(report["files_scanned"], 0)
+        self.assertTrue(any("Cannot decode" in e for e in report["errors"]))
+
+    def test_symlink_swap_before_open_does_not_read_outside(self):
+        with tempfile.TemporaryDirectory() as elsewhere:
+            outside = Path(elsewhere) / "private.md"
+            outside.write_text("org/repo\n", encoding="utf-8")
+            probe = self.root / "symlink-probe"
+            try:
+                probe.symlink_to(outside)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            probe.unlink()
+
+            victim = self.put("README.md", b"safe\n")
+            real_open = repo_references.os.open
+
+            def swap_on_open(path, flags):
+                if Path(path) == victim:
+                    victim.unlink()
+                    victim.symlink_to(outside)
+                return real_open(path, flags)
+
+            with patch.object(repo_references.os, "open", side_effect=swap_on_open):
+                report = inspect(self.root, "org/repo")
+            self.assertEqual(report["status"], "incomplete")
+            self.assertEqual(report["findings"], [])
+            self.assertEqual(report["files_scanned"], 0)
+
+
     def test_validation_errors_return_two_without_traceback(self):
         for input_value in ("https://github.com/org/repo", "../../repo", "org/", "org/repo/x"):
             with self.subTest(value=input_value):
