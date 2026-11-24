@@ -146,8 +146,12 @@ tool results to a model provider.
 In the human-readable report, unprintable Unicode control/format characters
 from filenames or diagnostics are escaped on the same physical line (for
 example, a newline becomes \u000a and an ANSI escape becomes \u001b).
-Ordinary printable Unicode is preserved. JSON mode still uses its native
-string encoding. This prevents a source filename from forging extra terminal
+Ordinary printable Unicode is preserved where stdout can encode it. In the
+current development source, characters unsupported by a legacy console or
+redirected stdout encoding are emitted as backslash escapes instead of
+crashing the text report. For the older pinned first-run checkout above,
+use `python -I -X utf8` in place of `python -I` if necessary. JSON mode
+still uses ASCII-safe JSON string escapes. This prevents a source filename from forging extra terminal
 report lines; it does not make hostile filesystem traversal safe.
 
 Reports can contain filenames, link targets and other project-sensitive
