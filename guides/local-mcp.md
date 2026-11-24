@@ -141,25 +141,28 @@ This commit is **not a released MCP version**:
 
 [BeautifulRepo `e6c2b3b9817cfbd79d81b44592453e8195819622`](https://github.com/drevendev/BeautifulRepo/commit/e6c2b3b9817cfbd79d81b44592453e8195819622).
 
-Run these commands from a writable **disposable parent directory** on
-macOS/Linux with Git and Python 3.11+ installed:
+Run these commands in a **disposable shell** from a writable, empty parent
+directory on macOS/Linux with Git and Python 3.11+ installed. Each setup
+step exits the shell on failure; do not continue with an older checkout or
+virtual environment after a failed command.
 
 ```sh
-git clone https://github.com/drevendev/BeautifulRepo.git
-cd BeautifulRepo
-git checkout --detach e6c2b3b9817cfbd79d81b44592453e8195819622
+git clone https://github.com/drevendev/BeautifulRepo.git || exit 1
+cd BeautifulRepo || exit 1
+git checkout --detach e6c2b3b9817cfbd79d81b44592453e8195819622 || exit 1
 test "$(git rev-parse HEAD)" = "e6c2b3b9817cfbd79d81b44592453e8195819622" || exit 1
-python3 -m venv ../beautifulrepo-mcp-venv
-../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
-../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
-BR_PYTHON="$(cd ../beautifulrepo-mcp-venv/bin && pwd -P)/python"
-BR_SERVER="$(pwd -P)/integrations/mcp_server.py"
-BR_ROOT="$(pwd -P)/tests/fixtures/agent-repos/healthy"
+python3 -m venv ../beautifulrepo-mcp-venv || exit 1
+../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0" || exit 1
+../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py || exit 1
+BR_PYTHON="$(cd ../beautifulrepo-mcp-venv/bin && pwd -P)/python" || exit 1
+BR_SERVER="$(pwd -P)/integrations/mcp_server.py" || exit 1
+BR_ROOT="$(pwd -P)/tests/fixtures/agent-repos/healthy" || exit 1
 ```
 
 The `test` command stops this POSIX procedure if the checkout is not
 **exactly** the 40-character commit above; do not silently substitute a
-newer `master`. The smoke runs the real SDK **without a model** against
+newer `master`. A failed clone, checkout, environment creation, SDK install
+or protocol smoke also stops the procedure before host registration. The smoke runs the real SDK **without a model** against
 temporary synthetic repositories. It requires package download for installation; run it only if you accept the
 environment/network implications. A smoke PASS validates protocol wiring,
 **not** either model host. The sample `BR_ROOT` is a checked-in **synthetic**
