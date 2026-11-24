@@ -829,6 +829,12 @@ keep their original themed headings.
 
 ### Changed
 
+- Refresh the experimental MCP host-trial pin to
+  `e6c2b3b9817cfbd79d81b44592453e8195819622` so both OS recipes include
+  distinct budget-refusal diagnostics and the real SDK oversized-source
+  refusal/recovery test. Preserve the distinction between PR-head SDK evidence
+  and unverified Claude Code/Codex installation (#255).
+
 - Refresh the first-audit development pin to include the legacy-console
   Unicode fix. Exercise the actual pinned text CLI with strict ASCII stdout
   in a clean sibling clone; the released Action pin is unchanged.

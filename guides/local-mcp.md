@@ -1,6 +1,6 @@
 # Experimental local MCP adapter (not a released integration)
 
-**Development candidate, source-reviewed 2026-11-19 (UTC).** This optional adapter exposes
+**Development candidate, source-reviewed 2026-11-24 (UTC).** This optional adapter exposes
 BeautifulRepo's *existing* offline checkers as three read-only tools over MCP
 stdio. No successful Claude Code, Codex, or external-user installation is
 claimed. The normal CLI and GitHub Action do **not** require MCP.
@@ -40,7 +40,7 @@ fail-closed pass over the stable checkout: at most 50,000 directory entries,
 5,000 Markdown sources, 2 MiB per Markdown source and 32 MiB total,
 with a five-second preflight deadline. It skips `.git` and `node_modules`
 like the link checkers. **At the immutable installation pin below**
-(`2724555bee2629397cb2b23449ba30eed8f718c1`), it refuses
+(`e6c2b3b9817cfbd79d81b44592453e8195819622`), it refuses
 non-directory special files (FIFOs, sockets and devices) regardless of
 extension, out-of-checkout file symlinks regardless of extension
 (including `LICENSE`, `README.rst` and assets), hard-linked regular files
@@ -52,13 +52,11 @@ ordinary in-root file aliases are accepted only when they resolve to regular,
 single-linked files. This metadata preflight is not an anti-race sandbox.
 
 Copy fixtures rather than using hard links. A limit or unreadable source
-returns **incomplete evidence** (exit 2), not a clean audit. On the development
-branch, the preflight distinguishes deadline, directory-entry count,
+returns **incomplete evidence** (exit 2), not a clean audit. At the immutable installation pin, the preflight distinguishes deadline, directory-entry count,
 Markdown source count, per-file bytes and total Markdown bytes with fixed,
 path-free reasons. Unsupported or unreadable sources retain the generic
 refusal. These reasons help select a smaller trusted checkout without
-disclosing target names; they do not relax the limits or change the
-immutable host-trial pin below. This is
+disclosing target names; they do not relax the limits. This is
 **not** a stable filesystem snapshot, concurrent-write protection or a
 general limit on non-Markdown contents; the standalone CLI has its own
 coverage boundaries.
@@ -98,7 +96,7 @@ do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
 
-This **source-checked procedure, refreshed 2026-11-19 (UTC), has not passed a fresh
+This **source-checked procedure, refreshed 2026-11-24 (UTC), has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
 following full commit is a `master` snapshot containing both official-SDK
 protocol smoke lifecycles, per-checker isolation, bounded child output,
@@ -110,7 +108,21 @@ rejection of a junction encountered *inside* the allowed checkout
 It also includes the extension-independent file-symlink preflight merged
 in [PR #351](https://github.com/drevendev/BeautifulRepo/pull/351), and the
 extension-independent FIFO/socket/device refusal merged in
-[PR #425](https://github.com/drevendev/BeautifulRepo/pull/425).
+[PR #425](https://github.com/drevendev/BeautifulRepo/pull/425). The refreshed
+pin also includes the five distinct path-free budget refusal reasons from
+[PR #465](https://github.com/drevendev/BeautifulRepo/pull/465) and the real
+SDK oversized-source refusal and same-session recovery from
+[PR #466](https://github.com/drevendev/BeautifulRepo/pull/466).
+On the #466 PR head `0c90f283c86d5f18c3dda56cb6d6367a70f8724c`,
+[Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/45288349637)
+and [MCP protocol CI](https://github.com/drevendev/BeautifulRepo/actions/runs/45288349620)
+completed successfully, including both Linux and Windows MCP jobs. The adapter,
+protocol smoke, three checker modules, combined CLI and MCP workflow have
+identical Git blob identities at that PR head and the new installation pin.
+This is PR-head SDK evidence, not a new run on the squash-merge SHA.
+The previous `2724555bee2629397cb2b23449ba30eed8f718c1` pin is historical and
+predates the new budget diagnostics and recovery test.
+
 On the **PR #425 head** `b50ef4e3f0aa1d14daa00467913589156282805e`,
 [Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44576851080)
 completed 6/6 and [MCP protocol CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44576851023)
@@ -127,7 +139,7 @@ replacement remain untested. The older `ed1e70c` trial predates the internal-jun
 checkout should be reused when testing the current documented boundary.
 This commit is **not a released MCP version**:
 
-[BeautifulRepo `2724555bee2629397cb2b23449ba30eed8f718c1`](https://github.com/drevendev/BeautifulRepo/commit/2724555bee2629397cb2b23449ba30eed8f718c1).
+[BeautifulRepo `e6c2b3b9817cfbd79d81b44592453e8195819622`](https://github.com/drevendev/BeautifulRepo/commit/e6c2b3b9817cfbd79d81b44592453e8195819622).
 
 Run these commands from a writable **disposable parent directory** on
 macOS/Linux with Git and Python 3.11+ installed:
@@ -135,8 +147,8 @@ macOS/Linux with Git and Python 3.11+ installed:
 ```sh
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach 2724555bee2629397cb2b23449ba30eed8f718c1
-test "$(git rev-parse HEAD)" = "2724555bee2629397cb2b23449ba30eed8f718c1" || exit 1
+git checkout --detach e6c2b3b9817cfbd79d81b44592453e8195819622
+test "$(git rev-parse HEAD)" = "e6c2b3b9817cfbd79d81b44592453e8195819622" || exit 1
 python3 -m venv ../beautifulrepo-mcp-venv
 ../beautifulrepo-mcp-venv/bin/python -m pip install "mcp==2.3.0"
 ../beautifulrepo-mcp-venv/bin/python -I -B integrations/mcp_protocol_smoke.py
@@ -171,7 +183,7 @@ checked explicitly rather than assuming `$ErrorActionPreference` catches
 external program exit codes:
 
 ```powershell
-$pin = '2724555bee2629397cb2b23449ba30eed8f718c1'
+$pin = 'e6c2b3b9817cfbd79d81b44592453e8195819622'
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
 Set-Location BeautifulRepo
@@ -309,19 +321,19 @@ also exercises real-process refusal of relative, missing, home and filesystem
 roots, plus a symlink root where the platform permits creating one. While an
 MCP client stays connected, the test temporarily renames its synthetic target
 and requires **incomplete** results for all three tools in both lifecycles; the
-directory is restored and its bytes rechecked. The current development smoke
+directory is restored and its bytes rechecked. The pinned development smoke
 also creates a synthetic file **outside** the repository, exposes it as a
 hard-linked `LICENSE` and as an outside-pointing Markdown symlink, and demands
 `incomplete` (exit 2) from **all three tools** through both SDK lifecycles.
 Link creation that a platform does not permit is explicitly reported as
 **untested**, not PASS. This is a protocol-level boundary regression, not proof
 of resistance to concurrent filesystem replacement. The immutable host-trial checkout pinned above includes these smoke
-cases. On the development branch, the real SDK smoke also adds a synthetic
+cases. At the refreshed pin, the real SDK smoke also adds a synthetic
 Markdown file one byte over the 2 MiB per-file limit during each healthy
 session, requires the exact path-free incomplete response from all three
 tools, removes the file, and checks recovery against separate direct CLI
 runs in the same session. This exercises one production budget, not all five
-limits over the wire, and is not part of the older immutable trial pin.
+limits over the wire; the historical November 19 pin lacks this test.
 The SDK's own clients are not independent Claude Code or Codex hosts. Run locally
 with the optional SDK installed:
 
