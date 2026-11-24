@@ -44,12 +44,15 @@ show a captured synthetic report, not a real-user or accessibility test.
 
 **Audit your own checkout.** From a directory containing your existing
 `your-repository/` folder, clone BeautifulRepo **beside** it. You need Git and
-Python 3.11+; only cloning uses the network:
+Python 3.11+; only cloning uses the network. In Bash, paste the whole block
+at once; the audit runs only after successful setup and exact SHA verification:
 
 ```bash
-git clone https://github.com/drevendev/BeautifulRepo.git
-cd BeautifulRepo
-git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
+git clone https://github.com/drevendev/BeautifulRepo.git &&
+cd BeautifulRepo &&
+git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf &&
+actual=$(git rev-parse HEAD) &&
+test "$actual" = "e494a0d5be90dd718db4a25e777aba8abc295ecf" &&
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
