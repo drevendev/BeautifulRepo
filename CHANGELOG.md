@@ -1091,6 +1091,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Guard the Windows PowerShell first-audit block against failed prerequisites,
+  directory changes, exact SHA lookup/mismatch and unsupported Python versions.
+  Preserve the audit's 0/1/2 status; exercise the documented block with mocked
+  setup failures and successful setup paths in PowerShell.
+
 - Guard the Bash first-audit examples against failed clone, directory change,
   detached checkout or exact SHA lookup/mismatch before invoking the audit;
   preserve the audit's own 0/1/2 result after successful setup.
