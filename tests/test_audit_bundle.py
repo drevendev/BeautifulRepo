@@ -281,6 +281,27 @@ class AuditBundleTests(unittest.TestCase):
         self.assertIn("\n\nExit 1: 0=threshold clear", output)
         self.assertEqual("Safe café 😀", bundle._one_terminal_line("Safe café 😀"))
 
+    def test_text_cli_preserves_findings_with_legacy_stdout_encoding(self):
+        import io
+
+        self.write("README.md", "# Fixture\n\n[Broken](docs/café-文档.md)\n")
+        for encoding, marker in (
+            ("cp1252", r"café-\u6587\u6863.md"),
+            ("ascii", r"caf\xe9-\u6587\u6863.md"),
+            ("utf-8", "café-文档.md"),
+        ):
+            with self.subTest(encoding=encoding):
+                buffer = io.BytesIO()
+                with io.TextIOWrapper(buffer, encoding=encoding, errors="strict") as stream:
+                    with patch.object(bundle.sys, "stdout", stream):
+                        code = bundle.main([str(self.repo), "--fail-on", "never"])
+                    stream.flush()
+                    output = buffer.getvalue().decode(encoding)
+                    self.assertEqual("strict", stream.errors)
+                self.assertEqual(1, code)
+                self.assertIn(marker, output)
+                self.assertIn("Exit 1:", output)
+
     def test_text_output_preserves_specific_rules_and_limitations(self):
         self.write("README.md", "# Fixture\n\nTODO: check this.\n")
         result = self.invoke("--fail-on", "warning")
