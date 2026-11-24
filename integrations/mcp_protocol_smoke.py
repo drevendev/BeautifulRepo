@@ -165,6 +165,40 @@ async def probe(root: Path, *, broken: bool, mode: str,
                         )
             finally:
                 parked.rename(root)
+
+            # Exercise the actual production byte limit, not a patched
+            # adapter constant. A rejected request must not poison a session.
+            oversized = root / "synthetic-oversized.md"
+            oversized.write_bytes(b"x" * (2 * 1024 * 1024 + 1))
+            oversized_before = snapshot(root)
+            try:
+                for name, check in CHECKS.items():
+                    response = await client.call_tool(name, {})
+                    expected = {
+                        "checker": check, "state": "incomplete", "exit_code": 2,
+                        "reason": "a Markdown source exceeded the per-file byte limit",
+                        "coverage": COVERAGE,
+                    }
+                    if response.is_error or response.structured_content != expected:
+                        raise AssertionError(
+                            f"{mode} {name}: oversized source did not return bounded evidence"
+                        )
+                if oversized_before != snapshot(root):
+                    raise AssertionError("oversized-source refusal changed fixture files")
+            finally:
+                oversized.unlink()
+            for name, check in CHECKS.items():
+                response = await client.call_tool(name, {})
+                direct_record, direct_exit = direct_cli_receipt(root, name)
+                expected = {
+                    "checker": check, "state": "complete", "exit_code": direct_exit,
+                    "evidence": direct_record, "bundle_exit_code": direct_exit,
+                    "coverage": COVERAGE,
+                }
+                if response.is_error or response.structured_content != expected:
+                    raise AssertionError(
+                        f"{mode} {name}: session did not recover after source removal"
+                    )
     if before != snapshot(root):
         raise AssertionError("MCP checker created, removed, or modified fixture files")
     return version
@@ -330,6 +364,8 @@ async def main() -> None:
             f"fixture files unchanged; {refusal_count} unsafe startup roots refused "
             f"(symlink exercised: {symlink_tested}); missing root during an active "
             "session returns incomplete evidence for all 3 tools in both lifecycles; "
+            "oversized Markdown source refused with exact reason and session recovery "
+            "after removal verified for all 3 tools in both lifecycles; "
             f"outside-document aliases refused: {', '.join(aliases_exercised) or 'none'} "
             f"(untested on this platform: {', '.join(aliases_skipped) or 'none'}). "
             "active-session symlink-root replacement refused in: "

@@ -316,8 +316,13 @@ hard-linked `LICENSE` and as an outside-pointing Markdown symlink, and demands
 Link creation that a platform does not permit is explicitly reported as
 **untested**, not PASS. This is a protocol-level boundary regression, not proof
 of resistance to concurrent filesystem replacement. The immutable host-trial checkout pinned above includes these smoke
-cases, but the SDK's own clients are not independent Claude Code or Codex
-hosts. Run locally
+cases. On the development branch, the real SDK smoke also adds a synthetic
+Markdown file one byte over the 2 MiB per-file limit during each healthy
+session, requires the exact path-free incomplete response from all three
+tools, removes the file, and checks recovery against separate direct CLI
+runs in the same session. This exercises one production budget, not all five
+limits over the wire, and is not part of the older immutable trial pin.
+The SDK's own clients are not independent Claude Code or Codex hosts. Run locally
 with the optional SDK installed:
 
 ```sh
