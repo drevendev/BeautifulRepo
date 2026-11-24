@@ -152,12 +152,86 @@ class FirstVisitTests(unittest.TestCase):
 
 
 
+
+    @unittest.skipUnless(sys.platform != "win32", "POSIX shell control-flow test")
+    def test_documented_posix_setup_stops_before_audit_on_failure(self):
+        import os
+        import re
+        import shutil
+
+        bash = shutil.which("bash")
+        if not bash:
+            self.skipTest("Bash unavailable")
+        harness = r"""
+git() {
+    printf '%s\n' "$1" >> "$BR_TEST_LOG"
+    case "$1" in
+        clone)
+            if [ "$BR_TEST_FAIL" = clone ]; then return 1; fi
+            if [ "$BR_TEST_FAIL" != location ]; then mkdir BeautifulRepo; fi
+            ;;
+        checkout)
+            [ "$BR_TEST_FAIL" != checkout ]
+            ;;
+        rev-parse)
+            if [ "$BR_TEST_FAIL" = wrong-sha ]; then
+                printf '%s\n' wrong
+            else
+                printf '%s\n' "$BR_TEST_PIN"
+            fi
+            [ "$BR_TEST_FAIL" != sha ]
+            ;;
+        *) return 99 ;;
+    esac
+}
+python() {
+    printf '%s\n' audit >> "$BR_TEST_LOG"
+    return "$BR_TEST_AUDIT_EXIT"
+}
+"""
+        stages = {
+            "clone": ["clone"],
+            "location": ["clone"],
+            "checkout": ["clone", "checkout"],
+            "sha": ["clone", "checkout", "rev-parse"],
+            "wrong-sha": ["clone", "checkout", "rev-parse"],
+            "": ["clone", "checkout", "rev-parse", "audit"],
+        }
+        for relative in ("README.md", "guides/combined-audit.md", "guides/working-proof.md"):
+            source = (ROOT / relative).read_text(encoding="utf-8")
+            block = next(
+                snippet for snippet in re.findall(r"\x60\x60\x60bash\n(.*?)\n\x60\x60\x60", source, re.S)
+                if snippet.startswith("git clone https://github.com/drevendev/BeautifulRepo.git")
+            )
+            pin = re.search(r"git checkout --detach ([0-9a-f]{40})", block).group(1)
+            for failure, expected in stages.items():
+                for audit_exit in ((0, 1, 2) if not failure else (0,)):
+                    with self.subTest(document=relative, failure=failure, audit_exit=audit_exit):
+                        with tempfile.TemporaryDirectory() as tmp:
+                            root = Path(tmp)
+                            log = root / "steps.log"
+                            # A failed clone must not reuse an older checkout.
+                            if failure == "clone":
+                                (root / "BeautifulRepo").mkdir()
+                            result = subprocess.run(
+                                [bash, "--noprofile", "--norc", "-c", harness + "\n" + block],
+                                cwd=root, capture_output=True, text=True, timeout=15,
+                                env={**os.environ, "BR_TEST_LOG": str(log),
+                                     "BR_TEST_FAIL": failure, "BR_TEST_PIN": pin,
+                                     "BR_TEST_AUDIT_EXIT": str(audit_exit)},
+                                check=False,
+                            )
+                            self.assertEqual(expected, log.read_text().splitlines())
+                            self.assertEqual(1 if failure else audit_exit, result.returncode,
+                                             result.stdout + result.stderr)
+
+
     def test_documented_pin_runs_the_actual_first_audit_from_a_clean_clone(self):
         # The current-HEAD clone smoke does not exercise the detached SHA that
         # first-time readers actually copy from README/combined-audit.md.
         import re
 
-        pattern = r"^git checkout --detach ([0-9a-f]{40})$"
+        pattern = r"^git checkout --detach ([0-9a-f]{40})(?: &&)?$"
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         guide = (ROOT / "guides" / "combined-audit.md").read_text(encoding="utf-8")
         readme_pins = re.findall(pattern, readme, flags=re.MULTILINE)

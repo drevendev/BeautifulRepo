@@ -24,12 +24,15 @@ packages are installed.
 
 **Audit your own checkout first.** From a directory containing your
 repository as `your-repository/` (replace that name with its real folder name),
-clone BeautifulRepo **beside** it and run:
+clone BeautifulRepo **beside** it. Paste the entire Bash block at once; a
+failed setup command or SHA mismatch prevents the audit from running:
 
 ```bash
-git clone https://github.com/drevendev/BeautifulRepo.git
-cd BeautifulRepo
-git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
+git clone https://github.com/drevendev/BeautifulRepo.git &&
+cd BeautifulRepo &&
+git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf &&
+actual=$(git rev-parse HEAD) &&
+test "$actual" = "e494a0d5be90dd718db4a25e777aba8abc295ecf" &&
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
