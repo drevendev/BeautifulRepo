@@ -1091,6 +1091,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Stop the four-skill candidate preparation on failed clone, checkout, SHA
+  lookup/mismatch or unsuccessful/nonempty Git cleanliness checks. Exercise
+  both published POSIX shell blocks with mocked Git; host installation and
+  model execution remain unverified.
+
 - Guard the Windows PowerShell first-audit block against failed prerequisites,
   directory changes, exact SHA lookup/mismatch and unsupported Python versions.
   Preserve the audit's 0/1/2 status; exercise the documented block with mocked
