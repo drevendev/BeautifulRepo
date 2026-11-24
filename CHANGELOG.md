@@ -1081,6 +1081,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Keep combined audit text reports readable on legacy stdout encodings:
+  preserve representable Unicode and escape unsupported characters without
+  losing findings or changing the exit status. JSON and HTML output are unchanged.
+
 - Refuse repository-reference scans when a checked file is swapped for a
   different inode, redirected symlink, non-regular or hard-linked entry before
   opening. Compare file metadata and bounded read size before counting matches;
