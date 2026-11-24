@@ -18,7 +18,7 @@ beside it and check out a reviewed, immutable development snapshot:
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach d0e746c04563beef0a854baa5974e5f409a3bd90
+git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 python -I tools/audit_bundle.py ../your-repository --format json
 ```
@@ -43,7 +43,7 @@ Run the same **read-only**, dependency-free checker in PowerShell:
 git clone https://github.com/drevendev/BeautifulRepo.git
 if ($LASTEXITCODE -ne 0) { throw "Git clone failed" }
 Set-Location .\BeautifulRepo
-git checkout --detach d0e746c04563beef0a854baa5974e5f409a3bd90
+git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
 if ($LASTEXITCODE -ne 0) { throw "Pinned checkout failed" }
 python --version
 if ($LASTEXITCODE -ne 0) { throw "Python not available" }
@@ -62,10 +62,10 @@ Python 3.11+ and ensure its command is on PATH; do not substitute a different
 unchecked interpreter or install packages into the target.
 
 The pinned checkout is a reviewed development snapshot, not a new stable
-release. Its [six Quality CI checks](https://github.com/drevendev/BeautifulRepo/actions/runs/44190103994)
-completed successfully on the exact pinned source (2026-11-18). The pin
-includes subsequent hard-link and path-redirection protections absent from
-`28530c9`; this is source/checker evidence, not external-user installation. This path is checked using a fresh **local** sibling Git clone of
+release. Its [six Quality CI checks](https://github.com/drevendev/BeautifulRepo/actions/runs/45364559651)
+completed successfully on the exact pinned source (2026-11-24). The pin
+includes hard-link and path-redirection protections and readable diagnostics
+in legacy console encodings; this is source/checker evidence, not external-user installation. This path is checked using a fresh **local** sibling Git clone of
 the CI source revision on Windows; the remote pinned-revision checkout and
 actual first-time end-user PowerShell session have not been independently
 observed. The audit
@@ -147,10 +147,9 @@ In the human-readable report, unprintable Unicode control/format characters
 from filenames or diagnostics are escaped on the same physical line (for
 example, a newline becomes \u000a and an ANSI escape becomes \u001b).
 Ordinary printable Unicode is preserved where stdout can encode it. In the
-current development source, characters unsupported by a legacy console or
-redirected stdout encoding are emitted as backslash escapes instead of
-crashing the text report. For the older pinned first-run checkout above,
-use `python -I -X utf8` in place of `python -I` if necessary. JSON mode
+pinned development source above, characters unsupported by a legacy console
+or redirected stdout encoding are emitted as backslash escapes instead of
+crashing the text report. JSON mode
 still uses ASCII-safe JSON string escapes. This prevents a source filename from forging extra terminal
 report lines; it does not make hostile filesystem traversal safe.
 
