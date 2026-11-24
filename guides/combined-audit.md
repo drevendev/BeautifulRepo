@@ -13,13 +13,22 @@ it does **not** invent a repository beauty score or replace the underlying tools
 
 Use Python **3.11+**, Git and a stable local target. From the **parent
 directory** containing your target as `your-repository/`, clone the tools
-beside it and check out a reviewed, immutable development snapshot:
+beside it and check out a reviewed, immutable development snapshot. Paste the
+whole Bash block at once; a failed setup command prevents the audit from running:
 
 ```bash
-git clone https://github.com/drevendev/BeautifulRepo.git
-cd BeautifulRepo
-git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
+git clone https://github.com/drevendev/BeautifulRepo.git &&
+cd BeautifulRepo &&
+git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf &&
+actual=$(git rev-parse HEAD) &&
+test "$actual" = "e494a0d5be90dd718db4a25e777aba8abc295ecf" &&
 python -I tools/audit_bundle.py ../your-repository --fail-on never
+```
+
+After successful setup (including the exact SHA check), you can separately
+request JSON from the same checkout, even if the first audit found broken links:
+
+```bash
 python -I tools/audit_bundle.py ../your-repository --format json
 ```
 
