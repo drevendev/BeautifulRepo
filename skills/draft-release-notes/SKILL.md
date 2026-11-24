@@ -45,8 +45,18 @@ This check does not prove agent discovery, selection or execution.
 ## 2. Choose the target (`T`) and prerequisites
 
 Use the user's named local repository, or the current repository's root when
-none was named. State `T` before inspection. Confirm Python 3.11+ and `git`
-are installed. Do not run any scripts, builds or tests from `T`.
+none was named. State `T` before inspection. Confirm that `git` is installed.
+Do not run any scripts, builds or tests from `T`.
+
+Select a trusted, installed Python executable outside `T` (prefer its absolute
+path). Do not use an interpreter, shim or virtual environment supplied by the
+target. From a trusted working directory outside `T`, check Python 3.11+ with
+`<py> -I -S -c "import sys; sys.exit(sys.version_info < (3, 11))"` (exit 0).
+Try `python3`, then `python` (on Windows, try `python` first), after resolving
+and checking the executable. If none works, stop and report the missing
+prerequisite. The flags ignore Python environment overrides and site startup
+hooks; they are not a sandbox. Use the same trusted interpreter and working
+directory for the subsequent checks.
 
 ## 3. Collect exact local history
 

@@ -46,7 +46,15 @@ target or silently switch roots. Presence does not prove agent execution.
 
 `T` is the explicitly named repository, else the current Git repository root
 (or working directory if it is not in Git). State its resolved location.
-Use Python 3.11+ (`python3` or `python`; on Windows try `python` first).
+Select a trusted, installed Python executable outside `T` (prefer its absolute
+path). Do not use an interpreter, shim or virtual environment supplied by the
+target. From a trusted working directory outside `T`, check Python 3.11+ with
+`<py> -I -S -c "import sys; sys.exit(sys.version_info < (3, 11))"` (exit 0).
+Try `python3`, then `python` (on Windows, try `python` first), after resolving
+and checking the executable. If none works, stop and report the missing
+prerequisite. The flags ignore Python environment overrides and site startup
+hooks; they are not a sandbox. Use the same trusted interpreter and working
+directory for the subsequent checks.
 Never silently switch to a different repository or inspect private files
 outside the authorized `T`.
 
