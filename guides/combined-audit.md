@@ -46,26 +46,38 @@ not an independently observed remote clone of this pin.
 
 From the **parent directory** containing `your-repository\` (rename that
 placeholder to the folder you actually own), clone BeautifulRepo beside it.
-Run the same **read-only**, dependency-free checker in PowerShell:
+Paste the whole PowerShell block at once to run the same **read-only**,
+dependency-free checker. A failed prerequisite or SHA mismatch stops the
+block before the audit runs:
 
 ```powershell
-git clone https://github.com/drevendev/BeautifulRepo.git
-if ($LASTEXITCODE -ne 0) { throw "Git clone failed" }
-Set-Location .\BeautifulRepo
-git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
-if ($LASTEXITCODE -ne 0) { throw "Pinned checkout failed" }
-python --version
-if ($LASTEXITCODE -ne 0) { throw "Python not available" }
-python -I .\tools\audit_bundle.py ..\your-repository --fail-on never
-$LASTEXITCODE
+& {
+    $PSNativeCommandUseErrorActionPreference = $false
+    Get-Command git, python -ErrorAction Stop | Out-Null
+    git clone https://github.com/drevendev/BeautifulRepo.git
+    if ($LASTEXITCODE -ne 0) { throw "Git clone failed" }
+    Set-Location -LiteralPath .\BeautifulRepo -ErrorAction Stop
+    git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
+    if ($LASTEXITCODE -ne 0) { throw "Pinned checkout failed" }
+    $actual = git rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw "Git SHA lookup failed" }
+    $actual = "$actual".Trim()
+    if ($actual -cne "e494a0d5be90dd718db4a25e777aba8abc295ecf") { throw "Unexpected Git SHA" }
+    python -I -c "import sys; print(sys.version.split()[0]); sys.exit(0 if sys.version_info >= (3, 11) else 1)"
+    if ($LASTEXITCODE -ne 0) { throw "Python 3.11+ required" }
+    python -I .\tools\audit_bundle.py ..\your-repository --fail-on never
+    $LASTEXITCODE
+}
 ```
 
-Use Python **3.11 or later**. The final PowerShell expression prints the
-Python process status: **0** when the selected threshold is clear, **1** for
+Use Python **3.11 or later**; the isolated version probe rejects older
+interpreters. The final PowerShell expression prints the audit's native
+process status: **0** when the selected threshold is clear, **1** for
 broken local links or threshold-reaching findings, **2** for invalid roots or
 incomplete evidence. The result also ends with `Exit N:`. PowerShell does
-not automatically stop a session when a native command exits nonzero; do not
-interpret that as a passing audit. `--fail-on never` only makes *entry-point*
+not automatically stop a session when a native command exits nonzero. The
+block checks setup commands explicitly and allows the audit to report 1 or 2
+without treating either as a successful check. `--fail-on never` only makes *entry-point*
 findings advisory, not broken local links. If `python` is unavailable, install
 Python 3.11+ and ensure its command is on PATH; do not substitute a different
 unchecked interpreter or install packages into the target.
