@@ -1091,6 +1091,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Stop the Windows MCP setup block on failed directory changes or path
+  resolution as well as native command errors; verify the Git SHA before
+  using it and keep successful setup variables available for registration.
+
 - Stop the POSIX experimental MCP setup on failed clone, checkout, environment
   creation, SDK installation or protocol smoke instead of proceeding to host
   registration with stale or unverified inputs (#255).
