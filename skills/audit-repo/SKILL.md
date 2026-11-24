@@ -53,10 +53,20 @@ a Git repository. Tell the user which `T` you are auditing before you run anythi
 
 ## 3. Pick Python 3.11 or newer
 
-Use the first interpreter for which
-`<py> -c "import sys; sys.exit(sys.version_info < (3, 11))"` exits with 0. Try
-`python3`, then `python` (on Windows, try `python` first). If none works, stop and
-say that Python 3.11+ is required.
+Select a trusted, installed Python executable outside `T` (prefer its absolute
+path). Do not use an interpreter, shim or virtual environment supplied by the
+target. From a trusted working directory outside `T`, use the first interpreter
+for which
+`<py> -I -S -c "import sys; sys.exit(sys.version_info < (3, 11))"` exits with 0.
+Try `python3`, then `python` (on Windows, try `python` first), after resolving
+and checking the executable. If none works, stop and say that Python 3.11+
+is required.
+
+The version probe ignores Python environment overrides and skips site startup
+hooks; see the [Python command-line reference](https://docs.python.org/3.11/using/cmdline.html)
+(reviewed 2026-11-24). These flags are not a sandbox and cannot make an
+untrusted executable safe. Use the same trusted interpreter and working
+directory for the subsequent checks.
 
 ## 4. Run the tools
 
