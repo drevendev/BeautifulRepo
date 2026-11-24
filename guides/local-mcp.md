@@ -198,7 +198,9 @@ old variables. Native exit codes are checked explicitly rather than assuming
     git checkout --detach $pin
     if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
     $actual = git rev-parse HEAD
-    if ($LASTEXITCODE -ne 0 -or "$actual".Trim() -ne $pin) { throw 'Unexpected Git SHA' }
+    if ($LASTEXITCODE -ne 0) { throw 'Git SHA lookup failed' }
+    $actual = "$actual".Trim()
+    if ($actual -ne $pin) { throw 'Unexpected Git SHA' }
     py -3.11 -m venv ..\beautifulrepo-mcp-venv
     if ($LASTEXITCODE -ne 0) { throw 'Venv creation failed' }
     $brPython = (Resolve-Path ..\beautifulrepo-mcp-venv\Scripts\python.exe -ErrorAction Stop).Path
