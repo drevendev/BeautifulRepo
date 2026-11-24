@@ -829,6 +829,11 @@ keep their original themed headings.
 
 ### Changed
 
+- Refresh the four-skill development trial source to `600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c`
+  after its 2026-11-24 exact-source Quality CI passed 6/6. The pin includes
+  the trusted and isolated Python version probes from #467 and #468.
+  Historical trials remain revision-bound; no host acceptance or release is claimed.
+
 - Distinguish the five metadata/Markdown preflight budget failures in the
   experimental MCP adapter with fixed, path-free reasons; keep generic unsafe
   source refusals and the same fail-closed limits.

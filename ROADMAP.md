@@ -157,28 +157,30 @@ no installable package.
 
 ## Current work: verify the four-skill candidate and demonstrate real use
 
-This section reflects source inspection on **2026-11-18**. It is not a
+This section reflects source inspection on **2026-11-24**. It is not a
 release date or evidence of passing model tests. Consult the linked GitHub
 issues for their live status.
 
 - **Four-skill plugin candidate** ([#257](https://github.com/drevendev/BeautifulRepo/issues/257)):
   released `v0.2.0` contains **only** `audit-repo`. The [current four-skill
   development candidate](guides/agent-plugin.md#try-all-four-skills-from-a-pinned-development-candidate)
-  is pinned to `4d74e840792fe87c79e1202d982a95103d97ba73` (`0.3.0-dev.0`). It includes
+  is pinned to `600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c` (`0.3.0-dev.0`). It includes
   the local-executor declaration, hard-link guards from #380–#383 and #408,
   the cache verifier from #387, the README path guard from #402, and the
-  release-inventory path preflight from #410. Earlier candidates
+  release-inventory path preflight from #410, and trusted, isolated interpreter
+  version probes in all four skills from #467 and #468. Earlier candidates
+  `4d74e840792fe87c79e1202d982a95103d97ba73`,
   `76c39ed5732304334358b9d4b214821d7030b39f` and `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`
   are historical; their results do not transfer.
-  [Exact-source Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/44266792229)
-  on this SHA completed **6/6 SUCCESS** on 2026-11-18. Repository CI does
+  [Exact-source Quality CI](https://github.com/drevendev/BeautifulRepo/actions/runs/45325925884)
+  on this SHA completed **6/6 SUCCESS** on 2026-11-24. Repository CI does
   **not** prove fresh host installation, skill discovery or model behavior
   in Claude Code/Codex. The [manual matrix](evals/manual-smoke.md),
   [fixtures](https://github.com/drevendev/BeautifulRepo/issues/74) and
   [tester request](https://github.com/drevendev/BeautifulRepo/issues/258)
   cover remaining positive, negative and hostile tests. Issues #257/#258
-  now use source candidate `4d74e840792fe87c79e1202d982a95103d97ba73`
-  and reviewed setup documentation from `775e1ba9de4b20fd9e6b60f4648d558f85944b63`.
+  may still name the previous source until the issue handoff is reconciled.
+  Record the exact source and documentation revisions separately.
   Pin their roles separately: instructions are not host evidence, and no test
   results transfer across source candidates. No stable four-skill release or
   real host acceptance is claimed.

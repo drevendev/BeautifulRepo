@@ -1,6 +1,6 @@
 # Manual smoke matrix for BeautifulRepo Agent Skills
 
-**Prepared 2026-10-25; current candidate source reviewed 2026-11-18; no model runs claimed.** This procedure is for a
+**Prepared 2026-10-25; current candidate source reviewed 2026-11-24; no model runs claimed.** This procedure is for a
 maintainer who has separately authorized model usage. It is not part of CI,
 does not install or invoke an agent automatically, and is not a security
 certification. The static [eval case definitions](README.md) are inputs, not
@@ -13,16 +13,17 @@ results. Never report PASS based on reading this page or on green unit tests.
    documents, private project history or your actual home directory. The
    agent's model provider may receive the inspected repository content.
 2. For the **four-skill development-candidate** matrix, use exactly
-   [commit `4d74e840792fe87c79e1202d982a95103d97ba73`](https://github.com/drevendev/BeautifulRepo/tree/4d74e840792fe87c79e1202d982a95103d97ba73)
+   [commit `600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c`](https://github.com/drevendev/BeautifulRepo/tree/600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c)
    (`0.3.0-dev.0`). Record the full SHA, plugin source, agent name/version,
    model/provider, host OS, sandbox, permissions and target directory.
    Released `v0.2.0` contains only `audit-repo` and **cannot** satisfy this
    four-skill matrix. Do not substitute mutable `master` or a later commit.
-   **Revision boundary, reviewed 2026-11-18:** this source includes
+   **Revision boundary, reviewed 2026-11-24:** this source includes
    hard-link input fixes from PRs #380–#383, the installed-cache hard-link
    verifier from PR #387, README parent-path protection from PR #402, and
-   the workflow/manifest and release-inventory guards from PRs #408 and #410.
-   The earlier `76c39ed5732304334358b9d4b214821d7030b39f`, `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`
+   the workflow/manifest and release-inventory guards from PRs #408 and #410,
+   and the trusted, isolated interpreter version probes from PRs #467 and #468.
+   The earlier `4d74e840792fe87c79e1202d982a95103d97ba73`, `76c39ed5732304334358b9d4b214821d7030b39f`, `70b792b7f09d4bd03e36b6ca1cf6c869e5036872`
    and `8947574…` candidates are historical. No previous model, CI or
    cache result transfers to this source. Test its actual installed assets
    and source-locked fixtures; a green CI run or matching cache does not
@@ -32,13 +33,13 @@ results. Never report PASS based on reading this page or on green unit tests.
 
    ```sh
    git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
-   git -C BeautifulRepo-candidate checkout --detach 4d74e840792fe87c79e1202d982a95103d97ba73
+   git -C BeautifulRepo-candidate checkout --detach 600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c
    git -C BeautifulRepo-candidate rev-parse HEAD
    git -C BeautifulRepo-candidate status --porcelain --untracked-files=all
    git -C BeautifulRepo-candidate clean -ndx
    ```
 
-   Stop unless `rev-parse HEAD` is exactly `4d74e840792fe87c79e1202d982a95103d97ba73`
+   Stop unless `rev-parse HEAD` is exactly `600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c`
    **and both following commands are silent**. `status` catches tracked
    changes and ordinary untracked files; `git clean -ndx` is a **dry run**
    that also reports ignored/untracked files, without deleting anything.
@@ -83,12 +84,13 @@ results. Never report PASS based on reading this page or on green unit tests.
    do not use the historical candidate's weaker embedded checker or a
    manufactured installed cache.
    If a host fails to install, inspect its actual version and report
-   **FAIL/INCONCLUSIVE** with the error. **Issue handoff (reviewed 2026-11-18):**
+   **FAIL/INCONCLUSIVE** with the error. **Issue handoff (reviewed 2026-11-24):**
    [the tester request #258](https://github.com/drevendev/BeautifulRepo/issues/258)
    and [release gate #257](https://github.com/drevendev/BeautifulRepo/issues/257)
-   now name source candidate `4d74e840792fe87c79e1202d982a95103d97ba73`
-   and link to the reviewed documentation commit
-   `775e1ba9de4b20fd9e6b60f4648d558f85944b63`. Source bytes, prompts,
+   may still name the 18 November source candidate until their handoff is
+   reconciled. For this successor trial use the exact source pin above and
+   the maintained installation procedure. Record the documentation revision
+   separately from the candidate. Source bytes, prompts,
    graders and fixtures must still come from the **source** candidate, not the
    docs commit or mutable master. Do not combine test results across source
    candidates. Neither issue nor this matrix proves a host installed or ran a
