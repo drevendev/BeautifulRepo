@@ -181,28 +181,34 @@ These exact setup commands have **not** been executed in a real Windows
 Claude Code or Codex host. The separate Windows CI SDK smoke is not host
 installation or model-tool-call acceptance.
 
-Run in a disposable parent directory; PowerShell command failures are
-checked explicitly rather than assuming `$ErrorActionPreference` catches
-external program exit codes:
+Run in a writable, empty, disposable parent directory and paste the whole
+block at once. The dot-sourced block retains the variables on success, but
+stops on failed native commands or failed directory/path resolution. Do not
+run registration after any setup error, including when reusing a shell with
+old variables. Native exit codes are checked explicitly rather than assuming
+`$ErrorActionPreference` catches them:
 
 ```powershell
-$pin = 'e6c2b3b9817cfbd79d81b44592453e8195819622'
-git clone https://github.com/drevendev/BeautifulRepo.git
-if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
-Set-Location BeautifulRepo
-git checkout --detach $pin
-if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
-$actual = (git rev-parse HEAD).Trim()
-if ($LASTEXITCODE -ne 0 -or $actual -ne $pin) { throw 'Unexpected Git SHA' }
-py -3.11 -m venv ..\beautifulrepo-mcp-venv
-if ($LASTEXITCODE -ne 0) { throw 'Venv creation failed' }
-$brPython = (Resolve-Path ..\beautifulrepo-mcp-venv\Scripts\python.exe).Path
-& $brPython -m pip install 'mcp==2.3.0'
-if ($LASTEXITCODE -ne 0) { throw 'SDK install failed' }
-& $brPython -I -B .\integrations\mcp_protocol_smoke.py
-if ($LASTEXITCODE -ne 0) { throw 'SDK smoke failed' }
-$brServer = (Resolve-Path .\integrations\mcp_server.py).Path
-$brRoot = (Resolve-Path .\tests\fixtures\agent-repos\healthy).Path
+. {
+    $pin = 'e6c2b3b9817cfbd79d81b44592453e8195819622'
+    Get-Command git, py -ErrorAction Stop | Out-Null
+    git clone https://github.com/drevendev/BeautifulRepo.git
+    if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
+    Set-Location BeautifulRepo -ErrorAction Stop
+    git checkout --detach $pin
+    if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
+    $actual = git rev-parse HEAD
+    if ($LASTEXITCODE -ne 0 -or "$actual".Trim() -ne $pin) { throw 'Unexpected Git SHA' }
+    py -3.11 -m venv ..\beautifulrepo-mcp-venv
+    if ($LASTEXITCODE -ne 0) { throw 'Venv creation failed' }
+    $brPython = (Resolve-Path ..\beautifulrepo-mcp-venv\Scripts\python.exe -ErrorAction Stop).Path
+    & $brPython -m pip install 'mcp==2.3.0'
+    if ($LASTEXITCODE -ne 0) { throw 'SDK install failed' }
+    & $brPython -I -B .\integrations\mcp_protocol_smoke.py
+    if ($LASTEXITCODE -ne 0) { throw 'SDK smoke failed' }
+    $brServer = (Resolve-Path .\integrations\mcp_server.py -ErrorAction Stop).Path
+    $brRoot = (Resolve-Path .\tests\fixtures\agent-repos\healthy -ErrorAction Stop).Path
+}
 ```
 
 Keep the variables in the **same PowerShell session** for the host
