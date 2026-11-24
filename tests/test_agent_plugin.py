@@ -292,15 +292,18 @@ class SkillTests(unittest.TestCase):
                     self.assertTrue(target.is_relative_to(ROOT.resolve()), relative)
                     self.assertTrue(target.is_file(), relative)
 
-    def test_audit_version_probe_is_isolated_before_checker_execution(self):
-        body = (ROOT / "skills/audit-repo/SKILL.md").read_text(encoding="utf-8")
-        self.assertIn(
-            '<py> -I -S -c "import sys; sys.exit(sys.version_info < (3, 11))"',
-            body,
-        )
-        self.assertNotIn('<py> -c "import sys;', body)
-        self.assertIn("trusted working directory outside", body)
-        self.assertIn("virtual environment supplied by the", body)
+    def test_all_skill_version_probes_are_isolated_before_checker_execution(self):
+        for path in self.skills():
+            body = path.read_text(encoding="utf-8")
+            with self.subTest(skill=path.parent.name):
+                probe = '<py> -I -S -c "import sys; sys.exit(sys.version_info < (3, 11))"'
+                self.assertIn(probe, body)
+                self.assertNotIn('<py> -c "import sys;', body)
+                self.assertIn("trusted working directory outside", body)
+                self.assertIn("virtual environment supplied by the", body)
+                first_check = re.search(r'-I "R/(?:tools|scripts)/\w+\.py"', body)
+                self.assertIsNotNone(first_check)
+                self.assertLess(body.index(probe), first_check.start())
 
     def test_tool_commands_are_isolated_explicit_and_read_only(self):
         for path in self.skills():
