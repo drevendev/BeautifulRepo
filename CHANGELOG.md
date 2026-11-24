@@ -1091,6 +1091,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Stop the POSIX experimental MCP setup on failed clone, checkout, environment
+  creation, SDK installation or protocol smoke instead of proceeding to host
+  registration with stale or unverified inputs (#255).
+
 - Keep combined audit text reports readable on legacy stdout encodings:
   preserve representable Unicode and escape unsupported characters without
   losing findings or changing the exit status. JSON and HTML output are unchanged.
