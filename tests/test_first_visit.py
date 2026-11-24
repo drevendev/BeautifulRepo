@@ -231,7 +231,7 @@ python() {
         # first-time readers actually copy from README/combined-audit.md.
         import re
 
-        pattern = r"^git checkout --detach ([0-9a-f]{40})(?: &&)?$"
+        pattern = r"^[ \t]*git checkout --detach ([0-9a-f]{40})(?: &&)?$"
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         guide = (ROOT / "guides" / "combined-audit.md").read_text(encoding="utf-8")
         readme_pins = re.findall(pattern, readme, flags=re.MULTILINE)
@@ -341,6 +341,95 @@ python() {
             self.assertEqual("", clean.stdout,
                              "Pinned first audit changed its tool checkout")
             self.assertFalse((checkout / "tools" / "__pycache__").exists())
+
+
+    def test_documented_powershell_setup_stops_before_audit_on_failure(self):
+        import os
+        import re
+        import shutil
+
+        pwsh = shutil.which("pwsh")
+        if not pwsh:
+            if sys.platform == "win32":
+                self.fail("Windows CI needs PowerShell 7")
+            self.skipTest("PowerShell unavailable")
+        source = (ROOT / "guides" / "combined-audit.md").read_text(encoding="utf-8")
+        block = re.search(r"\x60\x60\x60powershell\n(.*?)\n\x60\x60\x60", source, re.S).group(1)
+        pin = re.search(r"git checkout --detach ([0-9a-f]{40})", block).group(1)
+        harness = r"""
+function git {
+    $stage = $args[0]
+    Add-Content -LiteralPath $env:BR_TEST_LOG -Value $stage
+    $global:LASTEXITCODE = 0
+    switch ($stage) {
+        clone {
+            if ($env:BR_TEST_FAIL -eq 'clone') { $global:LASTEXITCODE = 1 }
+            elseif ($env:BR_TEST_FAIL -ne 'location') {
+                New-Item -ItemType Directory -Path BeautifulRepo | Out-Null
+            }
+        }
+        checkout {
+            if ($env:BR_TEST_FAIL -eq 'checkout') { $global:LASTEXITCODE = 1 }
+        }
+        'rev-parse' {
+            if ($env:BR_TEST_FAIL -eq 'sha') { $global:LASTEXITCODE = 1 }
+            elseif ($env:BR_TEST_FAIL -eq 'wrong-sha') { 'wrong' }
+            else { $env:BR_TEST_PIN }
+        }
+        default { throw 'Unexpected Git command' }
+    }
+}
+function python {
+    if ($args[1] -eq '-c') {
+        Add-Content -LiteralPath $env:BR_TEST_LOG -Value version
+        $global:LASTEXITCODE = 0
+        if ($env:BR_TEST_FAIL -eq 'version') { $global:LASTEXITCODE = 1 }
+    } else {
+        Add-Content -LiteralPath $env:BR_TEST_LOG -Value audit
+        if ((Get-Location).Path -ne (Join-Path $env:BR_TEST_ROOT BeautifulRepo)) {
+            throw 'Unexpected audit working directory'
+        }
+        $global:LASTEXITCODE = [int]$env:BR_TEST_AUDIT_EXIT
+    }
+}
+"""
+        stages = {
+            "clone": ["clone"],
+            "location": ["clone"],
+            "checkout": ["clone", "checkout"],
+            "sha": ["clone", "checkout", "rev-parse"],
+            "wrong-sha": ["clone", "checkout", "rev-parse"],
+            "version": ["clone", "checkout", "rev-parse", "version"],
+            "": ["clone", "checkout", "rev-parse", "version", "audit"],
+        }
+        for failure, expected in stages.items():
+            for audit_exit in ((0, 1, 2) if not failure else (0,)):
+                with self.subTest(failure=failure, audit_exit=audit_exit):
+                    with tempfile.TemporaryDirectory(prefix="first audit ") as tmp:
+                        root = Path(tmp).resolve()
+                        log = root / "steps.log"
+                        script = root / "trial.ps1"
+                        if failure == "clone":
+                            (root / "BeautifulRepo").mkdir()
+                        script.write_text(
+                            harness + "\ntry {\n" + block
+                            + "\n} catch { [Console]::Error.WriteLine($_.Exception.Message); exit 17 }"
+                            + "\nexit $LASTEXITCODE\n",
+                            encoding="utf-8",
+                        )
+                        result = subprocess.run(
+                            [pwsh, "-NoProfile", "-NonInteractive", "-File", str(script)],
+                            cwd=root, capture_output=True, text=True, encoding="utf-8",
+                            timeout=30, check=False,
+                            env={**os.environ, "BR_TEST_LOG": str(log),
+                                 "BR_TEST_ROOT": str(root), "BR_TEST_FAIL": failure,
+                                 "BR_TEST_PIN": pin, "BR_TEST_AUDIT_EXIT": str(audit_exit)},
+                        )
+                        self.assertEqual(expected, log.read_text(encoding="utf-8-sig").splitlines())
+                        self.assertEqual(17 if failure else audit_exit, result.returncode,
+                                         result.stdout + result.stderr)
+                        if not failure:
+                            self.assertEqual(str(audit_exit), result.stdout.strip().splitlines()[-1])
 
 
     @unittest.skipUnless(sys.platform == "win32", "PowerShell smoke runs on Windows")
