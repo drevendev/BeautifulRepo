@@ -233,6 +233,30 @@ class FirstVisitTests(unittest.TestCase):
                 self.assertEqual(before, file_snapshot(target),
                                  "Pinned first audit changed the target")
 
+            # Exercise the actual pinned text CLI with a strict legacy stream.
+            # -I ignores PYTHONIOENCODING, so set the encoding explicitly in
+            # this fixed test harness rather than relying on runner locale.
+            (target / "README.md").write_text(
+                "# Sample\n\n[Installation](docs/café-文档.md)\n",
+                encoding="utf-8",
+            )
+            before = file_snapshot(target)
+            result = subprocess.run(
+                [sys.executable, "-I", "-S", "-c",
+                 "import runpy, sys; "
+                 "sys.stdout.reconfigure(encoding='ascii', errors='strict'); "
+                 "sys.argv = ['tools/audit_bundle.py', '../your-repository', "
+                 "'--fail-on', 'never']; "
+                 "runpy.run_path(sys.argv[0], run_name='__main__')"],
+                cwd=checkout, capture_output=True, text=True, encoding="ascii",
+                timeout=90, check=False,
+            )
+            self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+            self.assertIn(r"caf\xe9-\u6587\u6863.md", result.stdout)
+            self.assertIn("Exit 1:", result.stdout)
+            self.assertEqual(before, file_snapshot(target),
+                             "Legacy-console audit changed the target")
+
             clean = subprocess.run(
                 ["git", "-C", str(checkout), "status", "--porcelain",
                  "--untracked-files=all"],

@@ -49,15 +49,15 @@ Python 3.11+; only cloning uses the network:
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git
 cd BeautifulRepo
-git checkout --detach d0e746c04563beef0a854baa5974e5f409a3bd90
+git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
 This immutable `master` commit is a reviewed **development** audit checkout,
-not the older `v0.2.0` Action. Its [Quality CI run](https://github.com/drevendev/BeautifulRepo/actions/runs/44190103994)
-completed all six jobs successfully on this exact SHA. It includes later
-hard-link and redirected-path source protections absent from the former
-`28530c9` quickstart. CI does not establish a fresh external-user installation. The audit does not run target code, follow external links or
+not the older `v0.2.0` Action. Its [Quality CI run](https://github.com/drevendev/BeautifulRepo/actions/runs/45364559651)
+completed all six jobs successfully on this exact SHA. It includes hard-link and redirected-path source protections, plus readable
+text diagnostics in legacy console encodings. CI does not establish a fresh
+external-user installation. The audit does not run target code, follow external links or
 write the target. Exit **0** means no threshold-reaching findings; **1**
 includes broken local destinations even with `--fail-on never`; **2** means
 invalid input or incomplete evidence. A clean run does not prove a good README.

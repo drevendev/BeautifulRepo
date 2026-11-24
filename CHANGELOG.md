@@ -829,6 +829,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Refresh the first-audit development pin to include the legacy-console
+  Unicode fix. Exercise the actual pinned text CLI with strict ASCII stdout
+  in a clean sibling clone; the released Action pin is unchanged.
+
 - Refresh the four-skill development trial source to `600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c`
   after its 2026-11-24 exact-source Quality CI passed 6/6. The pin includes
   the trusted and isolated Python version probes from #467 and #468.
