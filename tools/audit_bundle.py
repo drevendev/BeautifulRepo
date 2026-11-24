@@ -295,7 +295,14 @@ def main(argv: list[str] | None = None) -> int:
     elif args.format == "html":
         print(render_html(result), end="")
     else:
-        print(render_text(result), end="")
+        output = render_text(result)
+        # A redirected console can use a legacy encoding even under -I.
+        # Keep representable characters; escape the rest without losing the
+        # audit's exit status or changing the caller's stdout configuration.
+        encoding = getattr(sys.stdout, "encoding", None)
+        if encoding:
+            output = output.encode(encoding, errors="backslashreplace").decode(encoding)
+        print(output, end="")
     return code
 
 
