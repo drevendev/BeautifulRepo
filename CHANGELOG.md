@@ -1091,6 +1091,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Guard the Bash first-audit examples against failed clone, directory change,
+  detached checkout or exact SHA lookup/mismatch before invoking the audit;
+  preserve the audit's own 0/1/2 result after successful setup.
+
 - Stop the Windows MCP setup block on failed directory changes or path
   resolution as well as native command errors; verify the Git SHA before
   using it and keep successful setup variables available for registration.
