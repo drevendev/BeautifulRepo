@@ -14,7 +14,8 @@ it does **not** invent a repository beauty score or replace the underlying tools
 Use Python **3.11+**, Git and a stable local target. From the **parent
 directory** containing your target as `your-repository/`, clone the tools
 beside it and check out a reviewed, immutable development snapshot. Paste the
-whole Bash block at once; a failed setup command prevents the audit from running:
+whole Bash block at once; a failed setup command or Python version check
+prevents the audit from running:
 
 ```bash
 git clone https://github.com/drevendev/BeautifulRepo.git &&
@@ -22,6 +23,7 @@ cd BeautifulRepo &&
 git checkout --detach e494a0d5be90dd718db4a25e777aba8abc295ecf &&
 actual=$(git rev-parse HEAD) &&
 test "$actual" = "e494a0d5be90dd718db4a25e777aba8abc295ecf" &&
+python -I -c 'import sys; sys.exit("Python 3.11+ required") if sys.version_info < (3, 11) else print(sys.version.split()[0])' &&
 python -I tools/audit_bundle.py ../your-repository --fail-on never
 ```
 
