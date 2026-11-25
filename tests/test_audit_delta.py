@@ -78,6 +78,32 @@ class AuditDeltaTests(unittest.TestCase):
         self.assertNotIn("FIXED", text.stdout)
         self.assertNotIn("README.md", text.stdout)
 
+    def test_all_formats_with_strict_ascii_stdout(self):
+        self.before.write_text(json.dumps(report()), encoding="utf-8")
+        self.after.write_text(json.dumps(report(read_files=[])), encoding="utf-8")
+        # -I ignores PYTHONIOENCODING; configure stdout inside the child instead.
+        launcher = (
+            "import runpy, sys; "
+            "sys.stdout.reconfigure(encoding='ascii', errors='strict'); "
+            "runpy.run_path(sys.argv.pop(1), run_name='__main__')"
+        )
+        for output_format in ("text", "json", "markdown"):
+            with self.subTest(output_format=output_format):
+                result = subprocess.run(
+                    [sys.executable, "-I", "-c", launcher, str(TOOL),
+                     str(self.before), str(self.after), "--format", output_format],
+                    cwd=self.home, capture_output=True, text=True, encoding="ascii",
+                    timeout=20, check=False,
+                )
+                self.assertEqual(0, result.returncode, result.stderr)
+                if output_format == "json":
+                    self.assertTrue(json.loads(result.stdout)["coverage_changed"])
+                elif output_format == "markdown":
+                    self.assertIn("**Coverage changed:** YES", result.stdout)
+                else:
+                    self.assertIn("Coverage changed: YES", result.stdout)
+                self.assertNotIn("README.md", result.stdout)
+
     def test_coverage_details_name_roles_but_not_file_paths(self):
         old = report()
         new = report(read_files=["README.md", "COPYING.md"])
