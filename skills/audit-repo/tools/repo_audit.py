@@ -366,6 +366,20 @@ def _has_owner_contact(text: str) -> bool:
     return bool(heading or field)
 
 
+def _balanced_bare_destination(destination: str) -> bool:
+    """Reject unmatched parentheses; escaped parentheses are literal."""
+    depth = 0
+    for match in re.finditer(r"\\[\\()]|[()]", destination):
+        token = match[0]
+        if token == "(":
+            depth += 1
+        elif token == ")":
+            depth -= 1
+            if depth < 0:
+                return False
+    return depth == 0
+
+
 def _absolute_image_findings(visible: str, path: str,
                              html_images: list[tuple[int, dict[str, str | None]]]
                              ) -> list[dict[str, Any]]:
@@ -373,7 +387,12 @@ def _absolute_image_findings(visible: str, path: str,
     findings: list[dict[str, Any]] = []
     lines = [line.rstrip("\r\n") for line in _split_lines(visible)]
     references: dict[str, str] = {}
-    definition = re.compile(r"^ {0,3}\[([^\]\r\n]{1,128})\]:[ \t]*<?(https?://[^\s)>]+)", re.I)
+    # A non-HTTP definition can win, but arbitrary trailing prose cannot.
+    definition = re.compile(
+        r"^ {0,3}\[([^\]\r\n]{1,128})\]:[ \t]*(?:<([^<>\r\n]*)>|([^\s<>]+))"
+        r"""(?:[ \t]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\)))?"""
+        r"[ \t]*$"
+    )
     inline = re.compile(r"(?<!\\)!\[[^\]\r\n]{0,256}\]\(\s*<?(https?://[^\s)>]+)", re.I)
     referenced = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\]\[([^\]\r\n]{0,128})\]")
     shortcut = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\](?![\[(])")
@@ -381,7 +400,10 @@ def _absolute_image_findings(visible: str, path: str,
     for line in lines:
         match = definition.match(line)
         if match:
-            references.setdefault(" ".join(match[1].casefold().split()), match[2])
+            destination = match[2] if match[2] is not None else match[3]
+            if match[3] is not None and not _balanced_bare_destination(destination):
+                continue
+            references.setdefault(" ".join(match[1].casefold().split()), destination)
 
     def record(line_number: int) -> None:
         findings.append(finding(

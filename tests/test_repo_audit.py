@@ -639,6 +639,47 @@ class AuditTests(unittest.TestCase):
                          if f["rule_id"] == "readme.absolute_repo_asset"]
                 self.assertEqual([f["line"] for f in items], [3, 4, 6])
 
+    def test_absolute_image_references_use_first_definition_even_if_local(self):
+        raw = "https://raw.githubusercontent.com/acme/app/main/banner.png"
+        cases = (
+            ("assets/banner.png", raw, False),
+            ("<assets/banner with spaces.png>", raw, False),
+            ("https://example.org/banner.png", raw, False),
+            (raw, "assets/banner.png", True),
+            (f"<{raw}>", "assets/banner.png", True),
+            ("<>", raw, False),
+            ("assets/banner(.png", raw, True),
+            ("assets/banner).png", raw, True),
+            ("assets/banner)(.png", raw, True),
+            ("assets/banner(1).png", raw, False),
+            ("assets/banner((1)).png", raw, False),
+            (r"assets/banner\(.png", raw, False),
+            (r"assets/banner\).png", raw, False),
+            (r"assets/banner\\(.png", raw, True),
+            (r"assets/banner\\\(.png", raw, False),
+            ("<assets/banner(.png>", raw, False),
+            (f"{raw}(", "assets/banner.png", False),
+            ("assets/banner.png trailing prose", raw, True),
+            ("<assets/banner.png> trailing prose", raw, True),
+            ('assets/banner.png "Title" trailing prose', raw, True),
+            ('assets/banner.png "Unterminated', raw, True),
+            ('assets/banner.png "Title"', raw, False),
+            ("assets/banner.png 'Title'", raw, False),
+            ("assets/banner.png (Title)", raw, False),
+            ('<assets/banner with spaces.png> "Title"', raw, False),
+            (r'assets/banner.png "A \"title\""', raw, False),
+            (f'{raw} "Title"', "assets/banner.png", True),
+        )
+        for first, second, expected in cases:
+            with self.subTest(first=first, second=second):
+                self.write("README.md",
+                           "# Example\n\n"
+                           "![Banner][hero]\n![hero][]\n![hero]\n\n"
+                           f"[hero]: {first}\n\n[HERO]: {second}\n")
+                items = [f for f in self.report()["findings"]
+                         if f["rule_id"] == "readme.absolute_repo_asset"]
+                self.assertEqual([f["line"] for f in items], [3, 4, 5] if expected else [])
+
     def test_absolute_image_rule_ignores_non_images_code_and_lookalike_hosts(self):
         tick = chr(96)
         self.write("README.md",
