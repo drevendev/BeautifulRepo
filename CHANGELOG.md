@@ -1099,6 +1099,9 @@ keep their original themed headings.
 
 ### Fixed
 
+- Respect first-definition precedence for simple Markdown image references in the
+  raw GitHub asset audit, including local and empty destinations.
+
 - Check the Python 3.11+ prerequisite before launching the first audit in
   all three Bash quickstarts, matching the PowerShell failure-stop behavior.
   The shell regression covers a failed version probe and preserved audit exits.
