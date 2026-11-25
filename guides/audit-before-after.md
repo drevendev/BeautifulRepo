@@ -44,6 +44,62 @@ duplicate JSON keys retain a specific error category without printing the
 input path. Unreadable files and generic JSON parsing errors still receive a
 path-free generic message; no diagnostic authenticates the report.
 
+## Optional: prepare both snapshots without switching your working branch
+
+For a **trusted local Git repository** with both revisions already available,
+use detached [Git worktrees](https://git-scm.com/docs/git-worktree)
+(documentation reviewed 2026-11-25). This avoids switching your current branch
+or stashing its edits. Git creates checkout files and updates its worktree
+metadata: this preparation is not read-only. Checkout can invoke configured
+hooks or filters; do not use this recipe for an untrusted Git environment.
+
+Run from a clean, reviewed BeautifulRepo checkout. Replace all four example
+values below. Choose a new evidence directory with an existing parent,
+outside both repositories, in a location appropriate for private reports.
+These POSIX shell commands stop on the first failure and preserve partial
+evidence for inspection; do not continue using a failed preparation.
+
+~~~sh
+target='/absolute/path/to/target'
+before='BEFORE_COMMIT'
+after='AFTER_COMMIT'
+evidence='/absolute/path/to/new-audit-evidence'
+
+(
+  set -eu
+  before_sha=$(git -C "$target" rev-parse --verify --end-of-options "$before^{commit}")
+  after_sha=$(git -C "$target" rev-parse --verify --end-of-options "$after^{commit}")
+  mkdir "$evidence"
+  printf 'before=%s\nafter=%s\n' "$before_sha" "$after_sha" > "$evidence/revisions.txt"
+  git -C "$target" worktree add --detach "$evidence/before" "$before_sha"
+  git -C "$target" worktree add --detach "$evidence/after" "$after_sha"
+  test "$(git -C "$evidence/before" rev-parse HEAD)" = "$before_sha"
+  test "$(git -C "$evidence/after" rev-parse HEAD)" = "$after_sha"
+  git rev-parse HEAD > "$evidence/auditor-revision.txt"
+  python -I tools/repo_audit.py "$evidence/before" --profile public --format json --fail-on never > "$evidence/before.json"
+  python -I tools/repo_audit.py "$evidence/after" --profile public --format json --fail-on never > "$evidence/after.json"
+  python -I tools/audit_delta.py "$evidence/before.json" "$evidence/after.json" --format markdown > "$evidence/delta.md"
+)
+~~~
+
+Only use the generated delta if the block succeeds. Use the same profile in
+both commands; select the internal or private profile for those targets.
+Worktrees contain tracked checkout content, not uncommitted edits, ignored
+local configuration or initialized submodule content. Review that limitation
+before comparing results. Keep the reports and revision records together;
+a recorded auditor SHA identifies the commit, not uncommitted auditor edits.
+
+After reviewing the evidence, remove only the two linked worktrees:
+
+~~~sh
+git -C "$target" worktree remove "$evidence/before"
+git -C "$target" worktree remove "$evidence/after"
+~~~
+
+Do not add `--force` if removal refuses a dirty worktree. Inspect and preserve
+any local changes first. The reports and revision records remain in the
+evidence directory; review their confidentiality before sharing.
+
 ## Interpreting the output
 
 The tool prints the before and after totals for error, warning and info,
