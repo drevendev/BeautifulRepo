@@ -366,6 +366,20 @@ def _has_owner_contact(text: str) -> bool:
     return bool(heading or field)
 
 
+def _balanced_bare_destination(destination: str) -> bool:
+    """Reject unmatched parentheses; escaped parentheses are literal."""
+    depth = 0
+    for match in re.finditer(r"\\[\\()]|[()]", destination):
+        token = match[0]
+        if token == "(":
+            depth += 1
+        elif token == ")":
+            depth -= 1
+            if depth < 0:
+                return False
+    return depth == 0
+
+
 def _absolute_image_findings(visible: str, path: str,
                              html_images: list[tuple[int, dict[str, str | None]]]
                              ) -> list[dict[str, Any]]:
@@ -387,6 +401,8 @@ def _absolute_image_findings(visible: str, path: str,
         match = definition.match(line)
         if match:
             destination = match[2] if match[2] is not None else match[3]
+            if match[3] is not None and not _balanced_bare_destination(destination):
+                continue
             references.setdefault(" ".join(match[1].casefold().split()), destination)
 
     def record(line_number: int) -> None:
