@@ -279,33 +279,48 @@ or use `--scope project` to bypass workspace approval.
 
 The [Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)
 documents `codex mcp add <name> -- <command>` and a shared
-`~/.codex/config.toml` configuration for local Codex clients. With the
-same shell variables, in a **separate host trial**:
+`~/.codex/config.toml` configuration for local Codex clients (rechecked
+**2026-11-25**). With the same variables from successful preparation, use a
+**separate host trial**. Before running either block below, run `codex mcp list`
+and inspect the result. Stop if the command fails or `beautifulrepo-audit`
+already exists; do not replace another trial's configuration. Use a disposable
+configuration if needed. Only proceed if the name is unused.
 
 ```sh
-codex --version
+codex --version || exit 1
 codex mcp add beautifulrepo-audit -- \
-  "$BR_PYTHON" -I -B "$BR_SERVER" --root "$BR_ROOT"
-codex mcp list
-codex mcp get beautifulrepo-audit
+  "$BR_PYTHON" -I -B "$BR_SERVER" --root "$BR_ROOT" || exit 1
+codex mcp list || exit 1
+codex mcp get beautifulrepo-audit || exit 1
 ```
 
-Start a new local Codex session and inspect `/mcp` for the configured
-server and tools. `codex mcp add` changes your user configuration:
+Only after every command in the chosen block succeeds, start a new local
+Codex session and inspect `/mcp` for the configured server and tools. Stop
+on any command failure; do not infer discovery from a stale entry. `codex mcp add` changes your user configuration:
 do **not** confuse this with a repository-scoped or cloud plugin install.
 Configuration visible in the CLI is not evidence of a host tool invocation.
 Record actual calls and `PASS/FAIL/INCONCLUSIVE` separately from the Claude
 Code run; do not use model calls without usage/cost authorization.
-Remove the entry with `codex mcp remove beautifulrepo-audit`.
+After closing the host, remove only the entry created for this trial with
+`codex mcp remove beautifulrepo-audit`, check the command succeeds, and run
+`codex mcp list` to confirm removal. If setup failed partway through, inspect
+configuration before cleanup; never remove an entry that was already present.
 
 For a **Windows PowerShell** host trial, using the same `$brPython`,
 `$brServer`, and `$brRoot` variables from the Windows preparation block:
 
 ```powershell
-codex --version
-codex mcp add beautifulrepo-audit -- $brPython -I -B $brServer --root $brRoot
-codex mcp list
-codex mcp get beautifulrepo-audit
+. {
+    Get-Command codex -ErrorAction Stop | Out-Null
+    codex --version
+    if ($LASTEXITCODE -ne 0) { throw 'Codex version lookup failed' }
+    codex mcp add beautifulrepo-audit -- $brPython -I -B $brServer --root $brRoot
+    if ($LASTEXITCODE -ne 0) { throw 'MCP registration failed' }
+    codex mcp list
+    if ($LASTEXITCODE -ne 0) { throw 'MCP list failed' }
+    codex mcp get beautifulrepo-audit
+    if ($LASTEXITCODE -ne 0) { throw 'MCP get failed' }
+}
 ```
 
 Neither Windows host setup nor a real legacy model-host lifecycle has been
