@@ -373,7 +373,10 @@ def _absolute_image_findings(visible: str, path: str,
     findings: list[dict[str, Any]] = []
     lines = [line.rstrip("\r\n") for line in _split_lines(visible)]
     references: dict[str, str] = {}
-    definition = re.compile(r"^ {0,3}\[([^\]\r\n]{1,128})\]:[ \t]*<?(https?://[^\s)>]+)", re.I)
+    # Record non-HTTP destinations too: the first matching reference wins.
+    definition = re.compile(
+        r"^ {0,3}\[([^\]\r\n]{1,128})\]:[ \t]*(?:<([^<>\r\n]*)>|([^\s<>]+))"
+    )
     inline = re.compile(r"(?<!\\)!\[[^\]\r\n]{0,256}\]\(\s*<?(https?://[^\s)>]+)", re.I)
     referenced = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\]\[([^\]\r\n]{0,128})\]")
     shortcut = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\](?![\[(])")
@@ -381,7 +384,8 @@ def _absolute_image_findings(visible: str, path: str,
     for line in lines:
         match = definition.match(line)
         if match:
-            references.setdefault(" ".join(match[1].casefold().split()), match[2])
+            destination = match[2] if match[2] is not None else match[3]
+            references.setdefault(" ".join(match[1].casefold().split()), destination)
 
     def record(line_number: int) -> None:
         findings.append(finding(
