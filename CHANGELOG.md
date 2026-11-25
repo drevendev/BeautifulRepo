@@ -1091,6 +1091,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Register Claude Code's local MCP entry from the synthetic target project
+  on POSIX and PowerShell, stop on setup or registration-command failure,
+  and use the same project for the session and cleanup. Structural regression
+  coverage does not establish real host installation or invocation (#255).
+
 - Stop the four-skill candidate preparation on failed clone, checkout, SHA
   lookup/mismatch or unsuccessful/nonempty Git cleanliness checks. Exercise
   both published POSIX shell blocks with mocked Git; host installation and

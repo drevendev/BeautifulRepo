@@ -224,37 +224,55 @@ just because these source-reviewed commands are provided.
 
 The [official Claude Code MCP guide](https://code.claude.com/docs/en/mcp)
 documents `claude mcp add --transport stdio <name> -- <command> [args...]`
-and local scope. With the shell variables from the preceding block:
+and [local scope](https://code.claude.com/docs/en/mcp#local-scope)
+(rechecked **2026-11-25**). Local registration belongs to the project in
+which the command runs; it is not a user-wide registration. With the absolute
+paths from the successful preparation block, first enter the synthetic target
+and run registration there. Use the same starting directory for the host
+session and removal. Do not register from the server source checkout and then
+assume a session started in another project can see the entry.
 
 ```sh
-claude --version
+cd "$BR_ROOT" || exit 1
+claude --version || exit 1
 claude mcp add --scope local --transport stdio beautifulrepo-audit -- \
-  "$BR_PYTHON" -I -B "$BR_SERVER" --root "$BR_ROOT"
-claude mcp list
-claude mcp get beautifulrepo-audit
+  "$BR_PYTHON" -I -B "$BR_SERVER" --root "$BR_ROOT" || exit 1
+claude mcp list || exit 1
+claude mcp get beautifulrepo-audit || exit 1
 ```
 
 For a **Windows PowerShell** host trial, use the variables from the Windows
 preparation block instead of the POSIX environment variables:
 
 ```powershell
-claude --version
-claude mcp add --scope local --transport stdio beautifulrepo-audit -- $brPython -I -B $brServer --root $brRoot
-claude mcp list
-claude mcp get beautifulrepo-audit
+. {
+    Set-Location -LiteralPath $brRoot -ErrorAction Stop
+    claude --version
+    if ($LASTEXITCODE -ne 0) { throw 'Claude version lookup failed' }
+    claude mcp add --scope local --transport stdio beautifulrepo-audit -- $brPython -I -B $brServer --root $brRoot
+    if ($LASTEXITCODE -ne 0) { throw 'Local registration failed' }
+    claude mcp list
+    if ($LASTEXITCODE -ne 0) { throw 'MCP list failed' }
+    claude mcp get beautifulrepo-audit
+    if ($LASTEXITCODE -ne 0) { throw 'MCP get failed' }
+}
 ```
 
 These are unverified host commands, not an observed installation.
-Open **Claude Code** on that synthetic fixture and inspect `/mcp` for a
-connected server and the three named tools. A successful `add` or `list`
+Only after successful registration, start **Claude Code** from that same
+directory and inspect `/mcp` for a connected server and the three named tools.
+If the entry is missing, check the current project and configuration scope
+before diagnosing the server protocol. A failed directory change or command
+is a stop condition, not a reason to reuse an old registration. A successful `add` or `list`
 alone is **only configuration evidence**. Actual acceptance still needs
 an observed `tools/list` and `tools/call` via the host, with the version,
 tool results, exact commit and file snapshot recorded. Model invocation may
 consume subscription usage or paid tokens; obtain appropriate authorization.
 
-Undo the **local** registration using
-`claude mcp remove beautifulrepo-audit --scope local` and close the host
-session. Do not commit a machine-specific `.mcp.json` to a public project
+Close the host session, then undo the **local** registration from the same
+project directory using `claude mcp remove beautifulrepo-audit --scope local`.
+Check `claude mcp list` there to confirm removal; do not remove a pre-existing
+entry that belongs to another trial. Do not commit a machine-specific `.mcp.json` to a public project
 or use `--scope project` to bypass workspace approval.
 
 ### Codex CLI: stdio entry (host run unverified)

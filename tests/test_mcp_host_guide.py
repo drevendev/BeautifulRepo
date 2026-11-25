@@ -53,6 +53,26 @@ class McpHostGuidePinTests(unittest.TestCase):
         self.assertEqual(re.findall(full_sha, posix_commands), [pin, pin])
         self.assertEqual(re.findall(full_sha, windows_commands), [pin])
 
+    def test_claude_local_registration_starts_in_the_target_directory(self):
+        source = GUIDE.read_text(encoding="utf-8")
+        section = source.split("### Claude Code: local-scope stdio entry", 1)[1]
+        section = section.split("### Codex CLI:", 1)[0]
+        posix = section.split("```sh\n", 1)[1].split("\n```", 1)[0]
+        windows = section.split("```powershell\n", 1)[1].split("\n```", 1)[0]
+        self.assertTrue(posix.startswith('cd "$BR_ROOT" || exit 1\n'))
+        self.assertIn('--root "$BR_ROOT" || exit 1', posix)
+        self.assertIn("claude mcp list || exit 1", posix)
+        self.assertIn("claude mcp get beautifulrepo-audit || exit 1", posix)
+        self.assertLess(
+            windows.index("Set-Location -LiteralPath $brRoot -ErrorAction Stop"),
+            windows.index("claude mcp add --scope local"),
+        )
+        self.assertEqual(windows.count("if ($LASTEXITCODE -ne 0)"), 4)
+        self.assertIn("--root $brRoot", windows)
+        self.assertIn("from that same\ndirectory", section)
+        self.assertIn("from the same\nproject directory", section)
+        self.assertIn("claude mcp remove beautifulrepo-audit --scope local", section)
+
     def test_host_outcomes_remain_explicitly_unverified(self):
         text = GUIDE.read_text(encoding="utf-8")
         self.assertIn("has not passed a fresh\nClaude Code/Codex host installation", text)
