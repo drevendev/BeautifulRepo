@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add POSIX integration regressions that execute the documented detached Git
+  worktree recipe with both audit tools, check saved evidence and preserve a
+  dirty main checkout. Cover invalid revision rejection before evidence creation.
+
 - Add a detached Git worktree recipe for before/after audit evidence, recording
   both target revisions and the auditor revision without switching the main
   working branch. Keep reports outside the snapshots and avoid forced cleanup.
