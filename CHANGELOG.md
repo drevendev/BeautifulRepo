@@ -1091,6 +1091,11 @@ keep their original themed headings.
 
 ### Fixed
 
+- Stop Codex MCP registration examples on failed CLI commands in both POSIX
+  and PowerShell; check for an existing entry before registration and confirm
+  cleanup. Mocked shell and structural tests do not establish host acceptance
+  (#255).
+
 - Register Claude Code's local MCP entry from the synthetic target project
   on POSIX and PowerShell, stop on setup or registration-command failure,
   and use the same project for the session and cleanup. Structural regression
