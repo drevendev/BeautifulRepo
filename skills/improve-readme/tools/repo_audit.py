@@ -373,9 +373,11 @@ def _absolute_image_findings(visible: str, path: str,
     findings: list[dict[str, Any]] = []
     lines = [line.rstrip("\r\n") for line in _split_lines(visible)]
     references: dict[str, str] = {}
-    # Record non-HTTP destinations too: the first matching reference wins.
+    # A non-HTTP definition can win, but arbitrary trailing prose cannot.
     definition = re.compile(
         r"^ {0,3}\[([^\]\r\n]{1,128})\]:[ \t]*(?:<([^<>\r\n]*)>|([^\s<>]+))"
+        r"""(?:[ \t]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\)))?"""
+        r"[ \t]*$"
     )
     inline = re.compile(r"(?<!\\)!\[[^\]\r\n]{0,256}\]\(\s*<?(https?://[^\s)>]+)", re.I)
     referenced = re.compile(r"(?<!\\)!\[([^\]\r\n]{1,256})\]\[([^\]\r\n]{0,128})\]")
