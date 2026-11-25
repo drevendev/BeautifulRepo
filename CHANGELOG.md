@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a detached Git worktree recipe for before/after audit evidence, recording
+  both target revisions and the auditor revision without switching the main
+  working branch. Keep reports outside the snapshots and avoid forced cleanup.
+
 - Include Go module/workspace metadata and `.go` source imports in the
   bounded repository-rename reference inventory. Tests cover detected module
   paths, excluded checksum records and undecodable modules.
