@@ -185,8 +185,13 @@ git() {
     esac
 }
 python() {
-    printf '%s\n' audit >> "$BR_TEST_LOG"
-    return "$BR_TEST_AUDIT_EXIT"
+    if [ "$2" = -c ]; then
+        printf '%s\n' version >> "$BR_TEST_LOG"
+        [ "$BR_TEST_FAIL" != version ]
+    else
+        printf '%s\n' audit >> "$BR_TEST_LOG"
+        return "$BR_TEST_AUDIT_EXIT"
+    fi
 }
 """
         stages = {
@@ -195,7 +200,8 @@ python() {
             "checkout": ["clone", "checkout"],
             "sha": ["clone", "checkout", "rev-parse"],
             "wrong-sha": ["clone", "checkout", "rev-parse"],
-            "": ["clone", "checkout", "rev-parse", "audit"],
+            "version": ["clone", "checkout", "rev-parse", "version"],
+            "": ["clone", "checkout", "rev-parse", "version", "audit"],
         }
         for relative in ("README.md", "guides/combined-audit.md", "guides/working-proof.md"):
             source = (ROOT / relative).read_text(encoding="utf-8")

@@ -1091,6 +1091,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Check the Python 3.11+ prerequisite before launching the first audit in
+  all three Bash quickstarts, matching the PowerShell failure-stop behavior.
+  The shell regression covers a failed version probe and preserved audit exits.
+
 - Stop Codex MCP registration examples on failed CLI commands in both POSIX
   and PowerShell; check for an existing entry before registration and confirm
   cleanup. Mocked shell and structural tests do not establish host acceptance
