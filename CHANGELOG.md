@@ -1099,6 +1099,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Keep audit-delta text output ASCII-safe when coverage changes, avoiding a
+  Unicode encoding crash in legacy consoles and redirected output. Exercise
+  all three report formats with strict ASCII stdout.
+
 - Respect first-definition precedence for simple Markdown image references in the
   raw GitHub asset audit, including local and empty destinations.
 
