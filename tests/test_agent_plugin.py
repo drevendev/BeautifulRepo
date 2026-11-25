@@ -64,10 +64,11 @@ class PluginManifestTests(unittest.TestCase):
     def test_development_install_examples_share_one_immutable_candidate(self):
         """One pinned source must govern both host instructions and evaluation fixtures."""
         guide = (ROOT / "guides/agent-plugin.md").read_text(encoding="utf-8")
-        checkouts = re.findall(
-            r"(?m)^git -C BeautifulRepo-candidate checkout --detach ([a-f0-9]{40})$",
-            guide,
+        checkout_pattern = (
+            r"(?m)^[ \t]*git -C BeautifulRepo-candidate checkout --detach "
+            r"([a-f0-9]{40})[ \t]+&&[ \t]*$"
         )
+        checkouts = re.findall(checkout_pattern, guide)
         self.assertEqual(len(checkouts), 1, "need one active full-SHA checkout")
         candidate = checkouts[0]
         self.assertEqual(candidate, "600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c")
@@ -105,10 +106,7 @@ class PluginManifestTests(unittest.TestCase):
             f"https://github.com/drevendev/BeautifulRepo/tree/{candidate}",
             matrix,
         )
-        self.assertIn(
-            f"git -C BeautifulRepo-candidate checkout --detach {candidate}",
-            matrix,
-        )
+        self.assertEqual(re.findall(checkout_pattern, matrix), [candidate])
         self.assertIn(
             f"--expected-commit {candidate}",
             guide,
