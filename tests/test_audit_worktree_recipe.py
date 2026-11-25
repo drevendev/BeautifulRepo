@@ -69,7 +69,8 @@ class AuditWorktreeRecipeTests(unittest.TestCase):
         values = {"target": str(self.target), "before": before,
                   "after": self.after, "evidence": str(self.evidence)}
         for name, value in values.items():
-            block, count = re.subn(rf"^{name}=.*$", lambda _: f"{name}={shlex.quote(value)}",
+            replacement = f"{name}={shlex.quote(value)}"
+            block, count = re.subn(rf"^{name}=.*$", lambda _, replacement=replacement: replacement,
                                    block, flags=re.M)
             self.assertEqual(1, count, name)
         # Select the test runner's interpreter without changing the documented block.
