@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+import shutil
+import subprocess
 import unittest
 
 
@@ -72,6 +74,52 @@ class McpHostGuidePinTests(unittest.TestCase):
         self.assertIn("from that same\ndirectory", section)
         self.assertIn("from the same\nproject directory", section)
         self.assertIn("claude mcp remove beautifulrepo-audit --scope local", section)
+
+    def test_codex_registration_stops_on_each_command_failure(self):
+        source = GUIDE.read_text(encoding="utf-8")
+        section = source.split("### Codex CLI: stdio entry", 1)[1]
+        section = section.split("### Report a real host result", 1)[0]
+        posix = section.split("```" + "sh\n", 1)[1].split("\n" + "```", 1)[0]
+        windows = section.split("```" + "powershell\n", 1)[1].split("\n" + "```", 1)[0]
+        self.assertIn("already exists; do not replace another trial", section)
+        self.assertIn("Only after every command in the chosen block succeeds", section)
+        self.assertIn("Get-Command codex -ErrorAction Stop", windows)
+        native_lines = [line.strip() for line in windows.splitlines()]
+        commands = [i for i, line in enumerate(native_lines) if line.startswith("codex ")]
+        self.assertEqual(len(commands), 4)
+        for i in commands:
+            self.assertTrue(native_lines[i + 1].startswith("if ($LASTEXITCODE -ne 0)"))
+        self.assertIn("--root $brRoot", windows)
+        self.assertEqual(posix.count("|| exit 1"), 4)
+
+    @unittest.skipUnless(shutil.which("sh"), "POSIX shell unavailable")
+    def test_codex_posix_registration_executes_no_later_command_after_failure(self):
+        source = GUIDE.read_text(encoding="utf-8")
+        section = source.split("### Codex CLI: stdio entry", 1)[1]
+        block = section.split("```" + "sh\n", 1)[1].split("\n" + "```", 1)[0]
+        stub = r"""
+BR_PYTHON='/trial path/python'
+BR_SERVER='/trial path/server.py'
+BR_ROOT='/trial path/target'
+count=0
+codex() {
+    count=$((count + 1))
+    printf '%s\n' "$count"
+    if [ "$count" -eq 2 ]; then
+        [ "$#" -eq 10 ] && [ "$5" = "$BR_PYTHON" ] && [ "$8" = "$BR_SERVER" ] && [ "$9" = "--root" ] && [ "${10}" = "$BR_ROOT" ] || return 99
+    fi
+    [ "$count" -ne "$FAIL_AT" ]
+}
+"""
+        for fail_at in range(5):
+            with self.subTest(fail_at=fail_at):
+                result = subprocess.run(
+                    ["sh", "-c", f"FAIL_AT={fail_at}\n" + stub + block],
+                    capture_output=True, text=True, check=False, timeout=10,
+                )
+                expected = fail_at or 4
+                self.assertEqual(result.stdout.splitlines(), [str(i) for i in range(1, expected + 1)])
+                self.assertEqual(result.returncode, int(bool(fail_at)), result.stderr)
 
     def test_host_outcomes_remain_explicitly_unverified(self):
         text = GUIDE.read_text(encoding="utf-8")
