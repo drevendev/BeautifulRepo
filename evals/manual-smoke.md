@@ -32,15 +32,26 @@ results. Never report PASS based on reading this page or on green unit tests.
    checkout for either host (Git and Python 3.11+ required):
 
    ```sh
-   git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
-   git -C BeautifulRepo-candidate checkout --detach 600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c
-   git -C BeautifulRepo-candidate rev-parse HEAD
-   git -C BeautifulRepo-candidate status --porcelain --untracked-files=all
-   git -C BeautifulRepo-candidate clean -ndx
+   (
+     if git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate &&
+        git -C BeautifulRepo-candidate checkout --detach 600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c &&
+        actual=$(git -C BeautifulRepo-candidate rev-parse HEAD) &&
+        [ "$actual" = 600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c ] &&
+        status=$(git -C BeautifulRepo-candidate status --porcelain --untracked-files=all) &&
+        [ -z "$status" ] &&
+        ignored=$(git -C BeautifulRepo-candidate clean -ndx) &&
+        [ -z "$ignored" ]; then
+       printf '%s\n' "Verified clean candidate: $actual"
+     else
+       printf '%s\n' 'STOP: candidate setup or cleanliness check failed; do not register the marketplace.' >&2
+       exit 1
+     fi
+   )
    ```
 
-   Stop unless `rev-parse HEAD` is exactly `600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c`
-   **and both following commands are silent**. `status` catches tracked
+   Stop unless the block exits with status 0 and prints `Verified clean candidate:`
+   with the full SHA above. It checks the exact `rev-parse HEAD` result and
+   requires both following Git commands to succeed with empty output. `status` catches tracked
    changes and ordinary untracked files; `git clean -ndx` is a **dry run**
    that also reports ignored/untracked files, without deleting anything.
    A dirty local checkout is not a reproducible source pin, even if HEAD is

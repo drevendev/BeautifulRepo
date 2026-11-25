@@ -111,15 +111,26 @@ only `audit-repo`.
 Use a clean disposable **parent** directory, Git and Python 3.11+:
 
 ```sh
-git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate
-git -C BeautifulRepo-candidate checkout --detach 600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c
-git -C BeautifulRepo-candidate rev-parse HEAD
-git -C BeautifulRepo-candidate status --porcelain --untracked-files=all
-git -C BeautifulRepo-candidate clean -ndx
+(
+  if git clone https://github.com/drevendev/BeautifulRepo.git BeautifulRepo-candidate &&
+     git -C BeautifulRepo-candidate checkout --detach 600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c &&
+     actual=$(git -C BeautifulRepo-candidate rev-parse HEAD) &&
+     [ "$actual" = 600a02c1aff45580ba517c2af2fa8fe4ea8b4f7c ] &&
+     status=$(git -C BeautifulRepo-candidate status --porcelain --untracked-files=all) &&
+     [ -z "$status" ] &&
+     ignored=$(git -C BeautifulRepo-candidate clean -ndx) &&
+     [ -z "$ignored" ]; then
+    printf '%s\n' "Verified clean candidate: $actual"
+  else
+    printf '%s\n' 'STOP: candidate setup or cleanliness check failed; do not register the marketplace.' >&2
+    exit 1
+  fi
+)
 ```
 
-**Stop** unless `rev-parse HEAD` prints the full SHA above **and both
-subsequent commands print nothing**. The `status` check catches tracked
+**Stop** unless the block exits with status 0 and prints `Verified clean candidate:`
+with the full SHA above. It checks that `rev-parse HEAD` matches exactly and
+both subsequent Git commands succeed with empty output. The `status` check catches tracked
 changes and ordinary untracked files; `git clean -ndx` is a **dry run** that
 also reports ignored/untracked files, without deleting them. A correct HEAD
 with extra working-tree content is **not** a source-locked local marketplace:
