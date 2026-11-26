@@ -82,14 +82,55 @@ another repository without its owner's permission. The steps below are the minim
 
 ### 2. Audit with pinned tools
 
-Run BeautifulRepo's tools from a **pinned** release commit, never from a moving
-branch, in isolated mode and with an explicit root. Save the output outside the target.
+Run BeautifulRepo's tools from a **pinned**, reviewed commit, never from a moving
+branch, in isolated mode and with an explicit root. Use the same clean auditor
+checkout, Python version and explicit audit profile for both target snapshots.
+Record the full Git SHA of each target and the auditor, the interpreter version,
+OS and observation date. A SHA alone does not establish a clean checkout.
+
+For a POSIX shell, run this from the trusted auditor checkout. Replace both
+paths: the target must be an already prepared snapshot, and the evidence directory
+must be new, outside both checkouts, with an existing trusted private parent.
+Repeat for the after snapshot with a different evidence directory.
 
 ```bash
-python -I tools/repo_audit.py ../target --format json --fail-on never
-python -I tools/docs_links.py --root ../target
-python -I tools/html_navigation.py --root ../target
+target='/absolute/path/to/target-snapshot'
+evidence='/absolute/path/to/new-case-evidence'
+(
+  set -eu
+  umask 077
+  mkdir "$evidence"
+  capture() {
+    name=$1; shift
+    status=0
+    "$@" > "$evidence/$name.out" 2> "$evidence/$name.err" || status=$?
+    printf '%s\n' "$status" > "$evidence/$name.status"
+  }
+  capture audit python -I tools/repo_audit.py "$target" --profile public --format json --fail-on never
+  capture markdown python -I tools/docs_links.py --root "$target"
+  capture html python -I tools/html_navigation.py --root "$target"
+)
 ```
+
+Select the appropriate profile for non-public targets; do not publish their
+evidence. The capture block continues after a nonzero checker exit so all three
+independent results can be inspected. Its own success means only that the capture
+steps completed, **not** that the checks passed. Inspect every status, stdout and
+stderr file; a missing, incomplete or invalid report, launch failure or unexpected
+diagnostic is not clean evidence. Never replace a failed output with an empty
+report or treat `--fail-on never` as a passing audit. Keep raw reports private and
+review the [confidentiality checklist](../checklists/confidentiality.md) before
+publishing excerpts.
+
+For a current auditor checkout containing `audit_delta.py`, compare valid saved
+`audit.out` JSON reports using the [before/after guide](../guides/audit-before-after.md).
+Keep coverage changes separate from count changes. For example, the published
+[PatchPitch case](patchpitch.md) recorded one fewer informational finding after
+adding a contribution guide. That is also a reason to review changed document
+selection, not to require identical coverage in every successful intervention.
+This observation uses the case's historical counts; no new comparison of its
+original JSON reports is claimed. The case's observed first run and remaining
+contrast problems matter independently of those counts.
 
 Then go through the [repository checklist](../checklists/repository.md) and the
 [first-success checklist](../checklists/first-success.md) by hand. Record each
