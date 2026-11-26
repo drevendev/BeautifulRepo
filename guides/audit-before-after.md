@@ -144,6 +144,29 @@ counts in either direction. Review coverage and source evidence separately,
 even when the command exits 0. Do not use the exit code as proof of repaired
 behavior or to block a contribution without an explicit local policy.
 
+## Optional: require unchanged audited-document coverage
+
+For a local regression check that should stop for review when the selected
+documents change, combine the two opt-in signals:
+
+~~~sh
+python -I tools/audit_delta.py before.json after.json --format markdown --fail-on-increase warning --fail-on-coverage-change
+~~~
+
+The coverage flag alone exits 1 when an entry-point role or the inspected-file
+selection changes, even if every rule count decreases or stays the same.
+With both flags, **either** signal triggers exit 1; the complete comparison
+is still printed. Check the coverage notice and changed-rule rows to
+distinguish the reasons. Invalid evidence still exits 2 without a report.
+Neither flag changes the default report-only mode.
+
+For example, adding a missing LICENSE may be a deliberate improvement and
+still trigger the coverage signal. Review the source diff and evidence
+before accepting such a change; do not treat the signal as a defect or a
+universal merge requirement. Unchanged coverage is only a comparison of
+the recorded document roles and file selection, not proof of equivalent
+content, an identical auditor revision or a valid measurement.
+
 ## Safety and limits
 
 [audit_delta.py](../tools/audit_delta.py) uses Python's standard library,
@@ -155,9 +178,9 @@ unsupported profiles and mismatched profiles. This path check is a preflight,
 not a race-resistant sandbox or a guarantee for unusual filesystem features. It does not invoke Git,
 run target code, contact a network, modify inputs, discover repositories or
 include input document paths/messages in its output. Exit code **0** means
-structurally comparable reports with no triggered optional increase signal,
-not an improvement; **1** means the opted-in rule-count increase threshold
-was triggered; **2** means invalid or unreadable evidence or arguments. It is not a content or security scanner, visual test,
+structurally comparable reports with no triggered optional signal,
+not an improvement; **1** means an opted-in rule-count increase or coverage
+change signal was triggered; **2** means invalid or unreadable evidence or arguments. It is not a content or security scanner, visual test,
 accessibility certification, release signal or ranking system. Reports
 themselves may contain relative filenames and metadata: review them before
 sharing, especially for private repositories.

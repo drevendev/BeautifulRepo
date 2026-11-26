@@ -213,6 +213,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--format", choices=("text", "json", "markdown"), default="text")
     parser.add_argument("--fail-on-increase", choices=("never", *SEVERITIES), default="never",
                         help="exit 1 for any increased rule count at or above this severity")
+    parser.add_argument("--fail-on-coverage-change", action="store_true",
+                        help="exit 1 when audited document roles or inspected files change")
     args = parser.parse_args(argv)
     try:
         result = compare(load_report(args.before, "before"), load_report(args.after, "after"))
@@ -225,7 +227,8 @@ def main(argv: list[str] | None = None) -> int:
         print(render_markdown(result), end="")
     else:
         print(render_text(result), end="")
-    return int(has_increase(result, args.fail_on_increase))
+    return int(has_increase(result, args.fail_on_increase) or
+               (args.fail_on_coverage_change and result["coverage_changed"]))
 
 
 if __name__ == "__main__":
