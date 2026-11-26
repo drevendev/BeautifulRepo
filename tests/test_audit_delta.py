@@ -188,6 +188,30 @@ class AuditDeltaTests(unittest.TestCase):
         self.assertIn("exceeds 1 MiB", oversized.stderr)
         self.assertNotIn(str(self.home), oversized.stderr)
 
+    def test_nonstandard_json_constants_rejected_in_either_report(self):
+        valid = json.dumps(report())
+        for token in ("NaN", "Infinity", "-Infinity"):
+            for selected in (self.before, self.after):
+                with self.subTest(token=token, selected=selected.name):
+                    self.before.write_text(valid, encoding="utf-8")
+                    self.after.write_text(valid, encoding="utf-8")
+                    # An ignored extension must still contain syntactically valid JSON.
+                    malformed = valid[:-1] + ',"extension":{"values":[' + token + ']} }'
+                    selected.write_text(malformed, encoding="utf-8")
+                    result = self.invoke("--format", "json")
+                    self.assertEqual(2, result.returncode, result.stderr)
+                    self.assertEqual("", result.stdout)
+                    self.assertIn("Non-standard JSON numeric constant", result.stderr)
+                    self.assertNotIn(str(self.home), result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
+
+    def test_valid_extension_strings_and_numbers_remain_accepted(self):
+        old = report()
+        old["extension"] = ["NaN", "Infinity", "-Infinity", 1.5, -12, True, None]
+        result = self.run_cli(old, report(), "--format", "json")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual([], json.loads(result.stdout)["changes"])
+
     def test_oversized_json_integer_reports_clean_error(self):
         # CPython 3.11+ may reject integers exceeding its decimal digit limit.
         # The parser error must not leak a traceback or exit with code 1.

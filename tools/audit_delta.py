@@ -38,6 +38,11 @@ def _unique_pairs(pairs):
     return result
 
 
+def _reject_constant(_value: str) -> None:
+    # Python accepts NaN and infinities by default; RFC 8259 does not.
+    raise ReportError("Non-standard JSON numeric constant.")
+
+
 def load_report(filename: str, label: str) -> dict:
     path = Path(filename)
     selected = path if path.is_absolute() else Path.cwd() / path
@@ -59,7 +64,8 @@ def load_report(filename: str, label: str) -> dict:
             raw = stream.read(LIMIT + 1)
         if len(raw) > LIMIT or b"\x00" in raw:
             raise ReportError(f"{label}: report exceeds 1 MiB or contains NUL bytes.")
-        data = json.loads(raw.decode("utf-8-sig"), object_pairs_hook=_unique_pairs)
+        data = json.loads(raw.decode("utf-8-sig"), object_pairs_hook=_unique_pairs,
+                          parse_constant=_reject_constant)
     except ReportError:
         # Preserve deliberate, path-free validation reasons; ReportError inherits ValueError.
         raise
