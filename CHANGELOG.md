@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a copyable audit-delta CI shell recipe that preserves the Markdown
+  comparison and propagates the original exit status, with pinned-auditor
+  guidance and private evidence handling.
+
 - Add an opt-in audit-delta coverage-change exit signal, independently or
   alongside the rule-count increase threshold, with complete report output
   and unchanged default behavior.
