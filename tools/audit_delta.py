@@ -197,11 +197,22 @@ def render_markdown(delta: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def has_increase(delta: dict, threshold: str) -> bool:
+    """Report positive rule-count changes at or above an opted-in severity."""
+    if threshold == "never":
+        return False
+    levels = SEVERITIES[:SEVERITIES.index(threshold) + 1]
+    return any(item["severity"] in levels and item["delta"] > 0
+               for item in delta["changes"])
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("before", help="saved JSON from repo_audit.py --format json")
     parser.add_argument("after", help="saved JSON from repo_audit.py --format json")
     parser.add_argument("--format", choices=("text", "json", "markdown"), default="text")
+    parser.add_argument("--fail-on-increase", choices=("never", *SEVERITIES), default="never",
+                        help="exit 1 for any increased rule count at or above this severity")
     args = parser.parse_args(argv)
     try:
         result = compare(load_report(args.before, "before"), load_report(args.after, "after"))
@@ -214,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
         print(render_markdown(result), end="")
     else:
         print(render_text(result), end="")
-    return 0
+    return int(has_increase(result, args.fail_on_increase))
 
 
 if __name__ == "__main__":
