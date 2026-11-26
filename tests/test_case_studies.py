@@ -25,7 +25,19 @@ class CaseStudyIndexTests(unittest.TestCase):
             with self.subTest(heading=heading):
                 self.assertIn(heading, self.index)
         self.assertIn("Unlicensed targets", self.index)
-        self.assertIn("python -I tools/docs_links.py --root ../target", self.index)
+
+    def test_audit_recipe_captures_each_checker_in_isolated_mode(self):
+        for command in (
+            'capture audit python -I tools/repo_audit.py "$target" --profile public '
+            '--format json --fail-on never',
+            'capture markdown python -I tools/docs_links.py --root "$target"',
+            'capture html python -I tools/html_navigation.py --root "$target"',
+        ):
+            with self.subTest(command=command):
+                self.assertIn(command, self.index)
+        for suffix in ("out", "err", "status"):
+            with self.subTest(suffix=suffix):
+                self.assertIn(f'"$evidence/$name.{suffix}"', self.index)
 
     def test_index_is_linked_from_the_readme(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
