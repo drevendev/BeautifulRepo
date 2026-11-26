@@ -82,6 +82,58 @@ protection or a real model host. No local full-run stdout or exit code
 has been recorded for this case. Do not cite the green PR jobs as proof
 that a fresh external user's command succeeded.
 
+## Follow-up: one command needs more than one entrance
+
+On **2026-11-26**, two merged follow-ups exposed a second, independent
+documentation problem: the correct runner was visible in README, but readers
+entering through contribution instructions, agent instructions or a new pull
+request were still offered the shorter checklist.
+
+Use this inventory when adopting the pattern in your own repository. Each
+entrance has a different reader intent, even when the underlying command is
+identical.
+
+| Entrance at the follow-up merge | Reader task | Contract to preserve |
+| --- | --- | --- |
+| [README](https://github.com/drevendev/BeautifulRepo/blob/817c6331444292e84814bcb0393d5d4da8be37ff/README.md#this-repository-checks-itself) | Decide whether to try the project | Show the complete local command and its scope |
+| [CONTRIBUTING](https://github.com/drevendev/BeautifulRepo/blob/817c6331444292e84814bcb0393d5d4da8be37ff/CONTRIBUTING.md#verify-a-change-locally) | Verify a proposed change | Lead with the runner; regenerate the catalog only when it changes; retain targeted diagnostics |
+| [AGENTS](https://github.com/drevendev/BeautifulRepo/blob/817c6331444292e84814bcb0393d5d4da8be37ff/AGENTS.md) | Verify an automated contribution | Use the same runner and link to the maintained diagnostic instructions |
+| [PR template](https://github.com/drevendev/BeautifulRepo/blob/817c6331444292e84814bcb0393d5d4da8be37ff/.github/pull_request_template.md) | Report what was actually checked | Leave the full-run checkbox unchecked if incomplete; report hosted CI separately |
+
+[PR #491](https://github.com/drevendev/BeautifulRepo/pull/491) aligned the
+contribution and agent entrances; [PR #492](https://github.com/drevendev/BeautifulRepo/pull/492)
+aligned the PR template. Both merged on 2026-11-26. Their respective
+[CI run 45857847598](https://github.com/drevendev/BeautifulRepo/actions/runs/45857847598)
+and [CI run 45875512148](https://github.com/drevendev/BeautifulRepo/actions/runs/45875512148)
+each had six successful jobs, rechecked on that date. The
+[consistency regression](https://github.com/drevendev/BeautifulRepo/blob/817c6331444292e84814bcb0393d5d4da8be37ff/tests/test_check_list_consistency.py)
+checks the diagnostic block, the agent's link to it and the PR-template
+reporting contract. It is a source assertion, not a comprehension test.
+
+A small, non-executing acceptance step is useful before asking anyone to run
+a complete verification:
+
+```sh
+python -I scripts/verify_checkout.py --list
+```
+
+**Observed 2026-11-26:** Linux, Python 3.13.5; the runner file reconstructed
+from the pinned merge source had Git blob hash
+`e81fd28f98d3a5551a74cb749b2d9f8761d50be5`, matching GitHub.
+The command exited 0 and printed nine lines, from
+`first-minute demo: python -I examples/combined-audit/demo.py` through
+`repository entry points: python tools/repo_audit.py .`.
+All nine printed commands matched the pinned
+[workflow steps](https://github.com/drevendev/BeautifulRepo/blob/817c6331444292e84814bcb0393d5d4da8be37ff/.github/workflows/quality.yml#L42-L58)
+in order. Only the runner file was reconstructed: this was **not** a clean
+clone, a full verification run or execution of any of those nine commands.
+
+For another repository, inventory the actual entry documents first, compare
+their commands to the workflow, and replace conflicting primary instructions
+with one maintained route. Keep the component commands as diagnostic help,
+not a competing definition of success. Explicitly distinguish a list-only
+check, a partial local run, a full local run and hosted CI in the PR report.
+
 ## Reuse and remaining work
 
 **Reusable pattern:** expose a small, discoverable entry point for a real
