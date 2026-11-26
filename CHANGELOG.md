@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add an opt-in severity threshold to audit-delta comparisons for signalling
+  increased individual rule counts with exit code 1, while preserving complete
+  report output, default report-only behavior and separate coverage review.
+
 - Add POSIX integration regressions that execute the documented detached Git
   worktree recipe with both audit tools, check saved evidence and preserve a
   dirty main checkout. Cover invalid revision rejection before evidence creation.
