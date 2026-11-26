@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a repeatable case-study evidence capture recipe that preserves each offline
+  checker's stdout, stderr and exit status, and connects the saved audit reports
+  to coverage-aware comparison and the historical PatchPitch example.
+
 - Add a copyable audit-delta CI shell recipe that preserves the Markdown
   comparison and propagates the original exit status, with pinned-auditor
   guidance and private evidence handling.
