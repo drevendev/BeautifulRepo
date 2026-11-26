@@ -160,6 +160,44 @@ class AuditDeltaTests(unittest.TestCase):
         self.assertEqual("", mismatch.stdout)
         self.assertIn("profiles differ", mismatch.stderr)
 
+    def test_opt_in_increase_thresholds_keep_default_and_output_compatible(self):
+        old = report(finding("readme.placeholder"), finding("readme.placeholder"))
+        new = report(finding("link.vague_text", "info"))
+        for output_format in ("text", "json", "markdown"):
+            baseline = self.run_cli(old, new, "--format", output_format)
+            self.assertEqual(0, baseline.returncode, baseline.stderr)
+            for threshold, expected in (("never", 0), ("error", 0),
+                                        ("warning", 0), ("info", 1)):
+                with self.subTest(output_format=output_format, threshold=threshold):
+                    result = self.run_cli(old, new, "--format", output_format,
+                                          "--fail-on-increase", threshold)
+                    self.assertEqual(expected, result.returncode, result.stderr)
+                    self.assertEqual(baseline.stdout, result.stdout)
+                    self.assertEqual("", result.stderr)
+
+    def test_increased_rule_counts_are_not_hidden_by_other_decreases(self):
+        old = report(finding("readme.placeholder"), finding("readme.placeholder"))
+        new = report(finding("link.broken"))
+        for threshold, expected in (("error", 0), ("warning", 1), ("info", 1)):
+            with self.subTest(threshold=threshold):
+                result = self.run_cli(old, new, "--fail-on-increase", threshold)
+                self.assertEqual(expected, result.returncode, result.stderr)
+        error = report(finding("readme.missing", "error"))
+        result = self.run_cli(old, error, "--fail-on-increase", "error")
+        self.assertEqual(1, result.returncode, result.stderr)
+
+    def test_increase_option_does_not_fail_for_decreases_or_replace_validation(self):
+        old = report(finding("readme.placeholder"))
+        for new in (old, report(), report(read_files=[])):
+            with self.subTest(new=new):
+                result = self.run_cli(old, new, "--fail-on-increase", "info")
+                self.assertEqual(0, result.returncode, result.stderr)
+        invalid = self.run_cli(report(profile="private"), report(),
+                               "--fail-on-increase", "info")
+        self.assertEqual(2, invalid.returncode)
+        self.assertEqual("", invalid.stdout)
+        self.assertIn("profiles differ", invalid.stderr)
+
     def test_unmatched_profiles_rejected(self):
         text = self.run_cli(report(profile="public"), report(profile="private"))
         self.assertEqual(2, text.returncode)
