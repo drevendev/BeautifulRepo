@@ -857,6 +857,9 @@ keep their original themed headings.
 
 ### Changed
 
+- Align the pull request checklist with the full local Python verification runner;
+  distinguish incomplete local checks, conditional catalog regeneration and hosted CI.
+
 - Align contributor and coding-agent verification instructions with the complete
   local Python CI runner; regenerate the catalog only when it changes and keep
   targeted checks for diagnosis, not as a substitute for full verification.
