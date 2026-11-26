@@ -857,6 +857,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Extend the checkout-verification case study with four contributor entrances,
+  a revision-pinned command-inventory check and explicit distinctions between
+  list-only verification, a partial local run, a full local run and hosted CI.
+
 - Align the pull request checklist with the full local Python verification runner;
   distinguish incomplete local checks, conditional catalog regeneration and hosted CI.
 
