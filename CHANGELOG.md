@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add an opt-in audit-delta coverage-change exit signal, independently or
+  alongside the rule-count increase threshold, with complete report output
+  and unchanged default behavior.
+
 - Add an opt-in severity threshold to audit-delta comparisons for signalling
   increased individual rule counts with exit code 1, while preserving complete
   report output, default report-only behavior and separate coverage review.

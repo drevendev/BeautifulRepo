@@ -198,6 +198,40 @@ class AuditDeltaTests(unittest.TestCase):
         self.assertEqual("", invalid.stdout)
         self.assertIn("profiles differ", invalid.stderr)
 
+    def test_opt_in_coverage_guard_preserves_complete_output(self):
+        old = report()
+        changed_role = report()
+        changed_role["documents"]["license"] = "COPYING.md"
+        for new, expected in ((report(), 0), (changed_role, 1),
+                              (report(read_files=["INDEX.md"]), 1),
+                              (report(read_files=[]), 1)):
+            for output_format in ("text", "json", "markdown"):
+                with self.subTest(new=new, output_format=output_format):
+                    baseline = self.run_cli(old, new, "--format", output_format)
+                    guarded = self.run_cli(old, new, "--format", output_format,
+                                           "--fail-on-coverage-change")
+                    self.assertEqual(0, baseline.returncode, baseline.stderr)
+                    self.assertEqual(expected, guarded.returncode, guarded.stderr)
+                    self.assertEqual(baseline.stdout, guarded.stdout)
+                    self.assertEqual("", guarded.stderr)
+
+    def test_coverage_guard_composes_with_increase_and_validation(self):
+        old = report(finding("readme.placeholder"))
+        for new, expected in ((old, 0), (report(), 0),
+                              (report(read_files=[]), 1),
+                              (report(finding("link.broken")), 1)):
+            with self.subTest(new=new):
+                result = self.run_cli(old, new, "--fail-on-coverage-change",
+                                      "--fail-on-increase", "warning")
+                self.assertEqual(expected, result.returncode, result.stderr)
+                self.assertTrue(result.stdout)
+        invalid = self.run_cli(report(profile="private"), report(),
+                               "--fail-on-coverage-change",
+                               "--fail-on-increase", "info")
+        self.assertEqual(2, invalid.returncode)
+        self.assertEqual("", invalid.stdout)
+        self.assertIn("profiles differ", invalid.stderr)
+
     def test_unmatched_profiles_rejected(self):
         text = self.run_cli(report(profile="public"), report(profile="private"))
         self.assertEqual(2, text.returncode)
