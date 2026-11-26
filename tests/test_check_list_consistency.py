@@ -1,4 +1,4 @@
-"""README, CONTRIBUTING, the maintenance guide and CI name one and the same check list."""
+"""Keep targeted component checks and the full verification route consistent."""
 from pathlib import Path
 import unittest
 
@@ -13,11 +13,17 @@ CHECKS = (
 
 
 class CheckListConsistencyTests(unittest.TestCase):
-    def test_documents_list_every_check_in_one_order(self):
+    def test_diagnostic_documents_list_component_checks_in_order(self):
         block = "\n".join(CHECKS) + "\n```"
-        for page in ("README.md", "CONTRIBUTING.md", "guides/maintenance-workflow.md", "AGENTS.md"):
+        for page in ("README.md", "CONTRIBUTING.md", "guides/maintenance-workflow.md"):
             with self.subTest(page=page):
                 self.assertIn(block, (ROOT / page).read_text(encoding="utf-8"))
+
+    def test_agents_link_to_the_targeted_checks_instead_of_repeating_them(self):
+        agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        contributing = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        self.assertIn("[CONTRIBUTING.md](CONTRIBUTING.md#verify-a-change-locally)", agents)
+        self.assertIn("### Verify a change locally", contributing)
 
     def test_ci_runs_every_documented_check(self):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")

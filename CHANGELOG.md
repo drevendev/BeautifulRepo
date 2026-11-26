@@ -857,6 +857,10 @@ keep their original themed headings.
 
 ### Changed
 
+- Align contributor and coding-agent verification instructions with the complete
+  local Python CI runner; regenerate the catalog only when it changes and keep
+  targeted checks for diagnosis, not as a substitute for full verification.
+
 - Refresh the experimental MCP host-trial pin to
   `e6c2b3b9817cfbd79d81b44592453e8195819622` so both OS recipes include
   distinct budget-refusal diagnostics and the real SDK oversized-source

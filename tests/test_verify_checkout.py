@@ -24,6 +24,18 @@ class VerifyCheckoutTests(unittest.TestCase):
         self.assertIn("this BeautifulRepo checkout", readme)
         self.assertIn("GitHub Action self-tests", readme)
 
+    def test_contributor_and_agent_routes_lead_with_complete_runner(self):
+        command = "python -I scripts/verify_checkout.py"
+        for path in ("CONTRIBUTING.md", "AGENTS.md"):
+            with self.subTest(path=path):
+                doc = (ROOT / path).read_text(encoding="utf-8")
+                blocks = re.findall(r"```bash\n(.*?)\n```", doc, flags=re.DOTALL)
+                self.assertEqual(blocks[0], command)
+                self.assertIn("`--list`", doc)
+                self.assertIn("`--keep-going`", doc)
+                self.assertIn("python tools/catalog.py --write", doc)
+                self.assertIn("all nine Python steps", doc)
+
     def test_inventory_matches_python_steps_in_quality_catalog_job(self):
         workflow = (ROOT / ".github" / "workflows" / "quality.yml").read_text(encoding="utf-8")
         catalog = workflow.split("\n  catalog:\n", 1)[1].split("\n  lint:\n", 1)[0]

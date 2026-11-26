@@ -77,19 +77,10 @@ redistribution rights. No CLA or DCO requirement is introduced.
 Separate reading documentation from running a tool. Link to copyrighted material rather
 than copying it; check permissions and preserve required attribution before any reuse.
 
-From the repository root with Python 3.11 or newer:
+### Verify a change locally
 
-```bash
-python tools/catalog.py --write
-python tools/catalog.py
-python tools/docs_links.py
-python tools/html_navigation.py
-python -m unittest discover -s tests -v
-python tools/repo_audit.py .
-```
-
-For a general change, run the **Python portion of Quality CI** in this
-checkout with one command (no extra packages):
+From the repository root with Python 3.11 or newer, run the **Python portion
+of Quality CI** with one command (no extra packages):
 
 ```bash
 python -I scripts/verify_checkout.py
@@ -104,15 +95,39 @@ reproduce the separate GitHub Action self-test jobs, the optional Ruff lint
 job, the Linux/Windows matrix, repository protection or external-host tests.
 Only the current linked GitHub checks establish the provider result.
 
-The first command explicitly regenerates `catalog/README.md`; the others are the five
-checks CI runs. `repo_audit.py` audits BeautifulRepo's own README, licence and
-contribution entry points.
-The documentation-link check covers repository-owned inline Markdown and bounded
-one-line reference-style link and image paths. The HTML navigation checker adds
-bounded local HTML/media
-and section-fragment checks. Neither checks external URLs, completely renders
-Markdown, or certifies accessibility. Review the generated diff. No network
-access or third-party Python packages are needed.
+**Only if you edited the catalog**, regenerate its Markdown before running
+the full command:
+
+```bash
+python tools/catalog.py --write
+```
+
+Review the generated diff. The normal verification command validates the
+catalog without regenerating it.
+
+For targeted diagnosis, these five component checks are useful on their own:
+
+```bash
+python tools/catalog.py
+python tools/docs_links.py
+python tools/html_navigation.py
+python -m unittest discover -s tests -v
+python tools/repo_audit.py .
+```
+
+For example, if the runner reports a Markdown destinations failure, repair
+the indicated local link and rerun `python tools/docs_links.py`. Then rerun
+the full local verification command: a passing targeted check does not
+establish that the remaining steps passed. If a check could not be run,
+say so in the pull request rather than reporting a complete local pass.
+
+`repo_audit.py` audits BeautifulRepo's own README, licence and contribution
+entry points. The documentation-link check covers repository-owned inline
+Markdown and bounded one-line reference-style link and image paths.
+The HTML navigation checker adds bounded local HTML/media and section-fragment
+checks. Neither checks external URLs, completely renders Markdown, or certifies
+accessibility. No network access or third-party Python packages are needed for
+these Python checks.
 
 CI additionally checks the root README's local GitHub Actions badge target using
 `python -I tools/workflow_badges.py --root . --repo drevendev/BeautifulRepo --require-badge`. This read-only check establishes file presence, not CI success. The optional
@@ -144,8 +159,8 @@ numbers. A release/tag requires separate owner authorization.
 2. Add a dated `## [vX.Y.Z] — YYYY-MM-DD` heading to `CHANGELOG.md`.
    Document Action compatibility, security changes and whether consumers
    should update a commit pin.
-3. Run the five local checks above and review the actual required Ubuntu,
-   Windows and Action self-test jobs on the intended commit. The existing
+3. Run the full local verification command above and review the actual required
+   Ubuntu, Windows and Action self-test jobs on the intended commit. The existing
    `tests/test_agent_plugin.py` checks skill frontmatter, commands,
    references and manifest consistency.
 4. If an authorized `vX.Y.Z` tag is pushed, the quality workflow also runs
