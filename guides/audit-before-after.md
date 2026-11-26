@@ -122,6 +122,28 @@ version. Record its commit SHA independently. For a real case, accompany the
 counts with a human-reviewed diff, actual checkout or browser observations,
 remaining findings and known limits.
 
+## Optional: signal increasing rule counts in a local check
+
+When comparing two reports with comparable coverage, opt in to a nonzero
+exit code for increased rule counts:
+
+~~~sh
+python -I tools/audit_delta.py before.json after.json --format markdown --fail-on-increase warning
+~~~
+
+The command still prints the complete comparison. Exit 1 means at least one
+individual rule count increased at the selected severity or above: `error`
+checks errors; `warning` checks errors and warnings; `info` checks all three.
+A decrease in another rule does not cancel an increase. The default `never`
+preserves report-only behavior. Exit 2 still indicates invalid evidence or
+arguments.
+
+This is an optional count-based signal, not a new repository merge gate.
+An unchanged count can hide different findings; changed coverage can distort
+counts in either direction. Review coverage and source evidence separately,
+even when the command exits 0. Do not use the exit code as proof of repaired
+behavior or to block a contribution without an explicit local policy.
+
 ## Safety and limits
 
 [audit_delta.py](../tools/audit_delta.py) uses Python's standard library,
@@ -133,8 +155,9 @@ unsupported profiles and mismatched profiles. This path check is a preflight,
 not a race-resistant sandbox or a guarantee for unusual filesystem features. It does not invoke Git,
 run target code, contact a network, modify inputs, discover repositories or
 include input document paths/messages in its output. Exit code **0** means
-structurally comparable reports, not an improvement; **2** means invalid or
-unreadable evidence. It is not a content or security scanner, visual test,
+structurally comparable reports with no triggered optional increase signal,
+not an improvement; **1** means the opted-in rule-count increase threshold
+was triggered; **2** means invalid or unreadable evidence or arguments. It is not a content or security scanner, visual test,
 accessibility certification, release signal or ranking system. Reports
 themselves may contain relative filenames and metadata: review them before
 sharing, especially for private repositories.
