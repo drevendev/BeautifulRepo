@@ -51,6 +51,25 @@ class CLIStarterTests(unittest.TestCase):
         self.assertEqual(result.stdout, outputs[0] + "\n")
         self.assertEqual(result.stderr, "")
 
+    def test_readme_failure_matches_actual_cli_result(self):
+        readme = README.read_text(encoding="utf-8")
+        heading = "## Try a known failure\n"
+        self.assertEqual(readme.count(heading), 1)
+        section = readme.split(heading, 1)[1].split("\n## ", 1)[0]
+        commands = re.findall(r"(?ms)^```bash\n(.*?)\n```$", section)
+        outputs = re.findall(r"(?ms)^```text\n(.*?)\n```$", section)
+        self.assertEqual(
+            commands,
+            ["python examples/cli-starter/rowcount.py examples/cli-starter/invalid-sample.csv"],
+        )
+        self.assertEqual(len(outputs), 1)
+        self.assertIn("Expected stderr:", section)
+        self.assertIn("Expected exit code: **1**; stdout is empty.", section)
+        result = self.run_cli(str(SAMPLE.with_name("invalid-sample.csv")))
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(result.stderr, outputs[0] + "\n")
+
     def test_help_exit_code(self):
         result = self.run_cli("--help")
         self.assertEqual(result.returncode, 0)
