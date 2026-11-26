@@ -5,24 +5,24 @@ contribute to: guides, tested starter examples, templates and small offline Pyth
 checks. This file is the contract for agents that change it. People should read
 [CONTRIBUTING.md](CONTRIBUTING.md), which says the same things at more length.
 
-## Run the five checks
+## Verify the checkout
 
 From the repository root with Python 3.11 or newer, before every pull request:
 
 ```bash
-python tools/catalog.py
-python tools/docs_links.py
-python tools/html_navigation.py
-python -m unittest discover -s tests -v
-python tools/repo_audit.py .
+python -I scripts/verify_checkout.py
 ```
 
-CI runs these alongside additional local checks. To run all nine Python steps
-of the Quality workflow's matrix job in order, use
-`python -I scripts/verify_checkout.py`; this does **not** replace GitHub's
-cross-platform matrix, Action self-test jobs or separate lint job. Edit
-`catalog/resources.json`, never `catalog/README.md`, and regenerate the view
-with `python tools/catalog.py --write`.
+This runs all nine Python steps of the Quality workflow's matrix job in order.
+Use `--list` to inspect the inventory or `--keep-going` to collect independent
+failures. It does **not** replace GitHub's cross-platform matrix, Action
+self-test jobs or separate lint job. For targeted diagnosis, see
+[CONTRIBUTING.md](CONTRIBUTING.md#verify-a-change-locally).
+Report which checks actually ran and which did not.
+
+Edit `catalog/resources.json`, never `catalog/README.md`. For catalog changes
+only, regenerate the view with `python tools/catalog.py --write` before the
+full verification command and review the generated diff.
 
 ## House rules
 
