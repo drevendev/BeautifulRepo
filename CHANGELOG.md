@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Execute the published case-study evidence capture recipe against a synthetic
+  broken-link repository in POSIX tests; verify independent checker results,
+  private output-directory permissions, and refusal to overwrite prior evidence.
+
 - Add a repeatable case-study evidence capture recipe that preserves each offline
   checker's stdout, stderr and exit status, and connects the saved audit reports
   to coverage-aware comparison and the historical PatchPitch example.
