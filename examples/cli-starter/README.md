@@ -26,6 +26,27 @@ record, ignores fully blank records, and preserves quoted CSV newlines. It repor
 error when a nonblank record has a different number of columns than the header. This is
 not a schema, type, delimiter, or adversarial-data validator.
 
+## Try a known failure
+
+Use the deliberately malformed [invalid-sample.csv](invalid-sample.csv) from the
+same checkout root. Its last record has one column instead of two. No private
+data, missing local path, network connection or file write is required.
+
+```bash
+python examples/cli-starter/rowcount.py examples/cli-starter/invalid-sample.csv
+```
+
+Expected stderr:
+
+```text
+rowcount: record ending at line 3: expected 2 columns, got 1
+```
+
+Expected exit code: **1**; stdout is empty. The README regression checks all
+three facts against the actual command. Unlike an OS-specific file-access
+message, this example is controlled by the application. It shows that a partial
+count is not presented as success.
+
 ## Commands and results
 
 | Command | Result |
