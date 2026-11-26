@@ -126,7 +126,7 @@ def compare(before: dict, after: dict) -> dict:
 
 def render_text(delta: dict) -> str:
     lines = ["BeautifulRepo audit delta (offline; count changes, not verified fixes)",
-             "Coverage changed: " + ("YES — review the entry-point documents inspected."
+             "Coverage changed: " + ("YES - review the entry-point documents inspected."
                                    if delta["coverage_changed"] else "no")]
     if delta["coverage_changed"]:
         details = delta["coverage_details"]
