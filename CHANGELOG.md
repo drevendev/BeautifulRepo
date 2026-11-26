@@ -1099,6 +1099,9 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject non-standard JSON numeric constants in saved audit-delta reports, even
+  in ignored extension fields, without changing valid quoted strings or numbers.
+
 - Keep audit-delta text output ASCII-safe when coverage changes, avoiding a
   Unicode encoding crash in legacy consoles and redirected output. Exercise
   all three report formats with strict ASCII stdout.
