@@ -38,6 +38,14 @@ class CheckListConsistencyTests(unittest.TestCase):
                          (ROOT / ".claude/CLAUDE.md").read_text(encoding="utf-8"))
         self.assertIn("[AGENTS.md](AGENTS.md)", (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8"))
 
-    def test_pr_template_points_to_the_five_checks(self):
+    def test_pr_template_points_to_complete_local_verification(self):
         template = (ROOT / ".github/pull_request_template.md").read_text(encoding="utf-8")
-        self.assertIn("five local checks from CONTRIBUTING", template)
+        contributing = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        command = "python -I scripts/verify_checkout.py"
+        self.assertIn(command, contributing)
+        self.assertIn(f"- [ ] Local Python verification passed: `{command}`", template)
+        self.assertIn("CONTRIBUTING.md#verify-a-change-locally", template)
+        self.assertIn("leave unchecked if incomplete", template)
+        self.assertIn("If the catalog changed", template)
+        self.assertIn("not the hosted CI matrix", template)
+        self.assertNotIn("five local checks from CONTRIBUTING", template)
