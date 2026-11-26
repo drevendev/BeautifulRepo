@@ -34,6 +34,26 @@ blindly execute README shell snippets in CI: parsing and running arbitrary
 contributor-supplied commands would cross a different trust boundary. This
 fixed-argv check cannot verify packaging, arbitrary command examples, or OS coverage.
 
+## Give readers a safe failure to recognize
+
+A happy-path transcript alone does not show how a caller can tell whether a
+command failed. For a read-only CLI, a checked-in synthetic invalid input is
+often safer and more reproducible than a missing path, revoked credential or
+unavailable network service.
+
+The [Rowcount negative example](../examples/cli-starter/README.md#try-a-known-failure)
+uses an otherwise valid CSV with one short record after a valid data row.
+Its documented diagnostic, empty stdout and exit code 1 distinguish a failed
+count from a valid partial-looking result. A fixed-argv test checks the
+actual README fences and all three observable results.
+
+For your own project, choose an error that the application controls, link the
+small input fixture, state the expected output stream and exit code, and
+explain how the reader can correct the input. Avoid promising exact wording
+for operating-system or translated errors unless you control those messages.
+A deterministic negative example does not establish that all failure modes
+are handled or that an interactive terminal is accessible.
+
 ## A reader's decision path
 
 1. **Can it solve my problem?** Say what goes in, what comes out, and a major limitation.
