@@ -167,6 +167,54 @@ universal merge requirement. Unchanged coverage is only a comparison of
 the recorded document roles and file selection, not proof of equivalent
 content, an identical auditor revision or a valid measurement.
 
+## Preserve the comparison and its exit status in CI
+
+The two optional signals are available in **Unreleased** source, not the
+v0.2.0 Action. Start with report-only runs; inspect typical changes before
+choosing a regression policy. Use the same reviewed, pinned auditor for both
+reports, separate from the target PR checkout. Do not execute a PR-controlled
+copy of the auditor or use a privileged fork-PR workflow. See the
+[adoption guide](adopting-the-checks.md) for the runner trust boundary.
+
+When a team opts into both signals, a shell with `set -e` would normally
+stop at the first nonzero status. Capture it explicitly so the job retains
+the comparison for review without turning failures into passes. From the
+trusted BeautifulRepo checkout, with fresh reports in a private, writable
+evidence directory (replace the example path), this Bash step leaves the
+Markdown on disk and propagates the original command status:
+
+~~~bash
+evidence='/absolute/path/to/audit-evidence'
+status=0
+python -I tools/audit_delta.py "$evidence/before.json" "$evidence/after.json" \
+  --format markdown --fail-on-increase warning --fail-on-coverage-change \
+  > "$evidence/delta.md" || status=$?
+case "$status" in
+  0) printf '%s\n' 'No opted-in signal; review the evidence.' ;;
+  1) printf '%s\n' 'Review required: inspect report and stderr.' >&2 ;;
+  2) printf '%s\n' 'Invalid evidence or arguments; regenerate or repair.' >&2 ;;
+  *) printf '%s\n' 'Comparison did not complete normally.' >&2 ;;
+esac
+exit "$status"
+~~~
+
+Run this in its own CI step, not in an interactive shell you intend to keep
+open. A shell redirection failure or an abnormal interpreter exit is not an
+audit finding: check stderr and confirm the report is complete before
+interpreting a status of 0 or 1. Status 2 or an unexpected exit must not be
+treated as a valid comparison. Avoid `|| true`, which hides both signals
+and invalid evidence.
+
+For example, a new warning with unchanged document selection calls for
+review of the source change. A newly added contribution guide may instead
+trigger the coverage signal even though it helps readers. Inspect that
+change and approve a new baseline deliberately rather than automatically
+resetting it to silence the job. A profile mismatch is invalid evidence,
+not a regression to waive. Keep the original reports and revision records
+private; the Markdown can be reviewed for sharing, but this recipe does
+not post or upload it. A separate later artifact step, if needed, must
+respect the repository's data-retention and access policy.
+
 ## Safety and limits
 
 [audit_delta.py](../tools/audit_delta.py) uses Python's standard library,
