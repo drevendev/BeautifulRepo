@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Link the recorded public first-audit clone results from the first-run guides
+  and expose the Windows PowerShell route before the Bash block in README.
+  Distinguish hosted-runner CLI evidence from interactive shell and user tests.
+
 - Add an optional Ubuntu/Windows public first-audit trial that independently
   clones the documented audit source, verifies its exact SHA and exercises the
   existing broken-link, repaired-link and legacy-console regression. The local
