@@ -42,16 +42,22 @@ The detached commit pins a reviewed **development checkout** containing the
 combined audit; it is not a new release or the older `v0.2.0` Action pin.
 Its [six Quality CI jobs](https://github.com/drevendev/BeautifulRepo/actions/runs/45364559651)
 passed on the exact SHA, including hard-link and redirected-path source
-guards and legacy-console Unicode diagnostics. No independent first-time
-installation or user experience is inferred.
+guards and legacy-console Unicode diagnostics.
+
 The optional [public first-audit trial workflow](../.github/workflows/public-first-audit.yml)
-runs the documented pin test on Ubuntu and Windows using a separate clone of
-the public GitHub URL, rather than copying the CI checkout. It verifies the
-detached commit, the synthetic broken-link and repaired-link exits, legacy
-console diagnostics and unchanged files. Consult its actual run and job logs
-before reporting a pass. It is not a required merge check, independent user
-test or rendered-accessibility observation; the ordinary local suite remains
-offline.
+completed a separate public GitHub clone on both platforms on **2026-11-27**:
+[Ubuntu log](https://github.com/drevendev/BeautifulRepo/actions/runs/46069638330/job/140743219322)
+and [Windows log](https://github.com/drevendev/BeautifulRepo/actions/runs/46069638330/job/140743219531).
+The test harness at PR [#504](https://github.com/drevendev/BeautifulRepo/pull/504)
+checked out the exact documented `e494a0d5be90dd718db4a25e777aba8abc295ecf`
+source, not the workflow's own revision. Each log records exit 1 for a broken
+local link, exit 0 after a synthetic repair, complete link checks, unchanged
+target files, and a successful legacy ASCII console regression with an unchanged
+tool checkout. The workflow is optional; the ordinary local suite remains offline.
+
+This is automated clone and CLI evidence on hosted runners, not an independent
+user test, a literal execution of the full documented Bash/PowerShell blocks,
+or rendered-accessibility evidence. It applies to this pin only.
 
 Cloning needs network access; the audit itself does not. To adopt a newer
 revision, review and intentionally change the pin rather than silently
