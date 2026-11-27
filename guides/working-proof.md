@@ -44,6 +44,15 @@ Its [six Quality CI jobs](https://github.com/drevendev/BeautifulRepo/actions/run
 passed on the exact SHA, including hard-link and redirected-path source
 guards and legacy-console Unicode diagnostics. No independent first-time
 installation or user experience is inferred.
+The optional [public first-audit trial workflow](../.github/workflows/public-first-audit.yml)
+runs the documented pin test on Ubuntu and Windows using a separate clone of
+the public GitHub URL, rather than copying the CI checkout. It verifies the
+detached commit, the synthetic broken-link and repaired-link exits, legacy
+console diagnostics and unchanged files. Consult its actual run and job logs
+before reporting a pass. It is not a required merge check, independent user
+test or rendered-accessibility observation; the ordinary local suite remains
+offline.
+
 Cloning needs network access; the audit itself does not. To adopt a newer
 revision, review and intentionally change the pin rather than silently
 running whatever is on `master`.

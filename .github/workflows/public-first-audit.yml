@@ -1,0 +1,41 @@
+name: Public first-audit trial
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - README.md
+      - guides/combined-audit.md
+      - guides/working-proof.md
+      - tests/test_first_visit.py
+      - .github/workflows/public-first-audit.yml
+  push:
+    branches: [master]
+    paths:
+      - README.md
+      - guides/combined-audit.md
+      - guides/working-proof.md
+      - tests/test_first_visit.py
+      - .github/workflows/public-first-audit.yml
+permissions:
+  contents: read
+jobs:
+  public-clone:
+    name: Public first-audit clone (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 ref inspected 2026-10-05
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 ref inspected 2026-10-29
+        with:
+          python-version: '3.11'
+      - name: Clone public audit source and verify the documented pin
+        env:
+          BEAUTIFULREPO_FIRST_AUDIT_PUBLIC_CLONE: '1'
+          GIT_TERMINAL_PROMPT: '0'
+        run: python -I -m unittest discover -s tests -p test_first_visit.py -k test_documented_pin_runs_the_actual_first_audit_from_a_clean_clone -v
