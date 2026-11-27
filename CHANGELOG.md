@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Exercise both displayed library README calls and their exact output in CI,
+  including a handled invalid-input exception; clarify the observed runtime
+  matrix without implying a published distribution or wider support policy.
+
 - Check the research-data starter README's displayed aggregate against the same
   JSON fixture as the guide and CLI, rejecting incorrect totals, missing markers
   and duplicate keys with document-specific diagnostics.
