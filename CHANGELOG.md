@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add an optional Ubuntu/Windows public first-audit trial that independently
+  clones the documented audit source, verifies its exact SHA and exercises the
+  existing broken-link, repaired-link and legacy-console regression. The local
+  test suite retains its offline clone path; no user-testing claim is made.
+
 - Add a portable Python case-study evidence capture recipe for Windows and POSIX,
   with tests executing the documented block and verifying independent exit statuses,
   immutable input and refusal to overwrite earlier evidence.
