@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a portable Python case-study evidence capture recipe for Windows and POSIX,
+  with tests executing the documented block and verifying independent exit statuses,
+  immutable input and refusal to overwrite earlier evidence.
+
 - Add a source-backed multilingual README recipe with an explicit partial
   translation, a shared authoritative first-run route, and link/fragment
   regressions that materialize the displayed example.

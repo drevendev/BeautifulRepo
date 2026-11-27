@@ -201,12 +201,15 @@ issues for their live status.
   ([source-only review](case-studies/hungrycrab-first-command.md)):
   a verified public README at a fixed upstream commit, with a specific
   first-visit obstacle and copyable proposed improvement. It is **not** an
-  upstream PR, after-state or observed installation; the full procedure
-  remains open under #88.
+  upstream PR, after-state or observed installation. The completed first-case
+  epic #88 does not establish runtime results for HungryCrab.
 - **Real before/after cases**
   ([#88](https://github.com/drevendev/BeautifulRepo/issues/88)):
-  the [repeatable procedure](case-studies/README.md) and
-  [PatchPitch case](case-studies/patchpitch.md) are published. Additional
+  the [repeatable procedure](case-studies/README.md), including shell and portable
+  Python capture recipes, and [PatchPitch case](case-studies/patchpitch.md) are
+  published. The minimum first-case outcome is complete; the source-only
+  Quillgrain follow-up ([#83](https://github.com/drevendev/BeautifulRepo/issues/83))
+  remains separate. Additional
   case studies need exact before/after revisions, observed first-run commands
   and authenticated PR evidence. Changes to other repositories are outside
   BeautifulRepo's writable scope.

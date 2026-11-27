@@ -122,6 +122,64 @@ report or treat `--fail-on never` as a passing audit. Keep raw reports private a
 review the [confidentiality checklist](../checklists/confidentiality.md) before
 publishing excerpts.
 
+#### Portable capture (Windows or POSIX)
+
+If a POSIX shell is unavailable, save the following Python 3.11+ block as
+`capture_case.py` in a trusted private directory **outside both checkouts**.
+Run it from the pinned auditor checkout with the same trusted Python interpreter
+used for the audit. Pass two absolute paths (quote paths with spaces):
+
+```powershell
+python -I "C:\private\capture_case.py" "C:\snapshots\target" "C:\private\case-before"
+```
+
+```python
+import subprocess
+import sys
+from pathlib import Path
+
+if len(sys.argv) != 3:
+    raise SystemExit("usage: capture_case.py TARGET NEW_EVIDENCE_DIR")
+auditor = Path.cwd().resolve()
+target, evidence = map(Path, sys.argv[1:])
+if not target.is_absolute() or not evidence.is_absolute():
+    raise SystemExit("use absolute target and evidence paths")
+target, evidence = target.resolve(), evidence.resolve()
+if not target.is_dir() or not evidence.parent.is_dir():
+    raise SystemExit("target and trusted evidence parent must exist")
+if any(evidence.is_relative_to(root) for root in (auditor, target)):
+    raise SystemExit("evidence must be outside both checkouts")
+
+checks = (
+    ("audit", "repo_audit.py", [str(target), "--profile", "public",
+                             "--format", "json", "--fail-on", "never"]),
+    ("markdown", "docs_links.py", ["--root", str(target)]),
+    ("html", "html_navigation.py", ["--root", str(target)]),
+)
+evidence.mkdir(mode=0o700, exist_ok=False)
+for name, tool, args in checks:
+    command = [sys.executable, "-I", "-X", "utf8",
+               str(auditor / "tools" / tool), *args]
+    with (evidence / f"{name}.out").open("xb") as out, (
+        evidence / f"{name}.err"
+    ).open("xb") as err:
+        result = subprocess.run(command, cwd=auditor, stdout=out,
+                                stderr=err, check=False, timeout=120)
+    with (evidence / f"{name}.status").open("x", encoding="ascii") as status:
+        status.write(f"{result.returncode}\n")
+```
+
+The path example is illustrative; substitute your own existing directories.
+On POSIX the new directory requests mode `0700`; on Windows, choose a parent
+whose ACL already restricts access. The script does not configure ACLs. As in
+the shell recipe, the output directory must not already exist, and all paths
+and the auditor interpreter must be trusted. Ordinary nonzero checker exits
+are recorded without stopping subsequent checks. A launch failure, timeout
+or filesystem error stops capture and may leave partial files: inspect them
+and use a different new directory for a retry. Never treat partial evidence
+as a successful run. The standard-library script requires no additional
+packages or model host.
+
 For a current auditor checkout containing `audit_delta.py`, compare valid saved
 `audit.out` JSON reports using the [before/after guide](../guides/audit-before-after.md).
 Keep coverage changes separate from count changes. For example, the published
