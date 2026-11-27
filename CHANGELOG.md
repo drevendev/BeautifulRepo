@@ -886,6 +886,9 @@ keep their original themed headings.
 
 ### Changed
 
+- Document verified Ubuntu/Windows SDK installation from the immutable MCP source
+  pin, distinguishing it from unexecuted shell instructions and real host trials.
+
 - Extend the checkout-verification case study with four contributor entrances,
   a revision-pinned command-inventory check and explicit distinctions between
   list-only verification, a partial local run, a full local run and hosted CI.

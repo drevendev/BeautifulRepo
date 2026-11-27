@@ -1,6 +1,6 @@
 # Experimental local MCP adapter (not a released integration)
 
-**Development candidate, source-reviewed 2026-11-24 (UTC).** This optional adapter exposes
+**Development candidate, SDK installation evidence updated 2026-11-27 (UTC).** This optional adapter exposes
 BeautifulRepo's *existing* offline checkers as three read-only tools over MCP
 stdio. No successful Claude Code, Codex, or external-user installation is
 claimed. The normal CLI and GitHub Action do **not** require MCP.
@@ -95,6 +95,21 @@ and the *BeautifulRepo Git commit* during an independent installation trial;
 do not substitute a floating branch and claim the results are reproducible.
 
 ### Reproduce an immutable development checkout (POSIX)
+
+**Independent public-source SDK installation: PASS (2026-11-27).**
+[PR #500](https://github.com/drevendev/BeautifulRepo/pull/500) added separate
+[Ubuntu](https://github.com/drevendev/BeautifulRepo/actions/runs/45998714586/job/140504582902)
+and [Windows](https://github.com/drevendev/BeautifulRepo/actions/runs/45998714586/job/140504583252)
+CI jobs. Both fetched the exact source pin below into an empty directory,
+verified detached HEAD, installed `mcp==2.3.0` without the pip cache in a
+fresh Python 3.11 virtual environment, and passed that checkout's own smoke.
+The logs confirm both SDK protocol lifecycles, all three checker-equivalent
+tool calls on healthy/broken synthetic roots, unchanged fixture bytes,
+unsafe-root and outside-alias refusal, and oversized-source recovery.
+This is independent public-source **SDK** evidence from hosted CI, not a
+literal execution of the shell blocks below, a macOS result, a third-party
+client test, or an external-user/Claude Code/Codex installation.
+Transitive dependencies are not locked by the SDK version pin alone.
 
 This **source-checked procedure, refreshed 2026-11-24 (UTC), has not passed a fresh
 Claude Code/Codex host installation**. Use a disposable environment. The
@@ -348,9 +363,11 @@ success, or vice versa. Inspect **each** job result and log: on Windows,
 symlink creation may be reported as **untested**, which is not symlink
 coverage. This smoke does not create a native Windows junction (that has a
 separate Windows-only source-level regression), does not run an actual
-Claude Code or Codex host, and does not establish model behavior or external
-installation. Do not mark cross-platform protocol PASS until both jobs
-actually complete successfully on the same commit.
+Claude Code or Codex host, and does not establish model behavior or an external
+user's installation. The workflow also runs the independent pinned-source
+jobs described above; their source revision is distinct from the workflow's
+candidate checkout. Record both operating-system results for the relevant
+source SHA before claiming cross-platform protocol PASS.
 
 An opt-in [real-protocol smoke script](../integrations/mcp_protocol_smoke.py)
 and [focused GitHub Actions workflow](../.github/workflows/mcp-protocol.yml)
@@ -391,8 +408,10 @@ before claiming a PASS. Denied-root checks do not prove defenses against
 concurrent filesystem replacement or hostile mounts, and missing-root tests
 do not measure a checker timeout. A successful smoke demonstrates only the **pinned Python SDK's own** modern
 and legacy stdio client modes, not compatibility with independently implemented
-older clients. It is not a clean install from an immutable public commit, a
-Claude Code/Codex host session, model invocation, or external-user trial.
+older clients. The candidate-checkout smoke alone is not a clean install from an immutable
+public commit. The separate pinned-source jobs supply that SDK installation
+evidence, but neither job type is a Claude Code/Codex host session, model
+invocation, or external-user trial.
 See [#255](https://github.com/drevendev/BeautifulRepo/issues/255) for
 the remaining acceptance requirements.
 
