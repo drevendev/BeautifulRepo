@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Add a separate optional Ubuntu/Windows MCP job that fetches the exact public
+  installation commit documented in the guide, verifies its detached HEAD,
+  installs the pinned SDK in a fresh environment and runs that source's smoke.
+  Keep candidate-checkout evidence separate; this does not test model hosts.
+
 - Run the optional MCP protocol smoke in a newly created temporary virtual
   environment on both CI platforms, installing the pinned SDK into the same
   interpreter that runs the smoke rather than relying on runner packages.
