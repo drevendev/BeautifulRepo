@@ -3,12 +3,14 @@ on:
   pull_request:
     paths:
       - 'integrations/**'
+      - 'guides/local-mcp.md'
       - 'tools/**'
       - '.github/workflows/mcp-protocol.yml'
   push:
     branches: [master]
     paths:
       - 'integrations/**'
+      - 'guides/local-mcp.md'
       - 'tools/**'
       - '.github/workflows/mcp-protocol.yml'
   workflow_dispatch:
@@ -46,3 +48,43 @@ jobs:
               python = env / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
               subprocess.run([str(python), "-m", "pip", "install", "mcp==2.3.0"], check=True)
               subprocess.run([str(python), "-I", "-B", "integrations/mcp_protocol_smoke.py"], check=True)
+
+  pinned-source:
+    # Test the reader's documented immutable source separately from the PR checkout.
+    name: MCP pinned public source / ${{ matrix.os }} / Python 3.11
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 ref inspected 2026-10-29
+        with:
+          python-version: '3.11'
+      - name: Fetch exact public source and probe with a fresh SDK
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          import tempfile
+
+          pin = "e6c2b3b9817cfbd79d81b44592453e8195819622"
+          with tempfile.TemporaryDirectory(prefix="beautifulrepo-mcp-pin-", dir=os.environ["RUNNER_TEMP"]) as tmp:
+              checkout = Path(tmp) / "source"
+              checkout.mkdir()
+              git_env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+              subprocess.run(["git", "init", "--quiet"], cwd=checkout, env=git_env, check=True)
+              subprocess.run(["git", "fetch", "--depth=1", "https://github.com/drevendev/BeautifulRepo.git", pin], cwd=checkout, env=git_env, check=True)
+              subprocess.run(["git", "checkout", "--detach", "FETCH_HEAD"], cwd=checkout, env=git_env, check=True)
+              actual = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=checkout, text=True).strip()
+              if actual != pin:
+                  raise SystemExit("Unexpected pinned source SHA")
+              print(f"Independent public source: {actual}", flush=True)
+              env = Path(tmp) / "venv"
+              subprocess.run([sys.executable, "-m", "venv", str(env)], check=True)
+              python = env / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+              subprocess.run([str(python), "-m", "pip", "install", "--no-cache-dir", "mcp==2.3.0"], check=True)
+              subprocess.run([str(python), "-I", "-B", "integrations/mcp_protocol_smoke.py"], cwd=checkout, check=True)
