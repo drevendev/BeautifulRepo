@@ -25,9 +25,28 @@ python curate.py --as-of 2027-05-01 --fail-on-stale
 ```
 
 All three entries are then due for a human recheck and the exit status is **2**.
-Without `--fail-on-stale`, the same report exits **0**. Malformed input exits **1**
-with a generic diagnostic. Invalid command-line arguments use argparse's status
-**2**; distinguish them by stderr and the absence of a report.
+Without the flag, the same report exits **0**:
+
+```bash
+python curate.py --as-of 2027-05-01
+```
+
+Both due-review commands produce the same Markdown on stdout with three
+`**Review due**` markers and empty stderr. The flag changes only the exit status.
+
+Compare those results with two intentionally unsuccessful invocations:
+
+```bash
+python curate.py --as-of 2026-10-16
+python curate.py --format invalid
+```
+
+The first supplies a date earlier than the sample's recorded review dates:
+exit **1**, empty stdout and stderr `Invalid collection input or unavailable file`.
+The second supplies an unsupported output format: exit **2**, empty stdout and
+an argparse diagnostic containing `invalid choice`. In both cases there is no
+report to save. A due-review exit 2 is therefore not the same as an argument
+error. Inspect the streams as well as the exit status before acting on a report.
 
 ## Input contract
 
