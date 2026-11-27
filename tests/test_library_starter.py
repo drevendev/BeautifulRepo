@@ -45,6 +45,36 @@ class LibraryStarterIntegrationTests(unittest.TestCase):
         self.assertIn("**Verified runtime:**", readme)
         self.assertNotIn("Python 3.11+", readme)
 
+    def test_readme_calls_and_displayed_outputs(self):
+        # Execute only the examples in our own starter README, never Markdown
+        # from repositories inspected by the offline audit tools.
+        readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
+        blocks = re.findall(
+            r"^```(python|text)\n(.*?)^```$", readme, re.MULTILINE | re.DOTALL,
+        )
+        self.assertEqual(
+            [language for language, _ in blocks], ["python", "text", "python", "text"],
+        )
+        for index, expected in enumerate((
+            "hello-library-101\n",
+            "ValueError: text must be nonempty ASCII\n",
+        )):
+            with self.subTest(example=index):
+                code = blocks[index * 2][1]
+                displayed = blocks[index * 2 + 1][1]
+                self.assertEqual(displayed, expected)
+                completed = subprocess.run(
+                    [sys.executable, "-c", code],
+                    cwd=EXAMPLE,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    timeout=15,
+                )
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                self.assertEqual(completed.stdout, displayed)
+                self.assertEqual(completed.stderr, "")
+
     def test_nested_api_suite_is_part_of_default_ci(self):
         completed = subprocess.run(
             [
