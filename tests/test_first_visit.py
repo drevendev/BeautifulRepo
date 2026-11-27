@@ -235,6 +235,7 @@ python() {
     def test_documented_pin_runs_the_actual_first_audit_from_a_clean_clone(self):
         # The current-HEAD clone smoke does not exercise the detached SHA that
         # first-time readers actually copy from README/combined-audit.md.
+        import os
         import re
 
         pattern = r"^[ \t]*git checkout --detach ([0-9a-f]{40})(?: &&)?$"
@@ -250,8 +251,10 @@ python() {
         pin = readme_pins[0]
         self.assertEqual({pin}, set(guide_pins))
         self.assertEqual([pin], proof_pins, "All public first-run guides must use the same pinned source")
-        if not (ROOT / ".git").exists():
+        public_trial = os.environ.get("BEAUTIFULREPO_FIRST_AUDIT_PUBLIC_CLONE") == "1"
+        if not public_trial and not (ROOT / ".git").exists():
             self.skipTest("source archive has no local Git history")
+        source = "https://github.com/drevendev/BeautifulRepo.git" if public_trial else str(ROOT)
 
         with tempfile.TemporaryDirectory(prefix="beautifulrepo-pinned-audit-") as tmp:
             parent = Path(tmp)
@@ -270,7 +273,7 @@ python() {
             )
 
             for command in (
-                ["git", "clone", "--quiet", "--no-hardlinks", str(ROOT), str(checkout)],
+                ["git", "-c", "credential.helper=", "clone", "--quiet", "--no-hardlinks", source, str(checkout)],
                 ["git", "-C", str(checkout), "checkout", "--quiet", "--detach", pin],
             ):
                 outcome = subprocess.run(
@@ -287,6 +290,8 @@ python() {
             )
             self.assertEqual(0, actual.returncode, actual.stderr)
             self.assertEqual(pin, actual.stdout.strip())
+            if public_trial:
+                print(f"Public first-audit checkout: {actual.stdout.strip()}", flush=True)
 
             for expected, missing in ((1, True), (0, False)):
                 if not missing:
@@ -312,6 +317,8 @@ python() {
                     self.assertEqual(expected, check["exit_code"])
                 self.assertEqual(before, file_snapshot(target),
                                  "Pinned first audit changed the target")
+                if public_trial:
+                    print(f"Synthetic target: observed exit {result.returncode}; both link checks complete; target unchanged", flush=True)
 
             # Exercise the actual pinned text CLI with a strict legacy stream.
             # -I ignores PYTHONIOENCODING, so set the encoding explicitly in
@@ -347,6 +354,8 @@ python() {
             self.assertEqual("", clean.stdout,
                              "Pinned first audit changed its tool checkout")
             self.assertFalse((checkout / "tools" / "__pycache__").exists())
+            if public_trial:
+                print("Legacy-console negative case passed; tool checkout unchanged", flush=True)
 
 
     def test_documented_powershell_setup_stops_before_audit_on_failure(self):
