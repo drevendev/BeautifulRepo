@@ -104,8 +104,11 @@ def check_startup_refusals(root: Path) -> tuple[int, bool]:
     return len(candidates), symlink_tested
 
 
-async def probe(root: Path, *, broken: bool, mode: str,
+async def probe(root: Path, *, expected_exits: dict[str, int], mode: str,
                 exercise_missing_root: bool = False) -> str:
+    """Compare every tool with direct CLI evidence and fixture-specific exits."""
+    if set(expected_exits) != set(CHECKS):
+        raise AssertionError("fixture must declare an expected exit for every tool")
     params = StdioServerParameters(
         command=sys.executable,
         args=["-I", "-B", str(SERVER), "--root", str(root)],
@@ -141,7 +144,7 @@ async def probe(root: Path, *, broken: bool, mode: str,
                 raise AssertionError(
                     f"MCP tool evidence disagrees with independent CLI for {name}"
                 )
-            expected_exit = 0 if name == "audit_repository" or not broken else 1
+            expected_exit = expected_exits[name]
             if direct_exit != expected_exit:
                 raise AssertionError(
                     f"{name}: expected direct CLI exit {expected_exit}, got {direct_exit}"
@@ -333,23 +336,48 @@ async def main() -> None:
         root = workspace / "fixture"
         root.mkdir()
         (root / "docs").mkdir()
-        (root / "README.md").write_text(
-            "# Fixture\n\n[Guide](docs/guide.md)\n", encoding="utf-8"
+        readme = root / "README.md"
+        readme.write_text(
+            '# Fixture\n\n[Guide](docs/guide.md)\n\n'
+            '<a href="docs/guide.md#guide">Guide section</a>\n',
+            encoding="utf-8",
         )
         (root / "docs" / "guide.md").write_text("# Guide\n", encoding="utf-8")
         refusal_count, symlink_tested = check_startup_refusals(root)
+        healthy = dict.fromkeys(CHECKS, 0)
         modern_healthy = await probe(
-            root, broken=False, mode="auto", exercise_missing_root=True
+            root, expected_exits=healthy, mode="auto", exercise_missing_root=True
         )
         legacy_healthy = await probe(
-            root, broken=False, mode="legacy", exercise_missing_root=True
+            root, expected_exits=healthy, mode="legacy", exercise_missing_root=True
         )
-        (root / "README.md").write_text(
+        # An existing Markdown destination with a broken raw HTML fragment is
+        # an HTML-navigation-only failure, not a Markdown destination failure.
+        # Distinct outcomes prove the wrapper does not conflate the two tools.
+        readme.write_text(
+            '# Fixture\n\n[Guide](docs/guide.md)\n\n'
+            '<a href="docs/guide.md#missing">Missing section</a>\n',
+            encoding="utf-8",
+        )
+        html_only = {
+            "audit_repository": 0,
+            "check_documentation_links": 0,
+            "check_html_navigation": 1,
+        }
+        modern_html = await probe(root, expected_exits=html_only, mode="auto")
+        legacy_html = await probe(root, expected_exits=html_only, mode="legacy")
+        readme.write_text(
             "# Fixture\n\n[Broken](docs/missing.md)\n", encoding="utf-8"
         )
-        modern_broken = await probe(root, broken=True, mode="auto")
-        legacy_broken = await probe(root, broken=True, mode="legacy")
-        if modern_healthy != modern_broken or legacy_healthy != legacy_broken:
+        broken = {
+            "audit_repository": 0,
+            "check_documentation_links": 1,
+            "check_html_navigation": 1,
+        }
+        modern_broken = await probe(root, expected_exits=broken, mode="auto")
+        legacy_broken = await probe(root, expected_exits=broken, mode="legacy")
+        if (modern_healthy != modern_broken or modern_healthy != modern_html
+                or legacy_healthy != legacy_broken or legacy_healthy != legacy_html):
             raise AssertionError("protocol version changed within an MCP lifecycle")
         redirected_modes = [
             mode for mode in ("auto", "legacy")
@@ -359,8 +387,9 @@ async def main() -> None:
         print(
             f"MCP stdio SDK smoke PASS; modern discovery {modern_healthy}; "
             f"legacy initialize {legacy_healthy}; "
-            "3 tools listed and matched separate direct CLI bundle runs on healthy/broken synthetic roots "
-            "in both lifecycles; "
+            "3 tools listed and matched separate direct CLI bundle runs on healthy, "
+            "HTML-only broken-anchor, and broken Markdown synthetic roots in both "
+            "lifecycles; "
             f"fixture files unchanged; {refusal_count} unsafe startup roots refused "
             f"(symlink exercised: {symlink_tested}); missing root during an active "
             "session returns incomplete evidence for all 3 tools in both lifecycles; "

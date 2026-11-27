@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Exercise an HTML-only broken section anchor in both MCP SDK protocol lifecycles,
+  verifying that the Markdown destination checker remains clean while the HTML
+  navigation tool reports a finding; this is not a model-host test.
+
 - Verify the curated starter's documented commands, distinguishing a due-review
   report from invalid input and argument errors by exit status and output streams.
 
