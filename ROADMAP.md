@@ -12,6 +12,10 @@ Milestones describe useful outcomes rather than dates or assumed volunteer labor
   with an [editable deployment evidence record](templates/PAGES_DEPLOYMENT_RECORD.template.md),
   separating build, deploy status and observed reader experience without
   changing hosting settings or claiming a real site was inspected.
+- [Multilingual README navigation](guides/readme-localization.md) with a fictional
+  partial-translation example and regressions for missing language destinations
+  and stale authoritative heading links; no language or rendered-accessibility
+  certification is claimed.
 - [Task-first documentation navigation](guides/documentation-navigation.md) with a
   [copyable documentation index](templates/DOCS_INDEX.template.md), a fictional
   before/after reader route and a manual navigation review record.
