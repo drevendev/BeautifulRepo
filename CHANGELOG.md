@@ -13,6 +13,11 @@ keep their original themed headings.
 
 ### Added
 
+- Run the optional MCP protocol smoke in a newly created temporary virtual
+  environment on both CI platforms, installing the pinned SDK into the same
+  interpreter that runs the smoke rather than relying on runner packages.
+  This remains checkout-level SDK evidence, not a real model-host installation.
+
 - Exercise an HTML-only broken section anchor in both MCP SDK protocol lifecycles,
   verifying that the Markdown destination checker remains clean while the HTML
   navigation tool reports a finding; this is not a model-host test.
