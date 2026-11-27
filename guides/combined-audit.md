@@ -40,8 +40,9 @@ ensures the commands use the same source revision rather than a moving
 Action does not include `audit_bundle.py`. `git clone` fetches from
 GitHub; the Python checkers do not fetch external URLs or run target code.
 Inspect the exit status of each Python command before treating its output
-as complete. The local CI clone smoke exercises its tested branch HEAD,
-not an independently observed remote clone of this pin.
+as complete. The local CI clone smoke exercises its tested branch HEAD.
+A separate [public clone trial](working-proof.md) verified this exact documented
+pin on Ubuntu and Windows on 2026-11-27 using a synthetic target.
 
 
 ## Windows PowerShell first run
@@ -88,10 +89,12 @@ The pinned checkout is a reviewed development snapshot, not a new stable
 release. Its [six Quality CI checks](https://github.com/drevendev/BeautifulRepo/actions/runs/45364559651)
 completed successfully on the exact pinned source (2026-11-24). The pin
 includes hard-link and path-redirection protections and readable diagnostics
-in legacy console encodings; this is source/checker evidence, not external-user installation. This path is checked using a fresh **local** sibling Git clone of
-the CI source revision on Windows; the remote pinned-revision checkout and
-actual first-time end-user PowerShell session have not been independently
-observed. The audit
+in legacy console encodings. The [Windows public clone job](https://github.com/drevendev/BeautifulRepo/actions/runs/46069638330/job/140743219531)
+also verified this exact remote pin and the audit CLI against a synthetic target
+on 2026-11-27. This is distinct from the local sibling-clone PowerShell smoke
+and the setup control-flow test with mocked native commands. The public clone
+job does not execute the full PowerShell block above; an actual first-time
+end-user PowerShell session remains unobserved. The audit
 does not edit either checkout. Do not run it on a sensitive private target
 without first reviewing what source paths and diagnostics its output reveals.
 
