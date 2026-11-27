@@ -31,7 +31,18 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 ref inspected 2026-10-29
         with:
           python-version: '3.11'
-      - name: Install optional pinned MCP Python SDK
-        run: python -m pip install "mcp==2.3.0"
-      - name: Negotiate stdio MCP, list tools, and compare synthetic results
-        run: python -I -B integrations/mcp_protocol_smoke.py
+      - name: Install pinned SDK in a fresh environment and probe stdio
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          import tempfile
+
+          with tempfile.TemporaryDirectory(prefix="beautifulrepo-mcp-ci-", dir=os.environ["RUNNER_TEMP"]) as tmp:
+              env = Path(tmp) / "venv"
+              subprocess.run([sys.executable, "-m", "venv", str(env)], check=True)
+              python = env / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+              subprocess.run([str(python), "-m", "pip", "install", "mcp==2.3.0"], check=True)
+              subprocess.run([str(python), "-I", "-B", "integrations/mcp_protocol_smoke.py"], check=True)
