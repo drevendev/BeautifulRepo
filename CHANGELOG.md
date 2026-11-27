@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Check the research-data starter README's displayed aggregate against the same
+  JSON fixture as the guide and CLI, rejecting incorrect totals, missing markers
+  and duplicate keys with document-specific diagnostics.
+
 - Add a reproducible negative first-run example to the CLI starter: a synthetic
   malformed CSV and a README-fence regression for exact stderr, empty stdout
   and exit code 1, with adaptation guidance for other CLI maintainers.
