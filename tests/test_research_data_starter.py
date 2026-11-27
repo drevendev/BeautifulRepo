@@ -16,42 +16,49 @@ EXPECTED = json.loads(EXPECTED_FILE.read_text(encoding="utf-8"))
 RESULT_START = "<!-- beautifulrepo:research-result:start -->"
 RESULT_END = "<!-- beautifulrepo:research-result:end -->"
 GUIDE_LOCATION = "guides/research-data-repositories.md"
+README_LOCATION = "examples/research-data-starter/README.md"
 
 
 def _unique_json_keys(pairs):
     result = {}
     for key, value in pairs:
         if key in result:
-            raise ValueError(f"{GUIDE_LOCATION}: duplicate JSON key {key!r}")
+            raise ValueError(f"duplicate JSON key {key!r}")
         result[key] = value
     return result
 
 
-def _registered_guide_result(markdown: str) -> dict:
+def _registered_result(markdown: str, location: str) -> dict:
     """Read only the explicitly registered JSON result; never execute Markdown."""
     if markdown.count(RESULT_START) != 1 or markdown.count(RESULT_END) != 1:
-        raise ValueError(f"{GUIDE_LOCATION}: expected one registered JSON result")
+        raise ValueError(f"{location}: expected one registered JSON result")
     start = markdown.index(RESULT_START) + len(RESULT_START)
     end = markdown.index(RESULT_END)
     if end <= start:
-        raise ValueError(f"{GUIDE_LOCATION}: result markers are reversed")
+        raise ValueError(f"{location}: result markers are reversed")
     block = markdown[start:end].strip()
     if not (block.startswith("```json\n") and block.endswith("\n```")):
-        raise ValueError(f"{GUIDE_LOCATION}: expected a single fenced JSON result")
+        raise ValueError(f"{location}: expected a single fenced JSON result")
     payload = block[len("```json\n"):-len("\n```")]
     try:
         parsed = json.loads(payload, object_pairs_hook=_unique_json_keys)
     except (ValueError, TypeError) as exc:
-        raise ValueError(f"{GUIDE_LOCATION}: invalid registered JSON: {exc}") from exc
+        raise ValueError(f"{location}: invalid registered JSON: {exc}") from exc
     if not isinstance(parsed, dict):
-        raise ValueError(f"{GUIDE_LOCATION}: JSON result must be an object")
+        raise ValueError(f"{location}: JSON result must be an object")
     return parsed
 
 
-def _assert_registered_result_matches_fixture(markdown: str) -> None:
-    if _registered_guide_result(markdown) != EXPECTED:
+def _registered_guide_result(markdown: str) -> dict:
+    return _registered_result(markdown, GUIDE_LOCATION)
+
+
+def _assert_registered_result_matches_fixture(
+    markdown: str, location: str = GUIDE_LOCATION,
+) -> None:
+    if _registered_result(markdown, location) != EXPECTED:
         raise AssertionError(
-            f"{GUIDE_LOCATION}: documented result differs from {EXPECTED_FILE.relative_to(ROOT)}"
+            f"{location}: documented result differs from {EXPECTED_FILE.relative_to(ROOT)}"
         )
 
 
@@ -69,6 +76,32 @@ class ResearchDataIntegrationTests(unittest.TestCase):
 
     def test_registered_guide_result_matches_shared_fixture(self):
         _assert_registered_result_matches_fixture(GUIDE.read_text(encoding="utf-8"))
+
+    def test_registered_readme_result_matches_shared_fixture(self):
+        readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
+        _assert_registered_result_matches_fixture(readme, README_LOCATION)
+
+    def test_edited_readme_total_reports_readme_path(self):
+        readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
+        old_value = f'"grand_total": {EXPECTED["grand_total"]}'
+        new_value = f'"grand_total": {EXPECTED["grand_total"] + 1}'
+        self.assertIn(old_value, readme)
+        with self.assertRaisesRegex(AssertionError, README_LOCATION):
+            _assert_registered_result_matches_fixture(
+                readme.replace(old_value, new_value, 1), README_LOCATION,
+            )
+
+    def test_invalid_registered_readme_reports_readme_path(self):
+        readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
+        row_value = f'"rows": {EXPECTED["rows"]}'
+        for altered in (
+            readme.replace(RESULT_START, "", 1),
+            readme.replace(row_value, row_value + ", " + row_value, 1),
+        ):
+            with self.subTest(case=altered[:48]), self.assertRaisesRegex(
+                ValueError, README_LOCATION,
+            ):
+                _assert_registered_result_matches_fixture(altered, README_LOCATION)
 
     def test_reordered_json_keys_remain_valid(self):
         guide = GUIDE.read_text(encoding="utf-8")
