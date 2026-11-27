@@ -54,8 +54,7 @@ class CaseStudyIndexTests(unittest.TestCase):
 
 
 
-@unittest.skipUnless(os.name == "posix" and shutil.which("sh"), "requires POSIX shell")
-class CaseCaptureRecipeTests(unittest.TestCase):
+class PortableCaseCaptureRecipeTests(unittest.TestCase):
     def setUp(self):
         temp = tempfile.TemporaryDirectory(prefix="case capture ")
         self.addCleanup(temp.cleanup)
@@ -72,18 +71,13 @@ class CaseCaptureRecipeTests(unittest.TestCase):
         self.index = (CASES / "README.md").read_text(encoding="utf-8")
 
     def run_recipe(self):
-        blocks = re.findall(r"^\x60{3}bash\n(.*?)^\x60{3}$", self.index, re.M | re.S)
-        (block,) = [item for item in blocks if item.startswith("target=")]
-        for name, value in (("target", self.target), ("evidence", self.evidence)):
-            assignment = f"{name}={shlex.quote(str(value))}"
-            block, count = re.subn(
-                rf"^{name}=.*$", lambda _, assignment=assignment: assignment, block, flags=re.M
-            )
-            self.assertEqual(1, count, name)
-        env = dict(os.environ, CASE_TEST_PYTHON=sys.executable)
+        blocks = re.findall(r"^\x60{3}python\n(.*?)^\x60{3}$", self.index, re.M | re.S)
+        (block,) = [item for item in blocks if "capture_case.py TARGET" in item]
+        script = self.home / "capture_case.py"
+        script.write_text(block, encoding="utf-8")
         return subprocess.run(
-            ["sh", "-c", 'python() { "$CASE_TEST_PYTHON" "$@"; }\n' + block],
-            cwd=ROOT, env=env, capture_output=True, text=True, timeout=40, check=False,
+            [sys.executable, "-I", str(script), str(self.target), str(self.evidence)],
+            cwd=ROOT, capture_output=True, text=True, timeout=40, check=False,
         )
 
     def read(self, checker, suffix):
@@ -105,7 +99,8 @@ class CaseCaptureRecipeTests(unittest.TestCase):
              for suffix in ("out", "err", "status")},
             {item.name for item in self.evidence.iterdir()},
         )
-        self.assertEqual(0o700, stat.S_IMODE(self.evidence.stat().st_mode))
+        if os.name == "posix":
+            self.assertEqual(0o700, stat.S_IMODE(self.evidence.stat().st_mode))
         self.assertEqual(original, self.readme.read_bytes())
         self.assertEqual(["README.md"], sorted(item.name for item in self.target.iterdir()))
 
@@ -117,6 +112,24 @@ class CaseCaptureRecipeTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertEqual(b"previous evidence", marker.read_bytes())
         self.assertEqual(["audit.out"], sorted(item.name for item in self.evidence.iterdir()))
+
+
+@unittest.skipUnless(os.name == "posix" and shutil.which("sh"), "requires POSIX shell")
+class CaseCaptureRecipeTests(PortableCaseCaptureRecipeTests):
+    def run_recipe(self):
+        blocks = re.findall(r"^\x60{3}bash\n(.*?)^\x60{3}$", self.index, re.M | re.S)
+        (block,) = [item for item in blocks if item.startswith("target=")]
+        for name, value in (("target", self.target), ("evidence", self.evidence)):
+            assignment = f"{name}={shlex.quote(str(value))}"
+            block, count = re.subn(
+                rf"^{name}=.*$", lambda _, assignment=assignment: assignment, block, flags=re.M
+            )
+            self.assertEqual(1, count, name)
+        env = dict(os.environ, CASE_TEST_PYTHON=sys.executable)
+        return subprocess.run(
+            ["sh", "-c", 'python() { "$CASE_TEST_PYTHON" "$@"; }\n' + block],
+            cwd=ROOT, env=env, capture_output=True, text=True, timeout=40, check=False,
+        )
 
 
 if __name__ == "__main__":
