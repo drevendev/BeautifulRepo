@@ -4,6 +4,8 @@ from __future__ import annotations
 from datetime import date
 import importlib.util
 import json
+import re
+import shlex
 from pathlib import Path
 import subprocess
 import sys
@@ -59,6 +61,44 @@ class CuratedCollectionTests(unittest.TestCase):
         self.assertEqual(result.stdout.count("**Review due**"), 3)
         result = self.cli("--as-of", "2027-05-01")
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_documented_cli_commands_and_exit_meanings(self):
+        readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
+        commands = [
+            tuple(shlex.split(line))
+            for line in re.findall(r"^python curate\.py (.+)$", readme, re.MULTILINE)
+        ]
+        # Deliberately allow only these fixture commands: no shell, custom
+        # input paths, or other executables may be run from documentation.
+        self.assertEqual(commands, [
+            ("--as-of", "2026-10-17"),
+            ("--as-of", "2026-10-17", "--format", "json"),
+            ("--as-of", "2027-05-01", "--fail-on-stale"),
+            ("--as-of", "2027-05-01"),
+            ("--as-of", "2026-10-16"),
+            ("--format", "invalid"),
+        ])
+        fresh, fresh_json, due, advisory, invalid_input, invalid_arg = [
+            self.cli(*args) for args in commands
+        ]
+        for result, code in ((fresh, 0), (fresh_json, 0), (due, 2), (advisory, 0)):
+            self.assertEqual(result.returncode, code, result.stderr)
+            self.assertEqual(result.stderr, "")
+            self.assertTrue(result.stdout)
+        self.assertEqual(re.findall(r"^## (.+)$", fresh.stdout, re.MULTILINE),
+                         ["Community", "Curation", "Maintenance"])
+        self.assertNotIn("**Review due**", fresh.stdout)
+        self.assertEqual(json.loads(fresh_json.stdout)["review_due"], 0)
+        self.assertEqual(len(json.loads(fresh_json.stdout)["entries"]), 3)
+        self.assertEqual(due.stdout, advisory.stdout)
+        self.assertEqual(due.stdout.count("**Review due**"), 3)
+        self.assertEqual(invalid_input.returncode, 1)
+        self.assertEqual(invalid_input.stdout, "")
+        self.assertEqual(invalid_input.stderr, "Invalid collection input or unavailable file\n")
+        self.assertEqual(invalid_arg.returncode, 2)
+        self.assertEqual(invalid_arg.stdout, "")
+        self.assertIn("invalid choice", invalid_arg.stderr)
+        self.assertEqual((EXAMPLE / "items.json").read_bytes(), self.original)
 
     def test_duplicate_url_or_id_is_rejected(self):
         item = self.sample["entries"][0].copy()

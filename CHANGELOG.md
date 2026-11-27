@@ -13,6 +13,9 @@ keep their original themed headings.
 
 ### Added
 
+- Verify the curated starter's documented commands, distinguishing a due-review
+  report from invalid input and argument errors by exit status and output streams.
+
 - Exercise both displayed library README calls and their exact output in CI,
   including a handled invalid-input exception; clarify the observed runtime
   matrix without implying a published distribution or wider support policy.
