@@ -37,8 +37,11 @@ python -m unittest discover -s tests -v
 
 The analysis uses the checked-in CSV by default and emits JSON equivalent to
 [`expected-result.json`](expected-result.json), the shared expected-output fixture
-used by the nested example tests and the root integration checks:
+used by the nested example tests and the root integration checks. The JSON
+shown here and in the handbook guide is checked against that same fixture, so
+an edited documentation total cannot silently diverge from the tested result.
 
+<!-- beautifulrepo:research-result:start -->
 ```json
 {
   "grand_total": 60,
@@ -49,6 +52,7 @@ used by the nested example tests and the root integration checks:
   }
 }
 ```
+<!-- beautifulrepo:research-result:end -->
 
 Use `python analysis.py --input PATH` to inspect another *local* CSV with the
 same schema. The tool does not fetch external data or modify input files.
