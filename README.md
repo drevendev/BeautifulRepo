@@ -181,6 +181,7 @@ not a second copy of the first-screen chooser.
 
 - **Explain and present:** [README design](guides/readme.md),
   [visual README patterns](guides/readme-visuals.md),
+  [multilingual README navigation](guides/readme-localization.md),
   [offline image-weight inventory](guides/media-budget.md),
   [demo media evidence and alternatives](guides/demo-media.md),
   [editorial evidence kit](guides/editorial-evidence.md),

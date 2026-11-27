@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a source-backed multilingual README recipe with an explicit partial
+  translation, a shared authoritative first-run route, and link/fragment
+  regressions that materialize the displayed example.
+
 - Add a separate optional Ubuntu/Windows MCP job that fetches the exact public
   installation commit documented in the guide, verifies its detached HEAD,
   installs the pinned SDK in a fresh environment and runs that source's smoke.
