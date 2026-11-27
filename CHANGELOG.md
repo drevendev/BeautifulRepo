@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a reproducible negative first-run example to the CLI starter: a synthetic
+  malformed CSV and a README-fence regression for exact stderr, empty stdout
+  and exit code 1, with adaptation guidance for other CLI maintainers.
+
 - Execute the published case-study evidence capture recipe against a synthetic
   broken-link repository in POSIX tests; verify independent checker results,
   private output-directory permissions, and refusal to overwrite prior evidence.
