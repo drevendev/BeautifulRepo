@@ -26,9 +26,30 @@ class MCPProtocolWorkflowTests(unittest.TestCase):
         self.assertIn('[str(python), "-I", "-B", "integrations/mcp_protocol_smoke.py"], check=True', source)
         self.assertLess(source.index('"-m", "venv"'), source.index('"pip", "install"'))
         self.assertLess(source.index('"pip", "install"'), source.index('"integrations/mcp_protocol_smoke.py"'))
-        self.assertEqual(1, source.count("integrations/mcp_protocol_smoke.py"))
+        self.assertEqual(2, source.count("integrations/mcp_protocol_smoke.py"))
         self.assertIn("persist-credentials: false", source)
         self.assertIn("permissions:\n  contents: read\n", source)
+
+    def test_independent_public_source_matches_documented_install_pin(self):
+        source = WORKFLOW.read_text(encoding="utf-8")
+        guide = (WORKFLOW.parents[2] / "guides" / "local-mcp.md").read_text(encoding="utf-8")
+        pinned_job = source.split("\n  pinned-source:\n", 1)[1]
+        pin = pinned_job.split('pin = "', 1)[1].split('"', 1)[0]
+        self.assertRegex(pin, r"^[0-9a-f]{40}$")
+        self.assertIn(f"git checkout --detach {pin} || exit 1", guide)
+        self.assertIn(f"$pin = '{pin}'", guide)
+        self.assertIn("os: [ubuntu-latest, windows-latest]", pinned_job)
+        self.assertIn('checkout = Path(tmp) / "source"', pinned_job)
+        self.assertIn('"GIT_TERMINAL_PROMPT": "0"', pinned_job)
+        self.assertIn('["git", "fetch", "--depth=1", "https://github.com/drevendev/BeautifulRepo.git", pin]', pinned_job)
+        self.assertIn('["git", "checkout", "--detach", "FETCH_HEAD"]', pinned_job)
+        self.assertIn('["git", "rev-parse", "HEAD"]', pinned_job)
+        self.assertIn('if actual != pin:', pinned_job)
+        self.assertIn('raise SystemExit("Unexpected pinned source SHA")', pinned_job)
+        self.assertLess(pinned_job.index("if actual != pin:"), pinned_job.index('"-m", "venv"'))
+        self.assertIn('"install", "--no-cache-dir", "mcp==2.3.0"', pinned_job)
+        self.assertIn('[str(python), "-I", "-B", "integrations/mcp_protocol_smoke.py"], cwd=checkout, check=True', pinned_job)
+        self.assertEqual(2, source.count("      - 'guides/local-mcp.md'"))
 
     def test_protocol_workflow_remains_optional_and_scoped(self):
         source = WORKFLOW.read_text(encoding="utf-8")
