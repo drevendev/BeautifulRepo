@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import os
 from pathlib import Path
 import stat
 import subprocess
@@ -48,6 +47,18 @@ class ItchHTML5ZipTests(unittest.TestCase):
     def run_cli(self, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
         return subprocess.run([sys.executable, "-I", str(SCRIPT), str(self.archive), *args],
                               text=True, encoding="utf-8", capture_output=True, timeout=10, env=env)
+
+    def run_cli_ascii(self, *args: str) -> subprocess.CompletedProcess[str]:
+        # -I ignores PYTHONIOENCODING; configure stdout in the child itself.
+        launcher = (
+            "import runpy, sys; "
+            "sys.stdout.reconfigure(encoding='ascii', errors='strict'); "
+            "runpy.run_path(sys.argv.pop(1), run_name='__main__')"
+        )
+        return subprocess.run(
+            [sys.executable, "-I", "-c", launcher, str(SCRIPT), str(self.archive), *args],
+            text=True, encoding="utf-8", capture_output=True, timeout=10,
+        )
 
     def test_valid_small_html5_zip_and_json_contract(self):
         self.build([("index.html", '<script src="js/game.js"></script>'), ("js/game.js", "console.log(1)")])
@@ -368,14 +379,43 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.build([("index.html", "ok"), ("cafe.png", "asset")])
         self.patch_raw_member_name(b"cafe.png", b"caf\x82.png")
         # A Windows terminal or redirected stream may not support Unicode.
-        run = self.run_cli("--format", "json",
-                           env={**os.environ, "PYTHONIOENCODING": "ascii"})
+        run = self.run_cli_ascii("--format", "json")
         self.assertEqual(run.returncode, 1, run.stderr)
         self.assertIsNotNone(run.stdout, f"missing captured JSON output: {run.stderr!r}")
         self.assertEqual(run.stderr, "")
         self.assertTrue(run.stdout.isascii(), run.stdout)
         self.assertIn("legacy_name_encoding", {x["rule"] for x in json.loads(run.stdout)["findings"]})
         self.assertIn("caf\\u00e9.png", run.stdout)
+
+    def test_text_parent_collision_diagnostics_survive_strict_ascii_stdout(self):
+        composed = "assets/caf\u00e9"
+        child = "assets/cafe\u0301/game.js"
+        self.build([("index.html", "ok"), (composed, "file"), (child, "asset")])
+        before = self.archive.read_bytes()
+        run = self.run_cli_ascii()
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        self.assertTrue(run.stdout.isascii(), run.stdout)
+        self.assertIn("unicode_normalization_collision", run.stdout)
+        self.assertIn(r"assets/caf\xe9", run.stdout)
+        self.assertIn(r"assets/cafe\u0301/game.js", run.stdout)
+        self.assertEqual(len(run.stdout.splitlines()), 2)
+        report = json.loads(self.run_cli_ascii("--format", "json").stdout)
+        self.assertIn(composed, report["findings"][0]["detail"])
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_text_parent_collision_diagnostics_remain_single_line(self):
+        parent = "assets/line\nfeed"
+        self.build([("index.html", "ok"), (parent, "file"), (parent + "/game.js", "asset")])
+        run = self.run_cli_ascii()
+        self.assertEqual(run.returncode, 1, run.stderr)
+        self.assertEqual(run.stderr, "")
+        report = json.loads(self.run_cli_ascii("--format", "json").stdout)
+        self.assertEqual(len(run.stdout.splitlines()), 1 + len(report["findings"]))
+        self.assertIn(r"assets/line\nfeed", run.stdout)
+        self.assertIn("path_type_conflict", run.stdout)
+        self.assertIn(parent, next(f["detail"] for f in report["findings"]
+                                   if f["rule"] == "path_type_conflict"))
 
     def test_invalid_utf8_member_is_incomplete_not_traceback(self):
         self.build([("index.html", "ok"), ("cafe.png", "asset")])

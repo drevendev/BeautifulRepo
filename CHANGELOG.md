@@ -1183,6 +1183,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Keep HTML5 ZIP preflight text diagnostics ASCII-safe and single-line when
+  a conflicting parent path appears in the finding detail. Test both report
+  formats using actual strict ASCII stdout; preserve original names in JSON.
+
 - Preserve Unicode line separators and empty commit subjects in release-note
   inventories using Git's NUL-delimited records. Emit ASCII-safe JSON so legacy
   terminal encodings do not discard otherwise valid history.
