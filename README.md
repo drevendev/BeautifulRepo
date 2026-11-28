@@ -43,8 +43,10 @@ show a captured synthetic report, not a real-user or accessibility test.
 [![Synthetic Pocket Trails audit: before zero of two local-link checks pass; after two of two pass. The README changes docs/setup.md to docs/guide.md.](showcase/pocket-trails/pocket-trails-still.png)](SHOWCASE.md)
 
 **Audit your own checkout.** From a directory containing your existing
-`your-repository/` folder, clone BeautifulRepo **beside** it. You need Git and
-Python 3.11+; only cloning uses the network. In Bash, paste the whole block
+`your-repository/` folder (replace that name with your actual folder), clone
+BeautifulRepo **beside** it. You need Git and Python 3.11+; only cloning uses
+the network. On Windows, use the [PowerShell first-run block](guides/combined-audit.md#windows-powershell-first-run).
+In Bash, paste the whole block
 at once; the audit runs only after successful setup, exact SHA verification
 and a Python 3.11+ version check:
 
@@ -61,8 +63,10 @@ python -I tools/audit_bundle.py ../your-repository --fail-on never
 This immutable `master` commit is a reviewed **development** audit checkout,
 not the older `v0.2.0` Action. Its [Quality CI run](https://github.com/drevendev/BeautifulRepo/actions/runs/45364559651)
 completed all six jobs successfully on this exact SHA. It includes hard-link and redirected-path source protections, plus readable
-text diagnostics in legacy console encodings. CI does not establish a fresh
-external-user installation. The audit does not run target code, follow external links or
+text diagnostics in legacy console encodings. A separate [public clone trial](https://github.com/drevendev/BeautifulRepo/actions/runs/46069638330)
+passed on Ubuntu and Windows on 2026-11-27, exercising this same pin on a
+synthetic target. This is automated CLI evidence, not an independent user or
+interactive shell test. The audit does not run target code, follow external links or
 write the target. Exit **0** means no threshold-reaching findings; **1**
 includes broken local destinations even with `--fail-on never`; **2** means
 invalid input or incomplete evidence. A clean run does not prove a good README.
