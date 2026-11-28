@@ -128,6 +128,79 @@ result and console/network failures. Test resizing/fullscreen and save
 behavior with the real build; mark **Mobile Friendly** only when tested on
 mobile. A green archive preflight is not a working-browser certification.
 
+## Rehearse a browser build under a subdirectory
+
+A local development server at the origin root can hide broken asset URLs.
+Before an authorized upload, copy the **trusted, freshly exported** build
+into a disposable directory such as `staging/build/`, with `index.html`
+inside `build/`. Do not serve a repository root, home directory, secrets,
+untrusted archives or unrelated files. Do not execute somebody else's build
+as part of a documentation review.
+
+With Python 3.11+ installed, serve only this staging directory on loopback
+(from its parent):
+
+```sh
+python -m http.server 8000 --bind 127.0.0.1 --directory staging
+```
+
+Open `http://127.0.0.1:8000/build/index.html` in a disposable browser
+profile, with developer tools open. Use a different free port if needed.
+Stop the server with Ctrl+C afterwards. This is a local development server,
+not a production host.
+
+For example, if `build/assets/game.js` exists and there is no
+`staging/assets/game.js`, these two references resolve differently:
+
+```html
+<!-- Wrong for this deployment layout -->
+<script src="/assets/game.js"></script>
+<!-- Relative to the exported page -->
+<script src="./assets/game.js"></script>
+```
+
+**Observed synthetic HTTP check, 2026-11-28:** a Python loopback server
+served a disposable export under `/export/`. Resolving the first reference
+against `/export/index.html` and requesting it returned HTTP 404;
+the relative reference returned HTTP 200 at `/export/assets/game.js`.
+This exercised URL resolution and HTTP requests, not JavaScript or rendered
+gameplay. The attempted headless Chromium run did not finish, so browser
+execution remains unverified. itch.io documents the same subdirectory
+hazard, but its CDN, HTTPS, embed behavior and response codes can differ
+(official HTML5 guide re-read 2026-11-28).
+
+Use the browser's network and console panels during your own authorized
+first-play test. Check that script, image, audio and other required requests
+succeed with the intended content, not merely an HTML fallback with HTTP 200.
+Exercise one real player action and its visible result, restart and resize.
+If saving is supported, verify refresh and persistence with disposable data.
+A local HTTP check cannot reproduce the hosted iframe or its storage,
+compression, security and mobile constraints.
+
+### Keep one first-play evidence record per build
+
+Copy this record into your own release checklist. Use `NOT RUN` when
+evidence is missing rather than interpreting a successful preflight as a
+successful game launch.
+
+```text
+Source commit:
+Export artifact / SHA-256:
+Date and tested browser / OS / device:
+ZIP metadata preflight (exit and findings):
+Local subdirectory launch (URL, action, result, failed requests):
+Authorized hosted preview (build ID, launch mode, action, result):
+Resize / fullscreen / input / audio:
+Refresh / save / reset:
+Untested scenarios and known failures:
+Sanitized evidence location:
+```
+
+Keep the local and hosted outcomes separate. Redact private preview URLs,
+tokens, local usernames and save data before sharing logs. Only record an
+itch.io launch after observing the exact uploaded build in its actual embed;
+neither this record nor the local server grants permission to upload.
+
 ## Screenshots, motion and store presentation
 
 Use a real gameplay still before any large animation. Include descriptive
