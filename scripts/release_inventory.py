@@ -77,9 +77,14 @@ def inventory(target: Path, base: str | None = None, limit: int = 200) -> dict:
         raise InventoryError("shallow or unverified Git history; fetch complete history first")
     head = git(target, "rev-parse", "--verify", "HEAD^{commit}")
     assert head is not None
+    # Full object names are 40 hex digits in SHA-1 repositories and 64 in
+    # SHA-256 repositories. Use the resolved HEAD's width for this checkout.
+    if len(head) not in (40, 64) or not re.fullmatch(r"[0-9a-f]+", head):
+        raise InventoryError("unsupported Git commit object format")
+    hash_width = len(head)
     tag = None
     if base is not None:
-        if not re.fullmatch(r"[0-9a-fA-F]{7,40}", base):
+        if not re.fullmatch(rf"[0-9a-fA-F]{{7,{hash_width}}}", base):
             raise InventoryError("--base must be a hexadecimal commit SHA")
         base_sha = git(target, "rev-parse", "--verify", f"{base}^{{commit}}")
         base_kind = "explicit"
@@ -95,6 +100,8 @@ def inventory(target: Path, base: str | None = None, limit: int = 200) -> dict:
             base_sha = roots[0]
             base_kind = "root"
     assert base_sha is not None
+    if not re.fullmatch(rf"[0-9a-f]{{{hash_width}}}", base_sha):
+        raise InventoryError("base commit object format does not match HEAD")
     if git(target, "merge-base", "--is-ancestor", base_sha, head, allow_missing=True) is None:
         raise InventoryError("base is not an ancestor of HEAD")
     history = f"{base_sha}..{head}"
@@ -105,7 +112,7 @@ def inventory(target: Path, base: str | None = None, limit: int = 200) -> dict:
     commits = []
     for row in rows:
         sha, separator, subject = row.partition("\t")
-        if not separator or not re.fullmatch(r"[0-9a-f]{40}", sha):
+        if not separator or not re.fullmatch(rf"[0-9a-f]{{{hash_width}}}", sha):
             raise InventoryError("could not parse a commit record")
         commits.append({"sha": sha, "subject": subject})
     if len(commits) != count:
