@@ -1183,6 +1183,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject an MS-DOS/FAT ZIP directory masquerading as the root `index.html`
+  file; retain ordinary trailing-slash directory markers and count directories
+  separately from files.
+
 - Keep HTML5 ZIP preflight text diagnostics ASCII-safe and single-line when
   a conflicting parent path appears in the finding detail. Test both report
   formats using actual strict ASCII stdout; preserve original names in JSON.

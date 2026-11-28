@@ -76,10 +76,18 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         # A directory masquerading as "index.html" is not a usable entry point.
         name_is_dir = item.is_dir()
         unix_is_dir = unix_type == stat.S_IFDIR
+        # PKWARE APPNOTE 6.3.10 §§4.4.2, 4.4.15: MS-DOS attributes
+        # occupy the low byte; DIRECTORY is bit 0x10.
+        # https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+        dos_is_dir = item.create_system == 0 and bool(item.external_attr & 0x10)
+        is_directory = name_is_dir or unix_is_dir or dos_is_dir
         if unix_type in (stat.S_IFDIR, stat.S_IFREG) and name_is_dir != unix_is_dir:
             report("entry_type_mismatch", raw_name,
                    "Unix file type disagrees with directory path spelling")
-        if not (name_is_dir or unix_is_dir):
+        if dos_is_dir and not name_is_dir:
+            report("entry_type_mismatch", raw_name,
+                   "MS-DOS directory attribute disagrees with directory path spelling")
+        if not is_directory:
             files += 1
             total += item.file_size
             if raw_name == "index.html":
@@ -104,7 +112,7 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         # ZIP can contain incompatible file/directory paths; extracted filesystems cannot.
         key = canonical_name.rstrip("/")
         if key:
-            (directory_paths if (name_is_dir or unix_is_dir) else file_paths).add(key)
+            (directory_paths if is_directory else file_paths).add(key)
             # Canonically equivalent names can alias on filesystems that
             # compare Unicode-normalized names, including macOS APFS.
             # A lone decomposed Unicode filename is still acceptable.
@@ -152,7 +160,7 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
                    "non-ASCII ZIP member name lacks the UTF-8 flag; re-export with UTF-8 names")
         if len(name) > MAX_PATH_CHARS:
             report("path_length", name, f"path exceeds {MAX_PATH_CHARS} characters")
-        if not item.is_dir() and item.file_size > MAX_FILE_BYTES:
+        if not is_directory and item.file_size > MAX_FILE_BYTES:
             report("file_size", name, f"uncompressed file exceeds {MAX_FILE_BYTES} bytes")
         if item.create_system == 3 and unix_type not in (0, stat.S_IFREG, stat.S_IFDIR):
             report("special_entry", name, "symbolic links and special files are not accepted by this preflight")

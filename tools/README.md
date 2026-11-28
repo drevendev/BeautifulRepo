@@ -138,9 +138,14 @@ and [Apple's APFS filename guidance](https://developer.apple.com/library/archive
 (reviewed **2026-11-22** UTC). The Windows rules are based on
 [Microsoft's filename rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file).
 None are additional itch.io ZIP-upload requirements. Unix ZIP entries with
-conflicting filename/directory type metadata are reported: a directory named
-`index.html` without a trailing slash is
-**not** accepted as the game's entry point.
+conflicting filename/directory type metadata are reported. For MS-DOS/FAT
+creator metadata (host ID 0), an explicitly set directory bit also conflicts
+with a filename lacking a trailing slash. A directory named `index.html`
+without a trailing slash is **not** accepted as the game's entry point.
+A trailing slash remains a directory marker even when the DOS bit is absent.
+See [PKWARE APPNOTE 6.3.10](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+(sections 4.4.2 and 4.4.15) and [Microsoft file attribute constants](https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants),
+reviewed **2026-11-28** UTC. This does not emulate every ZIP creator's attributes.
 Non-ASCII names without the ZIP UTF-8 flag are reported as potentially
 non-portable; malformed UTF-8 filenames return **incomplete** rather than
 crashing. Store and Deflate ZIP member compression are accepted; BZIP2,
