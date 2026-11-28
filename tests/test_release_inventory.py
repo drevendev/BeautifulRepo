@@ -69,6 +69,59 @@ class ReleaseInventoryTests(unittest.TestCase):
         self.assertEqual(data["commit_count"], 1)
         self.assertEqual(self.invoke("--base", "--bad").returncode, 2)
 
+    def test_sha256_checkout_supports_root_tag_and_explicit_base(self):
+        checkout = Path(self.tmp.name) / "sha256"
+        result = subprocess.run(
+            ["git", "init", "-q", "--object-format=sha256", str(checkout)],
+            capture_output=True, text=True, check=False,
+        )
+        if result.returncode and (
+            "unknown option" in result.stderr.lower()
+            or "unknown hash algorithm" in result.stderr.lower()
+        ):
+            self.skipTest("Git does not support SHA-256 repositories")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        def git256(*args):
+            return subprocess.run(
+                ["git", "-C", str(checkout), "-c", "user.name=Fixture",
+                 "-c", "user.email=fixture@example.invalid", *args],
+                capture_output=True, text=True, check=True,
+            ).stdout.strip()
+
+        git256("commit", "-q", "--allow-empty", "-m", "root")
+        base = git256("rev-parse", "HEAD")
+        git256("commit", "-q", "--allow-empty", "-m", "visible change")
+        head = git256("rev-parse", "HEAD")
+        self.assertEqual((len(base), len(head)), (64, 64))
+
+        def inventory256(*args):
+            return subprocess.run(
+                [sys.executable, "-I", str(TOOL), str(checkout), *args],
+                capture_output=True, text=True, check=False, cwd=self.tmp.name,
+            )
+
+        def check_inventory(expected_kind, *args):
+            output = inventory256(*args)
+            self.assertEqual(output.returncode, 0, output.stderr)
+            data = json.loads(output.stdout)
+            self.assertEqual(data["status"], "unreleased_draft_only")
+            self.assertEqual(data["base_kind"], expected_kind)
+            self.assertEqual(data["base_commit"], base)
+            self.assertEqual(data["head_commit"], head)
+            self.assertEqual(data["commits"], [{"sha": head, "subject": "visible change"}])
+            self.assertFalse(data["worktree_dirty"])
+            return data
+
+        check_inventory("root")
+        check_inventory("explicit", "--base", base)
+        check_inventory("explicit", "--base", base[:12])
+        git256("tag", "v0.1.0", base)
+        self.assertEqual(check_inventory("tag")["base_tag"], "v0.1.0")
+        invalid = inventory256("--base", base + "0")
+        self.assertEqual(invalid.returncode, 2, invalid.stderr)
+        self.assertEqual(invalid.stdout, "")
+
     def test_limit_rejects_instead_of_silently_truncating(self):
         self.commit("second change")
         result = self.invoke("--limit", "1")
