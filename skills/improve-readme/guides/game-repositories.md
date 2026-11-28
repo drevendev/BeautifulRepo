@@ -169,6 +169,19 @@ execution remains unverified. itch.io documents the same subdirectory
 hazard, but its CDN, HTTPS, embed behavior and response codes can differ
 (official HTML5 guide re-read 2026-11-28).
 
+From a full BeautifulRepo checkout, reproduce the synthetic HTTP comparison:
+
+```sh
+python -m unittest discover -s tests -p 'test_game_export_rehearsal.py' -v
+```
+
+The regression reads the two documented script references and checks both
+server layouts: at the origin root both return the expected asset; under a
+subdirectory the absolute reference returns 404 and the relative one returns
+the expected bytes. It uses an ephemeral loopback port and disposable files,
+not a browser or the hosted game. This test is part of the checkout test suite,
+not a standalone skill installation requirement.
+
 Use the browser's network and console panels during your own authorized
 first-play test. Check that script, image, audio and other required requests
 succeed with the intended content, not merely an HTML fallback with HTTP 200.
