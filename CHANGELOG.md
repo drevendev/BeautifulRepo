@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Add a loopback subdirectory rehearsal and copyable first-play evidence record
+  for browser game exports, separating observed synthetic HTTP results from
+  unverified browser execution and actual hosted preview evidence.
+
 - Include the game README template and first-play guide in the improve-readme
   skill, both in the full plugin and standalone copy. Check their presence and
   bytes without implying a verified game build or model invocation.
