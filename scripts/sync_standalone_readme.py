@@ -20,11 +20,13 @@ FILES = (
     "checklists/confidentiality.md",
     "guides/agent-safety.md",
     "guides/cli-repositories.md",
+    "guides/game-repositories.md",
     "templates/README.template.md",
     "templates/LIBRARY_README.template.md",
     "templates/APPLICATION_README.template.md",
     "templates/RESEARCH_DATA_README.template.md",
     "templates/CURATED_README.template.md",
+    "templates/GAME_README.template.md",
     "templates/INTERNAL_README.template.md",
 )
 
