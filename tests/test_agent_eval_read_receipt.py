@@ -84,6 +84,37 @@ class ReceiptTests(unittest.TestCase):
                 self.assertEqual(2, result.returncode)
                 self.assertIn("ERROR:", result.stderr)
 
+    def test_nonstandard_json_constants_are_malformed(self):
+        for constant in ("NaN", "Infinity", "-Infinity"):
+            with self.subTest(constant=constant):
+                raw = '{"format":1,"reads":[],"extra":' + constant + '}'
+                result = self.run_checker(raw=raw)
+                self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+                self.assertIn("non-standard JSON constant", result.stderr)
+                self.assertNotIn("INCONCLUSIVE", result.stdout)
+
+    def test_excessive_json_nesting_is_a_controlled_error(self):
+        raw = '{"format":1,"reads":[],"extra":' + "[" * 10000 + "0" + "]" * 10000 + "}"
+        result = self.run_checker(raw=raw)
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("nesting is too deep", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_duplicate_key_diagnostic_escapes_control_and_unicode(self):
+        raw = r'{"\u001b\n\u2603":0,"\u001b\n\u2603":1}'
+        self.receipt.write_text(raw, encoding="utf-8")
+        result = subprocess.run([
+            sys.executable, "-I", "-X", "utf8=0", str(TOOL),
+            "--fixture", str(self.fixture),
+            "--observed-path", self.path,
+            "--receipt", str(self.receipt),
+        ], cwd=self.home, capture_output=True, encoding="ascii", timeout=30, check=False)
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("duplicate JSON key", result.stderr)
+        self.assertIn(r"\x1b\n\u2603", result.stderr)
+        self.assertNotIn("\x1b", result.stderr)
+        self.assertEqual(1, len(result.stderr.splitlines()))
+
     def test_crlf_fixture_must_not_match_lf_normalized_tool_output(self):
         self.fixture.write_bytes(b"first\r\nsecond\r\n")
         result = self.run_checker({"format": 1, "reads": [self.item(content="first\nsecond\n")]})
