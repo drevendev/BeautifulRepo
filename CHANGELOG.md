@@ -1179,6 +1179,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Preserve Unicode line separators and empty commit subjects in release-note
+  inventories using Git's NUL-delimited records. Emit ASCII-safe JSON so legacy
+  terminal encodings do not discard otherwise valid history.
+
 - Support local SHA-256 Git repositories in the release-note inventory, including
   full commit IDs and explicit bases. Keep the standalone skill copy identical;
   no release publication or model-host behavior is implied.
