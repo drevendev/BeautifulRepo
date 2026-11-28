@@ -108,11 +108,17 @@ def inventory(target: Path, base: str | None = None, limit: int = 200) -> dict:
     count = int(git(target, "rev-list", "--count", history) or "0")
     if count > limit:
         raise InventoryError(f"{count} commits exceed --limit {limit}; choose a narrower --base")
-    rows = (git(target, "log", "--no-show-signature", "--format=%H%x09%s", history) or "").splitlines()
+    # NUL is Git's record terminator with -z. Unlike str.splitlines(),
+    # it does not interpret Unicode line separators inside commit subjects
+    # as new records, and an empty subject is a valid field.
+    raw = git(target, "log", "-z", "--no-show-signature", "--encoding=UTF-8",
+              "--format=%H%x00%s", history) or ""
+    fields = raw.split("\0") if raw else []
+    if fields and (fields.pop() != "" or len(fields) % 2):
+        raise InventoryError("could not parse a commit record")
     commits = []
-    for row in rows:
-        sha, separator, subject = row.partition("\t")
-        if not separator or not re.fullmatch(rf"[0-9a-f]{{{hash_width}}}", sha):
+    for sha, subject in zip(fields[::2], fields[1::2], strict=True):
+        if not re.fullmatch(rf"[0-9a-f]{{{hash_width}}}", sha):
             raise InventoryError("could not parse a commit record")
         commits.append({"sha": sha, "subject": subject})
     if len(commits) != count:
@@ -140,7 +146,9 @@ def main() -> int:
     except InventoryError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
-    print(json.dumps(data, indent=2, ensure_ascii=False))
+    # ASCII escapes keep the JSON stream usable on legacy console encodings
+    # while JSON decoding recovers the same Unicode subject text.
+    print(json.dumps(data, indent=2, ensure_ascii=True))
     return 0
 
 
