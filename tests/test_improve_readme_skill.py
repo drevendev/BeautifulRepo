@@ -42,6 +42,19 @@ class ImproveReadmeSkillTests(unittest.TestCase):
         self.assertIn("untrusted data", body)
         self.assertIn("README.md", body)
 
+    def test_game_route_distinguishes_play_from_source_build(self):
+        body = SKILL.read_text(encoding="utf-8")
+        for token in (
+            "templates/GAME_README.template.md",
+            "guides/game-repositories.md",
+            "first successful play",
+            "hosted/downloadable build",
+            "code/asset rights separately",
+            "do not infer a playable build from source or CI",
+        ):
+            self.assertIn(token, body)
+        self.assertTrue((ROOT / "templates/GAME_README.template.md").is_file())
+
     def test_cases_are_structural_not_model_results(self):
         for case, kind in (
             ("readme-improvement-plan", "positive"),

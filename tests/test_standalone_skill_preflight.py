@@ -317,6 +317,26 @@ class StandalonePreflightTests(unittest.TestCase):
             self.assertEqual(incomplete["state"], "incomplete")
             self.assertIn("tools/readme_apply.py", incomplete["missing_or_redirected"])
 
+    def test_game_readme_assets_are_required_and_compared_in_copied_skill(self):
+        required = ("guides/game-repositories.md", "templates/GAME_README.template.md")
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory) / ".agents" / "skills" / "improve-readme"
+            shutil.copytree(ROOT / "skills" / "improve-readme", installed)
+            self.assertEqual(probe.inspect(installed, source_root=ROOT)["state"], "present")
+            for relative in required:
+                with self.subTest(relative=relative):
+                    asset = installed / relative
+                    original = asset.read_bytes()
+                    asset.write_bytes(b"changed")
+                    changed = probe.inspect(installed, source_root=ROOT)
+                    self.assertEqual(changed["state"], "mismatch")
+                    self.assertEqual(changed["source_comparison"]["mismatched"], [relative])
+                    asset.unlink()
+                    missing = probe.inspect(installed)
+                    self.assertEqual(missing["state"], "incomplete")
+                    self.assertEqual(missing["missing_or_redirected"], [relative])
+                    asset.write_bytes(original)
+
     def test_trust_bundle_and_copied_audit(self):
         check = subprocess.run(
             [sys.executable, "-I", str(ROOT / "scripts/sync_standalone_trust.py")],

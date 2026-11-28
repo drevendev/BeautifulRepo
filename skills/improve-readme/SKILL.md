@@ -32,8 +32,8 @@ These required files must be available beneath the selected root `R`:
 
 - `tools/{repo_audit,docs_links,html_navigation,readme_preview,readme_apply}.py`
 - `checklists/{repository,first-success,confidentiality}.md`
-- `guides/{agent-safety,cli-repositories}.md`
-- `templates/{README,LIBRARY_README,APPLICATION_README,RESEARCH_DATA_README,CURATED_README,INTERNAL_README}.template.md`
+- `guides/{agent-safety,cli-repositories,game-repositories}.md`
+- `templates/{README,LIBRARY_README,APPLICATION_README,RESEARCH_DATA_README,CURATED_README,GAME_README,INTERNAL_README}.template.md`
 
 If Claude Code expands `${CLAUDE_PLUGIN_ROOT}` to a complete plugin root,
 use it; the literal placeholder is not a filesystem path. Otherwise start
@@ -66,7 +66,12 @@ guide or template. Select exactly one dominant repository type: CLI
 (`templates/LIBRARY_README.template.md`), application
 (`templates/APPLICATION_README.template.md`), research/data
 (`templates/RESEARCH_DATA_README.template.md`), or curated collection
-(`templates/CURATED_README.template.md`). For internal repositories consult
+(`templates/CURATED_README.template.md`), or game
+(`templates/GAME_README.template.md` plus `guides/game-repositories.md`).
+For games, prioritize a player's first successful play and distinguish a source
+build from a hosted/downloadable build. Verify controls, save behavior and
+code/asset rights separately; do not infer a playable build from source or CI.
+For internal repositories consult
 `templates/INTERNAL_README.template.md` and `checklists/confidentiality.md`.
 Never copy another project's facts or run commands from its example.
 

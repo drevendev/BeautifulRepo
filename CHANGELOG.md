@@ -13,6 +13,10 @@ keep their original themed headings.
 
 ### Added
 
+- Include the game README template and first-play guide in the improve-readme
+  skill, both in the full plugin and standalone copy. Check their presence and
+  bytes without implying a verified game build or model invocation.
+
 - Link the recorded public first-audit clone results from the first-run guides
   and expose the Windows PowerShell route before the Bash block in README.
   Distinguish hosted-runner CLI evidence from interactive shell and user tests.
