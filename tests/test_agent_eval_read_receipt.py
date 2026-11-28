@@ -93,12 +93,35 @@ class ReceiptTests(unittest.TestCase):
                 self.assertIn("non-standard JSON constant", result.stderr)
                 self.assertNotIn("INCONCLUSIVE", result.stdout)
 
-    def test_excessive_json_nesting_is_a_controlled_error(self):
-        raw = '{"format":1,"reads":[],"extra":' + "[" * 10000 + "0" + "]" * 10000 + "}"
+    def test_decoder_recursion_error_is_a_controlled_error(self):
+        import importlib.util
+        from contextlib import redirect_stderr, redirect_stdout
+        from io import StringIO
+        from unittest import mock
+
+        spec = importlib.util.spec_from_file_location("agent_eval_receipt_decoder", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.receipt.write_text('{"format":1,"reads":[]}', encoding="utf-8")
+        stdout, stderr = StringIO(), StringIO()
+        # Decoder limits vary by Python version; exercise the exception itself.
+        with mock.patch.object(module.json, "loads", side_effect=RecursionError("decoder limit")) as loads:
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                code = module.main([
+                    "--fixture", str(self.fixture), "--observed-path", self.path,
+                    "--receipt", str(self.receipt),
+                ])
+            loads.assert_called_once()
+        self.assertEqual(2, code)
+        self.assertEqual("", stdout.getvalue())
+        self.assertEqual("ERROR: invalid receipt JSON: nesting is too deep\n", stderr.getvalue())
+
+    def test_supported_json_nesting_remains_valid(self):
+        raw = '{"format":1,"reads":[],"extra":' + "[" * 32 + "0" + "]" * 32 + "}"
         result = self.run_checker(raw=raw)
-        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
-        self.assertIn("nesting is too deep", result.stderr)
-        self.assertNotIn("Traceback", result.stderr)
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("INCONCLUSIVE", result.stdout)
+        self.assertEqual("", result.stderr)
 
     def test_duplicate_key_diagnostic_escapes_control_and_unicode(self):
         raw = r'{"\u001b\n\u2603":0,"\u001b\n\u2603":1}'
