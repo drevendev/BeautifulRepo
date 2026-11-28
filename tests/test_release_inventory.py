@@ -122,6 +122,33 @@ class ReleaseInventoryTests(unittest.TestCase):
         self.assertEqual(invalid.returncode, 2, invalid.stderr)
         self.assertEqual(invalid.stdout, "")
 
+    def test_unicode_and_empty_subjects_are_distinct_json_records(self):
+        subjects = ["Fix café\u2028second clause", "日本語\u0085next clause", ""]
+        expected = []
+        for subject in subjects:
+            self.git("commit", "-q", "--allow-empty", "--allow-empty-message",
+                     "-m", subject)
+            expected.append({"sha": self.git("rev-parse", "HEAD").stdout.strip(),
+                             "subject": subject})
+
+        # Force an ASCII-only stdout even in isolated mode. This reproduces
+        # legacy terminal encoding limits without relying on host locale.
+        runner = ("import runpy, sys; "
+                  "sys.stdout.reconfigure(encoding='ascii', errors='strict'); "
+                  "sys.argv = sys.argv[1:]; "
+                  "runpy.run_path(sys.argv[0], run_name='__main__')")
+        result = subprocess.run(
+            [sys.executable, "-I", "-c", runner, str(TOOL), str(self.repo),
+             "--base", self.head_sha],
+            capture_output=True, text=True, check=False, cwd=self.tmp.name,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.isascii())
+        data = json.loads(result.stdout)
+        self.assertEqual(data["commits"], list(reversed(expected)))
+        self.assertEqual(data["commit_count"], len(expected))
+        self.assertFalse(data["worktree_dirty"])
+
     def test_limit_rejects_instead_of_silently_truncating(self):
         self.commit("second change")
         result = self.invoke("--limit", "1")
