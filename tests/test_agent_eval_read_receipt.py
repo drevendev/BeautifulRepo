@@ -84,6 +84,60 @@ class ReceiptTests(unittest.TestCase):
                 self.assertEqual(2, result.returncode)
                 self.assertIn("ERROR:", result.stderr)
 
+    def test_nonstandard_json_constants_are_malformed(self):
+        for constant in ("NaN", "Infinity", "-Infinity"):
+            with self.subTest(constant=constant):
+                raw = '{"format":1,"reads":[],"extra":' + constant + '}'
+                result = self.run_checker(raw=raw)
+                self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+                self.assertIn("non-standard JSON constant", result.stderr)
+                self.assertNotIn("INCONCLUSIVE", result.stdout)
+
+    def test_decoder_recursion_error_is_a_controlled_error(self):
+        import importlib.util
+        from contextlib import redirect_stderr, redirect_stdout
+        from io import StringIO
+        from unittest import mock
+
+        spec = importlib.util.spec_from_file_location("agent_eval_receipt_decoder", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.receipt.write_text('{"format":1,"reads":[]}', encoding="utf-8")
+        stdout, stderr = StringIO(), StringIO()
+        # Decoder limits vary by Python version; exercise the exception itself.
+        with mock.patch.object(module.json, "loads", side_effect=RecursionError("decoder limit")) as loads:
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                code = module.main([
+                    "--fixture", str(self.fixture), "--observed-path", self.path,
+                    "--receipt", str(self.receipt),
+                ])
+            loads.assert_called_once()
+        self.assertEqual(2, code)
+        self.assertEqual("", stdout.getvalue())
+        self.assertEqual("ERROR: invalid receipt JSON: nesting is too deep\n", stderr.getvalue())
+
+    def test_supported_json_nesting_remains_valid(self):
+        raw = '{"format":1,"reads":[],"extra":' + "[" * 32 + "0" + "]" * 32 + "}"
+        result = self.run_checker(raw=raw)
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("INCONCLUSIVE", result.stdout)
+        self.assertEqual("", result.stderr)
+
+    def test_duplicate_key_diagnostic_escapes_control_and_unicode(self):
+        raw = r'{"\u001b\n\u2603":0,"\u001b\n\u2603":1}'
+        self.receipt.write_text(raw, encoding="utf-8")
+        result = subprocess.run([
+            sys.executable, "-I", "-X", "utf8=0", str(TOOL),
+            "--fixture", str(self.fixture),
+            "--observed-path", self.path,
+            "--receipt", str(self.receipt),
+        ], cwd=self.home, capture_output=True, encoding="ascii", timeout=30, check=False)
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("duplicate JSON key", result.stderr)
+        self.assertIn(r"\x1b\n\u2603", result.stderr)
+        self.assertNotIn("\x1b", result.stderr)
+        self.assertEqual(1, len(result.stderr.splitlines()))
+
     def test_crlf_fixture_must_not_match_lf_normalized_tool_output(self):
         self.fixture.write_bytes(b"first\r\nsecond\r\n")
         result = self.run_checker({"format": 1, "reads": [self.item(content="first\nsecond\n")]})

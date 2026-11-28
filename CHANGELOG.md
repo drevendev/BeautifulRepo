@@ -1183,6 +1183,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Reject non-standard JSON constants and decoder nesting errors in normalized
+  agent read receipts with exit 2; escape duplicate-key diagnostic text so
+  malformed evidence cannot inject raw terminal controls. No model run is implied.
+
 - Report directory entries declaring nonzero uncompressed data in HTML5 ZIP
   preflight; preserve valid empty directory markers and metadata-only file totals.
 
