@@ -1179,6 +1179,10 @@ keep their original themed headings.
 
 ### Fixed
 
+- Support local SHA-256 Git repositories in the release-note inventory, including
+  full commit IDs and explicit bases. Keep the standalone skill copy identical;
+  no release publication or model-host behavior is implied.
+
 - Reject non-standard JSON numeric constants in saved audit-delta reports, even
   in ignored extension fields, without changing valid quoted strings or numbers.
 
