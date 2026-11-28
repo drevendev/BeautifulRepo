@@ -63,6 +63,9 @@ python -I tools/agent_eval_read_receipt.py \
 Exit **0** prints `CONTENT_MATCH` with the fixture SHA-256; exit **1** means
 `INCONCLUSIVE` (no exact matching Read result, path mismatch, or missing/
 changed/truncated content); exit **2** means malformed or unreadable evidence.
+Malformed JSON includes duplicate keys, non-standard `NaN`/`Infinity` constants,
+and nesting beyond the JSON decoder's supported depth. Duplicate-key diagnostics
+escape control characters and non-ASCII text instead of printing raw key content.
 The checker refuses hard-linked fixture and receipt files, symlinked
 path components (including those before a lexical `..`), and Windows
 junctions/other detected reparse points in either file path. These paths
