@@ -20,9 +20,13 @@ def _unique_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
     result: dict[str, object] = {}
     for key, value in pairs:
         if key in result:
-            raise ValueError(f"duplicate JSON key: {key}")
+            raise ValueError(f"duplicate JSON key: {key!a}")
         result[key] = value
     return result
+
+
+def _reject_constant(value: str) -> None:
+    raise ValueError(f"non-standard JSON constant: {value}")
 
 
 def _text_file(path: Path, label: str) -> str:
@@ -68,8 +72,10 @@ def check_receipt(fixture: Path, observed_path: str, receipt: Path) -> tuple[int
     content = _text_file(fixture, "fixture")
     raw = _text_file(receipt, "receipt")
     try:
-        data = json.loads(raw, object_pairs_hook=_unique_pairs)
-    except (json.JSONDecodeError, ValueError) as error:
+        data = json.loads(raw, object_pairs_hook=_unique_pairs, parse_constant=_reject_constant)
+    except RecursionError as error:
+        raise ValueError("invalid receipt JSON: nesting is too deep") from error
+    except ValueError as error:
         raise ValueError(f"invalid receipt JSON: {error}") from error
     if not isinstance(data, dict) or type(data.get("format")) is not int or data["format"] != 1:
         raise ValueError("receipt format must be integer 1")
