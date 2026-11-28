@@ -9,16 +9,40 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 EVALS = ROOT / "evals"
 SKILLS = ROOT / "skills"
-TRIGGER = re.compile(r"^tags:\s*\[(.*?)\]$", re.M)
-ALLOWED = re.compile(r"^allowed_tools:\s*\[(.*?)\]$", re.M)
+# This is deliberately a narrow source contract, not a general YAML parser.
+# The checked-in prompts use one flat, unquoted field per line.
+FRONT_FIELDS = {"name", "tags", "runs", "max_turns", "timeout_seconds", "allowed_tools"}
+READ_ONLY_TOOLS = "[Read, Glob, Grep, Skill]"
+
+
+def prompt_fields(text):
+    lines = text.splitlines()
+    if not lines or lines[0] != "---" or "---" not in lines[1:]:
+        raise AssertionError("prompt must begin with closed frontmatter")
+    fields = {}
+    for line in lines[1:lines.index("---", 1)]:
+        match = re.fullmatch(r"([a-z_]+): (.+)", line)
+        if not match or match.group(1) not in FRONT_FIELDS:
+            raise AssertionError("unexpected prompt frontmatter syntax or field")
+        key, value = match.groups()
+        if key in fields:
+            raise AssertionError(f"duplicate prompt field: {key}")
+        fields[key] = value
+    if set(fields) != FRONT_FIELDS:
+        raise AssertionError("required prompt frontmatter fields are missing")
+    return fields
 
 
 def case_type(text):
-    match = TRIGGER.search(text)
+    match = re.fullmatch(r"\[(.*?)\]", prompt_fields(text)["tags"])
     if not match:
-        raise AssertionError("case tags are required")
-    tags = {tag.strip() for tag in match.group(1).split(",")}
-    return tags
+        raise AssertionError("case tags must be an inline list")
+    return {tag.strip() for tag in match.group(1).split(",")}
+
+
+def assert_read_only_tools(text):
+    if prompt_fields(text)["allowed_tools"] != READ_ONLY_TOOLS:
+        raise AssertionError("allowed_tools must be exactly Read, Glob, Grep, Skill")
 
 
 class AgentEvalCaseContracts(unittest.TestCase):
@@ -49,15 +73,35 @@ class AgentEvalCaseContracts(unittest.TestCase):
                                             for g in graders), str(path))
 
     def test_no_implicit_write_network_or_shell_grants(self):
-        prohibited = {"Bash", "Write", "Edit", "WebFetch", "WebSearch", "NotebookEdit"}
         for path in EVALS.glob("*/prompt.md"):
-            text = path.read_text(encoding="utf-8")
-            match = ALLOWED.search(text)
             with self.subTest(case=path.parent.name):
-                self.assertIsNotNone(match, "allowed_tools must be explicit")
-                names = {part.strip() for part in match.group(1).split(",")}
-                self.assertTrue(names)
-                self.assertTrue(names.isdisjoint(prohibited), names)
+                assert_read_only_tools(path.read_text(encoding="utf-8"))
+
+    def test_read_only_tool_contract_rejects_ambiguous_or_broader_grants(self):
+        valid = (
+            "---\nname: synthetic\ntags: [positive, audit-repo]\nruns: 1\n"
+            "max_turns: 12\ntimeout_seconds: 240\n"
+            "allowed_tools: [Read, Glob, Grep, Skill]\n---\nOrdinary request.\n"
+        )
+        assert_read_only_tools(valid)
+        line = "allowed_tools: " + READ_ONLY_TOOLS
+        for change in (
+            "allowed_tools: [Read, Glob, Grep, Skill, Agent]",
+            "allowed_tools: [Read, Glob, Grep, Skill, Bash(*)]",
+            "allowed_tools: [Read, Glob, Grep, Skill, mcp__example__write]",
+            "allowed_tools: [Read, Glob, Grep]",
+            "allowed_tools: [Read, Glob, Grep, Skill, Skill]",
+            line + "\\nallowed_tools: [Bash]",
+            line + '\\n"allowed_tools": [Bash]',
+            "allowed_tools: [Bash]\\n---\\n" + line,
+        ):
+            with self.subTest(change=change):
+                with self.assertRaises(AssertionError):
+                    assert_read_only_tools(valid.replace(line, change.replace("\\n", "\n")))
+        with self.assertRaises(AssertionError):
+            assert_read_only_tools(valid.replace(line + "\n", "") + line + "\n")
+        with self.assertRaises(AssertionError):
+            assert_read_only_tools(valid.removeprefix("---\n"))
 
     def test_fixture_references_are_local_and_exist(self):
         for path in EVALS.glob("*/case.yaml"):
