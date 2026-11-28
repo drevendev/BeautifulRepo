@@ -245,7 +245,10 @@ def main(argv: list[str] | None = None) -> int:
         if "error" in result:
             print(result["error"])
         for item in result["findings"]:
-            print(f"- {item['rule']} {ascii(item['path'])}: {item['detail']}")
+            # Details can contain a second archive path (e.g. a blocking parent).
+            # Escape it too, keeping diagnostics single-line and ASCII-safe.
+            detail = item["detail"].encode("unicode_escape").decode("ascii")
+            print(f"- {item['rule']} {ascii(item['path'])}: {detail}")
     return {"ok": 0, "findings": 1, "incomplete": 2}[str(result["status"])]
 
 
