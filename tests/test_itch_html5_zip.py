@@ -111,6 +111,58 @@ class ItchHTML5ZipTests(unittest.TestCase):
         self.assertEqual({"entry_type_mismatch", "missing_entrypoint"},
                          {item["rule"] for item in result["findings"]})
 
+    def test_dos_directory_named_index_is_not_a_valid_entrypoint(self):
+        index = zipfile.ZipInfo("index.html")
+        index.create_system = 0
+        index.external_attr = 0x10
+        with zipfile.ZipFile(self.archive, "w") as out:
+            out.writestr(index, b"not a valid file entry")
+        before = self.archive.read_bytes()
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        result = json.loads(run.stdout)
+        self.assertEqual(result["files"], 0)
+        self.assertEqual(result["uncompressed_bytes"], 0)
+        self.assertEqual({"entry_type_mismatch", "missing_entrypoint"},
+                         {item["rule"] for item in result["findings"]})
+        self.assertEqual(before, self.archive.read_bytes())
+
+    def test_dos_regular_file_and_directory_markers_remain_valid(self):
+        # A missing directory bit alone is not proof of a regular file.
+        for directory_attr in (0x10, 0x20):
+            with self.subTest(directory_attr=directory_attr):
+                index = zipfile.ZipInfo("index.html")
+                index.create_system = 0
+                index.external_attr = 0x20
+                directory = zipfile.ZipInfo("assets/")
+                directory.create_system = 0
+                directory.external_attr = directory_attr
+                with zipfile.ZipFile(self.archive, "w") as out:
+                    out.writestr(index, b"ok")
+                    out.writestr(directory, b"")
+                    out.writestr("assets/game.js", b"ok")
+                run = self.run_cli("--format", "json")
+                self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+                result = json.loads(run.stdout)
+                self.assertEqual(result["files"], 2)
+                self.assertEqual(result["uncompressed_bytes"], 4)
+                self.assertEqual(result["findings"], [])
+
+    def test_dos_directory_attribute_does_not_create_a_false_file_parent(self):
+        directory = zipfile.ZipInfo("assets")
+        directory.create_system = 0
+        directory.external_attr = 0x10
+        with zipfile.ZipFile(self.archive, "w") as out:
+            out.writestr("index.html", b"ok")
+            out.writestr(directory, b"")
+            out.writestr("assets/game.js", b"ok")
+        run = self.run_cli("--format", "json")
+        self.assertEqual(run.returncode, 1, run.stderr)
+        result = json.loads(run.stdout)
+        self.assertEqual(result["files"], 2)
+        self.assertEqual({"entry_type_mismatch"},
+                         {item["rule"] for item in result["findings"]})
+
     def test_unix_regular_file_named_as_directory_is_reported(self):
         directory_name = zipfile.ZipInfo("assets/")
         directory_name.create_system = 3
