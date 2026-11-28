@@ -123,9 +123,35 @@ class ItchHTML5ZipTests(unittest.TestCase):
         result = json.loads(run.stdout)
         self.assertEqual(result["files"], 0)
         self.assertEqual(result["uncompressed_bytes"], 0)
-        self.assertEqual({"entry_type_mismatch", "missing_entrypoint"},
+        self.assertEqual({"directory_payload", "entry_type_mismatch", "missing_entrypoint"},
                          {item["rule"] for item in result["findings"]})
         self.assertEqual(before, self.archive.read_bytes())
+
+    def test_directory_payload_is_reported_without_reading_or_counting_it(self):
+        for system in (0, 3):
+            for method in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+                for payload in (b"", b"unexpected data"):
+                    with self.subTest(system=system, method=method, payload=payload):
+                        directory = zipfile.ZipInfo("assets/")
+                        directory.create_system = system
+                        directory.external_attr = (0x10 if system == 0 else
+                                                   (stat.S_IFDIR | 0o755) << 16)
+                        with zipfile.ZipFile(self.archive, "w") as out:
+                            out.writestr("index.html", b"ok")
+                            out.writestr(directory, payload, compress_type=method)
+                        before = self.archive.read_bytes()
+                        run = self.run_cli("--format", "json")
+                        self.assertEqual(run.returncode, 1 if payload else 0,
+                                         run.stdout + run.stderr)
+                        result = json.loads(run.stdout)
+                        self.assertEqual(result["files"], 1)
+                        self.assertEqual(result["uncompressed_bytes"], 2)
+                        expected = [{
+                            "rule": "directory_payload", "path": "assets/",
+                            "detail": "directory declares nonzero uncompressed data; re-export the ZIP",
+                        }] if payload else []
+                        self.assertEqual(result["findings"], expected)
+                        self.assertEqual(before, self.archive.read_bytes())
 
     def test_dos_regular_file_and_directory_markers_remain_valid(self):
         # A missing directory bit alone is not proof of a regular file.

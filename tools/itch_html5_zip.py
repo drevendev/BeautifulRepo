@@ -87,6 +87,12 @@ def check_entries(entries: list[zipfile.ZipInfo]) -> tuple[int, int, list[dict[s
         if dos_is_dir and not name_is_dir:
             report("entry_type_mismatch", raw_name,
                    "MS-DOS directory attribute disagrees with directory path spelling")
+        # PKWARE APPNOTE 6.3.10 §4.3.8: directories contain no file data.
+        # Check declared uncompressed size, not compressed size: an empty
+        # Deflate stream can occupy bytes without representing any content.
+        if is_directory and item.file_size:
+            report("directory_payload", raw_name,
+                   "directory declares nonzero uncompressed data; re-export the ZIP")
         if not is_directory:
             files += 1
             total += item.file_size

@@ -1183,6 +1183,9 @@ keep their original themed headings.
 
 ### Fixed
 
+- Report directory entries declaring nonzero uncompressed data in HTML5 ZIP
+  preflight; preserve valid empty directory markers and metadata-only file totals.
+
 - Reject an MS-DOS/FAT ZIP directory masquerading as the root `index.html`
   file; retain ordinary trailing-slash directory markers and count directories
   separately from files.

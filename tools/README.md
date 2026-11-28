@@ -143,8 +143,11 @@ creator metadata (host ID 0), an explicitly set directory bit also conflicts
 with a filename lacking a trailing slash. A directory named `index.html`
 without a trailing slash is **not** accepted as the game's entry point.
 A trailing slash remains a directory marker even when the DOS bit is absent.
+A directory declaring nonzero uncompressed data is a `directory_payload`
+finding, not an ordinary file included in the size/file totals. Empty Deflate
+streams remain accepted. This checks declared metadata, not actual payloads.
 See [PKWARE APPNOTE 6.3.10](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
-(sections 4.4.2 and 4.4.15) and [Microsoft file attribute constants](https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants),
+(sections 4.3.8, 4.4.2 and 4.4.15) and [Microsoft file attribute constants](https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants),
 reviewed **2026-11-28** UTC. This does not emulate every ZIP creator's attributes.
 Non-ASCII names without the ZIP UTF-8 flag are reported as potentially
 non-portable; malformed UTF-8 filenames return **incomplete** rather than
